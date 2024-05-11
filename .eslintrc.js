@@ -39,5 +39,6 @@ module.exports = {
     'max-params': 'off',
     '@typescript-eslint/no-unused-vars': 'off',
     '@typescript-eslint/explicit-member-accessibility': 'off',
+    '@typescript-eslint/member-ordering': 'off',
   },
 };

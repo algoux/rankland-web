@@ -1,0 +1,3 @@
+[submodule "src/common/shared"]
+	path = src/common/shared
+	url = git@github.com:algoux/rankland-shared.git

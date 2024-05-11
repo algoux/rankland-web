@@ -11,6 +11,7 @@ import type { IAppConfig, IAppWiredData } from 'bwcx-ljsm';
 import { App } from 'bwcx-ljsm';
 import BWCX_CONTAINER_KEY from 'bwcx-ljsm/container-key';
 import { ApiClientGenerator } from 'bwcx-api-client/generator';
+import http from 'http';
 import path from 'path';
 import favicon from 'koa-favicon';
 import mount from 'koa-mount';
@@ -21,6 +22,8 @@ import DefaultResponseHandler from '@server/response-handlers/default.response-h
 import { IPageRenderer } from './lib/page-renderer.interface';
 import { BwcxClientVueClientRoutesMapId } from 'bwcx-client-vue/server';
 import { clientRoutesMap } from '@common/router/client-routes';
+import MongoClient from './lib/mongo-client';
+import SocketIOServer from './modules/socket-io/socket-io';
 
 export default class OurApp extends App {
   protected baseDir = path.join(__dirname, '..');
@@ -33,9 +36,9 @@ export default class OurApp extends App {
     '!./common/api/**',
   ];
 
-  protected hostname = '127.0.0.1';
+  public hostname = '127.0.0.1';
 
-  protected port = 3000;
+  public port = 3000;
 
   protected exitTimeout = 5000;
 
@@ -97,6 +100,9 @@ export default class OurApp extends App {
         console.error(e);
       }
     });
+
+    const mongoClient = getDependency<MongoClient>(MongoClient, this.container);
+    await mongoClient.init();
   }
 
   protected async afterStart() {
@@ -122,6 +128,16 @@ export default class OurApp extends App {
 
 const app = new OurApp();
 app.scan();
-app.bootstrap().then(() => {
-  app.start();
+app.bootstrap().then(async () => {
+  const socketIOServer = getDependency<SocketIOServer>(SocketIOServer, app.container);
+  await app.startManually(async () => {
+    const httpServer = http.createServer(app.instance.callback());
+    socketIOServer.init(httpServer);
+    const listenPromise = new Promise((resolve, _reject) => {
+      httpServer.listen(app.port, app.hostname, () => {
+        resolve(true);
+      });
+    });
+    await listenPromise;
+  });
 });

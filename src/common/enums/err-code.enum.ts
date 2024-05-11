@@ -6,6 +6,7 @@ export enum ErrCode {
   /** 非法参数 */
   IllegalParameters = -3,
 
-  // 自定义逻辑异常错误码
-  // ...
+  // LiveContest
+  LiveContestExisted = 100000,
+  LiveContestNotFound = 100001,
 }
