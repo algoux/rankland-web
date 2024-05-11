@@ -94,7 +94,7 @@ export default class LiveContestService {
     });
   }
 
-  public async handleProducerEvent(alias: string, req: rankland_live_contest_producer.ProducerEvent) {
+  public async handleProducerEvent(alias: string, req: rankland_live_contest_producer.IProducerEvent) {
     switch (req.type) {
       case rankland_live_contest_common.EventType.NEW_SOLUTION: {
         await this.insertNewSolutionEvent(alias, req.eventId, req.newSolutionData);

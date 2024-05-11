@@ -439,6 +439,214 @@ $root.rankland_live_contest_client = (function() {
         return ClientEvent;
     })();
 
+    rankland_live_contest_client.BatchClientEvent = (function() {
+
+        /**
+         * Properties of a BatchClientEvent.
+         * @memberof rankland_live_contest_client
+         * @interface IBatchClientEvent
+         * @property {Array.<rankland_live_contest_client.IClientEvent>|null} [events] BatchClientEvent events
+         */
+
+        /**
+         * Constructs a new BatchClientEvent.
+         * @memberof rankland_live_contest_client
+         * @classdesc Represents a BatchClientEvent.
+         * @implements IBatchClientEvent
+         * @constructor
+         * @param {rankland_live_contest_client.IBatchClientEvent=} [properties] Properties to set
+         */
+        function BatchClientEvent(properties) {
+            this.events = [];
+            if (properties)
+                for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
+                    if (properties[keys[i]] != null)
+                        this[keys[i]] = properties[keys[i]];
+        }
+
+        /**
+         * BatchClientEvent events.
+         * @member {Array.<rankland_live_contest_client.IClientEvent>} events
+         * @memberof rankland_live_contest_client.BatchClientEvent
+         * @instance
+         */
+        BatchClientEvent.prototype.events = $util.emptyArray;
+
+        /**
+         * Creates a new BatchClientEvent instance using the specified properties.
+         * @function create
+         * @memberof rankland_live_contest_client.BatchClientEvent
+         * @static
+         * @param {rankland_live_contest_client.IBatchClientEvent=} [properties] Properties to set
+         * @returns {rankland_live_contest_client.BatchClientEvent} BatchClientEvent instance
+         */
+        BatchClientEvent.create = function create(properties) {
+            return new BatchClientEvent(properties);
+        };
+
+        /**
+         * Encodes the specified BatchClientEvent message. Does not implicitly {@link rankland_live_contest_client.BatchClientEvent.verify|verify} messages.
+         * @function encode
+         * @memberof rankland_live_contest_client.BatchClientEvent
+         * @static
+         * @param {rankland_live_contest_client.IBatchClientEvent} message BatchClientEvent message or plain object to encode
+         * @param {$protobuf.Writer} [writer] Writer to encode to
+         * @returns {$protobuf.Writer} Writer
+         */
+        BatchClientEvent.encode = function encode(message, writer) {
+            if (!writer)
+                writer = $Writer.create();
+            if (message.events != null && message.events.length)
+                for (var i = 0; i < message.events.length; ++i)
+                    $root.rankland_live_contest_client.ClientEvent.encode(message.events[i], writer.uint32(/* id 1, wireType 2 =*/10).fork()).ldelim();
+            return writer;
+        };
+
+        /**
+         * Encodes the specified BatchClientEvent message, length delimited. Does not implicitly {@link rankland_live_contest_client.BatchClientEvent.verify|verify} messages.
+         * @function encodeDelimited
+         * @memberof rankland_live_contest_client.BatchClientEvent
+         * @static
+         * @param {rankland_live_contest_client.IBatchClientEvent} message BatchClientEvent message or plain object to encode
+         * @param {$protobuf.Writer} [writer] Writer to encode to
+         * @returns {$protobuf.Writer} Writer
+         */
+        BatchClientEvent.encodeDelimited = function encodeDelimited(message, writer) {
+            return this.encode(message, writer).ldelim();
+        };
+
+        /**
+         * Decodes a BatchClientEvent message from the specified reader or buffer.
+         * @function decode
+         * @memberof rankland_live_contest_client.BatchClientEvent
+         * @static
+         * @param {$protobuf.Reader|Uint8Array} reader Reader or buffer to decode from
+         * @param {number} [length] Message length if known beforehand
+         * @returns {rankland_live_contest_client.BatchClientEvent} BatchClientEvent
+         * @throws {Error} If the payload is not a reader or valid buffer
+         * @throws {$protobuf.util.ProtocolError} If required fields are missing
+         */
+        BatchClientEvent.decode = function decode(reader, length) {
+            if (!(reader instanceof $Reader))
+                reader = $Reader.create(reader);
+            var end = length === undefined ? reader.len : reader.pos + length, message = new $root.rankland_live_contest_client.BatchClientEvent();
+            while (reader.pos < end) {
+                var tag = reader.uint32();
+                switch (tag >>> 3) {
+                case 1:
+                    if (!(message.events && message.events.length))
+                        message.events = [];
+                    message.events.push($root.rankland_live_contest_client.ClientEvent.decode(reader, reader.uint32()));
+                    break;
+                default:
+                    reader.skipType(tag & 7);
+                    break;
+                }
+            }
+            return message;
+        };
+
+        /**
+         * Decodes a BatchClientEvent message from the specified reader or buffer, length delimited.
+         * @function decodeDelimited
+         * @memberof rankland_live_contest_client.BatchClientEvent
+         * @static
+         * @param {$protobuf.Reader|Uint8Array} reader Reader or buffer to decode from
+         * @returns {rankland_live_contest_client.BatchClientEvent} BatchClientEvent
+         * @throws {Error} If the payload is not a reader or valid buffer
+         * @throws {$protobuf.util.ProtocolError} If required fields are missing
+         */
+        BatchClientEvent.decodeDelimited = function decodeDelimited(reader) {
+            if (!(reader instanceof $Reader))
+                reader = new $Reader(reader);
+            return this.decode(reader, reader.uint32());
+        };
+
+        /**
+         * Verifies a BatchClientEvent message.
+         * @function verify
+         * @memberof rankland_live_contest_client.BatchClientEvent
+         * @static
+         * @param {Object.<string,*>} message Plain object to verify
+         * @returns {string|null} `null` if valid, otherwise the reason why it is not
+         */
+        BatchClientEvent.verify = function verify(message) {
+            if (typeof message !== "object" || message === null)
+                return "object expected";
+            if (message.events != null && message.hasOwnProperty("events")) {
+                if (!Array.isArray(message.events))
+                    return "events: array expected";
+                for (var i = 0; i < message.events.length; ++i) {
+                    var error = $root.rankland_live_contest_client.ClientEvent.verify(message.events[i]);
+                    if (error)
+                        return "events." + error;
+                }
+            }
+            return null;
+        };
+
+        /**
+         * Creates a BatchClientEvent message from a plain object. Also converts values to their respective internal types.
+         * @function fromObject
+         * @memberof rankland_live_contest_client.BatchClientEvent
+         * @static
+         * @param {Object.<string,*>} object Plain object
+         * @returns {rankland_live_contest_client.BatchClientEvent} BatchClientEvent
+         */
+        BatchClientEvent.fromObject = function fromObject(object) {
+            if (object instanceof $root.rankland_live_contest_client.BatchClientEvent)
+                return object;
+            var message = new $root.rankland_live_contest_client.BatchClientEvent();
+            if (object.events) {
+                if (!Array.isArray(object.events))
+                    throw TypeError(".rankland_live_contest_client.BatchClientEvent.events: array expected");
+                message.events = [];
+                for (var i = 0; i < object.events.length; ++i) {
+                    if (typeof object.events[i] !== "object")
+                        throw TypeError(".rankland_live_contest_client.BatchClientEvent.events: object expected");
+                    message.events[i] = $root.rankland_live_contest_client.ClientEvent.fromObject(object.events[i]);
+                }
+            }
+            return message;
+        };
+
+        /**
+         * Creates a plain object from a BatchClientEvent message. Also converts values to other types if specified.
+         * @function toObject
+         * @memberof rankland_live_contest_client.BatchClientEvent
+         * @static
+         * @param {rankland_live_contest_client.BatchClientEvent} message BatchClientEvent
+         * @param {$protobuf.IConversionOptions} [options] Conversion options
+         * @returns {Object.<string,*>} Plain object
+         */
+        BatchClientEvent.toObject = function toObject(message, options) {
+            if (!options)
+                options = {};
+            var object = {};
+            if (options.arrays || options.defaults)
+                object.events = [];
+            if (message.events && message.events.length) {
+                object.events = [];
+                for (var j = 0; j < message.events.length; ++j)
+                    object.events[j] = $root.rankland_live_contest_client.ClientEvent.toObject(message.events[j], options);
+            }
+            return object;
+        };
+
+        /**
+         * Converts this BatchClientEvent to JSON.
+         * @function toJSON
+         * @memberof rankland_live_contest_client.BatchClientEvent
+         * @instance
+         * @returns {Object.<string,*>} JSON object
+         */
+        BatchClientEvent.prototype.toJSON = function toJSON() {
+            return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
+        };
+
+        return BatchClientEvent;
+    })();
+
     return rankland_live_contest_client;
 })();
 
@@ -2583,6 +2791,214 @@ $root.rankland_live_contest_producer = (function() {
         };
 
         return ProducerEvent;
+    })();
+
+    rankland_live_contest_producer.BatchProducerEvent = (function() {
+
+        /**
+         * Properties of a BatchProducerEvent.
+         * @memberof rankland_live_contest_producer
+         * @interface IBatchProducerEvent
+         * @property {Array.<rankland_live_contest_producer.IProducerEvent>|null} [events] BatchProducerEvent events
+         */
+
+        /**
+         * Constructs a new BatchProducerEvent.
+         * @memberof rankland_live_contest_producer
+         * @classdesc Represents a BatchProducerEvent.
+         * @implements IBatchProducerEvent
+         * @constructor
+         * @param {rankland_live_contest_producer.IBatchProducerEvent=} [properties] Properties to set
+         */
+        function BatchProducerEvent(properties) {
+            this.events = [];
+            if (properties)
+                for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
+                    if (properties[keys[i]] != null)
+                        this[keys[i]] = properties[keys[i]];
+        }
+
+        /**
+         * BatchProducerEvent events.
+         * @member {Array.<rankland_live_contest_producer.IProducerEvent>} events
+         * @memberof rankland_live_contest_producer.BatchProducerEvent
+         * @instance
+         */
+        BatchProducerEvent.prototype.events = $util.emptyArray;
+
+        /**
+         * Creates a new BatchProducerEvent instance using the specified properties.
+         * @function create
+         * @memberof rankland_live_contest_producer.BatchProducerEvent
+         * @static
+         * @param {rankland_live_contest_producer.IBatchProducerEvent=} [properties] Properties to set
+         * @returns {rankland_live_contest_producer.BatchProducerEvent} BatchProducerEvent instance
+         */
+        BatchProducerEvent.create = function create(properties) {
+            return new BatchProducerEvent(properties);
+        };
+
+        /**
+         * Encodes the specified BatchProducerEvent message. Does not implicitly {@link rankland_live_contest_producer.BatchProducerEvent.verify|verify} messages.
+         * @function encode
+         * @memberof rankland_live_contest_producer.BatchProducerEvent
+         * @static
+         * @param {rankland_live_contest_producer.IBatchProducerEvent} message BatchProducerEvent message or plain object to encode
+         * @param {$protobuf.Writer} [writer] Writer to encode to
+         * @returns {$protobuf.Writer} Writer
+         */
+        BatchProducerEvent.encode = function encode(message, writer) {
+            if (!writer)
+                writer = $Writer.create();
+            if (message.events != null && message.events.length)
+                for (var i = 0; i < message.events.length; ++i)
+                    $root.rankland_live_contest_producer.ProducerEvent.encode(message.events[i], writer.uint32(/* id 1, wireType 2 =*/10).fork()).ldelim();
+            return writer;
+        };
+
+        /**
+         * Encodes the specified BatchProducerEvent message, length delimited. Does not implicitly {@link rankland_live_contest_producer.BatchProducerEvent.verify|verify} messages.
+         * @function encodeDelimited
+         * @memberof rankland_live_contest_producer.BatchProducerEvent
+         * @static
+         * @param {rankland_live_contest_producer.IBatchProducerEvent} message BatchProducerEvent message or plain object to encode
+         * @param {$protobuf.Writer} [writer] Writer to encode to
+         * @returns {$protobuf.Writer} Writer
+         */
+        BatchProducerEvent.encodeDelimited = function encodeDelimited(message, writer) {
+            return this.encode(message, writer).ldelim();
+        };
+
+        /**
+         * Decodes a BatchProducerEvent message from the specified reader or buffer.
+         * @function decode
+         * @memberof rankland_live_contest_producer.BatchProducerEvent
+         * @static
+         * @param {$protobuf.Reader|Uint8Array} reader Reader or buffer to decode from
+         * @param {number} [length] Message length if known beforehand
+         * @returns {rankland_live_contest_producer.BatchProducerEvent} BatchProducerEvent
+         * @throws {Error} If the payload is not a reader or valid buffer
+         * @throws {$protobuf.util.ProtocolError} If required fields are missing
+         */
+        BatchProducerEvent.decode = function decode(reader, length) {
+            if (!(reader instanceof $Reader))
+                reader = $Reader.create(reader);
+            var end = length === undefined ? reader.len : reader.pos + length, message = new $root.rankland_live_contest_producer.BatchProducerEvent();
+            while (reader.pos < end) {
+                var tag = reader.uint32();
+                switch (tag >>> 3) {
+                case 1:
+                    if (!(message.events && message.events.length))
+                        message.events = [];
+                    message.events.push($root.rankland_live_contest_producer.ProducerEvent.decode(reader, reader.uint32()));
+                    break;
+                default:
+                    reader.skipType(tag & 7);
+                    break;
+                }
+            }
+            return message;
+        };
+
+        /**
+         * Decodes a BatchProducerEvent message from the specified reader or buffer, length delimited.
+         * @function decodeDelimited
+         * @memberof rankland_live_contest_producer.BatchProducerEvent
+         * @static
+         * @param {$protobuf.Reader|Uint8Array} reader Reader or buffer to decode from
+         * @returns {rankland_live_contest_producer.BatchProducerEvent} BatchProducerEvent
+         * @throws {Error} If the payload is not a reader or valid buffer
+         * @throws {$protobuf.util.ProtocolError} If required fields are missing
+         */
+        BatchProducerEvent.decodeDelimited = function decodeDelimited(reader) {
+            if (!(reader instanceof $Reader))
+                reader = new $Reader(reader);
+            return this.decode(reader, reader.uint32());
+        };
+
+        /**
+         * Verifies a BatchProducerEvent message.
+         * @function verify
+         * @memberof rankland_live_contest_producer.BatchProducerEvent
+         * @static
+         * @param {Object.<string,*>} message Plain object to verify
+         * @returns {string|null} `null` if valid, otherwise the reason why it is not
+         */
+        BatchProducerEvent.verify = function verify(message) {
+            if (typeof message !== "object" || message === null)
+                return "object expected";
+            if (message.events != null && message.hasOwnProperty("events")) {
+                if (!Array.isArray(message.events))
+                    return "events: array expected";
+                for (var i = 0; i < message.events.length; ++i) {
+                    var error = $root.rankland_live_contest_producer.ProducerEvent.verify(message.events[i]);
+                    if (error)
+                        return "events." + error;
+                }
+            }
+            return null;
+        };
+
+        /**
+         * Creates a BatchProducerEvent message from a plain object. Also converts values to their respective internal types.
+         * @function fromObject
+         * @memberof rankland_live_contest_producer.BatchProducerEvent
+         * @static
+         * @param {Object.<string,*>} object Plain object
+         * @returns {rankland_live_contest_producer.BatchProducerEvent} BatchProducerEvent
+         */
+        BatchProducerEvent.fromObject = function fromObject(object) {
+            if (object instanceof $root.rankland_live_contest_producer.BatchProducerEvent)
+                return object;
+            var message = new $root.rankland_live_contest_producer.BatchProducerEvent();
+            if (object.events) {
+                if (!Array.isArray(object.events))
+                    throw TypeError(".rankland_live_contest_producer.BatchProducerEvent.events: array expected");
+                message.events = [];
+                for (var i = 0; i < object.events.length; ++i) {
+                    if (typeof object.events[i] !== "object")
+                        throw TypeError(".rankland_live_contest_producer.BatchProducerEvent.events: object expected");
+                    message.events[i] = $root.rankland_live_contest_producer.ProducerEvent.fromObject(object.events[i]);
+                }
+            }
+            return message;
+        };
+
+        /**
+         * Creates a plain object from a BatchProducerEvent message. Also converts values to other types if specified.
+         * @function toObject
+         * @memberof rankland_live_contest_producer.BatchProducerEvent
+         * @static
+         * @param {rankland_live_contest_producer.BatchProducerEvent} message BatchProducerEvent
+         * @param {$protobuf.IConversionOptions} [options] Conversion options
+         * @returns {Object.<string,*>} Plain object
+         */
+        BatchProducerEvent.toObject = function toObject(message, options) {
+            if (!options)
+                options = {};
+            var object = {};
+            if (options.arrays || options.defaults)
+                object.events = [];
+            if (message.events && message.events.length) {
+                object.events = [];
+                for (var j = 0; j < message.events.length; ++j)
+                    object.events[j] = $root.rankland_live_contest_producer.ProducerEvent.toObject(message.events[j], options);
+            }
+            return object;
+        };
+
+        /**
+         * Converts this BatchProducerEvent to JSON.
+         * @function toJSON
+         * @memberof rankland_live_contest_producer.BatchProducerEvent
+         * @instance
+         * @returns {Object.<string,*>} JSON object
+         */
+        BatchProducerEvent.prototype.toJSON = function toJSON() {
+            return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
+        };
+
+        return BatchProducerEvent;
     })();
 
     return rankland_live_contest_producer;

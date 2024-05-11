@@ -47,20 +47,24 @@ export default class SocketIOServer {
 
       socket.on('ProducerEvent', async (data, callback) => {
         try {
-          const req = rankland_live_contest_producer.ProducerEvent.decode(data);
-          console.log('ProducerEvent', req);
-          await this.liveContestService.handleProducerEvent(alias, req);
+          const batchData = rankland_live_contest_producer.BatchProducerEvent.decode(data);
+          for (const req of batchData.events) {
+            console.log('ProducerEvent req:', req);
+            try {
+              await this.liveContestService.handleProducerEvent(alias, req);
+            } catch (e) {
+              console.error('ProducerEvent failed:', e);
+              if (e.name === 'MongoServerError' && e.errorResponse?.code === 11000) {
+                continue;
+              }
+              throw e;
+            }
+          }
           callback({
             success: true,
           });
         } catch (e) {
           console.error('ProducerEvent failed:', e);
-          if (e.name === 'MongoServerError' && e.errorResponse?.code === 11000) {
-            callback({
-              success: true,
-            });
-            return;
-          }
           callback(this.handleError(e));
         }
       });

@@ -130,6 +130,96 @@ export namespace rankland_live_contest_client {
          */
         public toJSON(): { [k: string]: any };
     }
+
+    /** Properties of a BatchClientEvent. */
+    interface IBatchClientEvent {
+
+        /** BatchClientEvent events */
+        events?: (rankland_live_contest_client.IClientEvent[]|null);
+    }
+
+    /** Represents a BatchClientEvent. */
+    class BatchClientEvent implements IBatchClientEvent {
+
+        /**
+         * Constructs a new BatchClientEvent.
+         * @param [properties] Properties to set
+         */
+        constructor(properties?: rankland_live_contest_client.IBatchClientEvent);
+
+        /** BatchClientEvent events. */
+        public events: rankland_live_contest_client.IClientEvent[];
+
+        /**
+         * Creates a new BatchClientEvent instance using the specified properties.
+         * @param [properties] Properties to set
+         * @returns BatchClientEvent instance
+         */
+        public static create(properties?: rankland_live_contest_client.IBatchClientEvent): rankland_live_contest_client.BatchClientEvent;
+
+        /**
+         * Encodes the specified BatchClientEvent message. Does not implicitly {@link rankland_live_contest_client.BatchClientEvent.verify|verify} messages.
+         * @param message BatchClientEvent message or plain object to encode
+         * @param [writer] Writer to encode to
+         * @returns Writer
+         */
+        public static encode(message: rankland_live_contest_client.IBatchClientEvent, writer?: $protobuf.Writer): $protobuf.Writer;
+
+        /**
+         * Encodes the specified BatchClientEvent message, length delimited. Does not implicitly {@link rankland_live_contest_client.BatchClientEvent.verify|verify} messages.
+         * @param message BatchClientEvent message or plain object to encode
+         * @param [writer] Writer to encode to
+         * @returns Writer
+         */
+        public static encodeDelimited(message: rankland_live_contest_client.IBatchClientEvent, writer?: $protobuf.Writer): $protobuf.Writer;
+
+        /**
+         * Decodes a BatchClientEvent message from the specified reader or buffer.
+         * @param reader Reader or buffer to decode from
+         * @param [length] Message length if known beforehand
+         * @returns BatchClientEvent
+         * @throws {Error} If the payload is not a reader or valid buffer
+         * @throws {$protobuf.util.ProtocolError} If required fields are missing
+         */
+        public static decode(reader: ($protobuf.Reader|Uint8Array), length?: number): rankland_live_contest_client.BatchClientEvent;
+
+        /**
+         * Decodes a BatchClientEvent message from the specified reader or buffer, length delimited.
+         * @param reader Reader or buffer to decode from
+         * @returns BatchClientEvent
+         * @throws {Error} If the payload is not a reader or valid buffer
+         * @throws {$protobuf.util.ProtocolError} If required fields are missing
+         */
+        public static decodeDelimited(reader: ($protobuf.Reader|Uint8Array)): rankland_live_contest_client.BatchClientEvent;
+
+        /**
+         * Verifies a BatchClientEvent message.
+         * @param message Plain object to verify
+         * @returns `null` if valid, otherwise the reason why it is not
+         */
+        public static verify(message: { [k: string]: any }): (string|null);
+
+        /**
+         * Creates a BatchClientEvent message from a plain object. Also converts values to their respective internal types.
+         * @param object Plain object
+         * @returns BatchClientEvent
+         */
+        public static fromObject(object: { [k: string]: any }): rankland_live_contest_client.BatchClientEvent;
+
+        /**
+         * Creates a plain object from a BatchClientEvent message. Also converts values to other types if specified.
+         * @param message BatchClientEvent
+         * @param [options] Conversion options
+         * @returns Plain object
+         */
+        public static toObject(message: rankland_live_contest_client.BatchClientEvent, options?: $protobuf.IConversionOptions): { [k: string]: any };
+
+        /**
+         * Converts this BatchClientEvent to JSON.
+         * @returns JSON object
+         */
+        public toJSON(): { [k: string]: any };
+    }
 }
 
 /** Namespace rankland_live_contest_common. */
@@ -894,6 +984,96 @@ export namespace rankland_live_contest_producer {
 
         /**
          * Converts this ProducerEvent to JSON.
+         * @returns JSON object
+         */
+        public toJSON(): { [k: string]: any };
+    }
+
+    /** Properties of a BatchProducerEvent. */
+    interface IBatchProducerEvent {
+
+        /** BatchProducerEvent events */
+        events?: (rankland_live_contest_producer.IProducerEvent[]|null);
+    }
+
+    /** Represents a BatchProducerEvent. */
+    class BatchProducerEvent implements IBatchProducerEvent {
+
+        /**
+         * Constructs a new BatchProducerEvent.
+         * @param [properties] Properties to set
+         */
+        constructor(properties?: rankland_live_contest_producer.IBatchProducerEvent);
+
+        /** BatchProducerEvent events. */
+        public events: rankland_live_contest_producer.IProducerEvent[];
+
+        /**
+         * Creates a new BatchProducerEvent instance using the specified properties.
+         * @param [properties] Properties to set
+         * @returns BatchProducerEvent instance
+         */
+        public static create(properties?: rankland_live_contest_producer.IBatchProducerEvent): rankland_live_contest_producer.BatchProducerEvent;
+
+        /**
+         * Encodes the specified BatchProducerEvent message. Does not implicitly {@link rankland_live_contest_producer.BatchProducerEvent.verify|verify} messages.
+         * @param message BatchProducerEvent message or plain object to encode
+         * @param [writer] Writer to encode to
+         * @returns Writer
+         */
+        public static encode(message: rankland_live_contest_producer.IBatchProducerEvent, writer?: $protobuf.Writer): $protobuf.Writer;
+
+        /**
+         * Encodes the specified BatchProducerEvent message, length delimited. Does not implicitly {@link rankland_live_contest_producer.BatchProducerEvent.verify|verify} messages.
+         * @param message BatchProducerEvent message or plain object to encode
+         * @param [writer] Writer to encode to
+         * @returns Writer
+         */
+        public static encodeDelimited(message: rankland_live_contest_producer.IBatchProducerEvent, writer?: $protobuf.Writer): $protobuf.Writer;
+
+        /**
+         * Decodes a BatchProducerEvent message from the specified reader or buffer.
+         * @param reader Reader or buffer to decode from
+         * @param [length] Message length if known beforehand
+         * @returns BatchProducerEvent
+         * @throws {Error} If the payload is not a reader or valid buffer
+         * @throws {$protobuf.util.ProtocolError} If required fields are missing
+         */
+        public static decode(reader: ($protobuf.Reader|Uint8Array), length?: number): rankland_live_contest_producer.BatchProducerEvent;
+
+        /**
+         * Decodes a BatchProducerEvent message from the specified reader or buffer, length delimited.
+         * @param reader Reader or buffer to decode from
+         * @returns BatchProducerEvent
+         * @throws {Error} If the payload is not a reader or valid buffer
+         * @throws {$protobuf.util.ProtocolError} If required fields are missing
+         */
+        public static decodeDelimited(reader: ($protobuf.Reader|Uint8Array)): rankland_live_contest_producer.BatchProducerEvent;
+
+        /**
+         * Verifies a BatchProducerEvent message.
+         * @param message Plain object to verify
+         * @returns `null` if valid, otherwise the reason why it is not
+         */
+        public static verify(message: { [k: string]: any }): (string|null);
+
+        /**
+         * Creates a BatchProducerEvent message from a plain object. Also converts values to their respective internal types.
+         * @param object Plain object
+         * @returns BatchProducerEvent
+         */
+        public static fromObject(object: { [k: string]: any }): rankland_live_contest_producer.BatchProducerEvent;
+
+        /**
+         * Creates a plain object from a BatchProducerEvent message. Also converts values to other types if specified.
+         * @param message BatchProducerEvent
+         * @param [options] Conversion options
+         * @returns Plain object
+         */
+        public static toObject(message: rankland_live_contest_producer.BatchProducerEvent, options?: $protobuf.IConversionOptions): { [k: string]: any };
+
+        /**
+         * Converts this BatchProducerEvent to JSON.
          * @returns JSON object
          */
         public toJSON(): { [k: string]: any };
