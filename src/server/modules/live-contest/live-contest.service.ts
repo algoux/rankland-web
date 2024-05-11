@@ -2,7 +2,11 @@ import { Provide } from 'bwcx-core';
 import { LiveContestModel } from '@server/models/live-contest.model';
 import LogicException from '@server/exceptions/logic.exception';
 import { ErrCode } from '@common/enums/err-code.enum';
-import { rankland_live_contest_common, rankland_live_contest_producer } from '@common/proto/rankland_live_contest';
+import {
+  rankland_live_contest_common,
+  rankland_live_contest_producer,
+  rankland_live_contest_client,
+} from '@common/proto/rankland_live_contest';
 import { LiveContestEventModel } from '@server/models/live-contest-event.model';
 
 @Provide()
@@ -113,5 +117,70 @@ export default class LiveContestService {
         break;
       }
     }
+  }
+
+  public encodeEventToClientEvent(event: any): rankland_live_contest_client.IClientEvent {
+    switch (event.type) {
+      case rankland_live_contest_common.EventType.NEW_SOLUTION: {
+        return {
+          eventId: event.eventId,
+          type: event.type,
+          newSolutionData: {
+            solutionId: event.solutionId,
+            userId: event.userId,
+            problemAlias: event.problemAlias,
+            time: {
+              value: event.timeValue,
+              unit: event.timeUnit,
+            },
+          },
+        };
+      }
+      case rankland_live_contest_common.EventType.SOLUTION_ON_PROGRESS: {
+        return {
+          eventId: event.eventId,
+          type: event.type,
+          solutionOnProgressData: {
+            solutionId: event.solutionId,
+            percentageProgress: event.percentageProgress,
+          },
+        };
+      }
+      case rankland_live_contest_common.EventType.SOLUTION_ON_RESULT_SETTLE: {
+        return {
+          eventId: event.eventId,
+          type: event.type,
+          solutionOnResultSettleData: {
+            solutionId: event.solutionId,
+            result: event.result,
+            time: {
+              value: event.timeValue,
+              unit: event.timeUnit,
+            },
+          },
+        };
+      }
+      case rankland_live_contest_common.EventType.SOLUTION_ON_RESULT_CHANGE: {
+        return {
+          eventId: event.eventId,
+          type: event.type,
+          solutionOnResultChangeData: {
+            solutionId: event.solutionId,
+            previousResult: event.previousResult,
+            result: event.result,
+            time: {
+              value: event.timeValue,
+              unit: event.timeUnit,
+            },
+          },
+        };
+      }
+    }
+  }
+
+  public async getAllEventsAsClientEvents(alias: string): Promise<rankland_live_contest_client.IClientEvent[]> {
+    const contestId = await this.findContestIdByAlias(alias);
+    const res = await LiveContestEventModel.find({ contestId }).sort({ eventId: 1 });
+    return res.map((event) => this.encodeEventToClientEvent(event));
   }
 }

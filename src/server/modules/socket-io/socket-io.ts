@@ -41,7 +41,7 @@ export default class SocketIOServer {
       next();
     });
     this.producerNsp.on('connection', (socket) => {
-      const { producerId, alias } = socket.handshake.auth;
+      const { id: producerId, alias } = socket.handshake.auth;
       console.log('Producer connected', producerId, alias);
       socket.join(`${alias}`);
 
@@ -60,6 +60,7 @@ export default class SocketIOServer {
               throw e;
             }
           }
+          this.clientNsp.to(`${alias}`).emit('ClientEvents', data);
           callback({
             success: true,
           });
@@ -73,6 +74,18 @@ export default class SocketIOServer {
 
   public clientMount() {
     this.clientNsp = this.io.of('/client');
+    this.clientNsp.on('connection', async (socket) => {
+      const { id: clientId, alias, lastEventId } = socket.handshake.auth;
+      console.log('Client connected', clientId, alias);
+      socket.join(`${alias}`);
+
+      // Push all events (from last event id) to client when connected
+      const events = await this.liveContestService.getAllEventsAsClientEvents(alias);
+      const bytes = rankland_live_contest_client.BatchClientEvent.encode({ events }).finish();
+      socket.emit('InitClientEvents', bytes);
+      socket.emit('InitClientEventsDone');
+      console.log('InitClientEvents ok', events.length, bytes.length);
+    });
   }
 
   private handleError(e: any) {
