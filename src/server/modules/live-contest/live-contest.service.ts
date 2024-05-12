@@ -37,6 +37,16 @@ export default class LiveContestService {
     data: rankland_live_contest_common.INewSolutionEvent,
   ): Promise<{ _id: string }> {
     const contestId = await this.findContestIdByAlias(alias);
+    const existed = await LiveContestEventModel.findOne({
+      contestId,
+      type: rankland_live_contest_common.EventType.NEW_SOLUTION,
+      solutionId: data.solutionId,
+    });
+    if (existed) {
+      return {
+        _id: existed._id.toString(),
+      };
+    }
     const res = await LiveContestEventModel.create({
       contestId,
       eventId,

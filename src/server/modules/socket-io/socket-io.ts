@@ -60,7 +60,8 @@ export default class SocketIOServer {
               throw e;
             }
           }
-          this.clientNsp.to(`${alias}`).emit('ClientEvents', data);
+          const bytes = rankland_live_contest_client.BatchClientEvent.encode({ events: batchData.events }).finish();
+          this.clientNsp.to(`${alias}`).emit('ClientEvents', bytes);
           callback({
             success: true,
           });
