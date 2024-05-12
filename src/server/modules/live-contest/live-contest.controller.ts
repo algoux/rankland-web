@@ -47,6 +47,9 @@ export default class LiveContestController {
     if (!res) {
       throw new LogicException(ErrCode.LiveContestNotFound);
     }
-    return res.toObject() as GetLiveContestRespDTO;
+    const plain = res.toObject() as GetLiveContestRespDTO;
+    // @ts-ignore
+    delete plain.__v;
+    return plain;
   }
 }

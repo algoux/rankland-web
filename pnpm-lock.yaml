@@ -5,6 +5,12 @@ settings:
   excludeLinksFromLockfile: false
 
 dependencies:
+  '@algoux/standard-ranklist':
+    specifier: ^0.3.4
+    version: 0.3.4
+  '@algoux/standard-ranklist-utils':
+    specifier: ^0.1.1
+    version: 0.1.1(@algoux/standard-ranklist@0.3.4)
   '@vue/runtime-core':
     specifier: ^3.2.31
     version: 3.2.31
@@ -188,6 +194,22 @@ packages:
     resolution: {integrity: sha512-1Yjs2SvM8TflER/OD3cOjhWWOZb58A2t7wpE2S9XfBYTiIl+XFhQG2bjy4Pu1I+EAlCNUzRDYDdFwFYUKvXcIA==}
     engines: {node: '>=0.10.0'}
     dev: true
+
+  /@algoux/standard-ranklist-utils@0.1.1(@algoux/standard-ranklist@0.3.4):
+    resolution: {integrity: sha512-MBsn5NPPtN68bv/mYEVz8z11nZ5tlCcICSaqWQYpADHP9CTBFgNaRdPXm5OFLm6ivC4MNyw6F+Sny73HWIPxbw==}
+    peerDependencies:
+      '@algoux/standard-ranklist': '*'
+    dependencies:
+      '@algoux/standard-ranklist': 0.3.4
+      bcp-47-match: 2.0.3
+      bignumber.js: 9.1.2
+      semver: 7.5.4
+      textcolor: 1.0.2
+    dev: false
+
+  /@algoux/standard-ranklist@0.3.4:
+    resolution: {integrity: sha512-zXQNcejFMaa6F1GsIPrEoFVGkBKKN2bPfawrX5M7Grgjag1YM9MZsxy9KxRYVhu4LDKd0PjvLr32C3hGLeiDUg==}
+    dev: false
 
   /@ampproject/remapping@2.2.1:
     resolution: {integrity: sha512-lFMjJTrFL3j7L9yBxwYfCq2k6qqwHyzuUl/XBnif78PWTJYyL/dfowQHWE3sp6U6ZzqWiiIZnpTMO96zhkjwtg==}
@@ -1596,6 +1618,14 @@ packages:
   /basic-ftp@5.0.3:
     resolution: {integrity: sha512-QHX8HLlncOLpy54mh+k/sWIFd0ThmRqwe9ZjELybGZK+tZ8rUb9VO0saKJUROTbE+KhzDUT7xziGpGrW8Kmd+g==}
     engines: {node: '>=10.0.0'}
+    dev: false
+
+  /bcp-47-match@2.0.3:
+    resolution: {integrity: sha512-JtTezzbAibu8G0R9op9zb3vcWZd9JF6M0xOYGPn0fNCd7wOpRB1mU2mH9T8gaBGbAAyIIVgB2G7xG0GP98zMAQ==}
+    dev: false
+
+  /bignumber.js@9.1.2:
+    resolution: {integrity: sha512-2/mKyZH9K85bzOEfhXDBFZTGd1CTs+5IHpeFQo9luiBG7hghdC851Pj2WAhb6E3R6b9tZj/XKhbg4fum+Kepug==}
     dev: false
 
   /binary-extensions@1.13.1:
@@ -5128,6 +5158,10 @@ packages:
   /text-table@0.2.0:
     resolution: {integrity: sha512-N+8UisAXDGk8PFXP4HAzVR9nbfmVJ3zYLAWiTIoqC5v5isinhr+r5uaO8+7r3BMfuNIufIsA7RdpVgacC2cSpw==}
     dev: true
+
+  /textcolor@1.0.2:
+    resolution: {integrity: sha512-+frmW0G8e23xh30MCL47JWhXF+ckrPEzkCv4VJfXZpu08VsLJgvnWuVOivi2Ih8l0eBa9oCio0/SdiHra2357A==}
+    dev: false
 
   /thenify-all@1.6.0:
     resolution: {integrity: sha1-GhkY1ALY/D+Y+/I02wvMjMEOlyY=}

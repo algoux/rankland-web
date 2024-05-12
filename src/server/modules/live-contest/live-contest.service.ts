@@ -1,4 +1,5 @@
-import { Provide } from 'bwcx-core';
+import { Provide, Inject } from 'bwcx-core';
+import Long from 'long';
 import { LiveContestModel } from '@server/models/live-contest.model';
 import LogicException from '@server/exceptions/logic.exception';
 import { ErrCode } from '@common/enums/err-code.enum';
@@ -8,9 +9,12 @@ import {
   rankland_live_contest_client,
 } from '@common/proto/rankland_live_contest';
 import { LiveContestEventModel } from '@server/models/live-contest-event.model';
+import MiscUtils from '@server/utils/misc.util';
 
 @Provide()
 export default class LiveContestService {
+  public constructor(@Inject() private readonly miscUtils: MiscUtils) {}
+
   private contestIdCacheMap = new Map<string, string>();
 
   public async findContestIdByAlias(alias: string): Promise<string> {
@@ -99,6 +103,7 @@ export default class LiveContestService {
   }
 
   public async handleProducerEvent(alias: string, req: rankland_live_contest_producer.IProducerEvent) {
+    const contestId = await this.findContestIdByAlias(alias);
     switch (req.type) {
       case rankland_live_contest_common.EventType.NEW_SOLUTION: {
         await this.insertNewSolutionEvent(alias, req.eventId, req.newSolutionData);
@@ -110,10 +115,56 @@ export default class LiveContestService {
       }
       case rankland_live_contest_common.EventType.SOLUTION_ON_RESULT_SETTLE: {
         await this.insertSolutionOnResultSettleEvent(alias, req.eventId, req.solutionOnResultSettleData);
+        const firstNewSolutionEvent = await LiveContestEventModel.findOne({
+          contestId,
+          type: rankland_live_contest_common.EventType.NEW_SOLUTION,
+          solutionId: req.solutionOnResultSettleData.solutionId,
+        });
+        if (firstNewSolutionEvent) {
+          const timeValue = firstNewSolutionEvent.timeValue;
+          const timeUnit = firstNewSolutionEvent.timeUnit;
+          req.solutionOnResultSettleData.result = await this.processEventResult(
+            alias,
+            req.solutionOnResultSettleData.result,
+            timeValue,
+            timeUnit,
+          );
+        } else {
+          console.warn(
+            'No NewSolution event found for',
+            contestId,
+            alias,
+            req.solutionOnResultSettleData.solutionId,
+            req.eventId,
+          );
+        }
         break;
       }
       case rankland_live_contest_common.EventType.SOLUTION_ON_RESULT_CHANGE: {
         await this.insertSolutionOnResultChangeEvent(alias, req.eventId, req.solutionOnResultChangeData);
+        const firstNewSolutionEvent = await LiveContestEventModel.findOne({
+          contestId,
+          type: rankland_live_contest_common.EventType.NEW_SOLUTION,
+          solutionId: req.solutionOnResultChangeData.solutionId,
+        });
+        if (firstNewSolutionEvent) {
+          const timeValue = firstNewSolutionEvent.timeValue;
+          const timeUnit = firstNewSolutionEvent.timeUnit;
+          req.solutionOnResultChangeData.result = await this.processEventResult(
+            alias,
+            req.solutionOnResultChangeData.result,
+            timeValue,
+            timeUnit,
+          );
+        } else {
+          console.warn(
+            'No NewSolution event found for',
+            contestId,
+            alias,
+            req.solutionOnResultChangeData.solutionId,
+            req.eventId,
+          );
+        }
         break;
       }
     }
@@ -181,6 +232,57 @@ export default class LiveContestService {
   public async getAllEventsAsClientEvents(alias: string): Promise<rankland_live_contest_client.IClientEvent[]> {
     const contestId = await this.findContestIdByAlias(alias);
     const res = await LiveContestEventModel.find({ contestId }).sort({ eventId: 1 });
-    return res.map((event) => this.encodeEventToClientEvent(event));
+    const formattedRes = [];
+    for (const event of res) {
+      // 对于 result settle 和 change，时间需要为 new solution 的时间
+      switch (event.type) {
+        case rankland_live_contest_common.EventType.SOLUTION_ON_RESULT_SETTLE:
+        case rankland_live_contest_common.EventType.SOLUTION_ON_RESULT_CHANGE: {
+          const firstNewSolutionEvent = await LiveContestEventModel.findOne({
+            contestId,
+            type: rankland_live_contest_common.EventType.NEW_SOLUTION,
+            solutionId: event.solutionId,
+          });
+          if (firstNewSolutionEvent) {
+            const timeValue = firstNewSolutionEvent.timeValue;
+            const timeUnit = firstNewSolutionEvent.timeUnit;
+            event.result = await this.processEventResult(alias, event.result, timeValue, timeUnit);
+          } else {
+            console.warn('No NewSolution event found for', contestId, alias, event.solutionId, event.eventId);
+          }
+          break;
+        }
+      }
+      formattedRes.push(this.encodeEventToClientEvent(event));
+    }
+    return formattedRes;
+  }
+
+  public async processEventResult(
+    alias: string,
+    result: rankland_live_contest_common.Result,
+    timeValue: number | Long,
+    timeUnit: rankland_live_contest_common.TimeUnit,
+  ) {
+    if (!result) {
+      return result;
+    }
+    const contestId = await this.findContestIdByAlias(alias);
+    const contest = await LiveContestModel.findById(contestId);
+    if (!contest) {
+      throw new LogicException(ErrCode.LiveContestNotFound);
+    }
+    const { duration, frozenDuration } = contest.contest;
+    // TODO server time diff
+    const d = this.miscUtils.convertRLTimeDurationToSrk(timeValue, timeUnit);
+    const timeMs = this.miscUtils.formatTimeDuration(d, 'ms');
+    const durationMs = this.miscUtils.formatTimeDuration(duration, 'ms');
+    const frozenDurationMs = this.miscUtils.formatTimeDuration(frozenDuration, 'ms') || 0;
+    const inFrozen = timeMs >= durationMs - frozenDurationMs;
+    if (inFrozen) {
+      console.log('In frozen', timeMs, 'previous result', result);
+      return rankland_live_contest_common.Result.FZ;
+    }
+    return result;
   }
 }

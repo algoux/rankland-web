@@ -1,4 +1,5 @@
 import { FromBody, FromQuery } from 'bwcx-common';
+import { Type } from 'class-transformer';
 import { IsArray, IsNotEmpty, IsObject, IsOptional, IsString, Length } from 'class-validator';
 
 export class CreateLiveContestReqDTO {
@@ -20,19 +21,19 @@ export class CreateLiveContestReqDTO {
 
   @FromBody()
   @IsArray()
-  public problems: any[];
+  public problems: any;
 
   @FromBody()
   @IsArray()
-  public members: any[];
+  public members: any;
 
   @FromBody()
   @IsArray()
-  public markers: any[];
+  public markers: any;
 
   @FromBody()
   @IsArray()
-  public series: any[];
+  public series: any;
 
   @FromBody()
   @IsObject()
@@ -40,7 +41,7 @@ export class CreateLiveContestReqDTO {
 
   @FromBody()
   @IsArray()
-  public contributors: any[];
+  public contributors: any;
 }
 
 export class CreateLiveContestRespDTO {
@@ -69,22 +70,22 @@ export class UpdateLiveContestReqDTO {
   @FromBody()
   @IsOptional()
   @IsArray()
-  public problems?: any[];
+  public problems?: any;
 
   @FromBody()
   @IsOptional()
   @IsArray()
-  public members?: any[];
+  public members?: any;
 
   @FromBody()
   @IsOptional()
   @IsArray()
-  public markers?: any[];
+  public markers?: any;
 
   @FromBody()
   @IsOptional()
   @IsArray()
-  public series?: any[];
+  public series?: any;
 
   @FromBody()
   @IsOptional()
@@ -94,7 +95,7 @@ export class UpdateLiveContestReqDTO {
   @FromBody()
   @IsOptional()
   @IsArray()
-  public contributors?: any[];
+  public contributors?: any;
 }
 
 export class GetLiveContestReqDTO {
@@ -110,10 +111,10 @@ export class GetLiveContestRespDTO {
   public alias: string;
   public name: string;
   public contest: any;
-  public problems: any[];
-  public members: any[];
-  public markers: any[];
-  public series: any[];
+  public problems: any;
+  public members: any;
+  public markers: any;
+  public series: any;
   public sorter: any;
-  public contributors: any[];
+  public contributors: any;
 }

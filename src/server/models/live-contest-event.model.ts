@@ -5,7 +5,7 @@ export const liveContestEventSchema = new mongoose.Schema(
     contestId: String, // match liveContestSchema._id
     eventId: Number,
     type: Number,
-    solutionId: String,
+    solutionId: Number,
     userId: String,
     problemAlias: String,
     percentageProgress: Number,
