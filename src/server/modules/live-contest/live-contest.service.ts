@@ -42,21 +42,26 @@ export default class LiveContestService {
       type: rankland_live_contest_common.EventType.NEW_SOLUTION,
       solutionId: data.solutionId,
     });
-    if (existed) {
+    if (existed && existed.eventId < eventId) {
       return {
         _id: existed._id.toString(),
       };
     }
-    const res = await LiveContestEventModel.create({
-      contestId,
-      eventId,
-      type: rankland_live_contest_common.EventType.NEW_SOLUTION,
-      solutionId: data.solutionId,
-      userId: data.userId,
-      problemAlias: data.problemAlias,
-      timeValue: data.time.value,
-      timeUnit: data.time.unit,
-    });
+    const res = await LiveContestEventModel.findOneAndUpdate(
+      { contestId, eventId },
+      {
+        type: rankland_live_contest_common.EventType.NEW_SOLUTION,
+        solutionId: data.solutionId,
+        userId: data.userId,
+        problemAlias: data.problemAlias,
+        timeValue: data.time.value,
+        timeUnit: data.time.unit,
+      },
+      {
+        upsert: true,
+        new: true,
+      },
+    );
     return {
       _id: res._id.toString(),
     };
@@ -66,50 +71,79 @@ export default class LiveContestService {
     alias: string,
     eventId: number,
     data: rankland_live_contest_common.ISolutionOnProgressEvent,
-  ): Promise<void> {
+  ): Promise<{ _id: string }> {
     const contestId = await this.findContestIdByAlias(alias);
-    await LiveContestEventModel.create({
-      contestId,
-      eventId,
-      type: rankland_live_contest_common.EventType.SOLUTION_ON_PROGRESS,
-      solutionId: data.solutionId,
-      percentageProgress: data.percentageProgress,
-    });
+    const res = await LiveContestEventModel.findOneAndUpdate(
+      { contestId, eventId },
+      {
+        type: rankland_live_contest_common.EventType.SOLUTION_ON_PROGRESS,
+        solutionId: data.solutionId,
+        percentageProgress: data.percentageProgress,
+      },
+      {
+        upsert: true,
+        new: true,
+      },
+    );
+    return {
+      _id: res._id.toString(),
+    };
   }
 
   public async insertSolutionOnResultSettleEvent(
     alias: string,
     eventId: number,
     data: rankland_live_contest_common.ISolutionOnResultSettleEvent,
-  ): Promise<void> {
+  ): Promise<{ _id: string }> {
     const contestId = await this.findContestIdByAlias(alias);
-    await LiveContestEventModel.create({
-      contestId,
-      eventId,
-      type: rankland_live_contest_common.EventType.SOLUTION_ON_RESULT_SETTLE,
-      solutionId: data.solutionId,
-      result: data.result,
-      timeValue: data.time.value,
-      timeUnit: data.time.unit,
-    });
+    const res = await LiveContestEventModel.findOneAndUpdate(
+      { contestId, eventId },
+      {
+        type: rankland_live_contest_common.EventType.SOLUTION_ON_RESULT_SETTLE,
+        solutionId: data.solutionId,
+        result: data.result,
+        timeValue: data.time.value,
+        timeUnit: data.time.unit,
+      },
+      {
+        upsert: true,
+        new: true,
+      },
+    );
+    return {
+      _id: res._id.toString(),
+    };
   }
 
   public async insertSolutionOnResultChangeEvent(
     alias: string,
     eventId: number,
     data: rankland_live_contest_common.ISolutionOnResultChangeEvent,
-  ): Promise<void> {
+  ): Promise<{ _id: string }> {
     const contestId = await this.findContestIdByAlias(alias);
-    await LiveContestEventModel.create({
-      contestId,
-      eventId,
-      type: rankland_live_contest_common.EventType.SOLUTION_ON_RESULT_CHANGE,
-      solutionId: data.solutionId,
-      previousResult: data.previousResult,
-      result: data.result,
-      timeValue: data.time.value,
-      timeUnit: data.time.unit,
-    });
+    const res = await LiveContestEventModel.findOneAndUpdate(
+      { contestId, eventId },
+      {
+        type: rankland_live_contest_common.EventType.SOLUTION_ON_RESULT_CHANGE,
+        solutionId: data.solutionId,
+        previousResult: data.previousResult,
+        result: data.result,
+        timeValue: data.time.value,
+        timeUnit: data.time.unit,
+      },
+      {
+        upsert: true,
+        new: true,
+      },
+    );
+    return {
+      _id: res._id.toString(),
+    };
+  }
+
+  public async dropEvents(alias: string): Promise<void> {
+    const contestId = await this.findContestIdByAlias(alias);
+    await LiveContestEventModel.deleteMany({ contestId });
   }
 
   public async handleProducerEvent(alias: string, req: rankland_live_contest_producer.IProducerEvent) {

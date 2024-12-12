@@ -1,4 +1,5 @@
 import { Contract, Data, Get, InjectCtx, Post, RequestContext, UseGuards } from 'bwcx-ljsm';
+import { Inject } from 'bwcx-core';
 import { ApiController } from '@server/decorators';
 import AuthGuard from '@server/guards/auth.guard';
 import {
@@ -7,16 +8,21 @@ import {
   GetLiveContestReqDTO,
   GetLiveContestRespDTO,
   UpdateLiveContestReqDTO,
+  DropLiveContestEventsReqDTO,
 } from '@common/modules/live-contest/live-contest.dto';
 import { LiveContestModel } from '@server/models/live-contest.model';
 import LogicException from '@server/exceptions/logic.exception';
 import { ErrCode } from '@common/enums/err-code.enum';
+import LiveContestService from './live-contest.service';
 
 @ApiController()
 export default class LiveContestController {
   public constructor(
     @InjectCtx()
     private readonly ctx: RequestContext,
+
+    @Inject()
+    private readonly service: LiveContestService,
   ) {}
 
   @Post()
@@ -38,6 +44,13 @@ export default class LiveContestController {
   @Contract(UpdateLiveContestReqDTO, null)
   public async updateLiveContest(@Data() data: UpdateLiveContestReqDTO) {
     await LiveContestModel.updateOne({ alias: data.alias }, data);
+  }
+
+  @Post()
+  @UseGuards(AuthGuard)
+  @Contract(DropLiveContestEventsReqDTO, null)
+  public async dropLiveContestEvents(@Data() data: DropLiveContestEventsReqDTO) {
+    await this.service.dropEvents(data.alias);
   }
 
   @Get()

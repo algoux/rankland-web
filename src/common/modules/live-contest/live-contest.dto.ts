@@ -98,6 +98,14 @@ export class UpdateLiveContestReqDTO {
   public contributors?: any;
 }
 
+export class DropLiveContestEventsReqDTO {
+  @FromBody()
+  @IsString()
+  @IsNotEmpty()
+  @Length(3, 32)
+  public alias: string;
+}
+
 export class GetLiveContestReqDTO {
   @FromQuery()
   @IsString()
