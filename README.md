@@ -1,4 +1,4 @@
-# bwcx-vue3-ssr-template
+# rankland-web
 
 一个基于 bwcx 的全栈 SSR 项目模板（created at 2021）。
 

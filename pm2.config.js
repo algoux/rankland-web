@@ -1,6 +1,6 @@
 const apps = [
   {
-    name: 'bwcx-vue3-ssr-template',
+    name: 'rankland-web',
     script: `./app/server/index.js`,
     log_date_format: 'YYYY-MM-DD HH:mm:ss',
     exec_mode: 'cluster',
