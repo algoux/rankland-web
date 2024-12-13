@@ -13,7 +13,7 @@
     "dev": "concurrently -r \"npm:dev:start\" \"npm:gen:client-router\"",
     "gen:proto": "pbjs -t static-module -w commonjs -r rankland_live_contest_client --force-long -o src/common/proto/rankland_live_contest.js src/common/shared/proto/rankland_live_contest/*.proto && pbts -o src/common/proto/rankland_live_contest.d.ts src/common/proto/rankland_live_contest.js",
     "build:client": "rimraf dist && vite-ssr build --ssr src/client/entry-server.ts",
-    "build:server": "rimraf app && tsc -p src/server/tsconfig.json && copyfiles -u3 \"src/**/*.js\" app",
+    "build:server": "rimraf app && tsc -p src/server/tsconfig.json && copyfiles -u1 \"src/**/*.js\" app",
     "build": "pnpm run build:client && pnpm run build:server",
     "start": "cross-env NODE_ENV=production node --unhandled-rejections=warn app/server/index.js",
     "deploy": "cross-env NODE_ENV=production pm2 start pm2.config.js",
