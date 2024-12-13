@@ -36,9 +36,9 @@ export default class OurApp extends App {
     '!./common/api/**',
   ];
 
-  public hostname = '127.0.0.1';
+  public hostname = process.env.SERVER_HOST || '127.0.0.1';
 
-  public port = 3000;
+  public port = parseInt(process.env.SERVER_PORT, 10) || 3000;
 
   protected exitTimeout = 5000;
 
@@ -106,7 +106,7 @@ export default class OurApp extends App {
   }
 
   protected async afterStart() {
-    console.log(`🚀 A bwcx app is listening on http://${this.hostname || '0.0.0.0'}:${this.port}`);
+    console.log(`🚀 A bwcx app is listening on http://${this.hostname}:${this.port}`);
     if (!isProd) {
       // generate api client
       const apiClientGenerator = new ApiClientGenerator(
