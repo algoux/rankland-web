@@ -16,6 +16,7 @@ import path from 'path';
 import favicon from 'koa-favicon';
 import mount from 'koa-mount';
 import koaStatic from 'koa-static';
+import cors from '@koa/cors';
 import UtilityHeaderMiddleware from './middlewares/utility-header.middleware';
 import LoggerMiddleware from './middlewares/logger.middleware';
 import DefaultResponseHandler from '@server/response-handlers/default.response-handler';
@@ -71,6 +72,8 @@ export default class OurApp extends App {
   }
 
   protected async beforeWire() {
+    // cors
+    this.instance.use(cors());
     // favicon.ico
     this.instance.use(favicon(`${process.cwd()}/public/favicon.ico`));
     // serve static files (remove it if use other way to serve static files like CDN)
