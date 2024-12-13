@@ -42,7 +42,7 @@ export default class LiveContestService {
       type: rankland_live_contest_common.EventType.NEW_SOLUTION,
       solutionId: data.solutionId,
     });
-    if (existed && existed.eventId < eventId) {
+    if (existed && existed.eventId !== eventId) {
       return {
         _id: existed._id.toString(),
       };

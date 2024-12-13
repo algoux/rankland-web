@@ -16,7 +16,7 @@
     "build:server": "rimraf app && tsc -p src/server/tsconfig.json && copyfiles -u3 \"src/**/*.js\" app",
     "build": "pnpm run build:client && pnpm run build:server",
     "start": "cross-env NODE_ENV=production node --unhandled-rejections=warn app/server/index.js",
-    "deploy": "cross-env NODE_ENV=production pm2 pm2.config.js",
+    "deploy": "cross-env NODE_ENV=production pm2 start pm2.config.js",
     "deploy:foreground": "cross-env NODE_ENV=production pm2-runtime pm2.config.js"
   },
   "keywords": [
