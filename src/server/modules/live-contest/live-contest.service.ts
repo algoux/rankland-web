@@ -235,7 +235,7 @@ export default class LiveContestService {
     for (const event of res) {
       formattedRes.push(this.encodeEventToClientEvent(event));
     }
-    console.log('[getAllEventsAsClientEvents] fetch all events data from db', Date.now() - _s);
+    console.log(`[getAllEventsAsClientEvents] fetch all events data from db: ${Date.now() - _s}ms`);
     return formattedRes;
   }
 
