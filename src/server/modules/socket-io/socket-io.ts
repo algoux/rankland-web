@@ -10,6 +10,7 @@ import {
 import LiveContestService from '../live-contest/live-contest.service';
 import LogicException from '@server/exceptions/logic.exception';
 import { errCodeConfigs } from '@server/err-code-configs';
+import { ErrCode } from '@common/enums/err-code.enum';
 
 @Provide()
 export default class SocketIOServer {
@@ -36,7 +37,14 @@ export default class SocketIOServer {
     this.producerNsp.use((socket, next) => {
       const token = socket.handshake.auth.token;
       if (!token || token !== process.env.AUTH_TOKEN) {
-        return next(new Error('Not authorized'));
+        const e = new Error('Invalid authorization info');
+        // @ts-ignore
+        e.data = {
+          success: false,
+          code: ErrCode.InvalidAuthInfo,
+          msg: errCodeConfigs[ErrCode.InvalidAuthInfo],
+        };
+        next(e);
       }
       next();
     });

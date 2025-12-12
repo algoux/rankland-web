@@ -33,8 +33,8 @@
     "url": "git+https://github.com/algoux/rankland-web.git"
   },
   "dependencies": {
-    "@algoux/standard-ranklist": "^0.3.4",
-    "@algoux/standard-ranklist-utils": "^0.1.1",
+    "@algoux/standard-ranklist": "^0.3.11",
+    "@algoux/standard-ranklist-utils": "^0.2.9",
     "@koa/cors": "^5.0.0",
     "@vue/runtime-core": "^3.2.31",
     "@vue/server-renderer": "^3.2.31",

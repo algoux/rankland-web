@@ -6,11 +6,11 @@ settings:
 
 dependencies:
   '@algoux/standard-ranklist':
-    specifier: ^0.3.4
-    version: 0.3.4
+    specifier: ^0.3.11
+    version: 0.3.11
   '@algoux/standard-ranklist-utils':
-    specifier: ^0.1.1
-    version: 0.1.1(@algoux/standard-ranklist@0.3.4)
+    specifier: ^0.2.9
+    version: 0.2.9(@algoux/standard-ranklist@0.3.11)
   '@koa/cors':
     specifier: ^5.0.0
     version: 5.0.0
@@ -198,20 +198,21 @@ packages:
     engines: {node: '>=0.10.0'}
     dev: true
 
-  /@algoux/standard-ranklist-utils@0.1.1(@algoux/standard-ranklist@0.3.4):
-    resolution: {integrity: sha512-MBsn5NPPtN68bv/mYEVz8z11nZ5tlCcICSaqWQYpADHP9CTBFgNaRdPXm5OFLm6ivC4MNyw6F+Sny73HWIPxbw==}
+  /@algoux/standard-ranklist-utils@0.2.9(@algoux/standard-ranklist@0.3.11):
+    resolution: {integrity: sha512-VRK4EWYXJd1fGfADjwGghEDfi2xa8JKjbZPyPU5VjMt+lfaC4Lr3VzOy1mAZjRCZxH2e0rVYeX6DnAcIL4jbIA==}
     peerDependencies:
       '@algoux/standard-ranklist': '*'
     dependencies:
-      '@algoux/standard-ranklist': 0.3.4
+      '@algoux/standard-ranklist': 0.3.11
+      '@types/semver': 7.5.6
       bcp-47-match: 2.0.3
       bignumber.js: 9.1.2
       semver: 7.5.4
       textcolor: 1.0.2
     dev: false
 
-  /@algoux/standard-ranklist@0.3.4:
-    resolution: {integrity: sha512-zXQNcejFMaa6F1GsIPrEoFVGkBKKN2bPfawrX5M7Grgjag1YM9MZsxy9KxRYVhu4LDKd0PjvLr32C3hGLeiDUg==}
+  /@algoux/standard-ranklist@0.3.11:
+    resolution: {integrity: sha512-86HwhzsfHoj/WlxzdHbLDj56TlobbNu7G4sgDIvyNV8tByxz3EmuRBXmKpzpE8rCCt7cbSaGGJIWu4+K7uE/Jg==}
     dev: false
 
   /@ampproject/remapping@2.2.1:
@@ -893,7 +894,6 @@ packages:
 
   /@types/semver@7.5.6:
     resolution: {integrity: sha512-dn1l8LaMea/IjDoHNd9J52uBbInB796CDffS6VdIxvqYCPSG0V0DzHp76GpaWnlhg88uYyPbXCDIowa86ybd5A==}
-    dev: true
 
   /@types/send@0.17.4:
     resolution: {integrity: sha512-x2EM6TJOybec7c52BX0ZspPodMsQUd5L6PRwOunVyVUhXiBSKf3AezDL8Dgvgt5o0UfKNfuA0eMLr2wLT4AiBA==}

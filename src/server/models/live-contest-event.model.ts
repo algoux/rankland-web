@@ -17,6 +17,12 @@ export const liveContestEventSchema = new mongoose.Schema(
   {
     timestamps: true,
     minimize: false,
+    toJSON: {
+      versionKey: false,
+    },
+    toObject: {
+      versionKey: false,
+    },
   },
 );
 

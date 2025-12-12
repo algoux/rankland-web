@@ -37,6 +37,7 @@ module.exports = {
   rules: {
     // Customize your rules
     'max-params': 'off',
+    'complexity': 'off',
     '@typescript-eslint/no-unused-vars': 'off',
     '@typescript-eslint/explicit-member-accessibility': 'off',
     '@typescript-eslint/member-ordering': 'off',
