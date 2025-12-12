@@ -233,7 +233,6 @@ export class UpdateLiveContestReqDTO {
   @FromBody()
   @IsString()
   @IsNotEmpty()
-  @Length(3, 32)
   public alias: string;
 
   @FromBody()
@@ -292,7 +291,6 @@ export class DropLiveContestEventsReqDTO {
   @FromBody()
   @IsString()
   @IsNotEmpty()
-  @Length(3, 32)
   public alias: string;
 }
 
@@ -300,7 +298,6 @@ export class GetLiveContestReqDTO {
   @FromQuery()
   @IsString()
   @IsNotEmpty()
-  @Length(3, 32)
   public alias: string;
 }
 
@@ -321,7 +318,6 @@ export class GetPublicContestMembersReqDTO {
   @FromQuery()
   @IsString()
   @IsNotEmpty()
-  @Length(3, 32)
   public alias: string;
 
   @FromQuery()
@@ -375,7 +371,6 @@ export class GetPublicContestMemberReqDTO {
   @FromQuery()
   @IsString()
   @IsNotEmpty()
-  @Length(3, 32)
   public alias: string;
 
   @FromQuery()
@@ -402,7 +397,6 @@ export class GetContestMembersReqDTO {
   @FromQuery()
   @IsString()
   @IsNotEmpty()
-  @Length(3, 32)
   public alias: string;
 }
 
@@ -419,7 +413,6 @@ export class GetContestMemberReqDTO {
   @FromQuery()
   @IsString()
   @IsNotEmpty()
-  @Length(3, 32)
   public alias: string;
 
   @FromQuery()
@@ -446,7 +439,6 @@ export class UpdateContestMemberReqDTO {
   @FromBody()
   @IsString()
   @IsNotEmpty()
-  @Length(3, 32)
   public alias: string;
 
   @FromBody()

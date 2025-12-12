@@ -60,12 +60,12 @@ export default class LiveContestController {
   @UseGuards(AuthGuard)
   @Contract(UpdateLiveContestReqDTO, null)
   public async updateLiveContest(@Data() data: UpdateLiveContestReqDTO) {
-    const { members, ...contestData } = data as any;
-    const contest = await LiveContestModel.findOne({ alias: data.alias });
+    const { members,  alias, ...contestData } = data as any;
+    const contest = await LiveContestModel.findOne({ alias });
     if (!contest) {
       throw new LogicException(ErrCode.LiveContestNotFound);
     }
-    await LiveContestModel.updateOne({ alias: data.alias }, contestData);
+    await LiveContestModel.updateOne({ alias }, contestData);
 
     if (members !== undefined) {
       const contestId = contest._id.toString();
