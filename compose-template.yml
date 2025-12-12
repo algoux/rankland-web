@@ -1,0 +1,19 @@
+version: '3'
+services:
+  be:
+    image: algoux/rankland-web:latest
+    network_mode: host
+    restart: unless-stopped
+    container_name: rankland-web
+    environment:
+      - SERVER_HOST=127.0.0.1
+      - SERVER_PORT=3000
+      - NODE_WORKERS=1
+      - MONGO_HOST=127.0.0.1
+      - MONGO_PORT=27017
+      - MONGO_DB=rankland
+      - MONGO_USER=
+      - MONGO_PASS=
+      - AUTH_TOKEN=your-auth-token
+    volumes:
+      - /your-logs-path/rankland-web:/root/.pm2/logs
