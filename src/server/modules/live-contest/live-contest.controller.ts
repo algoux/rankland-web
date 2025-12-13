@@ -7,6 +7,8 @@ import {
   CreateLiveContestRespDTO,
   GetLiveContestReqDTO,
   GetLiveContestRespDTO,
+  GetPublicLiveContestReqDTO,
+  GetPublicLiveContestRespDTO,
   UpdateLiveContestReqDTO,
   DropLiveContestEventsReqDTO,
   GetPublicContestMembersReqDTO,
@@ -85,6 +87,7 @@ export default class LiveContestController {
   }
 
   @Get()
+  @UseGuards(AuthGuard)
   @Contract(GetLiveContestReqDTO, GetLiveContestRespDTO)
   public async getLiveContest(@Data() data: GetLiveContestReqDTO): Promise<GetLiveContestRespDTO> {
     const contest = await LiveContestModel.findOne({ alias: data.alias });
@@ -93,9 +96,20 @@ export default class LiveContestController {
     }
 
     const plain = contest.toObject() as GetLiveContestRespDTO;
-    // const members = await LiveContestMemberModel.find({
-    //   contestId: contest._id.toString(),
-    // }).sort({ index: 1 });
+    const members = await this.service.findContestMembers(data.alias);
+    (plain as any).members = members.map((member) => this.service.filterMemberForAdmin(member));
+    return plain;
+  }
+
+  @Get()
+  @Contract(GetPublicLiveContestReqDTO, GetPublicLiveContestRespDTO)
+  public async getPublicLiveContest(@Data() data: GetPublicLiveContestReqDTO): Promise<GetPublicLiveContestRespDTO> {
+    const contest = await LiveContestModel.findOne({ alias: data.alias });
+    if (!contest) {
+      throw new LogicException(ErrCode.LiveContestNotFound);
+    }
+
+    const plain = contest.toObject() as GetPublicLiveContestRespDTO;
     const members = await this.service.findContestMembers(data.alias);
     (plain as any).members = members.map((member) => this.service.filterMemberForPublic(member));
     return plain;

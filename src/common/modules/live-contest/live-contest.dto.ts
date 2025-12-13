@@ -158,6 +158,16 @@ export class UserDTO {
   public markers?: string[];
 }
 
+export class AdminUserDTO extends UserDTO {
+  @IsOptional()
+  @IsBoolean()
+  public banned?: boolean;
+
+  @IsOptional()
+  @IsString()
+  public broadcasterToken?: string;
+}
+
 export class MarkerDTO {
   @IsString()
   @IsNotEmpty()
@@ -302,6 +312,26 @@ export class GetLiveContestReqDTO {
 }
 
 export class GetLiveContestRespDTO {
+  public _id: string;
+  public alias: string;
+  public name: string;
+  public contest: ContestDTO;
+  public problems: ProblemDTO[];
+  public members: AdminUserDTO[];
+  public markers: srk.Marker[];
+  public series: srk.RankSeries[];
+  public sorter?: srk.Sorter;
+  public contributors?: string[];
+}
+
+export class GetPublicLiveContestReqDTO {
+  @FromQuery()
+  @IsString()
+  @IsNotEmpty()
+  public alias: string;
+}
+
+export class GetPublicLiveContestRespDTO {
   public _id: string;
   public alias: string;
   public name: string;
