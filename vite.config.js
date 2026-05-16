@@ -30,11 +30,11 @@ module.exports = defineConfig({
     sourcemap: true,
   },
   plugins: [
+    vue(),
     viteSSR({
       build: {
         keepIndexHtml: true,
       },
     }),
-    vue(),
   ],
 });
