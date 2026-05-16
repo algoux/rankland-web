@@ -802,7 +802,7 @@ Create `playwright.config.ts`:
 import { defineConfig, devices } from '@playwright/test';
 
 const externalBaseURL = process.env.E2E_BASE_URL;
-const baseURL = externalBaseURL || 'http://127.0.0.1:5173';
+const baseURL = externalBaseURL || 'http://127.0.0.1:3000';
 
 export default defineConfig({
   testDir: './tests/e2e',
@@ -822,7 +822,7 @@ export default defineConfig({
   webServer: externalBaseURL
     ? undefined
     : {
-        command: 'pnpm exec vite --host 127.0.0.1',
+        command: 'pnpm exec vite --host 127.0.0.1 --port 3000',
         url: baseURL,
         reuseExistingServer: !process.env.CI,
         timeout: 120_000,
@@ -830,7 +830,7 @@ export default defineConfig({
 });
 ```
 
-The default E2E harness uses the Vite client server because the current bwcx dev server initializes MongoDB during startup. When a full server is already running, set `E2E_BASE_URL=http://127.0.0.1:3000` to reuse it instead of starting Vite.
+The default E2E harness uses the Vite client server because the current bwcx dev server initializes MongoDB during startup. When a full server is already running, set `E2E_BASE_URL` to reuse it instead of starting Vite.
 
 - [ ] **Step 2: Add mock API helper**
 
