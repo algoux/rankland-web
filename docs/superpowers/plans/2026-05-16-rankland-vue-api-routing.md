@@ -90,7 +90,7 @@ export interface IApiLiveRanklistInfo {
   id: string;
   uniqueKey: string;
   title: srk.Contest['title'];
-  startAt: srk.Contest['title'];
+  startAt: srk.Contest['startAt'];
   duration: srk.Contest['duration'];
   frozenDuration: srk.Contest['frozenDuration'];
   unfrozenAt: srk.DatetimeISOString;
