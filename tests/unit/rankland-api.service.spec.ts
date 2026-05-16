@@ -103,6 +103,47 @@ describe('RanklandApiService.getRanklistInfo', () => {
       JSON.stringify(info),
     );
   });
+
+  it('falls back to CDN when ranklist info cache get fails', async () => {
+    const info = {
+      id: 'i',
+      uniqueKey: 'test-key',
+      name: 'T',
+      fileID: 'f1',
+      viewCnt: 1,
+      content: '',
+      createdAt: '2026-05-16T00:00:00.000Z',
+      updatedAt: '2026-05-16T00:00:00.000Z',
+    };
+    const cache = makeCache({ get: vi.fn().mockRejectedValue(new Error('cache unavailable')) });
+    const cdnGet = vi.fn().mockResolvedValue(info);
+    const { service } = buildService({ cdnGet, cache });
+
+    const res = await service.getRanklistInfo({ uniqueKey: 'test-key' });
+
+    expect(res).toBe(info);
+    expect(cdnGet).toHaveBeenCalledTimes(1);
+  });
+
+  it('returns fetched ranklist info when cache set fails', async () => {
+    const info = {
+      id: 'i',
+      uniqueKey: 'test-key',
+      name: 'T',
+      fileID: 'f1',
+      viewCnt: 1,
+      content: '',
+      createdAt: '2026-05-16T00:00:00.000Z',
+      updatedAt: '2026-05-16T00:00:00.000Z',
+    };
+    const cache = makeCache({ setEx: vi.fn().mockRejectedValue(new Error('cache write failed')) });
+    const cdnGet = vi.fn().mockResolvedValue(info);
+    const { service } = buildService({ cdnGet, cache });
+
+    const res = await service.getRanklistInfo({ uniqueKey: 'test-key' });
+
+    expect(res).toBe(info);
+  });
 });
 
 describe('RanklandApiService.getSrkFile', () => {
@@ -184,6 +225,59 @@ describe('RanklandApiService.getSrkFile', () => {
 
     expect(res).toEqual(srk);
     expect(cache.setEx).toHaveBeenCalledWith('rankland_ssr_api_cache:getSrkFile:fid', 24 * 60 * 60, raw);
+  });
+
+  it('falls back to CDN when srk cache get fails', async () => {
+    const srk = { type: 'general', version: '0.3.12' };
+    const cache = makeCache({ get: vi.fn().mockRejectedValue(new Error('cache unavailable')) });
+    const cdnGet = vi.fn().mockResolvedValue({
+      response: {
+        headers: { get: () => 'application/json' },
+        text: async () => JSON.stringify(srk),
+      },
+    });
+    const { service } = buildService({ cdnGet, cache });
+
+    const res = await service.getSrkFile<typeof srk>({ fileID: 'fid' });
+
+    expect(res).toEqual(srk);
+    expect(cdnGet).toHaveBeenCalledTimes(1);
+  });
+
+  it('refetches bad cached srk when cache delete fails', async () => {
+    const srk = { type: 'general', version: '0.3.12' };
+    const cache = makeCache({
+      get: vi.fn().mockResolvedValue('{bad json'),
+      del: vi.fn().mockRejectedValue(new Error('cache delete failed')),
+    });
+    const cdnGet = vi.fn().mockResolvedValue({
+      response: {
+        headers: { get: () => 'application/json' },
+        text: async () => JSON.stringify(srk),
+      },
+    });
+    const { service } = buildService({ cdnGet, cache });
+
+    const res = await service.getSrkFile<typeof srk>({ fileID: 'fid' });
+
+    expect(res).toEqual(srk);
+    expect(cdnGet).toHaveBeenCalledTimes(1);
+  });
+
+  it('returns fetched srk when cache set fails', async () => {
+    const srk = { type: 'general', version: '0.3.12' };
+    const cache = makeCache({ setEx: vi.fn().mockRejectedValue(new Error('cache write failed')) });
+    const cdnGet = vi.fn().mockResolvedValue({
+      response: {
+        headers: { get: () => 'application/json' },
+        text: async () => JSON.stringify(srk),
+      },
+    });
+    const { service } = buildService({ cdnGet, cache });
+
+    const res = await service.getSrkFile<typeof srk>({ fileID: 'fid' });
+
+    expect(res).toEqual(srk);
   });
 });
 
@@ -296,6 +390,31 @@ describe('RanklandApiService.getCollection', () => {
 
     expect(res).toEqual(inner);
     expect(cache.setEx).toHaveBeenCalledWith('rankland_ssr_api_cache:getCollection:official', 2 * 60, raw);
+  });
+
+  it('falls back to CDN when collection cache get fails', async () => {
+    const inner = { root: { children: [] } };
+    const raw = JSON.stringify(inner);
+    const cache = makeCache({ get: vi.fn().mockRejectedValue(new Error('cache unavailable')) });
+    const cdnGet = vi.fn().mockResolvedValue({ content: raw });
+    const { service } = buildService({ cdnGet, cache });
+
+    const res = await service.getCollection({ uniqueKey: 'official' });
+
+    expect(res).toEqual(inner);
+    expect(cdnGet).toHaveBeenCalledTimes(1);
+  });
+
+  it('returns fetched collection when cache set fails', async () => {
+    const inner = { root: { children: [] } };
+    const raw = JSON.stringify(inner);
+    const cache = makeCache({ setEx: vi.fn().mockRejectedValue(new Error('cache write failed')) });
+    const cdnGet = vi.fn().mockResolvedValue({ content: raw });
+    const { service } = buildService({ cdnGet, cache });
+
+    const res = await service.getCollection({ uniqueKey: 'official' });
+
+    expect(res).toEqual(inner);
   });
 });
 

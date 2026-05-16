@@ -47,24 +47,24 @@ export class RanklandApiService {
 
   public async getRanklistInfo(opts: { uniqueKey: string }): Promise<IApiRanklistInfo> {
     const cacheKey = `${CACHE_KEY_PREFIX}:getRanklistInfo:${opts.uniqueKey}`;
-    const cached = await this.cache?.get(cacheKey);
+    const cached = await this.getCachedValue(cacheKey);
     if (typeof cached === 'string') {
       return JSON.parse(cached) as IApiRanklistInfo;
     }
 
     const info = await this.cdnApi.get<IApiRanklistInfo>(urlcat('/rank/:key', { key: opts.uniqueKey }));
-    await this.cache?.setEx(cacheKey, RANKLIST_INFO_TTL_SECONDS, JSON.stringify(info));
+    await this.setCachedValue(cacheKey, RANKLIST_INFO_TTL_SECONDS, JSON.stringify(info));
     return info;
   }
 
   public async getSrkFile<T = srk.Ranklist>(opts: { fileID: string }): Promise<T> {
     const cacheKey = `${CACHE_KEY_PREFIX}:getSrkFile:${opts.fileID}`;
-    const cached = await this.cache?.get(cacheKey);
+    const cached = await this.getCachedValue(cacheKey);
     if (typeof cached === 'string') {
       try {
         return JSON.parse(cached) as T;
       } catch (error) {
-        await this.cache?.del(cacheKey);
+        await this.deleteCachedValue(cacheKey);
       }
     }
 
@@ -79,7 +79,7 @@ export class RanklandApiService {
 
     const rawSrk = await apiRes.response.text();
     const parsedSrk = JSON.parse(rawSrk) as T;
-    await this.cache?.setEx(cacheKey, SRK_FILE_TTL_SECONDS, rawSrk);
+    await this.setCachedValue(cacheKey, SRK_FILE_TTL_SECONDS, rawSrk);
     return parsedSrk;
   }
 
@@ -109,13 +109,13 @@ export class RanklandApiService {
 
   public async getCollection(opts: { uniqueKey: string }): Promise<IApiCollection> {
     const cacheKey = `${CACHE_KEY_PREFIX}:getCollection:${opts.uniqueKey}`;
-    const cached = await this.cache?.get(cacheKey);
+    const cached = await this.getCachedValue(cacheKey);
     if (typeof cached === 'string') {
       return JSON.parse(cached) as IApiCollection;
     }
 
     const res = await this.cdnApi.get<{ content: string }>(urlcat('/rank/group/:key', { key: opts.uniqueKey }));
-    await this.cache?.setEx(cacheKey, COLLECTION_TTL_SECONDS, res.content);
+    await this.setCachedValue(cacheKey, COLLECTION_TTL_SECONDS, res.content);
     return JSON.parse(res.content) as IApiCollection;
   }
 
@@ -133,5 +133,29 @@ export class RanklandApiService {
     return this.api.get<srk.Ranklist>(
       urlcat('/ranking/:id', { id: opts.id, token: opts.token || undefined, _t: Date.now() }),
     );
+  }
+
+  private async getCachedValue(key: string): Promise<unknown> {
+    try {
+      return await this.cache?.get(key);
+    } catch (error) {
+      return undefined;
+    }
+  }
+
+  private async setCachedValue(key: string, ttlSeconds: number, value: string): Promise<void> {
+    try {
+      await this.cache?.setEx(key, ttlSeconds, value);
+    } catch (error) {
+      // Cache is an optional SSR acceleration layer. Network data stays authoritative.
+    }
+  }
+
+  private async deleteCachedValue(key: string): Promise<void> {
+    try {
+      await this.cache?.del(key);
+    } catch (error) {
+      // A failed cleanup must not block refetching fresh SRK content.
+    }
   }
 }
