@@ -409,7 +409,7 @@ Goal:
 Acceptance:
 
 - `pnpm test:unit` runs at least route/API utility tests.
-- `pnpm test:ssr` can skip cleanly when no build exists and pass after build.
+- `pnpm test:ssr` fails clearly when build artifacts are missing and passes after `pnpm run build`.
 - `pnpm test:e2e` can run against local dev server with mocked APIs.
 
 ### Slice 3: Routing And Config

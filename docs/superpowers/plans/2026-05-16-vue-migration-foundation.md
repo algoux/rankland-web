@@ -749,19 +749,22 @@ describe('SSR smoke harness', () => {
 });
 ```
 
-- [ ] **Step 2: Verify SSR test skips before build**
+- [ ] **Step 2: Verify SSR test fails without build artifacts**
 
 Run:
 
 ```bash
+rimraf dist
 pnpm test:ssr
 ```
 
 Expected:
 
 ```text
-1 skipped
+SSR smoke requires built artifacts. Run "pnpm run build" first.
 ```
+
+The command should exit non-zero before a build exists. The SSR smoke harness must not skip missing build artifacts, because skipping can hide a false-positive SSR gate on a clean checkout.
 
 - [ ] **Step 3: Build the app**
 
