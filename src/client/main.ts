@@ -6,7 +6,9 @@ import { Vue } from 'vue-class-component';
 import { BwcxClientRouterPlugin } from 'bwcx-client-vue3';
 import { clientRoutesMap } from '@common/router/client-routes';
 import { ApiClientPlugin } from './plugins/api-client.plugin';
+import { RanklandApiPlugin } from './plugins/rankland-api.plugin';
 import type { ApiType, ApiClientType } from './api';
+import type { RanklandApiService } from '@common/rankland-api';
 
 Vue.registerHooks(['setup', 'beforeRouteEnter', 'beforeRouteUpdate', 'beforeRouteLeave', 'asyncData']);
 
@@ -17,7 +19,8 @@ export function mainEntry({
   initialState,
   api,
   apiClient,
-}: HookParams & { api: ApiType; apiClient: ApiClientType }) {
+  ranklandApiService,
+}: HookParams & { api: ApiType; apiClient: ApiClientType; ranklandApiService: RanklandApiService }) {
   const head = createHead();
   app.use(head);
   app.use(BwcxClientRouterPlugin, {
@@ -25,6 +28,9 @@ export function mainEntry({
   });
   app.use(ApiClientPlugin, {
     apiClient,
+  });
+  app.use(RanklandApiPlugin, {
+    ranklandApiService,
   });
   app.component(Head.name, Head);
   app.component(ClientOnly.name, ClientOnly);
@@ -60,7 +66,16 @@ export function mainEntry({
     // 可以在这里加入全局 loading 进度条。或改写这个钩子实现 Route-Update-First 的导航
     try {
       // @ts-ignore
-      const result = await component.asyncData({ app, router, initialState, to, from, api, apiClient });
+      const result = await component.asyncData({
+        app,
+        router,
+        initialState,
+        to,
+        from,
+        api,
+        apiClient,
+        ranklandApiService,
+      });
       // eslint-disable-next-line no-param-reassign
       to.meta.state = result;
       return next();

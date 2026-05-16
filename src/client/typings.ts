@@ -1,5 +1,6 @@
 import type { HookParams } from 'vite-ssr/vue/types';
 import type { RouteLocationNormalized } from 'vue-router';
+import type { RanklandApiService } from '@common/rankland-api';
 import type { ApiType, ApiClientType } from './api';
 
 export interface AsyncDataOptions {
@@ -10,4 +11,5 @@ export interface AsyncDataOptions {
   from: RouteLocationNormalized;
   api: ApiType;
   apiClient: ApiClientType;
+  ranklandApiService: RanklandApiService;
 }
