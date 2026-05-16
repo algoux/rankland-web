@@ -13,6 +13,11 @@ import { routeView } from 'bwcx-client-vue3';
 
 const About = defineComponent({
   name: 'About',
+  data() {
+    return {
+      env: process.env.NODE_ENV,
+    };
+  },
 });
 
 export default routeView(About, '/about');
