@@ -801,13 +801,16 @@ Create `playwright.config.ts`:
 ```ts
 import { defineConfig, devices } from '@playwright/test';
 
+const externalBaseURL = process.env.E2E_BASE_URL;
+const baseURL = externalBaseURL || 'http://127.0.0.1:5173';
+
 export default defineConfig({
   testDir: './tests/e2e',
   timeout: 30_000,
   fullyParallel: true,
   retries: process.env.CI ? 2 : 0,
   use: {
-    baseURL: process.env.E2E_BASE_URL || 'http://127.0.0.1:3000',
+    baseURL,
     trace: 'on-first-retry',
   },
   projects: [
@@ -816,14 +819,18 @@ export default defineConfig({
       use: { ...devices['Desktop Chrome'] },
     },
   ],
-  webServer: {
-    command: 'pnpm run dev:start',
-    url: 'http://127.0.0.1:3000',
-    reuseExistingServer: !process.env.CI,
-    timeout: 120_000,
-  },
+  webServer: externalBaseURL
+    ? undefined
+    : {
+        command: 'pnpm exec vite --host 127.0.0.1',
+        url: baseURL,
+        reuseExistingServer: !process.env.CI,
+        timeout: 120_000,
+      },
 });
 ```
+
+The default E2E harness uses the Vite client server because the current bwcx dev server initializes MongoDB during startup. When a full server is already running, set `E2E_BASE_URL=http://127.0.0.1:3000` to reuse it instead of starting Vite.
 
 - [ ] **Step 2: Add mock API helper**
 
@@ -1176,4 +1183,4 @@ If Task 1 dependency installation shows that Vue 3.4 is incompatible with the ex
 
 If Playwright cannot install or run browsers in the local environment, keep the Playwright config and tests committed, then record the command failure and skip only the browser execution gate for this foundation pass.
 
-If the dev server cannot start because MongoDB is not available, update `playwright.config.ts` in the implementation task to use a prestarted `E2E_BASE_URL` and run E2E against an already running server. Do not weaken the E2E assertions.
+If a later task needs full bwcx server E2E behavior, start that server separately with MongoDB available and run Playwright with `E2E_BASE_URL=http://127.0.0.1:3000`. Do not weaken the E2E assertions.
