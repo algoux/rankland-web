@@ -40,4 +40,13 @@ describe('vite config', () => {
     expect(viteConfig.define['process.env']).not.toHaveProperty('RANKLAND_E2E_PROBE');
     expect(viteConfig.define['process.env.RANKLAND_E2E_PROBE']).toBe('"1"');
   });
+
+  it('excludes original sources from generated source maps', () => {
+    delete require.cache[require.resolve(VITE_CONFIG_PATH)];
+
+    // eslint-disable-next-line @typescript-eslint/no-var-requires
+    const viteConfig = require(VITE_CONFIG_PATH);
+
+    expect(viteConfig.build.rollupOptions.output.sourcemapExcludeSources).toBe(true);
+  });
 });

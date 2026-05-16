@@ -33,6 +33,11 @@ module.exports = defineConfig({
   },
   build: {
     sourcemap: true,
+    rollupOptions: {
+      output: {
+        sourcemapExcludeSources: true,
+      },
+    },
   },
   plugins: [
     vue(),

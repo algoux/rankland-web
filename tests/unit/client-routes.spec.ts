@@ -13,6 +13,15 @@ describe('client routes', () => {
     }
   });
 
+  it('does not add the probe route when the probe is disabled', async () => {
+    delete process.env.RANKLAND_E2E_PROBE;
+
+    const routes = (await import('@client/routes')).default;
+
+    expect(routes.some((route) => route.name === 'E2eRanklandProbe')).toBe(false);
+    expect(routes.some((route) => route.path === '/__e2e/rankland-probe/:id')).toBe(false);
+  });
+
   it('adds the probe route with the expected path when the probe is enabled', async () => {
     process.env.RANKLAND_E2E_PROBE = '1';
 
