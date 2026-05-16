@@ -22,7 +22,7 @@ import LoggerMiddleware from './middlewares/logger.middleware';
 import DefaultResponseHandler from '@server/response-handlers/default.response-handler';
 import { IPageRenderer } from './lib/page-renderer.interface';
 import { BwcxClientVueClientRoutesMapId } from 'bwcx-client-vue/server';
-import { clientRoutesMap } from '@common/router/client-routes';
+import { getClientRoutesMapForServer } from '@common/router/e2e-client-routes';
 import MongoClient from './lib/mongo-client';
 import SocketIOServer from './modules/socket-io/socket-io';
 
@@ -68,7 +68,7 @@ export default class OurApp extends App {
 
   public constructor() {
     super();
-    this.container.bind(BwcxClientVueClientRoutesMapId).toConstantValue(clientRoutesMap);
+    this.container.bind(BwcxClientVueClientRoutesMapId).toConstantValue(getClientRoutesMapForServer());
   }
 
   protected async beforeWire() {
@@ -104,6 +104,11 @@ export default class OurApp extends App {
       }
     });
 
+    if (process.env.RANKLAND_E2E_SKIP_MONGO === '1') {
+      console.warn('[E2E] Skipping Mongo initialization');
+      return;
+    }
+
     const mongoClient = getDependency<MongoClient>(MongoClient, this.container);
     await mongoClient.init();
   }
@@ -135,7 +140,11 @@ app.bootstrap().then(async () => {
   const socketIOServer = getDependency<SocketIOServer>(SocketIOServer, app.container);
   await app.startManually(async () => {
     const httpServer = http.createServer(app.instance.callback());
-    socketIOServer.init(httpServer);
+    if (process.env.RANKLAND_E2E_SKIP_SOCKET === '1') {
+      console.warn('[E2E] Skipping Socket.IO initialization');
+    } else {
+      socketIOServer.init(httpServer);
+    }
     const listenPromise = new Promise((resolve, _reject) => {
       httpServer.listen(app.port, app.hostname, () => {
         resolve(true);
