@@ -198,6 +198,10 @@ Expected:
 **Files:**
 
 - Modify: `vite.config.js`
+- Modify: `src/client/App.vue`
+- Modify: `src/client/modules/about/about.view.vue`
+- Modify: `src/client/modules/home/home.view.vue`
+- Modify: `src/client/modules/demo/demo-detail.view.vue`
 - Generated: `src/client/router/routes.ts`
 - Generated: `src/client/router/types.d.ts`
 - Generated: `src/common/router/client-routes.ts`
@@ -299,12 +303,207 @@ Expected:
 Done
 ```
 
-- [ ] **Step 4: Commit compatibility verification**
+- [ ] **Step 4: If the build still fails on class decorators in `.vue` files, replace existing demo SFC class components with decorator-free components**
+
+Only apply this step if the build error mentions missing Babel parser plugins for `decorators` or `decorators-legacy` in a `.vue` file.
+
+Root cause:
+
+- `@vitejs/plugin-vue@2.3.4` rewrites non-setup TypeScript SFC default exports with a parser path that does not include decorators.
+- The existing template app uses `vue-class-component` decorators in `.vue` files.
+- The migration should use decorator-free `defineComponent + routeView()` declarations for Vue pages.
+
+Update `src/client/App.vue` script to:
+
+```vue
+<script lang="ts">
+import { defineComponent } from 'vue';
+
+export default defineComponent({
+  name: 'App',
+  computed: {
+    demoDetailUrl() {
+      return (this as any).$$router.to('DemoDetail').formatUrl({
+        id: 42,
+        preview: false,
+        arr: [1, 2],
+      });
+    },
+  },
+});
+</script>
+```
+
+Update `src/client/modules/about/about.view.vue` script to:
+
+```vue
+<script lang="ts">
+import { defineComponent } from 'vue';
+import { routeView } from 'bwcx-client-vue3';
+
+const About = defineComponent({
+  name: 'About',
+});
+
+export default routeView(About, '/about');
+</script>
+```
+
+Update `src/client/modules/home/home.view.vue` script to:
+
+```vue
+<script lang="ts">
+import { defineComponent } from 'vue';
+import { useHead } from '@vueuse/head';
+import { useContext } from 'vite-ssr/vue';
+import { routeView, RenderMethodKind } from 'bwcx-client-vue3';
+import type { DemoGetRespDTO } from '@common/modules/demo/demo.dto';
+import type { AsyncDataOptions } from '@client/typings';
+
+const Home = defineComponent({
+  name: 'Home',
+  props: {
+    homeState: {
+      type: Object,
+      required: false,
+    },
+  },
+  setup() {
+    const { isClient, url, initialState } = useContext();
+    isClient && console.log('Homepage setup', { url, initialState });
+
+    useHead({
+      title: 'Home',
+      meta: [
+        { name: 'description', content: 'This should be moved to head' },
+      ],
+    });
+
+    return {
+      initialState,
+    };
+  },
+  computed: {
+    list(): DemoGetRespDTO['list'] | undefined {
+      return (this.homeState as DemoGetRespDTO | undefined)?.list;
+    },
+  },
+  async asyncData({ apiClient }: AsyncDataOptions) {
+    const res = await apiClient.demoGet({
+      id: 42,
+      page: 9,
+    });
+    return {
+      homeState: res,
+    };
+  },
+} as any);
+
+export default routeView(Home, '/', undefined, undefined, {
+  renderMethod: RenderMethodKind.SSR,
+});
+</script>
+```
+
+Update `src/client/modules/demo/demo-detail.view.vue` script to:
+
+```vue
+<script lang="ts">
+import { defineComponent } from 'vue';
+import { routeView, RenderMethodKind } from 'bwcx-client-vue3';
+import { DemoDetailRPO } from '@common/modules/demo/demo.rpo';
+import type { AsyncDataOptions } from '@client/typings';
+import SomeCommon from '@client/components/some-common.vue';
+import type { DemoItem } from '@common/modules/demo/demo.dto';
+
+const DemoDetail = defineComponent({
+  name: 'DemoDetail',
+  components: {
+    SomeCommon,
+  },
+  props: {
+    id: {
+      type: [String, Number],
+      required: true,
+    },
+    page: {
+      type: Number,
+      required: false,
+    },
+    preview: {
+      type: Boolean,
+      required: false,
+    },
+    arr: {
+      type: Array,
+      required: false,
+    },
+    list: {
+      type: Array,
+      required: false,
+    },
+  },
+  data() {
+    return {
+      randomNumber: 0,
+    };
+  },
+  computed: {
+    shortenRandomNumber(): string {
+      return this.randomNumber.toFixed(5);
+    },
+  },
+  async asyncData({ apiClient, to }: AsyncDataOptions) {
+    const res = await apiClient.demoGet({
+      id: Number(to.params.id),
+      page: 1,
+    });
+    return {
+      list: res.list,
+    };
+  },
+  mounted() {
+    this.randomNumber = Math.random();
+  },
+  methods: {
+    goToRandomPage() {
+      const page = Math.floor(Math.random() * 1000) + 1;
+      (this as any).$$router.to('DemoDetail').push({
+        id: this.id,
+        preview: this.preview,
+        arr: this.arr,
+        page,
+      });
+    },
+  },
+} as any);
+
+export default routeView(DemoDetail, '/demo/detail/:id', DemoDetailRPO, undefined, {
+  renderMethod: RenderMethodKind.SSR,
+});
+</script>
+```
+
+Then rerun:
+
+```bash
+fnm exec --using=16.20.2 pnpm run gen:client-router
+fnm exec --using=16.20.2 pnpm run build
+```
+
+Expected:
+
+```text
+Generated 3 client route(s)
+Done
+```
+
+- [ ] **Step 5: Commit compatibility verification**
 
 Run:
 
 ```bash
-git add vite.config.js src/client/router/routes.ts src/client/router/types.d.ts src/common/router/client-routes.ts
+git add vite.config.js src/client/App.vue src/client/modules/about/about.view.vue src/client/modules/home/home.view.vue src/client/modules/demo/demo-detail.view.vue src/client/router/routes.ts src/client/router/types.d.ts src/common/router/client-routes.ts
 git commit -m "chore: verify Vue SSR compatibility"
 ```
 
