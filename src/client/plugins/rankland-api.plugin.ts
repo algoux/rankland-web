@@ -1,7 +1,7 @@
 import type { RanklandApiService } from '@common/rankland-api';
-import { inject, type App } from 'vue';
+import { inject, type App, type InjectionKey } from 'vue';
 
-export const RANKLAND_API_SERVICE_TOKEN = Symbol('RanklandApiService');
+export const RANKLAND_API_SERVICE_TOKEN: InjectionKey<RanklandApiService> = Symbol('RanklandApiService');
 
 export class RanklandApiPlugin {
   public static install(app: App, options: { ranklandApiService: RanklandApiService }) {
@@ -10,7 +10,7 @@ export class RanklandApiPlugin {
 }
 
 export function useRanklandApiService(): RanklandApiService {
-  const service = inject<RanklandApiService>(RANKLAND_API_SERVICE_TOKEN);
+  const service = inject(RANKLAND_API_SERVICE_TOKEN);
   if (!service) {
     throw new Error('RanklandApiService is not provided');
   }

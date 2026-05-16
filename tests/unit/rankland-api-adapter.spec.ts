@@ -48,8 +48,13 @@ describe('AxiosRanklandApiAdapter', () => {
       vi.fn().mockRejectedValue({ response: { status: 404, statusText: 'Not Found', data: 'nope' } }),
     );
 
-    await expect(adapter.get('/missing')).rejects.toBeInstanceOf(RanklandHttpException);
-    await expect(adapter.get('/missing')).rejects.toMatchObject({ status: 404 });
+    try {
+      await adapter.get('/missing');
+      throw new Error('Expected request to fail');
+    } catch (error) {
+      expect(error).toBeInstanceOf(RanklandHttpException);
+      expect(error).toMatchObject({ status: 404 });
+    }
   });
 
   it('returns a raw response wrapper for SRK downloads', async () => {
@@ -87,10 +92,15 @@ describe('AxiosRanklandApiAdapter', () => {
   it('throws the RanklandApiException class for wrapped errors using msg', async () => {
     const { adapter } = makeAdapter(vi.fn().mockResolvedValue({ status: 200, data: { code: 42, msg: 'bad request' } }));
 
-    await expect(adapter.get('/bad')).rejects.toBeInstanceOf(RanklandApiException);
-    await expect(adapter.get('/bad')).rejects.toMatchObject({
-      code: 42,
-      message: 'RankLand API request failed with code 42: bad request',
-    });
+    try {
+      await adapter.get('/bad');
+      throw new Error('Expected request to fail');
+    } catch (error) {
+      expect(error).toBeInstanceOf(RanklandApiException);
+      expect(error).toMatchObject({
+        code: 42,
+        message: 'RankLand API request failed with code 42: bad request',
+      });
+    }
   });
 });

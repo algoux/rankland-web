@@ -46,9 +46,9 @@ describe('createRanklandApiService', () => {
     createRanklandApiService({
       isClient: false,
       requestHeaders: {
-        cookie: 'sid=abc',
-        'user-agent': 'Vitest UA',
-        server_render_ip: '203.0.113.1',
+        cookie: ['sid=abc', 'sid=def'],
+        'user-agent': ['Vitest UA', 'Other UA'],
+        server_render_ip: ['203.0.113.1', '198.51.100.2'],
         ignored: 'no',
       },
     });

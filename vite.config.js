@@ -17,6 +17,10 @@ module.exports = defineConfig({
   define: {
     'process.env': {
       BWCX_RUNTIME_SCOPE: 'client',
+      RANKLAND_API_BASE_SERVER: process.env.RANKLAND_API_BASE_SERVER,
+      RANKLAND_CDN_API_BASE_SERVER: process.env.RANKLAND_CDN_API_BASE_SERVER,
+      RANKLAND_API_BASE_CLIENT: process.env.RANKLAND_API_BASE_CLIENT,
+      RANKLAND_CDN_API_BASE_CLIENT: process.env.RANKLAND_CDN_API_BASE_CLIENT,
     },
   },
   resolve: {

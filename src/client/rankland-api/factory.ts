@@ -7,18 +7,22 @@ interface CreateRanklandApiServiceOptions {
   requestHeaders?: Record<string, string | string[] | undefined>;
 }
 
-function readHeader(
-  headers: Record<string, string | string[] | undefined>,
-  name: string,
-): string | string[] | undefined {
-  return headers[name] ?? headers[name.toLowerCase()];
+function firstHeaderValue(value: string | string[] | undefined): string {
+  if (Array.isArray(value)) {
+    return value[0] || '';
+  }
+  return value || '';
+}
+
+function readHeader(headers: Record<string, string | string[] | undefined>, name: string): string {
+  return firstHeaderValue(headers[name] ?? headers[name.toLowerCase()]);
 }
 
 function getServerHeaders(requestHeaders: Record<string, string | string[] | undefined> = {}) {
   return {
-    Cookie: readHeader(requestHeaders, 'Cookie') || '',
-    'user-agent': readHeader(requestHeaders, 'user-agent') || '',
-    server_render_ip: readHeader(requestHeaders, 'server_render_ip') || '',
+    Cookie: readHeader(requestHeaders, 'Cookie'),
+    'user-agent': readHeader(requestHeaders, 'user-agent'),
+    server_render_ip: readHeader(requestHeaders, 'server_render_ip'),
   };
 }
 
