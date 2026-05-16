@@ -106,11 +106,10 @@ export default class OurApp extends App {
 
     if (process.env.RANKLAND_E2E_SKIP_MONGO === '1') {
       console.warn('[E2E] Skipping Mongo initialization');
-      return;
+    } else {
+      const mongoClient = getDependency<MongoClient>(MongoClient, this.container);
+      await mongoClient.init();
     }
-
-    const mongoClient = getDependency<MongoClient>(MongoClient, this.container);
-    await mongoClient.init();
   }
 
   protected async afterStart() {
@@ -137,12 +136,12 @@ export default class OurApp extends App {
 const app = new OurApp();
 app.scan();
 app.bootstrap().then(async () => {
-  const socketIOServer = getDependency<SocketIOServer>(SocketIOServer, app.container);
   await app.startManually(async () => {
     const httpServer = http.createServer(app.instance.callback());
     if (process.env.RANKLAND_E2E_SKIP_SOCKET === '1') {
       console.warn('[E2E] Skipping Socket.IO initialization');
     } else {
+      const socketIOServer = getDependency<SocketIOServer>(SocketIOServer, app.container);
       socketIOServer.init(httpServer);
     }
     const listenPromise = new Promise((resolve, _reject) => {
