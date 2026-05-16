@@ -5,6 +5,7 @@ import {
   RanklandHttpException,
   RanklandLogicException,
   RanklandLogicExceptionKind,
+  type RanklandApiCache,
   type RanklandApiRequestAdapter,
 } from '@common/rankland-api';
 
@@ -14,14 +15,24 @@ function makeAdapter(getMock: GetMock): RanklandApiRequestAdapter {
   return { get: getMock };
 }
 
-function buildService(opts: { apiGet?: GetMock; cdnGet?: GetMock } = {}) {
+function buildService(opts: { apiGet?: GetMock; cdnGet?: GetMock; cache?: RanklandApiCache } = {}) {
   const apiGet = opts.apiGet || vi.fn();
   const cdnGet = opts.cdnGet || vi.fn();
   const service = new RanklandApiService({
     api: makeAdapter(apiGet),
     cdnApi: makeAdapter(cdnGet),
+    cache: opts.cache,
   });
   return { service, apiGet, cdnGet };
+}
+
+function makeCache(opts: Partial<RanklandApiCache> = {}): RanklandApiCache {
+  return {
+    get: vi.fn().mockResolvedValue(undefined),
+    setEx: vi.fn().mockResolvedValue(undefined),
+    del: vi.fn().mockResolvedValue(undefined),
+    ...opts,
+  };
 }
 
 describe('RanklandApiService.getRanklistInfo', () => {
@@ -44,6 +55,53 @@ describe('RanklandApiService.getRanklistInfo', () => {
     expect(res).toBe(info);
     expect(cdnGet).toHaveBeenCalledTimes(1);
     expect(cdnGet.mock.calls[0][0]).toBe('/rank/test-key');
+  });
+
+  it('returns cached ranklist info without requesting CDN', async () => {
+    const info = {
+      id: 'i',
+      uniqueKey: 'test-key',
+      name: 'T',
+      fileID: 'f1',
+      viewCnt: 1,
+      content: '',
+      createdAt: '2026-05-16T00:00:00.000Z',
+      updatedAt: '2026-05-16T00:00:00.000Z',
+    };
+    const cache = makeCache({ get: vi.fn().mockResolvedValue(JSON.stringify(info)) });
+    const cdnGet = vi.fn();
+    const { service } = buildService({ cdnGet, cache });
+
+    const res = await service.getRanklistInfo({ uniqueKey: 'test-key' });
+
+    expect(res).toEqual(info);
+    expect(cdnGet).not.toHaveBeenCalled();
+    expect(cache.get).toHaveBeenCalledWith('rankland_ssr_api_cache:getRanklistInfo:test-key');
+  });
+
+  it('caches fetched ranklist info for 60 seconds', async () => {
+    const info = {
+      id: 'i',
+      uniqueKey: 'test-key',
+      name: 'T',
+      fileID: 'f1',
+      viewCnt: 1,
+      content: '',
+      createdAt: '2026-05-16T00:00:00.000Z',
+      updatedAt: '2026-05-16T00:00:00.000Z',
+    };
+    const cache = makeCache();
+    const cdnGet = vi.fn().mockResolvedValue(info);
+    const { service } = buildService({ cdnGet, cache });
+
+    const res = await service.getRanklistInfo({ uniqueKey: 'test-key' });
+
+    expect(res).toBe(info);
+    expect(cache.setEx).toHaveBeenCalledWith(
+      'rankland_ssr_api_cache:getRanklistInfo:test-key',
+      60,
+      JSON.stringify(info),
+    );
   });
 });
 
@@ -77,6 +135,55 @@ describe('RanklandApiService.getSrkFile', () => {
     const { service } = buildService({ cdnGet });
 
     await expect(service.getSrkFile({ fileID: 'fid' })).rejects.toThrow(/Unknown srk content type/);
+  });
+
+  it('returns parsed JSON from cached srk file without requesting CDN', async () => {
+    const srk = { type: 'general', version: '0.3.12' };
+    const cache = makeCache({ get: vi.fn().mockResolvedValue(JSON.stringify(srk)) });
+    const cdnGet = vi.fn();
+    const { service } = buildService({ cdnGet, cache });
+
+    const res = await service.getSrkFile<typeof srk>({ fileID: 'fid' });
+
+    expect(res).toEqual(srk);
+    expect(cdnGet).not.toHaveBeenCalled();
+    expect(cache.get).toHaveBeenCalledWith('rankland_ssr_api_cache:getSrkFile:fid');
+  });
+
+  it('deletes bad cached srk string and refetches from CDN', async () => {
+    const srk = { type: 'general', version: '0.3.12' };
+    const cache = makeCache({ get: vi.fn().mockResolvedValue('{bad json') });
+    const cdnGet = vi.fn().mockResolvedValue({
+      response: {
+        headers: { get: () => 'application/json' },
+        text: async () => JSON.stringify(srk),
+      },
+    });
+    const { service } = buildService({ cdnGet, cache });
+
+    const res = await service.getSrkFile<typeof srk>({ fileID: 'fid' });
+
+    expect(res).toEqual(srk);
+    expect(cache.del).toHaveBeenCalledWith('rankland_ssr_api_cache:getSrkFile:fid');
+    expect(cdnGet).toHaveBeenCalledTimes(1);
+  });
+
+  it('caches fetched srk raw JSON for 24 hours', async () => {
+    const srk = { type: 'general', version: '0.3.12' };
+    const raw = JSON.stringify(srk);
+    const cache = makeCache();
+    const cdnGet = vi.fn().mockResolvedValue({
+      response: {
+        headers: { get: () => 'application/json' },
+        text: async () => raw,
+      },
+    });
+    const { service } = buildService({ cdnGet, cache });
+
+    const res = await service.getSrkFile<typeof srk>({ fileID: 'fid' });
+
+    expect(res).toEqual(srk);
+    expect(cache.setEx).toHaveBeenCalledWith('rankland_ssr_api_cache:getSrkFile:fid', 24 * 60 * 60, raw);
   });
 });
 
@@ -163,6 +270,32 @@ describe('RanklandApiService.getCollection', () => {
 
     expect(res).toEqual(inner);
     expect(cdnGet.mock.calls[0][0]).toBe('/rank/group/official');
+  });
+
+  it('returns cached collection content without requesting CDN', async () => {
+    const inner = { root: { children: [] } };
+    const cache = makeCache({ get: vi.fn().mockResolvedValue(JSON.stringify(inner)) });
+    const cdnGet = vi.fn();
+    const { service } = buildService({ cdnGet, cache });
+
+    const res = await service.getCollection({ uniqueKey: 'official' });
+
+    expect(res).toEqual(inner);
+    expect(cdnGet).not.toHaveBeenCalled();
+    expect(cache.get).toHaveBeenCalledWith('rankland_ssr_api_cache:getCollection:official');
+  });
+
+  it('caches fetched collection raw content for 2 minutes', async () => {
+    const inner = { root: { children: [] } };
+    const raw = JSON.stringify(inner);
+    const cache = makeCache();
+    const cdnGet = vi.fn().mockResolvedValue({ content: raw });
+    const { service } = buildService({ cdnGet, cache });
+
+    const res = await service.getCollection({ uniqueKey: 'official' });
+
+    expect(res).toEqual(inner);
+    expect(cache.setEx).toHaveBeenCalledWith('rankland_ssr_api_cache:getCollection:official', 2 * 60, raw);
   });
 });
 

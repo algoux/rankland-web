@@ -16,6 +16,10 @@ import type {
 import type { RanklandApiCache, RanklandApiRequestAdapter } from './request-adapter';
 
 const urlcat = configureUrlcat({ arrayFormat: 'repeat' });
+const CACHE_KEY_PREFIX = 'rankland_ssr_api_cache';
+const RANKLIST_INFO_TTL_SECONDS = 60;
+const SRK_FILE_TTL_SECONDS = 24 * 60 * 60;
+const COLLECTION_TTL_SECONDS = 2 * 60;
 
 interface RanklandApiServiceAdapters {
   api: RanklandApiRequestAdapter;
@@ -42,10 +46,28 @@ export class RanklandApiService {
   }
 
   public async getRanklistInfo(opts: { uniqueKey: string }): Promise<IApiRanklistInfo> {
-    return this.cdnApi.get<IApiRanklistInfo>(urlcat('/rank/:key', { key: opts.uniqueKey }));
+    const cacheKey = `${CACHE_KEY_PREFIX}:getRanklistInfo:${opts.uniqueKey}`;
+    const cached = await this.cache?.get(cacheKey);
+    if (typeof cached === 'string') {
+      return JSON.parse(cached) as IApiRanklistInfo;
+    }
+
+    const info = await this.cdnApi.get<IApiRanklistInfo>(urlcat('/rank/:key', { key: opts.uniqueKey }));
+    await this.cache?.setEx(cacheKey, RANKLIST_INFO_TTL_SECONDS, JSON.stringify(info));
+    return info;
   }
 
   public async getSrkFile<T = srk.Ranklist>(opts: { fileID: string }): Promise<T> {
+    const cacheKey = `${CACHE_KEY_PREFIX}:getSrkFile:${opts.fileID}`;
+    const cached = await this.cache?.get(cacheKey);
+    if (typeof cached === 'string') {
+      try {
+        return JSON.parse(cached) as T;
+      } catch (error) {
+        await this.cache?.del(cacheKey);
+      }
+    }
+
     const apiRes = await this.cdnApi.get<{ response: RawResponseLike }>(urlcat('/file/download', { id: opts.fileID }), {
       getResponse: true,
     });
@@ -55,7 +77,10 @@ export class RanklandApiService {
       throw new Error('Unknown srk content type');
     }
 
-    return JSON.parse(await apiRes.response.text()) as T;
+    const rawSrk = await apiRes.response.text();
+    const parsedSrk = JSON.parse(rawSrk) as T;
+    await this.cache?.setEx(cacheKey, SRK_FILE_TTL_SECONDS, rawSrk);
+    return parsedSrk;
   }
 
   public async getRanklist(opts: { uniqueKey: string }): Promise<IApiRanklist> {
@@ -83,7 +108,14 @@ export class RanklandApiService {
   }
 
   public async getCollection(opts: { uniqueKey: string }): Promise<IApiCollection> {
+    const cacheKey = `${CACHE_KEY_PREFIX}:getCollection:${opts.uniqueKey}`;
+    const cached = await this.cache?.get(cacheKey);
+    if (typeof cached === 'string') {
+      return JSON.parse(cached) as IApiCollection;
+    }
+
     const res = await this.cdnApi.get<{ content: string }>(urlcat('/rank/group/:key', { key: opts.uniqueKey }));
+    await this.cache?.setEx(cacheKey, COLLECTION_TTL_SECONDS, res.content);
     return JSON.parse(res.content) as IApiCollection;
   }
 
