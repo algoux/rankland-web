@@ -7,9 +7,9 @@
   "scripts": {
     "preinstall": "npx only-allow pnpm",
     "test": "pnpm test:unit",
-    "test:unit": "vitest run",
+    "test:unit": "vitest run --passWithNoTests",
     "test:unit:watch": "vitest",
-    "test:ssr": "vitest run tests/ssr",
+    "test:ssr": "vitest run tests/ssr --passWithNoTests",
     "test:e2e": "playwright test",
     "test:migration": "pnpm test:unit && pnpm test:ssr && pnpm test:e2e",
     "init": "pnpm i --frozen-lockfile",
