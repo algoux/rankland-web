@@ -111,26 +111,43 @@ Keep existing dependencies that are not listed here unchanged.
 
 - [ ] **Step 3: Edit `package.json` devDependencies**
 
-Add these dev dependency entries:
+Add these Node 16-compatible dev dependency entries. Use exact versions for these tools so pnpm does not resolve to later Node 18-only releases:
 
 ```json
 {
-  "@playwright/test": "^1.42.1",
-  "@vitest/coverage-v8": "^1.6.1",
-  "jsdom": "^24.1.1",
-  "msw": "^2.6.8",
-  "vitest": "^1.6.1"
+  "@playwright/test": "1.42.1",
+  "@vitest/coverage-v8": "0.34.6",
+  "jsdom": "22.1.0",
+  "msw": "1.3.5",
+  "vitest": "0.34.6"
 }
 ```
 
 Keep existing dev dependencies that are not listed here unchanged.
 
-- [ ] **Step 4: Install dependencies**
+- [ ] **Step 4: Add pnpm overrides for Vitest's Vite dependency**
+
+Add this `pnpm` block at the root of `package.json`:
+
+```json
+{
+  "pnpm": {
+    "overrides": {
+      "vitest@0.34.6>vite": "4.5.14",
+      "vite-node@0.34.6>vite": "4.5.14"
+    }
+  }
+}
+```
+
+This keeps the application build on the existing `vite@~2.7.13` while forcing Vitest internals to use a Node 16-compatible Vite 4 release instead of resolving to Vite 5.
+
+- [ ] **Step 5: Install dependencies**
 
 Run:
 
 ```bash
-pnpm install
+fnm exec --using=16.20.2 pnpm install
 ```
 
 Expected:
@@ -141,7 +158,27 @@ Done
 
 If `pnpm install` reports a peer dependency conflict involving Vue, keep the package versions from this task and record the exact conflict in the task notes before adjusting any other dependency.
 
-- [ ] **Step 5: Commit dependency baseline**
+- [ ] **Step 6: Verify Node 16 toolchain compatibility**
+
+Run:
+
+```bash
+fnm exec --using=16.20.2 pnpm install --frozen-lockfile
+fnm exec --using=16.20.2 pnpm exec playwright --version
+fnm exec --using=16.20.2 pnpm test:unit
+```
+
+Expected:
+
+```text
+Lockfile is up to date
+Version 1.42.1
+No test files found
+```
+
+`pnpm test:unit` may exit with code `1` until Task 3 adds the first test file. It must not fail with Node engine, Vite runtime, or Playwright runtime errors.
+
+- [ ] **Step 7: Commit dependency baseline**
 
 Run:
 
