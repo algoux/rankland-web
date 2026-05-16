@@ -7,11 +7,25 @@ const serverEntryCandidates = [
   path.join(distDir, 'server', 'index.js'),
   path.join(distDir, 'server', 'entry-server.js'),
 ];
-const serverEntryPath = serverEntryCandidates.find((entryPath) => fs.existsSync(entryPath)) || serverEntryCandidates[0];
 const clientIndexPath = path.join(distDir, 'client', 'index.html');
 
-const hasBuild = fs.existsSync(serverEntryPath) && fs.existsSync(clientIndexPath);
-const suite = hasBuild ? describe : describe.skip;
+function getServerEntryPath() {
+  return serverEntryCandidates.find((entryPath) => fs.existsSync(entryPath));
+}
+
+function requireBuildArtifacts() {
+  const serverEntryPath = getServerEntryPath();
+  const missingArtifacts = [
+    serverEntryPath ? null : `one of ${serverEntryCandidates.join(', ')}`,
+    fs.existsSync(clientIndexPath) ? null : clientIndexPath,
+  ].filter(Boolean);
+
+  if (missingArtifacts.length > 0) {
+    throw new Error(`SSR smoke requires built artifacts. Run "pnpm run build" first. Missing: ${missingArtifacts.join('; ')}`);
+  }
+
+  return serverEntryPath as string;
+}
 
 class SmokeXMLHttpRequest {
   private method = '';
@@ -79,8 +93,9 @@ class SmokeXMLHttpRequest {
   }
 }
 
-suite('SSR smoke harness', () => {
+describe('SSR smoke harness', () => {
   it('renders the existing home route from the built vite-ssr server bundle', async () => {
+    const serverEntryPath = requireBuildArtifacts();
     const previousXMLHttpRequest = globalThis.XMLHttpRequest;
     globalThis.XMLHttpRequest = SmokeXMLHttpRequest as any;
 

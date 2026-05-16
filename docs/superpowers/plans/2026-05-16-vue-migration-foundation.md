@@ -70,11 +70,11 @@ Replace the current `scripts` block with this block:
 {
   "preinstall": "npx only-allow pnpm",
   "test": "pnpm test:unit",
-  "test:unit": "vitest run --passWithNoTests",
+  "test:unit": "vitest run tests/unit --passWithNoTests",
   "test:unit:watch": "vitest",
   "test:ssr": "vitest run tests/ssr --passWithNoTests",
   "test:e2e": "playwright test",
-  "test:migration": "pnpm test:unit && pnpm test:ssr && pnpm test:e2e",
+  "test:migration": "pnpm run build && pnpm test:unit && pnpm test:ssr && pnpm test:e2e",
   "init": "pnpm i --frozen-lockfile",
   "gen:client-router": "node scripts/client-routes.gen.js",
   "dev:start": "cross-env NODE_ENV=development tsnd --respawn --rs --transpile-only -P src/server/tsconfig.json --unhandled-rejections=warn --inspect=127.0.0.1:9232 src/server/index.ts",
@@ -118,10 +118,11 @@ Add these Node 16-compatible dev dependency entries. Use exact versions for thes
   "@playwright/test": "1.42.1",
   "@vitest/coverage-v8": "0.34.6",
   "jsdom": "22.1.0",
-  "msw": "1.3.5",
   "vitest": "0.34.6"
 }
 ```
+
+Do not add `msw` during the foundation pass. `msw@1.3.5` pulls an `@inquirer/external-editor` dependency with a Node 18 engine, while the repository baseline remains Node 16.
 
 Keep existing dev dependencies that are not listed here unchanged.
 
@@ -698,14 +699,33 @@ import path from 'path';
 import { describe, expect, it } from 'vitest';
 
 const distDir = path.resolve(__dirname, '..', '..', 'dist');
-const serverEntryPath = path.join(distDir, 'server', 'index.js');
+const serverEntryCandidates = [
+  path.join(distDir, 'server', 'index.js'),
+  path.join(distDir, 'server', 'entry-server.js'),
+];
 const clientIndexPath = path.join(distDir, 'client', 'index.html');
 
-const hasBuild = fs.existsSync(serverEntryPath) && fs.existsSync(clientIndexPath);
-const suite = hasBuild ? describe : describe.skip;
+function getServerEntryPath() {
+  return serverEntryCandidates.find((entryPath) => fs.existsSync(entryPath));
+}
 
-suite('SSR smoke harness', () => {
+function requireBuildArtifacts() {
+  const serverEntryPath = getServerEntryPath();
+  const missingArtifacts = [
+    serverEntryPath ? null : `one of ${serverEntryCandidates.join(', ')}`,
+    fs.existsSync(clientIndexPath) ? null : clientIndexPath,
+  ].filter(Boolean);
+
+  if (missingArtifacts.length > 0) {
+    throw new Error(`SSR smoke requires built artifacts. Run "pnpm run build" first. Missing: ${missingArtifacts.join('; ')}`);
+  }
+
+  return serverEntryPath as string;
+}
+
+describe('SSR smoke harness', () => {
   it('renders the existing home route from the built vite-ssr server bundle', async () => {
+    const serverEntryPath = requireBuildArtifacts();
     const renderModule = await import(serverEntryPath);
     const render = renderModule.default || renderModule;
     const htmlTemplate = fs.readFileSync(clientIndexPath, 'utf-8');
