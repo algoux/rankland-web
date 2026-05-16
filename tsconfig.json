@@ -16,7 +16,8 @@
     "paths": {
       "@server/*": ["./src/server/*"],
       "@common/*": ["./src/common/*"],
-      "@client/*": ["./src/client/*"]
+      "@client/*": ["./src/client/*"],
+      "@tests/*": ["./tests/*"]
     }
   },
   "include": ["./src/**/*"],
