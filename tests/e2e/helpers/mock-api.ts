@@ -19,6 +19,16 @@ async function fulfillJson(route: Route, data: unknown) {
 }
 
 export async function installApiMocks(page: Page) {
+  await page.route(/\/api\/rank\/[^/?]+(?:\?.*)?$/, (route) => fulfillJson(route, ok(ranklistInfo)));
+  await page.route(/\/api\/ranking\/[^/?]+(?:\?.*)?$/, (route) => fulfillJson(route, ok(srk)));
+  await page.route(/\/api\/ranking\/config\/[^/?]+(?:\?.*)?$/, (route) => fulfillJson(route, ok(liveInfo)));
+  await page.route(/\/api\/file\/download(?:\?.*)?$/, (route) => fulfillJson(route, srk));
+  await page.route(/\/api\/rank\/group\/[^/?]+(?:\?.*)?$/, (route) =>
+    fulfillJson(route, ok({ content: JSON.stringify(collection) })),
+  );
+  await page.route(/\/api\/statistics(?:\?.*)?$/, (route) => fulfillJson(route, ok(statistics)));
+  await page.route(/\/api\/rank\/search(?:\?.*)?$/, (route) => fulfillJson(route, ok(listall)));
+  await page.route(/\/api\/rank\/listall(?:\?.*)?$/, (route) => fulfillJson(route, ok(listall)));
   await page.route(/\/api\/demoGet\/[^/?]+(?:\?.*)?$/, (route) =>
     fulfillJson(route, {
       success: true,
@@ -33,16 +43,6 @@ export async function installApiMocks(page: Page) {
       },
     }),
   );
-  await page.route(/\/api\/rank\/listall(?:\?.*)?$/, (route) => fulfillJson(route, ok(listall)));
-  await page.route(/\/api\/rank\/search(?:\?.*)?$/, (route) => fulfillJson(route, ok(listall)));
-  await page.route(/\/api\/statistics(?:\?.*)?$/, (route) => fulfillJson(route, ok(statistics)));
-  await page.route(/\/api\/rank\/group\/[^/?]+(?:\?.*)?$/, (route) =>
-    fulfillJson(route, ok({ content: JSON.stringify(collection) })),
-  );
-  await page.route(/\/api\/file\/download(?:\?.*)?$/, (route) => fulfillJson(route, srk));
-  await page.route(/\/api\/ranking\/config\/[^/?]+(?:\?.*)?$/, (route) => fulfillJson(route, ok(liveInfo)));
-  await page.route(/\/api\/ranking\/[^/?]+(?:\?.*)?$/, (route) => fulfillJson(route, ok(srk)));
-  await page.route(/\/api\/rank\/[^/?]+(?:\?.*)?$/, (route) => fulfillJson(route, ok(ranklistInfo)));
 }
 
 export async function denyExternalCalls(page: Page) {

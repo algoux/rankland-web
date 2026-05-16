@@ -11,5 +11,7 @@ test.describe('current app smoke', () => {
     await expect(page.locator('body')).toBeVisible();
     await expect(page.locator('#app')).toBeAttached();
     await expect(page.getByRole('heading', { name: 'Welcome to bwcx Demo' })).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'This is the Home Page.' })).toBeVisible();
+    await expect(page.getByText('demo1')).toBeVisible();
   });
 });
