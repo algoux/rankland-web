@@ -87,6 +87,16 @@ export default class OurApp extends App {
         }),
       ),
     );
+    if (process.env.RANKLAND_E2E_HEALTH === '1') {
+      this.instance.use(async (ctx, next) => {
+        if (ctx.path === '/__e2e/health') {
+          ctx.status = 200;
+          ctx.body = 'ok';
+          return;
+        }
+        await next();
+      });
+    }
     // SSR
     this.pageRenderer = getDependency<IPageRenderer>(IPageRenderer, this.container);
     const renderMiddleware = await this.pageRenderer.init?.();

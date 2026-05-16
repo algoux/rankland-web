@@ -22,7 +22,7 @@ export default defineConfig({
     ? undefined
     : {
         command: 'node tests/e2e/support/start-full-chain-e2e.js',
-        url: baseURL,
+        url: `${baseURL}/__e2e/health`,
         reuseExistingServer: false,
         timeout: 120_000,
       },

@@ -17,6 +17,7 @@ const liveInfo = require(path.join(fixturesRoot, 'live-info.json'));
 
 const requests = [];
 let appProcess;
+let cleanupWatcherProcess;
 let shuttingDown = false;
 
 function ok(data) {
@@ -101,28 +102,102 @@ function routeRequest(req, res) {
 
 const mockServer = http.createServer(routeRequest);
 
+function startCleanupWatcher(appPid) {
+  const watcherScript = `
+const parentPid = Number(process.argv[1]);
+const appPid = Number(process.argv[2]);
+function isAlive(pid) {
+  try {
+    process.kill(pid, 0);
+    return true;
+  } catch (error) {
+    return error.code === 'EPERM';
+  }
+}
+function killApp(signal) {
+  try {
+    if (process.platform === 'win32') {
+      process.kill(appPid, signal);
+    } else {
+      process.kill(-appPid, signal);
+    }
+  } catch (error) {
+    if (error.code !== 'ESRCH') {
+      throw error;
+    }
+  }
+}
+const interval = setInterval(() => {
+  if (isAlive(parentPid)) {
+    return;
+  }
+  clearInterval(interval);
+  killApp('SIGTERM');
+  setTimeout(() => {
+    if (isAlive(appPid)) {
+      killApp('SIGKILL');
+    }
+    process.exit(0);
+  }, 2000);
+}, 250);
+`;
+
+  cleanupWatcherProcess = spawn(process.execPath, ['-e', watcherScript, String(process.pid), String(appPid)], {
+    detached: true,
+    stdio: 'ignore',
+  });
+  cleanupWatcherProcess.unref();
+}
+
+function stopAppProcess(signal) {
+  if (!appProcess || appProcess.killed) {
+    return;
+  }
+
+  if (process.platform === 'win32') {
+    appProcess.kill(signal);
+    return;
+  }
+
+  try {
+    process.kill(-appProcess.pid, signal);
+  } catch (error) {
+    if (error.code !== 'ESRCH') {
+      throw error;
+    }
+  }
+}
+
 function shutdown(signal) {
   if (shuttingDown) {
     return;
   }
   shuttingDown = true;
 
-  if (appProcess && !appProcess.killed) {
-    appProcess.kill(signal);
-  }
+  stopAppProcess(signal);
 
   mockServer.close(() => {
     process.exit(signal === 'SIGINT' ? 130 : 0);
   });
 }
 
+mockServer.on('error', (error) => {
+  if (error.code === 'EADDRINUSE') {
+    console.error(`Mock backend failed to start: port ${mockPort} is already in use. Set FULL_CHAIN_MOCK_PORT to a free port.`);
+    process.exit(1);
+  }
+  throw error;
+});
+
 mockServer.listen(Number(mockPort), '127.0.0.1', () => {
   appProcess = spawn('pnpm', ['run', 'dev:start'], {
     cwd: projectRoot,
+    detached: true,
     stdio: 'inherit',
     env: {
       ...process.env,
       NODE_ENV: 'development',
+      RANKLAND_E2E_HEALTH: '1',
       RANKLAND_E2E_PROBE: '1',
       RANKLAND_E2E_SKIP_MONGO: '1',
       RANKLAND_E2E_SKIP_SOCKET: '1',
@@ -134,6 +209,7 @@ mockServer.listen(Number(mockPort), '127.0.0.1', () => {
       RANKLAND_CDN_API_BASE_CLIENT: mockBaseURL,
     },
   });
+  startCleanupWatcher(appProcess.pid);
 
   appProcess.on('exit', (code, signal) => {
     if (shuttingDown) {
