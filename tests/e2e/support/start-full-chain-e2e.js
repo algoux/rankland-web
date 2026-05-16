@@ -168,17 +168,42 @@ function stopAppProcess(signal) {
   }
 }
 
-function shutdown(signal) {
+function waitForAppExit(timeoutMs) {
+  return new Promise((resolve) => {
+    if (!appProcess || appProcess.exitCode !== null || appProcess.signalCode !== null) {
+      resolve();
+      return;
+    }
+
+    const timeout = setTimeout(() => {
+      stopAppProcess('SIGKILL');
+      resolve();
+    }, timeoutMs);
+
+    appProcess.once('exit', () => {
+      clearTimeout(timeout);
+      resolve();
+    });
+  });
+}
+
+function closeMockServer() {
+  return new Promise((resolve) => {
+    mockServer.close(() => resolve());
+  });
+}
+
+async function shutdown(signal) {
   if (shuttingDown) {
     return;
   }
   shuttingDown = true;
 
   stopAppProcess(signal);
+  await waitForAppExit(2500);
+  await closeMockServer();
 
-  mockServer.close(() => {
-    process.exit(signal === 'SIGINT' ? 130 : 0);
-  });
+  process.exit(signal === 'SIGINT' ? 130 : 0);
 }
 
 mockServer.on('error', (error) => {
