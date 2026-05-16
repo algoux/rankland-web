@@ -6,13 +6,17 @@
 </template>
 
 <script lang="ts">
-import { Vue } from 'vue-class-component';
-import { Prop } from 'vue-property-decorator';
+import { defineComponent } from 'vue';
 
-export default class SomeCommon extends Vue {
-  @Prop({ type: Number, required: true })
-  someProp!: number;
-}
+export default defineComponent({
+  name: 'SomeCommon',
+  props: {
+    someProp: {
+      type: Number,
+      required: true,
+    },
+  },
+});
 </script>
 
 <style lang="less" scoped>

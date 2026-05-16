@@ -22,7 +22,6 @@ module.exports = defineConfig({
       RANKLAND_CDN_API_BASE_SERVER: process.env.RANKLAND_CDN_API_BASE_SERVER,
       RANKLAND_API_BASE_CLIENT: process.env.RANKLAND_API_BASE_CLIENT,
       RANKLAND_CDN_API_BASE_CLIENT: process.env.RANKLAND_CDN_API_BASE_CLIENT,
-      RANKLAND_E2E_PROBE: process.env.RANKLAND_E2E_PROBE,
     },
   },
   resolve: {
