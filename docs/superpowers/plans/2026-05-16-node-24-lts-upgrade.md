@@ -22,6 +22,7 @@
 
 - Modify: `.node-version`
 - Modify: `package.json`
+- Modify: `tests/e2e/support/start-full-chain-e2e.js`
 - Optional modify: `docs/superpowers/specs/2026-05-16-node-24-lts-upgrade-design.md` if verification exposes a decision that must be recorded
 - Optional modify: `docs/superpowers/plans/2026-05-16-node-24-lts-upgrade.md` if execution discovers a missing verification step
 
@@ -63,11 +64,12 @@ to:
 v24.11.1
 ```
 
-- [ ] **Step 3: Update `package.json` engines**
+- [ ] **Step 3: Update `package.json` package manager and engines**
 
-Change the `engines` block in `package.json` from:
+Set package-manager metadata and change the `engines` block in `package.json` from:
 
 ```json
+"packageManager": "pnpm@8.15.9",
 "engines": {
   "node": "^16.0.0",
   "pnpm": "^8.0.0"
@@ -77,13 +79,37 @@ Change the `engines` block in `package.json` from:
 to:
 
 ```json
+"packageManager": "pnpm@8.15.9",
 "engines": {
   "node": "^24.0.0",
   "pnpm": "^8.0.0"
 }
 ```
 
-Do not change dependencies, devDependencies, overrides, scripts, or lockfile content in this task.
+Do not change dependencies, devDependencies, overrides, or lockfile content in this task.
+
+Also update recursive pnpm scripts so they resolve through Corepack under Node 24:
+
+```json
+"test": "corepack pnpm test:unit",
+"test:migration": "corepack pnpm run build && corepack pnpm test:unit && corepack pnpm test:ssr && corepack pnpm test:e2e && corepack pnpm test:e2e:full-chain",
+"init": "corepack pnpm i --frozen-lockfile",
+"build": "corepack pnpm run build:client && corepack pnpm run build:server"
+```
+
+Leave scripts that do not recursively invoke pnpm unchanged.
+
+Also change the full-chain app launcher from:
+
+```js
+appProcess = spawn('pnpm', ['run', 'dev:start'], {
+```
+
+to:
+
+```js
+appProcess = spawn('corepack', ['pnpm', 'run', 'dev:start'], {
+```
 
 - [ ] **Step 4: Verify the manifest parses**
 
@@ -97,6 +123,18 @@ Expected output includes:
 
 ```text
 { node: '^24.0.0', pnpm: '^8.0.0' }
+```
+
+Also verify:
+
+```bash
+node -e "const pkg=require('./package.json'); console.log(pkg.packageManager)"
+```
+
+Expected:
+
+```text
+pnpm@8.15.9
 ```
 
 - [ ] **Step 5: Commit the runtime target change**
@@ -121,21 +159,17 @@ Run:
 
 ```bash
 fnm exec --using v24.11.1 node -v
-fnm exec --using v24.11.1 pnpm -v
+fnm exec --using v24.11.1 corepack pnpm -v
 ```
 
 Expected:
 
 ```text
 v24.11.1
-8.x
+8.15.9
 ```
 
-If `pnpm -v` reports `10.x`, use the existing pnpm 8 executable for verification, for example:
-
-```bash
-fnm exec --using v24.11.1 npx --cache /tmp/rankland-npx-node24 -y pnpm@8.15.9 -v
-```
+If direct `pnpm -v` reports `10.x`, continue using `corepack pnpm` for this branch.
 
 Do not change `engines.pnpm` to pnpm 10 in this branch.
 
@@ -144,7 +178,7 @@ Do not change `engines.pnpm` to pnpm 10 in this branch.
 Run with pnpm 8 under Node 24:
 
 ```bash
-fnm exec --using v24.11.1 pnpm install --frozen-lockfile
+fnm exec --using v24.11.1 corepack pnpm install --frozen-lockfile
 ```
 
 Expected:
@@ -155,18 +189,12 @@ Lockfile is up to date
 
 or an equivalent pnpm success message with exit code 0.
 
-If the globally selected pnpm is 10, run the equivalent pnpm 8 command:
-
-```bash
-fnm exec --using v24.11.1 npx --cache /tmp/rankland-npx-node24 -y pnpm@8.15.9 install --frozen-lockfile
-```
-
 - [ ] **Step 3: Verify production build**
 
 Run with pnpm 8 under Node 24:
 
 ```bash
-fnm exec --using v24.11.1 pnpm run build
+fnm exec --using v24.11.1 corepack pnpm run build
 ```
 
 Expected:
@@ -203,7 +231,7 @@ git commit -m "docs: record Node 24 verification constraint"
 Run:
 
 ```bash
-fnm exec --using v24.11.1 pnpm test:unit
+fnm exec --using v24.11.1 corepack pnpm test:unit
 ```
 
 Expected:
@@ -218,7 +246,7 @@ Tests  55 passed (55)
 Run:
 
 ```bash
-fnm exec --using v24.11.1 pnpm test:ssr
+fnm exec --using v24.11.1 corepack pnpm test:ssr
 ```
 
 Expected:
@@ -233,7 +261,7 @@ Tests  1 passed (1)
 Run:
 
 ```bash
-fnm exec --using v24.11.1 pnpm test:e2e
+fnm exec --using v24.11.1 corepack pnpm test:e2e
 ```
 
 Expected:
@@ -247,7 +275,7 @@ Expected:
 Run:
 
 ```bash
-fnm exec --using v24.11.1 pnpm test:e2e:full-chain
+fnm exec --using v24.11.1 corepack pnpm test:e2e:full-chain
 ```
 
 Expected:
@@ -283,7 +311,7 @@ Expected:
 Run:
 
 ```bash
-fnm exec --using v24.11.1 pnpm test:migration
+fnm exec --using v24.11.1 corepack pnpm test:migration
 ```
 
 Expected:

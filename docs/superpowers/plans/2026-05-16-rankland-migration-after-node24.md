@@ -76,7 +76,7 @@ v24.11.1
 Run:
 
 ```bash
-fnm exec --using v24.11.1 pnpm test:migration
+fnm exec --using v24.11.1 corepack pnpm test:migration
 ```
 
 Expected:
@@ -273,7 +273,7 @@ For each implementation task:
 Run:
 
 ```bash
-fnm exec --using v24.11.1 pnpm test:migration
+fnm exec --using v24.11.1 corepack pnpm test:migration
 ```
 
 Expected:

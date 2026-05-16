@@ -215,7 +215,7 @@ mockServer.on('error', (error) => {
 });
 
 mockServer.listen(Number(mockPort), '127.0.0.1', () => {
-  appProcess = spawn('pnpm', ['run', 'dev:start'], {
+  appProcess = spawn('corepack', ['pnpm', 'run', 'dev:start'], {
     cwd: projectRoot,
     detached: true,
     stdio: 'inherit',

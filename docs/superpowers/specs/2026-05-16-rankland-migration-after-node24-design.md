@@ -72,7 +72,7 @@ Start from the verified Node 24 branch:
 cd /Users/cooper/Projects/RankLand/rankland-web
 git switch migration/node-24-lts
 git status --short --branch
-fnm exec --using v24.11.1 pnpm test:migration
+fnm exec --using v24.11.1 corepack pnpm test:migration
 git switch -c migration/ranklist-page-foundation
 ```
 

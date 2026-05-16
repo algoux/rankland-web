@@ -6,7 +6,7 @@ This slice starts from local branch `migration/full-chain-e2e-foundation` and ru
 
 The full-chain E2E foundation is complete and has verified the current migration gate under the repository-compatible Node 16 toolchain. The next migration decision is runtime support: upgrade the project target before continuing user-facing RankLand page migration.
 
-The current repository declares:
+Before this branch, the repository declared:
 
 ```json
 {
@@ -16,6 +16,8 @@ The current repository declares:
   }
 }
 ```
+
+It did not pin `packageManager`, so the user's default Node 24 shell could resolve to pnpm 10 even though the project wanted pnpm 8.
 
 The repository also pins local runtime selection with:
 
@@ -86,7 +88,9 @@ In scope:
 - Change `.node-version` from Node 16 to Node 24 LTS.
 - Change `package.json` `engines.node` from `^16.0.0` to a Node 24 range.
 - Keep `engines.pnpm` on `^8.0.0`.
-- Optionally add or verify package-manager documentation for pnpm 8 usage.
+- Add or verify `packageManager: "pnpm@8.15.9"` so Corepack can resolve the intended pnpm major under Node 24.
+- Route package scripts that invoke pnpm recursively through `corepack pnpm`, because this local fnm environment can otherwise resolve nested script calls to pnpm 10.
+- Route the full-chain E2E server launcher through `corepack pnpm` for the same reason.
 - Verify install, build, unit, SSR, shallow E2E, and full-chain E2E under Node 24.
 - Verify the app server lifecycle leaves no full-chain E2E process or port leaks.
 - Record the post-upgrade branch handoff for page migration.
@@ -112,6 +116,7 @@ and:
 
 ```json
 {
+  "packageManager": "pnpm@8.15.9",
   "engines": {
     "node": "^24.0.0",
     "pnpm": "^8.0.0"
@@ -119,13 +124,13 @@ and:
 }
 ```
 
-The final verification command should use Node 24 without bypassing the package engine:
+The final verification command should use Node 24 and pnpm 8 without bypassing the package engine:
 
 ```bash
-fnm exec --using v24.11.1 pnpm test:migration
+fnm exec --using v24.11.1 corepack pnpm test:migration
 ```
 
-If the user's globally resolved pnpm under Node 24 remains pnpm 10, the branch should document that local commands must use pnpm 8 until a separate pnpm upgrade branch changes that target.
+If the user's globally resolved `pnpm` under Node 24 remains pnpm 10, local commands should use `corepack pnpm` until a separate pnpm upgrade branch changes that target.
 
 ## Risks
 
@@ -139,6 +144,8 @@ The highest-risk dependencies are older toolchain packages:
 
 The known `vite-ssr` CJS/ESM warning already appears under the current toolchain. It should be tracked as a warning, not treated as a Node 24 regression unless it becomes a failure.
 
+In this local environment, `fnm exec --using v24.11.1 corepack pnpm <script>` correctly starts pnpm 8, but package scripts and child processes that call bare `pnpm` can still resolve nested calls to pnpm 10. The branch should therefore update recursive package scripts such as `build`, `test`, `test:migration`, and `init` to use `corepack pnpm`, and update the full-chain E2E launcher to spawn `corepack pnpm run dev:start`.
+
 The full-chain E2E command starts a real bwcx/Koa dev server. The Node 24 upgrade must keep the cleanup guarantees from `migration/full-chain-e2e-foundation`: no lingering app server, mock backend, inspector process, or occupied test ports after the run.
 
 ## Acceptance Criteria
@@ -147,12 +154,13 @@ The Node 24 branch is acceptable when:
 
 - `.node-version` targets Node 24 LTS.
 - `package.json` declares Node 24 support and still declares pnpm 8 support.
-- `fnm exec --using v24.11.1 pnpm run build` passes.
-- `fnm exec --using v24.11.1 pnpm test:unit` passes.
-- `fnm exec --using v24.11.1 pnpm test:ssr` passes.
-- `fnm exec --using v24.11.1 pnpm test:e2e` passes.
-- `fnm exec --using v24.11.1 pnpm test:e2e:full-chain` passes.
-- `fnm exec --using v24.11.1 pnpm test:migration` passes.
+- `package.json` pins `packageManager` to pnpm 8 for Corepack.
+- `fnm exec --using v24.11.1 corepack pnpm run build` passes.
+- `fnm exec --using v24.11.1 corepack pnpm test:unit` passes.
+- `fnm exec --using v24.11.1 corepack pnpm test:ssr` passes.
+- `fnm exec --using v24.11.1 corepack pnpm test:e2e` passes.
+- `fnm exec --using v24.11.1 corepack pnpm test:e2e:full-chain` passes.
+- `fnm exec --using v24.11.1 corepack pnpm test:migration` passes.
 - Full-chain E2E leaves no process listening on ports `3100` or `3101`.
 - The branch remains local and unpushed.
 
