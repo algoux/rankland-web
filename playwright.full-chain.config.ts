@@ -1,14 +1,13 @@
 import { defineConfig, devices } from '@playwright/test';
 
 const externalBaseURL = process.env.E2E_BASE_URL;
-const baseURL = externalBaseURL || 'http://127.0.0.1:3000';
+const appPort = process.env.FULL_CHAIN_APP_PORT || '3100';
+const baseURL = externalBaseURL || `http://127.0.0.1:${appPort}`;
 
 export default defineConfig({
-  testDir: './tests/e2e',
-  testIgnore: ['**/full-chain/**'],
-  timeout: 30_000,
-  fullyParallel: true,
-  retries: process.env.CI ? 2 : 0,
+  testDir: './tests/e2e/full-chain',
+  timeout: 45_000,
+  fullyParallel: false,
   use: {
     baseURL,
     trace: 'on-first-retry',
@@ -22,9 +21,9 @@ export default defineConfig({
   webServer: externalBaseURL
     ? undefined
     : {
-        command: 'pnpm exec vite --host 127.0.0.1 --port 3000',
+        command: 'node tests/e2e/support/start-full-chain-e2e.js',
         url: baseURL,
-        reuseExistingServer: !process.env.CI,
+        reuseExistingServer: false,
         timeout: 120_000,
       },
 });

@@ -37,8 +37,20 @@ describe('vite config', () => {
     const viteConfig = require(VITE_CONFIG_PATH);
 
     expect(viteConfig.define['process.env']).toMatchObject(ranklandEnv);
-    expect(viteConfig.define['process.env']).not.toHaveProperty('RANKLAND_E2E_PROBE');
+    expect(viteConfig.define['process.env']).toHaveProperty('RANKLAND_E2E_PROBE', '1');
     expect(viteConfig.define['process.env.RANKLAND_E2E_PROBE']).toBe('"1"');
+  });
+
+  it('keeps the probe flag out of bundled process.env when disabled', () => {
+    Object.assign(process.env, ranklandEnv);
+    delete process.env.RANKLAND_E2E_PROBE;
+    delete require.cache[require.resolve(VITE_CONFIG_PATH)];
+
+    // eslint-disable-next-line @typescript-eslint/no-var-requires
+    const viteConfig = require(VITE_CONFIG_PATH);
+
+    expect(viteConfig.define['process.env']).not.toHaveProperty('RANKLAND_E2E_PROBE');
+    expect(viteConfig.define['process.env.RANKLAND_E2E_PROBE']).toBeUndefined();
   });
 
   it('excludes original sources from generated source maps', () => {
