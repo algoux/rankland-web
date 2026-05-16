@@ -241,9 +241,10 @@ Public route definitions:
 URL builders should encode route parameters and query values:
 
 ```ts
-ranklandRoutes.ranklist.build({ id: 'abc' }) === '/ranklist/abc'
+ranklandRoutes.ranklist.build({ id: 'abc', focus: 'yes' }) === '/ranklist/abc?focus=yes'
 ranklandRoutes.search.build({ kw: 'hello world' }) === '/search?kw=hello%20world'
 ranklandRoutes.collection.build({ id: 'official', rankId: 'test-key' }) === '/collection/official?rankId=test-key'
+ranklandRoutes.live.build({ id: 'live', token: 'private', scrollSolution: '1', focus: 'yes' }) === '/live/live?token=private&scrollSolution=1&focus=yes'
 ```
 
 This slice should not wire these routes into the visible Vue app. The route constants become the contract that page migration consumes in later slices.

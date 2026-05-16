@@ -497,8 +497,9 @@ describe('ranklandRoutes', () => {
     expect(ranklandRoutes.search.build({})).toBe('/search');
   });
 
-  it('builds encoded ranklist route', () => {
+  it('builds encoded ranklist route with optional focus query', () => {
     expect(ranklandRoutes.ranklist.build({ id: 'abc 123' })).toBe('/ranklist/abc%20123');
+    expect(ranklandRoutes.ranklist.build({ id: 'abc', focus: 'yes' })).toBe('/ranklist/abc?focus=yes');
   });
 
   it('builds collection route with optional rankId', () => {
@@ -506,8 +507,16 @@ describe('ranklandRoutes', () => {
     expect(ranklandRoutes.collection.build({ id: 'official' })).toBe('/collection/official');
   });
 
-  it('builds live route', () => {
+  it('builds live route with optional live queries', () => {
     expect(ranklandRoutes.live.build({ id: 'live id' })).toBe('/live/live%20id');
+    expect(
+      ranklandRoutes.live.build({
+        id: 'live id',
+        token: 't 0',
+        scrollSolution: '1',
+        focus: 'yes',
+      }),
+    ).toBe('/live/live%20id?token=t%200&scrollSolution=1&focus=yes');
   });
 });
 ```
@@ -556,7 +565,7 @@ export const ranklandRoutes = {
   ranklist: {
     path: '/ranklist/:id',
     ssr: true,
-    build: (opts: { id: string }) => `/ranklist/${encodePathValue(opts.id)}`,
+    build: (opts: { id: string; focus?: string }) => `/ranklist/${encodePathValue(opts.id)}${buildQuery({ focus: opts.focus })}`,
   },
   collection: {
     path: '/collection/:id',
@@ -567,7 +576,12 @@ export const ranklandRoutes = {
   live: {
     path: '/live/:id',
     ssr: false,
-    build: (opts: { id: string }) => `/live/${encodePathValue(opts.id)}`,
+    build: (opts: { id: string; token?: string; scrollSolution?: string; focus?: string }) =>
+      `/live/${encodePathValue(opts.id)}${buildQuery({
+        token: opts.token,
+        scrollSolution: opts.scrollSolution,
+        focus: opts.focus,
+      })}`,
   },
   playground: {
     path: '/playground',

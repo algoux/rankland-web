@@ -25,7 +25,7 @@ export const ranklandRoutes = {
   ranklist: {
     path: '/ranklist/:id',
     ssr: true,
-    build: (opts: { id: string }) => `/ranklist/${encodePathValue(opts.id)}`,
+    build: (opts: { id: string; focus?: string }) => `/ranklist/${encodePathValue(opts.id)}${buildQuery({ focus: opts.focus })}`,
   },
   collection: {
     path: '/collection/:id',
@@ -36,7 +36,12 @@ export const ranklandRoutes = {
   live: {
     path: '/live/:id',
     ssr: false,
-    build: (opts: { id: string }) => `/live/${encodePathValue(opts.id)}`,
+    build: (opts: { id: string; token?: string; scrollSolution?: string; focus?: string }) =>
+      `/live/${encodePathValue(opts.id)}${buildQuery({
+        token: opts.token,
+        scrollSolution: opts.scrollSolution,
+        focus: opts.focus,
+      })}`,
   },
   playground: {
     path: '/playground',
