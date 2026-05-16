@@ -1,4 +1,5 @@
 import { parseRoutes, RenderMethodKind } from 'bwcx-client-vue3';
+import type { RouteLocationNormalized } from 'vue-router';
 
 export const e2eClientRoutes = parseRoutes([
   {
@@ -9,6 +10,10 @@ export const e2eClientRoutes = parseRoutes([
     routeProps: undefined,
     priority: undefined,
     renderMethod: RenderMethodKind.SSR,
-    otherOptions: undefined,
+    otherOptions: {
+      props: (route: RouteLocationNormalized) => ({
+        id: String(route.params.id),
+      }),
+    },
   },
 ]);

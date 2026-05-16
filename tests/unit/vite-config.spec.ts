@@ -6,6 +6,7 @@ const ranklandEnv = {
   RANKLAND_CDN_API_BASE_SERVER: 'http://cdn-server.example/api',
   RANKLAND_API_BASE_CLIENT: 'https://client.example/api',
   RANKLAND_CDN_API_BASE_CLIENT: 'https://cdn-client.example/api',
+  RANKLAND_E2E_PROBE: '1',
 };
 
 const originalEnv = Object.fromEntries(

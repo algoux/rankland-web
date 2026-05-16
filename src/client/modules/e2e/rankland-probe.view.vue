@@ -6,7 +6,7 @@
     <div data-testid="rankland-probe-total-srk-count">{{ totalSrkCount }}</div>
     <div data-testid="rankland-probe-render-source">{{ renderSource }}</div>
     <div data-testid="rankland-probe-hydrated">{{ hydrated ? 'hydrated' : 'ssr' }}</div>
-    <div data-testid="rankland-probe-client-refresh-count">{{ clientRefreshCount }}</div>
+    <div data-testid="rankland-probe-client-refresh-count">{{ clientRefreshTotalSrkCount }}</div>
     <button type="button" data-testid="rankland-probe-refresh" @click="refreshStatistics">Refresh</button>
   </main>
 </template>
@@ -48,7 +48,7 @@ const RanklandProbe = defineComponent({
   data() {
     return {
       hydrated: false,
-      clientRefreshCount: 0,
+      clientRefreshTotalSrkCount: 0,
     };
   },
   computed: {
@@ -59,7 +59,7 @@ const RanklandProbe = defineComponent({
       return this.ranklist?.info.uniqueKey || '';
     },
     srkRowCount(): number {
-      return this.ranklist?.srk.rows?.length || 0;
+      return this.ranklist?.srk?.rows?.length || 0;
     },
     totalSrkCount(): number {
       return this.statistics?.totalSrkCount || 0;
@@ -71,7 +71,7 @@ const RanklandProbe = defineComponent({
   methods: {
     async refreshStatistics() {
       const statistics = await this.ranklandApiService.getStatistics();
-      this.clientRefreshCount += statistics.totalSrkCount;
+      this.clientRefreshTotalSrkCount += statistics.totalSrkCount;
     },
   },
   async asyncData({ ranklandApiService, to }: AsyncDataOptions) {
