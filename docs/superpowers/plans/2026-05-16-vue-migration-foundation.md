@@ -70,9 +70,9 @@ Replace the current `scripts` block with this block:
 {
   "preinstall": "npx only-allow pnpm",
   "test": "pnpm test:unit",
-  "test:unit": "vitest run",
+  "test:unit": "vitest run --passWithNoTests",
   "test:unit:watch": "vitest",
-  "test:ssr": "vitest run tests/ssr",
+  "test:ssr": "vitest run tests/ssr --passWithNoTests",
   "test:e2e": "playwright test",
   "test:migration": "pnpm test:unit && pnpm test:ssr && pnpm test:e2e",
   "init": "pnpm i --frozen-lockfile",
@@ -176,7 +176,7 @@ Version 1.42.1
 No test files found
 ```
 
-`pnpm test:unit` may exit with code `1` until Task 3 adds the first test file. It must not fail with Node engine, Vite runtime, or Playwright runtime errors.
+`pnpm test:unit` must exit with code `0` even before Task 3 adds the first test file. It must not fail with Node engine, Vite runtime, Playwright runtime, or no-test-file errors.
 
 - [ ] **Step 7: Commit dependency baseline**
 
