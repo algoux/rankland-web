@@ -31,7 +31,7 @@ In scope:
 - A test-only RankLand probe route that exercises SSR and CSR through the real bwcx/Koa server.
 - Server-side and client-side RankLand API adapters backed by the existing `RanklandApiService`.
 - Explicit RankLand API base URL configuration for SSR, CSR, and tests.
-- A controlled local mock backend for upstream RankLand normal API and CDN API endpoints.
+- A controlled local Node HTTP mock backend for upstream RankLand normal API and CDN API endpoints.
 - Playwright configuration that starts the bwcx/Koa server for full-chain E2E tests.
 - E2E assertions proving SSR HTML, hydrated CSR behavior, and upstream mock calls.
 - Test-mode server switches that avoid external Mongo/socket requirements for this read-only E2E path.
@@ -128,7 +128,7 @@ Probe code should consume this injected service from `asyncData` rather than con
 
 ### Controlled Mock Backend
 
-Add a small Node/Koa mock backend under `tests/e2e/support/`.
+Add a small Node HTTP mock backend under `tests/e2e/support/`. Use Node's built-in `http` module so this foundation does not add a direct `koa` dependency or churn the lockfile.
 
 It should serve the existing fixtures:
 
