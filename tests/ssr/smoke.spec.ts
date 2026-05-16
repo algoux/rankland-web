@@ -14,6 +14,9 @@ const hasBuild = fs.existsSync(serverEntryPath) && fs.existsSync(clientIndexPath
 const suite = hasBuild ? describe : describe.skip;
 
 class SmokeXMLHttpRequest {
+  private method = '';
+  private url = '';
+
   public readyState = 0;
   public responseText = '';
   public response = '';
@@ -28,13 +31,26 @@ class SmokeXMLHttpRequest {
   public onerror: (() => void) | null = null;
   public ontimeout: (() => void) | null = null;
 
-  public open() {
+  public open(method: string, url: string) {
+    this.method = method;
+    this.url = url;
     this.readyState = 1;
   }
 
   public setRequestHeader() {}
 
   public send() {
+    const requestUrl = new URL(this.url, 'http://127.0.0.1:3000');
+    const isExpectedDemoRequest =
+      this.method.toUpperCase() === 'GET' &&
+      requestUrl.origin === 'http://127.0.0.1:3000' &&
+      requestUrl.pathname === '/api/demoGet/42' &&
+      requestUrl.searchParams.get('page') === '9';
+
+    if (!isExpectedDemoRequest) {
+      throw new Error(`Unexpected SSR smoke XHR request: ${this.method} ${this.url}`);
+    }
+
     const responseBody = {
       success: true,
       data: {
@@ -65,29 +81,34 @@ class SmokeXMLHttpRequest {
 
 suite('SSR smoke harness', () => {
   it('renders the existing home route from the built vite-ssr server bundle', async () => {
+    const previousXMLHttpRequest = globalThis.XMLHttpRequest;
     globalThis.XMLHttpRequest = SmokeXMLHttpRequest as any;
 
-    const renderModule = await import(serverEntryPath);
-    const render = renderModule.default || renderModule;
-    const htmlTemplate = fs.readFileSync(clientIndexPath, 'utf-8');
+    try {
+      const renderModule = await import(serverEntryPath);
+      const render = renderModule.default || renderModule;
+      const htmlTemplate = fs.readFileSync(clientIndexPath, 'utf-8');
 
-    const result = await render('http://localhost:3000/', {
-      request: {
-        headers: {
-          host: 'localhost:3000',
+      const result = await render('http://localhost:3000/', {
+        request: {
+          headers: {
+            host: 'localhost:3000',
+          },
+          socket: {
+            remoteAddress: '127.0.0.1',
+          },
         },
-        socket: {
-          remoteAddress: '127.0.0.1',
-        },
-      },
-      response: {},
-      template: htmlTemplate,
-      manifest: {},
-      preload: false,
-    });
+        response: {},
+        template: htmlTemplate,
+        manifest: {},
+        preload: false,
+      });
 
-    expect(result).toBeTruthy();
-    expect(typeof result.html).toBe('string');
-    expect(result.html).toContain('<!DOCTYPE html>');
+      expect(result).toBeTruthy();
+      expect(typeof result.html).toBe('string');
+      expect(result.html).toContain('<!DOCTYPE html>');
+    } finally {
+      globalThis.XMLHttpRequest = previousXMLHttpRequest;
+    }
   });
 });
