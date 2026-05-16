@@ -20,21 +20,20 @@
 </template>
 
 <script lang="ts">
-import { Options, Vue } from 'vue-class-component';
+import { defineComponent } from 'vue';
 
-@Options({
-  components: {
+export default defineComponent({
+  name: 'App',
+  computed: {
+    demoDetailUrl() {
+      return (this as any).$$router.to('DemoDetail').formatUrl({
+        id: 42,
+        preview: false,
+        arr: [1, 2],
+      });
+    },
   },
-})
-export default class App extends Vue {
-  get demoDetailUrl() {
-    return this.$$router.to('DemoDetail').formatUrl({
-      id: 42,
-      preview: false,
-      arr: [1, 2],
-    });
-  }
-}
+});
 </script>
 
 <style lang="less" scoped>

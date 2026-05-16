@@ -10,21 +10,22 @@
 </template>
 
 <script lang="ts">
-import { Vue, setup } from 'vue-class-component';
-import { Prop } from 'vue-property-decorator';
+import { defineComponent } from 'vue';
 import { useHead } from '@vueuse/head';
 import { useContext } from 'vite-ssr/vue';
-import { View, RenderMethod, RenderMethodKind } from 'bwcx-client-vue3';
+import { routeView, RenderMethodKind } from 'bwcx-client-vue3';
 import type { DemoGetRespDTO } from '@common/modules/demo/demo.dto';
 import type { AsyncDataOptions } from '@client/typings';
 
-@View('/')
-@RenderMethod(RenderMethodKind.SSR)
-export default class Home extends Vue {
-  // passed from asyncData
-  @Prop() homeState: DemoGetRespDTO;
-
-  initialState = setup(() => {
+const Home = defineComponent({
+  name: 'Home',
+  props: {
+    homeState: {
+      type: Object,
+      required: false,
+    },
+  },
+  setup() {
     const { isClient, url, initialState } = useContext();
     isClient && console.log('Homepage setup', { url, initialState });
 
@@ -34,14 +35,16 @@ export default class Home extends Vue {
         { name: 'description', content: 'This should be moved to head' },
       ],
     });
-    return initialState;
-  });
 
-  // as computed
-  get list() {
-    return this.homeState.list;
-  }
-
+    return {
+      initialState,
+    };
+  },
+  computed: {
+    list(): DemoGetRespDTO['list'] | undefined {
+      return (this.homeState as DemoGetRespDTO | undefined)?.list;
+    },
+  },
   async asyncData({ apiClient }: AsyncDataOptions) {
     const res = await apiClient.demoGet({
       id: 42,
@@ -50,8 +53,12 @@ export default class Home extends Vue {
     return {
       homeState: res,
     };
-  }
-}
+  },
+});
+
+export default routeView(Home, '/', undefined, undefined, {
+  renderMethod: RenderMethodKind.SSR,
+});
 </script>
 
 <style lang="less" scoped>

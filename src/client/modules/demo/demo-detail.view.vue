@@ -20,32 +20,65 @@
 </template>
 
 <script lang="ts">
-import { Options } from 'vue-class-component';
-import { Prop } from 'vue-property-decorator';
-import { View, mixinRouteProps, RenderMethod, RenderMethodKind } from 'bwcx-client-vue3';
+import { defineComponent, h } from 'vue';
+import { routeView, RenderMethodKind } from 'bwcx-client-vue3';
 import { DemoDetailRPO } from '@common/modules/demo/demo.rpo';
 import type { AsyncDataOptions } from '@client/typings';
-import SomeCommon from '@client/components/some-common.vue';
-import { DemoItem } from '@common/modules/demo/demo.dto';
+import type { DemoItem } from '@common/modules/demo/demo.dto';
 
-@View('/demo/detail/:id', DemoDetailRPO)
-@RenderMethod(RenderMethodKind.SSR)
-@Options({
+const SomeCommon = defineComponent({
+  name: 'SomeCommon',
+  props: {
+    someProp: {
+      type: Number,
+      required: true,
+    },
+  },
+  setup(props) {
+    return () => h('div', { class: 'some-common-container' }, [
+      h('div', 'Common Component'),
+      h('pre', `someProp: ${props.someProp}`),
+    ]);
+  },
+});
+
+const DemoDetail = defineComponent({
+  name: 'DemoDetail',
   components: {
     SomeCommon,
   },
-})
-export default class DemoDetail extends mixinRouteProps(DemoDetailRPO) {
-  @Prop() list: DemoItem[];
-
-  // as data
-  randomNumber = 0;
-
-  // as computed
-  get shortenRandomNumber() {
-    return this.randomNumber.toFixed(5);
-  }
-
+  props: {
+    id: {
+      type: [String, Number],
+      required: true,
+    },
+    page: {
+      type: Number,
+      required: false,
+    },
+    preview: {
+      type: Boolean,
+      required: false,
+    },
+    arr: {
+      type: Array,
+      required: false,
+    },
+    list: {
+      type: Array,
+      required: false,
+    },
+  },
+  data() {
+    return {
+      randomNumber: 0,
+    };
+  },
+  computed: {
+    shortenRandomNumber(): string {
+      return this.randomNumber.toFixed(5);
+    },
+  },
   async asyncData({ apiClient, to }: AsyncDataOptions) {
     const res = await apiClient.demoGet({
       id: Number(to.params.id),
@@ -54,23 +87,26 @@ export default class DemoDetail extends mixinRouteProps(DemoDetailRPO) {
     return {
       list: res.list,
     };
-  }
-
-  // as lifecycle hook
+  },
   mounted() {
     this.randomNumber = Math.random();
-  }
+  },
+  methods: {
+    goToRandomPage() {
+      const page = Math.floor(Math.random() * 1000) + 1;
+      (this as any).$$router.to('DemoDetail').push({
+        id: this.id,
+        preview: this.preview,
+        arr: this.arr,
+        page,
+      });
+    },
+  },
+});
 
-  public goToRandomPage() {
-    const page = Math.floor(Math.random() * 1000) + 1;
-    this.$$router.to('DemoDetail').push({
-      id: this.id,
-      preview: this.preview,
-      arr: this.arr,
-      page,
-    });
-  }
-}
+export default routeView(DemoDetail, '/demo/detail/:id', DemoDetailRPO, undefined, {
+  renderMethod: RenderMethodKind.SSR,
+});
 </script>
 
 <style lang="less" scoped>
