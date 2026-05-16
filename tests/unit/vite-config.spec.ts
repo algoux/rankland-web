@@ -37,5 +37,6 @@ describe('vite config', () => {
     const viteConfig = require(VITE_CONFIG_PATH);
 
     expect(viteConfig.define['process.env']).toMatchObject(ranklandEnv);
+    expect(viteConfig.define['process.env.RANKLAND_E2E_PROBE']).toBe('"1"');
   });
 });

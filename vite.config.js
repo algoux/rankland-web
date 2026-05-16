@@ -15,6 +15,7 @@ module.exports = defineConfig({
   // If using CDN, you can set base like 'https://yourcdn.com/dist/'
   base: isProd ? '/dist/' : undefined,
   define: {
+    'process.env.RANKLAND_E2E_PROBE': JSON.stringify(process.env.RANKLAND_E2E_PROBE),
     'process.env': {
       BWCX_RUNTIME_SCOPE: 'client',
       RANKLAND_API_BASE_SERVER: process.env.RANKLAND_API_BASE_SERVER,
