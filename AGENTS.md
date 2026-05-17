@@ -28,7 +28,7 @@ The migration should preserve public routes, SSR behavior where it matters for S
 - `docs/migration`: migration inventory and API contract references.
 - `docs/superpowers/specs` and `docs/superpowers/plans`: accepted migration designs and implementation plans.
 
-Read the relevant migration documents before changing a route, data contract, SSR path, or cross-runtime helper.
+Read `docs/migration/playbook.md` and the relevant migration documents before changing a route, data contract, SSR path, or cross-runtime helper.
 
 ## Common Commands
 
