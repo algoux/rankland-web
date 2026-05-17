@@ -33,7 +33,7 @@
         class="search-section"
         :data-result-count="searchRows.length"
       >
-        <div data-id="search-result-count" class="search-section-title">搜索到 {{ searchRows.length }} 个结果</div>
+        <div class="search-section-title">搜索到 <span data-id="search-result-count">{{ searchRows.length }}</span> 个结果</div>
         <div v-if="searchRows.length === 0" data-id="search-empty-state" class="search-empty-state">暂无匹配的榜单</div>
         <ul v-else class="search-list">
           <li
