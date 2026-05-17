@@ -8,9 +8,13 @@ const originalEnv = {
 };
 
 function restoreEnv() {
-  process.env.RANKLAND_SITE_ORIGIN = originalEnv.RANKLAND_SITE_ORIGIN;
-  process.env.RANKLAND_SITE_ALIAS = originalEnv.RANKLAND_SITE_ALIAS;
-  process.env.SITE_ALIAS = originalEnv.SITE_ALIAS;
+  for (const key of Object.keys(originalEnv) as Array<keyof typeof originalEnv>) {
+    if (originalEnv[key] === undefined) {
+      delete process.env[key];
+    } else {
+      process.env[key] = originalEnv[key];
+    }
+  }
 }
 
 describe('home site helpers', () => {

@@ -8,10 +8,16 @@ const ranklandEnv = {
   RANKLAND_CDN_API_BASE_CLIENT: 'https://cdn-client.example/api',
 };
 const e2eProbeEnv = { RANKLAND_E2E_PROBE: '1' };
+const ranklandSiteEnv = {
+  RANKLAND_SITE_ORIGIN: 'https://rankland.example',
+  RANKLAND_SITE_ALIAS: 'cnn',
+  SITE_ALIAS: 'legacy-cnn',
+  BEIAN: '鲁ICP备00000000号',
+};
 
 const originalEnv = Object.fromEntries(
-  Object.keys({ ...ranklandEnv, ...e2eProbeEnv }).map((key) => [key, process.env[key]]),
-) as Record<keyof typeof ranklandEnv | keyof typeof e2eProbeEnv, string | undefined>;
+  Object.keys({ ...ranklandEnv, ...e2eProbeEnv, ...ranklandSiteEnv }).map((key) => [key, process.env[key]]),
+) as Record<keyof typeof ranklandEnv | keyof typeof e2eProbeEnv | keyof typeof ranklandSiteEnv, string | undefined>;
 
 function restoreEnv() {
   for (const key of Object.keys(originalEnv) as Array<keyof typeof originalEnv>) {
@@ -29,14 +35,15 @@ describe('vite config', () => {
     delete require.cache[require.resolve(VITE_CONFIG_PATH)];
   });
 
-  it('injects RankLand API env values into bundled process.env', () => {
-    Object.assign(process.env, ranklandEnv, e2eProbeEnv);
+  it('injects RankLand API and site env values into bundled process.env', () => {
+    Object.assign(process.env, ranklandEnv, e2eProbeEnv, ranklandSiteEnv);
     delete require.cache[require.resolve(VITE_CONFIG_PATH)];
 
     // eslint-disable-next-line @typescript-eslint/no-var-requires
     const viteConfig = require(VITE_CONFIG_PATH);
 
     expect(viteConfig.define['process.env']).toMatchObject(ranklandEnv);
+    expect(viteConfig.define['process.env']).toMatchObject(ranklandSiteEnv);
     expect(viteConfig.define['process.env']).toHaveProperty('RANKLAND_E2E_PROBE', '1');
     expect(viteConfig.define['process.env.RANKLAND_E2E_PROBE']).toBe('"1"');
   });
