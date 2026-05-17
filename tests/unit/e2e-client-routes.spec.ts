@@ -3,6 +3,7 @@ import { RenderMethodKind } from 'bwcx-client-vue/enums';
 import { getClientRoutesMapForServer } from '@common/router/e2e-client-routes';
 import { clientRoutesMap } from '@common/router/client-routes';
 import { RanklistRPO } from '@common/modules/ranklist/ranklist.rpo';
+import { CollectionRPO } from '@common/modules/collection/collection.rpo';
 
 describe('getClientRoutesMapForServer', () => {
   const originalProbe = process.env.RANKLAND_E2E_PROBE;
@@ -24,7 +25,7 @@ describe('getClientRoutesMapForServer', () => {
     expect(routes.has('Home')).toBe(true);
   });
 
-  it('exposes the public ranklist route as SSR', () => {
+  it('exposes public RankLand routes as SSR', () => {
     delete process.env.RANKLAND_E2E_PROBE;
 
     const routes = getClientRoutesMapForServer();
@@ -32,6 +33,11 @@ describe('getClientRoutesMapForServer', () => {
     expect(routes.get('Ranklist')).toEqual({
       path: '/ranklist/:id',
       routeProps: RanklistRPO,
+      renderMethod: RenderMethodKind.SSR,
+    });
+    expect(routes.get('Collection')).toEqual({
+      path: '/collection/:id',
+      routeProps: CollectionRPO,
       renderMethod: RenderMethodKind.SSR,
     });
   });
