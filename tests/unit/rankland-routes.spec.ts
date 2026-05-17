@@ -48,9 +48,12 @@ describe('ranklandRoutes', () => {
 
   it('marks SSR metadata for public routes', () => {
     expect(ranklandRoutes.home.ssr).toBe(true);
-    expect(ranklandRoutes.search.ssr).toBe(true);
     expect(ranklandRoutes.ranklist.ssr).toBe(true);
     expect(ranklandRoutes.collection.ssr).toBe(true);
+  });
+
+  it('marks CSR routes', () => {
+    expect(ranklandRoutes.search.ssr).toBe(false);
     expect(ranklandRoutes.live.ssr).toBe(false);
     expect(ranklandRoutes.playground.ssr).toBe(false);
   });

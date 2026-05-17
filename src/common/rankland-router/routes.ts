@@ -19,7 +19,7 @@ export const ranklandRoutes = {
   },
   search: {
     path: '/search',
-    ssr: true,
+    ssr: false,
     build: (opts: { kw?: string } = {}) => `/search${buildQuery({ kw: opts.kw })}`,
   },
   ranklist: {
