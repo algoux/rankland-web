@@ -5,14 +5,17 @@
 
 import { Newable } from 'bwcx-common';
 import { RenderMethodKind } from 'bwcx-client-vue/enums';
+import { CollectionRPO } from '../modules/collection/collection.rpo';
 import { DemoDetailRPO } from '../modules/demo/demo.rpo';
 import { RanklistRPO } from '../modules/ranklist/ranklist.rpo';
 
 export const clientRoutesMap = new Map<string, { path: string; routeProps: Newable | undefined; renderMethod: RenderMethodKind | undefined }>([
   ['About', { path: '/about', routeProps: undefined, renderMethod: undefined }],
+  ['Collection', { path: '/collection/:id', routeProps: CollectionRPO, renderMethod: RenderMethodKind.SSR }],
   ['DemoDetail', { path: '/demo/detail/:id', routeProps: DemoDetailRPO, renderMethod: RenderMethodKind.SSR }],
   ['Home', { path: '/', routeProps: undefined, renderMethod: RenderMethodKind.SSR }],
   ['Ranklist', { path: '/ranklist/:id', routeProps: RanklistRPO, renderMethod: RenderMethodKind.SSR }],
 ]);
+export { CollectionRPO } from '../modules/collection/collection.rpo';
 export { DemoDetailRPO } from '../modules/demo/demo.rpo';
 export { RanklistRPO } from '../modules/ranklist/ranklist.rpo';

@@ -11,6 +11,7 @@ declare module '@vue/runtime-core' {
   export interface ComponentCustomProperties {
     $$router: {
       to(target: 'About'): BwcxVueRouterActions;
+      to(target: 'Collection'): BwcxVueRouterActions<R.CollectionRPO>;
       to(target: 'DemoDetail'): BwcxVueRouterActions<R.DemoDetailRPO>;
       to(target: 'Home'): BwcxVueRouterActions;
       to(target: 'Ranklist'): BwcxVueRouterActions<R.RanklistRPO>;
