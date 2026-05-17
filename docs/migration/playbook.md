@@ -117,7 +117,9 @@ Use specialized skills only when they directly match the task:
 - `superpowers:verification-before-completion` before claiming a branch is complete;
 - `storybloq` only if the project needs durable cross-session tickets, handoffs, or decisions beyond the existing docs.
 
-Use subagents only when the current platform and user request allow it. Good splits are:
+Prefer subagents for migration execution and problem handling when the current platform and user request allow it. Use the main agent to keep the critical path, own final integration, and make architectural calls. Use subagents for bounded parallel work that can be reviewed independently.
+
+Good splits are:
 
 - explorer: compare old React behavior with the target Vue route;
 - explorer: inspect current test harness and route generation constraints;
@@ -125,7 +127,105 @@ Use subagents only when the current platform and user request allow it. Good spl
 - worker: add tests in a separate, non-overlapping file set;
 - reviewer: check parity, test gaps, and generated-file boundaries.
 
-Avoid parallel workers touching the same Vue page, generated route files, or shared API service at the same time.
+Before dispatching workers, assign explicit ownership. Prefer file-set ownership over vague feature ownership. Do not run parallel workers that modify the same Vue page, generated route files, shared API service, package manifests, lockfiles, or broad config files at the same time. If a task needs one of those shared files, keep that edit in the main agent or serialize the workers.
+
+Use explorers freely for read-only questions. Use workers only when their write set is narrow and non-overlapping. After each worker returns, inspect the diff before continuing and run the smallest verification that proves the integrated result.
+
+## Spec Coding And Conversation Maintenance
+
+Spec coding is the default migration style for non-trivial work. The spec is the design contract; the plan is the execution checklist; commits are the durable history.
+
+Use this flow:
+
+1. Create or update a design spec under `docs/superpowers/specs/YYYY-MM-DD-<slice>-design.md` before broad page migrations, cross-runtime changes, API behavior changes, route contract changes, or E2E harness changes.
+2. Create or update an implementation plan under `docs/superpowers/plans/YYYY-MM-DD-<slice>.md` when the work spans multiple files, multiple test layers, or more than one commit.
+3. Keep specs focused on decisions, tradeoffs, data flow, SSR/CSR behavior, error handling, test strategy, acceptance criteria, and known risks.
+4. Keep plans executable: target files, ordered tasks, expected tests, generated-file steps, and commit boundaries.
+5. Update the spec or plan when implementation reality changes. Do not rely on Codex conversation history as the only record of a decision.
+6. At handoff, summarize branch, latest commit, completed slice, verification results, skipped gates, open risks, and next recommended slice in the conversation.
+
+Codex conversations are working memory, not project memory. Preserve decisions that must survive the session in one of:
+
+- `docs/migration/playbook.md` for process rules;
+- `docs/migration/inventory.md` for route/source inventory;
+- `docs/migration/api-contract.md` for upstream API assumptions;
+- `docs/superpowers/specs/*` for design decisions;
+- `docs/superpowers/plans/*` for execution plans;
+- commit messages for completed durable changes.
+
+Use `storybloq` only if this documentation set stops being enough, for example when migration work starts needing durable tickets, multi-session handoffs, decision logs, or state that does not fit cleanly into specs/plans.
+
+## Long-Running Execution Model
+
+Use slice-based execution as the default way to complete the whole migration.
+
+One Codex conversation should usually own one meaningful migration slice, such as `home-page-foundation`, `search-page-foundation`, `playground-page-foundation`, or `live-page-foundation`. Inside a slice, continue the same conversation through exploration, spec, plan, implementation, debugging, verification, and commit. Context compaction is acceptable inside a slice because durable decisions live in specs, plans, migration docs, and commits.
+
+After a slice is verified and committed, write a handoff block and start a fresh conversation for the next slice. Fresh conversations reduce drift from old debugging paths while still recovering project state from the repo.
+
+Use this handoff shape:
+
+```text
+请使用 rankland-migration skill 继续 RankLand 迁移。
+
+Repo: /Users/cooper/Projects/RankLand/rankland-web
+当前分支: <branch>
+最新 commit: <hash> <message>
+
+已完成:
+- <completed slice>
+- <key behavior>
+- <test coverage>
+
+验证:
+- <command>: <result>
+- 跳过的 gate: <reason>
+
+当前文档:
+- docs/migration/playbook.md
+- docs/migration/inventory.md
+- docs/migration/api-contract.md
+- docs/superpowers/specs/<current spec>
+- docs/superpowers/plans/<current plan>
+
+下一步建议:
+- <next slice>
+- <questions to confirm>
+- <recommended subagent split>
+
+请先检查 git 状态和最近 commit，再按 playbook 继续。
+```
+
+Do not use one indefinitely long conversation as the project memory. Do not rely on autonomous scheduled tasks to perform product migration without review. Scheduled tasks are for checks, reminders, and status synthesis.
+
+## Codex Automation Strategy
+
+Use Codex automations as a guardrail, not as the main migration driver.
+
+Recommended automations:
+
+1. Weekly migration health check
+
+   - Schedule: Monday morning.
+   - Workspace: `/Users/cooper/Projects/RankLand/rankland-web`.
+   - Task: inspect branch/worktree, confirm Node/pnpm versions, run `corepack pnpm test:unit`, and report current branch, latest commit, dirty files, and test result.
+   - Purpose: catch drift cheaply without running the full gate too often.
+
+2. Pre-work migration brief
+
+   - Schedule: before planned migration work sessions.
+   - Workspace: `/Users/cooper/Projects/RankLand/rankland-web`.
+   - Task: read `docs/migration/playbook.md`, `inventory.md`, `api-contract.md`, recent commits, and open specs/plans; summarize current migration state and the recommended next slice.
+   - Purpose: make it easy to start a fresh conversation with accurate context.
+
+3. On-demand full migration gate
+
+   - Schedule: manual or explicitly requested.
+   - Workspace: `/Users/cooper/Projects/RankLand/rankland-web`.
+   - Task: run `corepack pnpm test:migration`, report failures with logs, and avoid changing code unless explicitly asked.
+   - Purpose: validate a completed slice before merge/push.
+
+Avoid scheduled automations that implement pages, rewrite specs, commit changes, or modify shared files without a human-triggered session. Those tasks require parity judgment and review.
 
 ## Maintenance Rules
 
