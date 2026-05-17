@@ -5,6 +5,7 @@
 
 import { parseRoutes, RenderMethodKind } from 'bwcx-client-vue3';
 import { DemoDetailRPO } from '../../common/modules/demo/demo.rpo';
+import { RanklistRPO } from '../../common/modules/ranklist/ranklist.rpo';
 
 const clientRoutes = parseRoutes([
   {
@@ -42,14 +43,10 @@ const clientRoutes = parseRoutes([
     path: '/ranklist/:id',
     fullPath: '/ranklist/:id',
     component: () => import(/* webpackChunkName: "Ranklist" */ '../modules/ranklist/ranklist.view.vue'),
-    routeProps: undefined,
+    routeProps: RanklistRPO,
     priority: undefined,
     renderMethod: RenderMethodKind.SSR,
-    otherOptions: {
-      props: (route) => ({
-        id: String(route.params.id),
-      }),
-    },
+    otherOptions: undefined,
   },
 ]);
 

@@ -36,12 +36,13 @@
 import { defineComponent, type PropType } from 'vue';
 import { routeView, RenderMethodKind } from 'bwcx-client-vue3';
 import type { IApiRanklist } from '@common/rankland-api';
+import { RanklistRPO } from '@common/modules/ranklist/ranklist.rpo';
 import type { AsyncDataOptions } from '@client/typings';
 import { formatTitle } from '@client/utils/title-format.util';
 import RanklandRanklist from '@client/components/rankland-ranklist.vue';
 import { classifyRanklistLoadError, type RanklistLoadErrorState } from './ranklist-error';
 
-const Ranklist = defineComponent({
+const RanklistPage = defineComponent({
   name: 'Ranklist',
   components: {
     RanklandRanklist,
@@ -118,11 +119,7 @@ const Ranklist = defineComponent({
   },
 });
 
-export default routeView(Ranklist, '/ranklist/:id', undefined, {
-  props: (route) => ({
-    id: String(route.params.id),
-  }),
-}, {
+export default routeView(RanklistPage, '/ranklist/:id', RanklistRPO, undefined, {
   renderMethod: RenderMethodKind.SSR,
 });
 </script>

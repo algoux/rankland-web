@@ -5,6 +5,7 @@ describe('client routes', () => {
 
   afterEach(() => {
     vi.resetModules();
+    vi.doUnmock('bwcx-client-vue3');
 
     if (originalProbe === undefined) {
       delete process.env.RANKLAND_E2E_PROBE;
@@ -24,6 +25,23 @@ describe('client routes', () => {
     expect(ranklistRoute).toMatchObject({
       path: '/ranklist/:id',
     });
+  });
+
+  it('generates the public ranklist route with typed route props', async () => {
+    vi.doMock('bwcx-client-vue3', async () => {
+      const actual = await vi.importActual<typeof import('bwcx-client-vue3')>('bwcx-client-vue3');
+
+      return {
+        ...actual,
+        parseRoutes: vi.fn((routes) => routes),
+      };
+    });
+
+    const routes = (await import('@client/router/routes')).default as Array<{ name: string; routeProps?: unknown }>;
+    const { RanklistRPO } = await import('@common/modules/ranklist/ranklist.rpo');
+    const ranklistRoute = routes.find((route) => route.name === 'Ranklist');
+
+    expect(ranklistRoute?.routeProps).toBe(RanklistRPO);
   });
 
   it('adds the probe route with the expected path when the probe is enabled', async () => {

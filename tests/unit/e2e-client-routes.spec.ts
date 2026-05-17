@@ -2,6 +2,7 @@ import { afterEach, describe, expect, it } from 'vitest';
 import { RenderMethodKind } from 'bwcx-client-vue/enums';
 import { getClientRoutesMapForServer } from '@common/router/e2e-client-routes';
 import { clientRoutesMap } from '@common/router/client-routes';
+import { RanklistRPO } from '@common/modules/ranklist/ranklist.rpo';
 
 describe('getClientRoutesMapForServer', () => {
   const originalProbe = process.env.RANKLAND_E2E_PROBE;
@@ -30,7 +31,7 @@ describe('getClientRoutesMapForServer', () => {
 
     expect(routes.get('Ranklist')).toEqual({
       path: '/ranklist/:id',
-      routeProps: undefined,
+      routeProps: RanklistRPO,
       renderMethod: RenderMethodKind.SSR,
     });
   });
