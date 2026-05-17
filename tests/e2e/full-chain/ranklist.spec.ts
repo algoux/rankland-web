@@ -27,15 +27,15 @@ test.describe('/ranklist/:id full-chain route', () => {
 
     const requestsResponse = await request.get(`${mockBaseURL}/__requests`);
     const requests = (await requestsResponse.json()) as Array<{ path: string; search: string }>;
+    const rankRequests = requests.filter((requestRecord) => requestRecord.path === '/rank/test-key');
+    const srkFileRequests = requests.filter(
+      (requestRecord) =>
+        requestRecord.path === '/file/download' &&
+        new URLSearchParams(requestRecord.search).get('id') === 'file-test-1',
+    );
 
-    expect(requests.some((requestRecord) => requestRecord.path === '/rank/test-key')).toBe(true);
-    expect(
-      requests.some(
-        (requestRecord) =>
-          requestRecord.path === '/file/download' &&
-          new URLSearchParams(requestRecord.search).get('id') === 'file-test-1',
-      ),
-    ).toBe(true);
+    expect(rankRequests).toHaveLength(1);
+    expect(srkFileRequests).toHaveLength(1);
   });
 
   test('renders the Not Found page when the backend returns missing ranklist', async ({ page, request }) => {
@@ -52,7 +52,8 @@ test.describe('/ranklist/:id full-chain route', () => {
 
     const requestsResponse = await request.get(`${mockBaseURL}/__requests`);
     const requests = (await requestsResponse.json()) as Array<{ path: string }>;
+    const rankRequests = requests.filter((requestRecord) => requestRecord.path === '/rank/missing-key');
 
-    expect(requests.some((requestRecord) => requestRecord.path === '/rank/missing-key')).toBe(true);
+    expect(rankRequests).toHaveLength(1);
   });
 });
