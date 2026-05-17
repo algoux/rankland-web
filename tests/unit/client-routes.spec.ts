@@ -17,9 +17,13 @@ describe('client routes', () => {
     delete process.env.RANKLAND_E2E_PROBE;
 
     const routes = (await import('@client/routes')).default;
+    const ranklistRoute = routes.find((route) => route.name === 'Ranklist');
 
     expect(routes.some((route) => route.name === 'E2eRanklandProbe')).toBe(false);
     expect(routes.some((route) => route.path === '/__e2e/rankland-probe/:id')).toBe(false);
+    expect(ranklistRoute).toMatchObject({
+      path: '/ranklist/:id',
+    });
   });
 
   it('adds the probe route with the expected path when the probe is enabled', async () => {

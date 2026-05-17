@@ -13,6 +13,7 @@ declare module '@vue/runtime-core' {
       to(target: 'About'): BwcxVueRouterActions;
       to(target: 'DemoDetail'): BwcxVueRouterActions<R.DemoDetailRPO>;
       to(target: 'Home'): BwcxVueRouterActions;
+      to(target: 'Ranklist'): BwcxVueRouterActions;
     };
   }
 }

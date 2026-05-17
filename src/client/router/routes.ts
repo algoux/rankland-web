@@ -37,7 +37,20 @@ const clientRoutes = parseRoutes([
     renderMethod: RenderMethodKind.SSR,
     otherOptions: undefined,
   },
+  {
+    name: 'Ranklist',
+    path: '/ranklist/:id',
+    fullPath: '/ranklist/:id',
+    component: () => import(/* webpackChunkName: "Ranklist" */ '../modules/ranklist/ranklist.view.vue'),
+    routeProps: undefined,
+    priority: undefined,
+    renderMethod: RenderMethodKind.SSR,
+    otherOptions: {
+      props: (route) => ({
+        id: String(route.params.id),
+      }),
+    },
+  },
 ]);
 
 export default clientRoutes;
-

@@ -23,6 +23,18 @@ describe('getClientRoutesMapForServer', () => {
     expect(routes.has('Home')).toBe(true);
   });
 
+  it('exposes the public ranklist route as SSR', () => {
+    delete process.env.RANKLAND_E2E_PROBE;
+
+    const routes = getClientRoutesMapForServer();
+
+    expect(routes.get('Ranklist')).toEqual({
+      path: '/ranklist/:id',
+      routeProps: undefined,
+      renderMethod: RenderMethodKind.SSR,
+    });
+  });
+
   it('does not expose the probe route for non-1 values', () => {
     process.env.RANKLAND_E2E_PROBE = 'true';
 
