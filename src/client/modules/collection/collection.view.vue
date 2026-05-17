@@ -93,6 +93,14 @@ import {
 
 const COLLAPSED_STORAGE_KEY = 'CollectionNavCollapsed';
 
+interface CollectionAsyncDataState {
+  collection?: IApiCollection;
+  ranklist?: IApiRanklist;
+  collectionLoadError?: CollectionLoadErrorState;
+  ranklistLoadError?: SelectedRanklistLoadErrorState;
+  ranklistIdInvalid?: boolean;
+}
+
 const CollectionPage = defineComponent({
   name: 'Collection',
   components: {
@@ -191,10 +199,22 @@ const CollectionPage = defineComponent({
       window.localStorage.setItem(COLLAPSED_STORAGE_KEY, String(this.collapsed));
     },
   },
-  async asyncData({ ranklandApiService, to }: AsyncDataOptions) {
+  async asyncData({ ranklandApiService, to, from }: AsyncDataOptions) {
     const id = String(to.params.id);
     const rankId = typeof to.query.rankId === 'string' ? to.query.rankId : undefined;
     const realId = normalizeCollectionId(id);
+    const previousState = from.meta.state as CollectionAsyncDataState | undefined;
+
+    // 同一合集内清理 rankId 时复用已有合集数据，避免 hydration 后重复请求合集接口。
+    if (!rankId && String(from.params.id) === id && previousState?.collection && !previousState.collectionLoadError) {
+      return {
+        collection: previousState.collection,
+        ranklist: undefined,
+        collectionLoadError: undefined,
+        ranklistLoadError: undefined,
+        ranklistIdInvalid: false,
+      };
+    }
 
     try {
       const collection = await ranklandApiService.getCollection({ uniqueKey: realId });
