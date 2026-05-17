@@ -55,23 +55,21 @@ class SmokeXMLHttpRequest {
 
   public send() {
     const requestUrl = new URL(this.url, 'http://127.0.0.1:3000');
-    const isExpectedDemoRequest =
+    const isExpectedStatisticsRequest =
       this.method.toUpperCase() === 'GET' &&
       requestUrl.origin === 'http://127.0.0.1:3000' &&
-      requestUrl.pathname === '/api/demoGet/42' &&
-      requestUrl.searchParams.get('page') === '9';
+      requestUrl.pathname === '/api/statistics';
 
-    if (!isExpectedDemoRequest) {
+    if (!isExpectedStatisticsRequest) {
       throw new Error(`Unexpected SSR smoke XHR request: ${this.method} ${this.url}`);
     }
 
     const responseBody = {
-      success: true,
+      code: 0,
+      message: 'success',
       data: {
-        page: 9,
-        list: [],
-        ip: '127.0.0.1',
-        ua: 'BwcxServerRequest/0',
+        totalSrkCount: 1234,
+        totalViewCount: 56789,
       },
     };
 
@@ -122,6 +120,9 @@ describe('SSR smoke harness', () => {
       expect(result).toBeTruthy();
       expect(typeof result.html).toBe('string');
       expect(result.html).toContain('<!DOCTYPE html>');
+      expect(result.html).toContain('欢迎来到 RankLand');
+      expect(result.html).toContain('1234');
+      expect(result.html).toContain('56789');
     } finally {
       globalThis.XMLHttpRequest = previousXMLHttpRequest;
     }
