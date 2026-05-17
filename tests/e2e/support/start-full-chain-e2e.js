@@ -73,6 +73,11 @@ function routeRequest(req, res) {
   }
 
   if (method === 'GET' && /^\/rank\/[^/]+$/.test(url.pathname)) {
+    if (url.pathname === '/rank/missing-key') {
+      sendJson(res, 200, { code: 11, message: 'Ranklist not found' });
+      return;
+    }
+
     sendJson(res, 200, ok(ranklistInfo));
     return;
   }
