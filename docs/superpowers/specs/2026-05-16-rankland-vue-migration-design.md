@@ -553,7 +553,7 @@ Full migration gate:
 - Route compatibility script
 - Manual smoke of production server:
   - `/`
-  - `/search?kw=Test`
+  - `/search?kw=Test%202024`
   - `/ranklist/test-key`
   - `/collection/official?rankId=test-key`
   - `/playground`
