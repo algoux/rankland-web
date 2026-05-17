@@ -59,6 +59,16 @@ const clientRoutes = parseRoutes([
     renderMethod: RenderMethodKind.SSR,
     otherOptions: undefined,
   },
+  {
+    name: 'Search',
+    path: '/search',
+    fullPath: '/search',
+    component: () => import(/* webpackChunkName: "Search" */ '../modules/search/search.view.vue'),
+    routeProps: undefined,
+    priority: undefined,
+    renderMethod: undefined,
+    otherOptions: undefined,
+  },
 ]);
 
 export default clientRoutes;
