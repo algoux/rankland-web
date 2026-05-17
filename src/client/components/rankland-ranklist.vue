@@ -5,8 +5,7 @@
 </template>
 
 <script lang="ts">
-import type { PropType } from 'vue';
-import { defineComponent } from 'vue';
+import { computed, defineComponent, type PropType } from 'vue';
 import type * as srk from '@algoux/standard-ranklist';
 import { convertToStaticRanklist } from '@algoux/standard-ranklist-renderer-component-core';
 import { Ranklist } from '@algoux/standard-ranklist-renderer-component-vue';
@@ -23,10 +22,9 @@ export default defineComponent({
       required: true,
     },
   },
-  computed: {
-    staticRanklist() {
-      return convertToStaticRanklist(this.ranklist);
-    },
+  setup(props) {
+    const staticRanklist = computed(() => convertToStaticRanklist(props.ranklist));
+    return { staticRanklist };
   },
 });
 </script>
