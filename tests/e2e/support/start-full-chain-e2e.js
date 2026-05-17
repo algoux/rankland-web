@@ -68,6 +68,11 @@ function routeRequest(req, res) {
   }
 
   if (method === 'GET' && /^\/rank\/group\/[^/]+$/.test(url.pathname)) {
+    if (url.pathname === '/rank/group/missing-collection') {
+      sendJson(res, 200, { code: 11, message: 'Collection not found' });
+      return;
+    }
+
     sendJson(res, 200, ok({ content: JSON.stringify(collection) }));
     return;
   }

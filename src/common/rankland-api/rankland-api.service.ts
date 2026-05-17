@@ -114,9 +114,19 @@ export class RanklandApiService {
       return JSON.parse(cached) as IApiCollection;
     }
 
-    const res = await this.cdnApi.get<{ content: string }>(urlcat('/rank/group/:key', { key: opts.uniqueKey }));
-    await this.setCachedValue(cacheKey, COLLECTION_TTL_SECONDS, res.content);
-    return JSON.parse(res.content) as IApiCollection;
+    try {
+      const res = await this.cdnApi.get<{ content: string }>(urlcat('/rank/group/:key', { key: opts.uniqueKey }));
+      await this.setCachedValue(cacheKey, COLLECTION_TTL_SECONDS, res.content);
+      return JSON.parse(res.content) as IApiCollection;
+    } catch (error) {
+      if (
+        (error instanceof RanklandApiException && error.code === 11) ||
+        (error instanceof RanklandHttpException && error.status === 404)
+      ) {
+        throw new RanklandLogicException(RanklandLogicExceptionKind.NotFound);
+      }
+      throw error;
+    }
   }
 
   public getStatistics(): Promise<IApiStatistics> {

@@ -185,12 +185,24 @@ const CollectionPage = defineComponent({
   mounted() {
     this.hydrated = true;
     this.collapsed = window.localStorage.getItem(COLLAPSED_STORAGE_KEY) === 'true';
-
-    if (this.ranklistIdInvalid) {
-      this.$router.replace(ranklandRoutes.collection.build({ id: this.id }));
-    }
+    this.cleanupInvalidRankId();
+  },
+  watch: {
+    ranklistIdInvalid() {
+      this.cleanupInvalidRankId();
+    },
   },
   methods: {
+    cleanupInvalidRankId() {
+      if (!this.ranklistIdInvalid) {
+        return;
+      }
+
+      const target = ranklandRoutes.collection.build({ id: this.id });
+      if (this.$route.fullPath !== target) {
+        this.$router.replace(target);
+      }
+    },
     refresh() {
       window.location.reload();
     },

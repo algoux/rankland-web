@@ -416,6 +416,26 @@ describe('RanklandApiService.getCollection', () => {
 
     expect(res).toEqual(inner);
   });
+
+  it('translates RanklandApiException(code=11) into RanklandLogicException(NotFound)', async () => {
+    const cdnGet = vi.fn().mockRejectedValue(new RanklandApiException(11, 'Collection not found'));
+    const { service } = buildService({ cdnGet });
+
+    await expect(service.getCollection({ uniqueKey: 'missing-collection' })).rejects.toMatchObject({
+      name: 'RanklandLogicException',
+      kind: RanklandLogicExceptionKind.NotFound,
+    });
+  });
+
+  it('translates RanklandHttpException(status=404) into RanklandLogicException(NotFound)', async () => {
+    const cdnGet = vi.fn().mockRejectedValue(new RanklandHttpException(404, 'Not Found'));
+    const { service } = buildService({ cdnGet });
+
+    await expect(service.getCollection({ uniqueKey: 'missing-collection' })).rejects.toMatchObject({
+      name: 'RanklandLogicException',
+      kind: RanklandLogicExceptionKind.NotFound,
+    });
+  });
 });
 
 describe('RanklandApiService.getStatistics', () => {
