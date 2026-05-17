@@ -187,7 +187,7 @@ describe('search result helpers', () => {
   });
 
   it('searches ranklists by name with Fuse', () => {
-    expect(searchRanklists(ranklists, 'Test').map((item) => item.uniqueKey)).toEqual(['test-key']);
+    expect(searchRanklists(ranklists, 'Test 2024').map((item) => item.uniqueKey)).toEqual(['test-key']);
   });
 
   it('searches ranklists by uniqueKey with Fuse', () => {
@@ -662,7 +662,7 @@ test.describe('/search full-chain route', () => {
     await denyExternalCalls(page);
     await request.post(`${mockBaseURL}/__reset`);
 
-    const response = await page.goto('/search?kw=Test');
+    const response = await page.goto('/search?kw=Test%202024');
 
     expect(response).not.toBeNull();
     expect(response?.ok()).toBe(true);

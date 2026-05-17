@@ -161,7 +161,7 @@ Unit tests:
 Full-chain E2E:
 
 - `/search` renders CSR shell, hydrates, calls `/rank/listall`, shows recent rows, and links the first row to `/ranklist/test-key`;
-- `/search?kw=Test` calls `/rank/listall`, renders result count `1`, and links the matching row to `/ranklist/test-key`;
+- `/search?kw=Test%202024` calls `/rank/listall`, renders result count `1`, and links the matching row to `/ranklist/test-key`;
 - `/search?kw=` behaves like empty query and shows the recent section;
 - full-chain search coverage asserts no `/rank/search` request is made.
 
