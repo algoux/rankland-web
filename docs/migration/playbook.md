@@ -200,32 +200,16 @@ Do not use one indefinitely long conversation as the project memory. Do not rely
 
 ## Codex Automation Strategy
 
-Use Codex automations as a guardrail, not as the main migration driver.
+Use Codex automations as a brief generator, not as the main migration driver.
 
-Recommended automations:
+Keep one recurring automation: daily pre-work migration brief.
 
-1. Weekly migration health check
+- Schedule: daily before the normal migration work window.
+- Workspace: `/Users/cooper/Projects/RankLand/rankland-web`.
+- Task: read `docs/migration/playbook.md`, `inventory.md`, `api-contract.md`, recent commits, and open specs/plans; summarize current migration state and the recommended next slice.
+- Purpose: make it easy to start a fresh conversation with accurate context.
 
-   - Schedule: Monday morning.
-   - Workspace: `/Users/cooper/Projects/RankLand/rankland-web`.
-   - Task: inspect branch/worktree, confirm Node/pnpm versions, run `corepack pnpm test:unit`, and report current branch, latest commit, dirty files, and test result.
-   - Purpose: catch drift cheaply without running the full gate too often.
-
-2. Pre-work migration brief
-
-   - Schedule: before planned migration work sessions.
-   - Workspace: `/Users/cooper/Projects/RankLand/rankland-web`.
-   - Task: read `docs/migration/playbook.md`, `inventory.md`, `api-contract.md`, recent commits, and open specs/plans; summarize current migration state and the recommended next slice.
-   - Purpose: make it easy to start a fresh conversation with accurate context.
-
-3. On-demand full migration gate
-
-   - Schedule: manual or explicitly requested.
-   - Workspace: `/Users/cooper/Projects/RankLand/rankland-web`.
-   - Task: run `corepack pnpm test:migration`, report failures with logs, and avoid changing code unless explicitly asked.
-   - Purpose: validate a completed slice before merge/push.
-
-Avoid scheduled automations that implement pages, rewrite specs, commit changes, or modify shared files without a human-triggered session. Those tasks require parity judgment and review.
+Avoid scheduled automations that implement pages, rewrite specs, run expensive full gates, commit changes, or modify shared files without a human-triggered session. Those tasks require parity judgment and review.
 
 ## Maintenance Rules
 
