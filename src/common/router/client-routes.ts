@@ -7,6 +7,7 @@ import { Newable } from 'bwcx-common';
 import { RenderMethodKind } from 'bwcx-client-vue/enums';
 import { CollectionRPO } from '../modules/collection/collection.rpo';
 import { DemoDetailRPO } from '../modules/demo/demo.rpo';
+import { LiveRPO } from '../modules/live/live.rpo';
 import { RanklistRPO } from '../modules/ranklist/ranklist.rpo';
 
 export const clientRoutesMap = new Map<string, { path: string; routeProps: Newable | undefined; renderMethod: RenderMethodKind | undefined }>([
@@ -14,10 +15,12 @@ export const clientRoutesMap = new Map<string, { path: string; routeProps: Newab
   ['Collection', { path: '/collection/:id', routeProps: CollectionRPO, renderMethod: RenderMethodKind.SSR }],
   ['DemoDetail', { path: '/demo/detail/:id', routeProps: DemoDetailRPO, renderMethod: RenderMethodKind.SSR }],
   ['Home', { path: '/', routeProps: undefined, renderMethod: RenderMethodKind.SSR }],
+  ['Live', { path: '/live/:id', routeProps: LiveRPO, renderMethod: undefined }],
   ['Playground', { path: '/playground', routeProps: undefined, renderMethod: undefined }],
   ['Ranklist', { path: '/ranklist/:id', routeProps: RanklistRPO, renderMethod: RenderMethodKind.SSR }],
   ['Search', { path: '/search', routeProps: undefined, renderMethod: undefined }],
 ]);
 export { CollectionRPO } from '../modules/collection/collection.rpo';
 export { DemoDetailRPO } from '../modules/demo/demo.rpo';
+export { LiveRPO } from '../modules/live/live.rpo';
 export { RanklistRPO } from '../modules/ranklist/ranklist.rpo';

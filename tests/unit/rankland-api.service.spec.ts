@@ -483,4 +483,24 @@ describe('RanklandApiService.getLiveRanklistInfo & getLiveRanklist', () => {
     const url = apiGet.mock.calls[0][0] as string;
     expect(url).not.toMatch(/token=/);
   });
+
+  it('getLiveRanklistInfo translates RanklandApiException(code=11) into RanklandLogicException(NotFound)', async () => {
+    const apiGet = vi.fn().mockRejectedValue(new RanklandApiException(11, 'Live ranklist not found'));
+    const { service } = buildService({ apiGet });
+
+    await expect(service.getLiveRanklistInfo({ uniqueKey: 'missing-live' })).rejects.toMatchObject({
+      name: 'RanklandLogicException',
+      kind: RanklandLogicExceptionKind.NotFound,
+    });
+  });
+
+  it('getLiveRanklist translates HTTP 404 into RanklandLogicException(NotFound)', async () => {
+    const apiGet = vi.fn().mockRejectedValue(new RanklandHttpException(404, 'Not Found'));
+    const { service } = buildService({ apiGet });
+
+    await expect(service.getLiveRanklist({ id: 'missing-live-id' })).rejects.toMatchObject({
+      name: 'RanklandLogicException',
+      kind: RanklandLogicExceptionKind.NotFound,
+    });
+  });
 });

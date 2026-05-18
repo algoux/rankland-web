@@ -49,12 +49,19 @@ describe('client routes', () => {
     }>;
     const { RanklistRPO } = await import('@common/modules/ranklist/ranklist.rpo');
     const { CollectionRPO } = await import('@common/modules/collection/collection.rpo');
+    const { LiveRPO } = await import('@common/modules/live/live.rpo');
     const ranklistRoute = routes.find((route) => route.name === 'Ranklist');
     const collectionRoute = routes.find((route) => route.name === 'Collection');
+    const liveRoute = routes.find((route) => route.name === 'Live');
     const playgroundRoute = routes.find((route) => route.name === 'Playground');
 
     expect(ranklistRoute?.routeProps).toBe(RanklistRPO);
     expect(collectionRoute?.routeProps).toBe(CollectionRPO);
+    expect(liveRoute).toMatchObject({
+      path: '/live/:id',
+      routeProps: LiveRPO,
+      renderMethod: undefined,
+    });
     expect(playgroundRoute).toMatchObject({
       path: '/playground',
       routeProps: undefined,

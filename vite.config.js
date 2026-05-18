@@ -14,6 +14,8 @@ const clientProcessEnv = {
   RANKLAND_SITE_ALIAS: process.env.RANKLAND_SITE_ALIAS,
   SITE_ALIAS: process.env.SITE_ALIAS,
   BEIAN: process.env.BEIAN,
+  RANKLAND_LIVE_POLLING_INTERVAL: process.env.RANKLAND_LIVE_POLLING_INTERVAL,
+  RANKLAND_WS_BASE: process.env.RANKLAND_WS_BASE,
 };
 
 if (process.env.RANKLAND_E2E_PROBE === '1') {

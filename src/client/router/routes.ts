@@ -6,6 +6,7 @@
 import { parseRoutes, RenderMethodKind } from 'bwcx-client-vue3';
 import { CollectionRPO } from '../../common/modules/collection/collection.rpo';
 import { DemoDetailRPO } from '../../common/modules/demo/demo.rpo';
+import { LiveRPO } from '../../common/modules/live/live.rpo';
 import { RanklistRPO } from '../../common/modules/ranklist/ranklist.rpo';
 
 const clientRoutes = parseRoutes([
@@ -47,6 +48,16 @@ const clientRoutes = parseRoutes([
     routeProps: undefined,
     priority: undefined,
     renderMethod: RenderMethodKind.SSR,
+    otherOptions: undefined,
+  },
+  {
+    name: 'Live',
+    path: '/live/:id',
+    fullPath: '/live/:id',
+    component: () => import(/* webpackChunkName: "Live" */ '../modules/live/live.view.vue'),
+    routeProps: LiveRPO,
+    priority: undefined,
+    renderMethod: undefined,
     otherOptions: undefined,
   },
   {

@@ -34,6 +34,20 @@ interface RawResponseLike {
   text(): Promise<string>;
 }
 
+function isRanklandNotFoundError(error: unknown): boolean {
+  return (
+    (error instanceof RanklandApiException && error.code === 11) ||
+    (error instanceof RanklandHttpException && error.status === 404)
+  );
+}
+
+function throwMappedRanklandNotFound(error: unknown): never {
+  if (isRanklandNotFoundError(error)) {
+    throw new RanklandLogicException(RanklandLogicExceptionKind.NotFound);
+  }
+  throw error;
+}
+
 export class RanklandApiService {
   private readonly api: RanklandApiRequestAdapter;
   private readonly cdnApi: RanklandApiRequestAdapter;
@@ -89,13 +103,7 @@ export class RanklandApiService {
       const ranklist = await this.getSrkFile({ fileID: info.fileID });
       return { info, srk: ranklist };
     } catch (error) {
-      if (
-        (error instanceof RanklandApiException && error.code === 11) ||
-        (error instanceof RanklandHttpException && error.status === 404)
-      ) {
-        throw new RanklandLogicException(RanklandLogicExceptionKind.NotFound);
-      }
-      throw error;
+      throwMappedRanklandNotFound(error);
     }
   }
 
@@ -119,13 +127,7 @@ export class RanklandApiService {
       await this.setCachedValue(cacheKey, COLLECTION_TTL_SECONDS, res.content);
       return JSON.parse(res.content) as IApiCollection;
     } catch (error) {
-      if (
-        (error instanceof RanklandApiException && error.code === 11) ||
-        (error instanceof RanklandHttpException && error.status === 404)
-      ) {
-        throw new RanklandLogicException(RanklandLogicExceptionKind.NotFound);
-      }
-      throw error;
+      throwMappedRanklandNotFound(error);
     }
   }
 
@@ -134,15 +136,23 @@ export class RanklandApiService {
   }
 
   public async getLiveRanklistInfo(opts: { uniqueKey: string }): Promise<IApiLiveRanklistInfo> {
-    return this.api.get<IApiLiveRanklistInfo>(
-      urlcat('/ranking/config/:uniqueKey', { uniqueKey: opts.uniqueKey, _t: Date.now() }),
-    );
+    try {
+      return await this.api.get<IApiLiveRanklistInfo>(
+        urlcat('/ranking/config/:uniqueKey', { uniqueKey: opts.uniqueKey, _t: Date.now() }),
+      );
+    } catch (error) {
+      throwMappedRanklandNotFound(error);
+    }
   }
 
   public async getLiveRanklist(opts: { id: string; token?: string }): Promise<srk.Ranklist> {
-    return this.api.get<srk.Ranklist>(
-      urlcat('/ranking/:id', { id: opts.id, token: opts.token || undefined, _t: Date.now() }),
-    );
+    try {
+      return await this.api.get<srk.Ranklist>(
+        urlcat('/ranking/:id', { id: opts.id, token: opts.token || undefined, _t: Date.now() }),
+      );
+    } catch (error) {
+      throwMappedRanklandNotFound(error);
+    }
   }
 
   private async getCachedValue(key: string): Promise<unknown> {

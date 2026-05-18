@@ -53,6 +53,9 @@ export async function denyExternalCalls(page: Page) {
 
 export async function stubWebSocket(page: Page) {
   await page.addInitScript(() => {
+    const win = window as unknown as { __ranklandWsUrls?: string[] };
+    win.__ranklandWsUrls = [];
+
     class StubWebSocket extends EventTarget {
       static CONNECTING = 0;
       static OPEN = 1;
@@ -66,6 +69,7 @@ export async function stubWebSocket(page: Page) {
       constructor(url: string) {
         super();
         this.url = url;
+        win.__ranklandWsUrls?.push(url);
         setTimeout(() => this.dispatchEvent(new Event('open')), 0);
       }
 

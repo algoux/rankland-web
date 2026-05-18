@@ -242,6 +242,8 @@ mockServer.listen(Number(mockPort), '127.0.0.1', () => {
       RANKLAND_CDN_API_BASE_SERVER: mockBaseURL,
       RANKLAND_API_BASE_CLIENT: mockBaseURL,
       RANKLAND_CDN_API_BASE_CLIENT: mockBaseURL,
+      RANKLAND_LIVE_POLLING_INTERVAL: '5000',
+      RANKLAND_WS_BASE: `ws://127.0.0.1:${mockPort}`,
     },
   });
   startCleanupWatcher(appProcess.pid);

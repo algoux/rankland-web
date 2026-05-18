@@ -14,10 +14,20 @@ const ranklandSiteEnv = {
   SITE_ALIAS: 'legacy-cnn',
   BEIAN: '鲁ICP备00000000号',
 };
+const ranklandLiveEnv = {
+  RANKLAND_LIVE_POLLING_INTERVAL: '250',
+  RANKLAND_WS_BASE: 'ws://127.0.0.1:3101',
+};
 
 const originalEnv = Object.fromEntries(
-  Object.keys({ ...ranklandEnv, ...e2eProbeEnv, ...ranklandSiteEnv }).map((key) => [key, process.env[key]]),
-) as Record<keyof typeof ranklandEnv | keyof typeof e2eProbeEnv | keyof typeof ranklandSiteEnv, string | undefined>;
+  Object.keys({ ...ranklandEnv, ...e2eProbeEnv, ...ranklandSiteEnv, ...ranklandLiveEnv }).map((key) => [
+    key,
+    process.env[key],
+  ]),
+) as Record<
+  keyof typeof ranklandEnv | keyof typeof e2eProbeEnv | keyof typeof ranklandSiteEnv | keyof typeof ranklandLiveEnv,
+  string | undefined
+>;
 
 function restoreEnv() {
   for (const key of Object.keys(originalEnv) as Array<keyof typeof originalEnv>) {
@@ -36,7 +46,7 @@ describe('vite config', () => {
   });
 
   it('injects RankLand API and site env values into bundled process.env', () => {
-    Object.assign(process.env, ranklandEnv, e2eProbeEnv, ranklandSiteEnv);
+    Object.assign(process.env, ranklandEnv, e2eProbeEnv, ranklandSiteEnv, ranklandLiveEnv);
     delete require.cache[require.resolve(VITE_CONFIG_PATH)];
 
     // eslint-disable-next-line @typescript-eslint/no-var-requires
@@ -44,6 +54,7 @@ describe('vite config', () => {
 
     expect(viteConfig.define['process.env']).toMatchObject(ranklandEnv);
     expect(viteConfig.define['process.env']).toMatchObject(ranklandSiteEnv);
+    expect(viteConfig.define['process.env']).toMatchObject(ranklandLiveEnv);
     expect(viteConfig.define['process.env']).toHaveProperty('RANKLAND_E2E_PROBE', '1');
     expect(viteConfig.define['process.env.RANKLAND_E2E_PROBE']).toBe('"1"');
   });

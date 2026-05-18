@@ -14,6 +14,7 @@ declare module '@vue/runtime-core' {
       to(target: 'Collection'): BwcxVueRouterActions<R.CollectionRPO>;
       to(target: 'DemoDetail'): BwcxVueRouterActions<R.DemoDetailRPO>;
       to(target: 'Home'): BwcxVueRouterActions;
+      to(target: 'Live'): BwcxVueRouterActions<R.LiveRPO>;
       to(target: 'Playground'): BwcxVueRouterActions;
       to(target: 'Ranklist'): BwcxVueRouterActions<R.RanklistRPO>;
       to(target: 'Search'): BwcxVueRouterActions;

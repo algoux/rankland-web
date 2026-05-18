@@ -317,17 +317,20 @@ Avoid scheduled automations that implement pages, rewrite specs, run expensive f
 
 ## Remaining Route Backlog
 
-As of the playground-page foundation branch, the migrated public route foundation includes:
+As of the live-page foundation branch, the migrated public route foundation includes:
 
 - `/` as an SSR route;
 - `/search` as a CSR route;
 - `/ranklist/:id` as an SSR route;
 - `/collection/:id` as an SSR route;
 - `/playground` as a CSR route;
+- `/live/:id` as a CSR route;
 - shared RankLand API service, route builders, SRK renderer wrapper, client route generator isolation, fixtures, and full-chain E2E harness.
 
-The likely next route slice is:
+The likely next route slices are:
 
-- `/live/:id`.
+- scroll-solution visual parity and realtime event rendering polish;
+- SRK renderer wrapper parity beyond the foundation table;
+- page-specific parity gaps found during product review.
 
 Update this section when a route reaches full-chain coverage.
