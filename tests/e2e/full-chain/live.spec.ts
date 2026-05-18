@@ -10,6 +10,22 @@ async function readRequests(request: APIRequestContext) {
   return (await response.json()) as Array<{ path: string; search: string }>;
 }
 
+function bytes(text: string) {
+  return Array.from(new TextEncoder().encode(text));
+}
+
+function makeRealtimeSolutionBytes() {
+  const fields = [
+    [0, 0, 0, 0, 0, 0, 0, 7],
+    bytes('A'),
+    bytes('team-alpha'),
+    bytes('AC'),
+    [2],
+  ];
+  const header = [fields.length, ...fields.map((field) => field.length)];
+  return [...header, ...fields.flat()];
+}
+
 test.describe('/live/:id full-chain route', () => {
   test('hydrates the CSR live page, preserves queries, polls live ranklist, and guards WebSocket setup', async ({
     page,
@@ -40,6 +56,26 @@ test.describe('/live/:id full-chain route', () => {
         page.evaluate(() => (window as unknown as { __ranklandWsUrls?: string[] }).__ranklandWsUrls || []),
       )
       .toContain(`ws://127.0.0.1:${mockPort}/ranking/record/live-rid-1?token=t0`);
+
+    await page.evaluate(
+      ({ url, message }) => {
+        (
+          window as unknown as {
+            __ranklandEmitWsMessage?: (url: string, bytes: number[]) => void;
+          }
+        ).__ranklandEmitWsMessage?.(url, message);
+      },
+      {
+        url: `ws://127.0.0.1:${mockPort}/ranking/record/live-rid-1?token=t0`,
+        message: makeRealtimeSolutionBytes(),
+      },
+    );
+
+    const scrollSolutionItem = page.locator('[data-id="live-scroll-solution-item"]').first();
+    await expect(scrollSolutionItem).toContainText('2');
+    await expect(scrollSolutionItem).toContainText('Team Alpha');
+    await expect(scrollSolutionItem).toContainText('A');
+    await expect(scrollSolutionItem).toContainText('AC');
 
     const requests = await readRequests(request);
     const liveInfoRequests = requests.filter((requestRecord) => requestRecord.path === '/ranking/config/live-test-key');

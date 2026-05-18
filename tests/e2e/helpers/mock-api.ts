@@ -53,8 +53,19 @@ export async function denyExternalCalls(page: Page) {
 
 export async function stubWebSocket(page: Page) {
   await page.addInitScript(() => {
-    const win = window as unknown as { __ranklandWsUrls?: string[] };
+    const sockets = new Map<string, EventTarget>();
+    const win = window as unknown as {
+      __ranklandWsUrls?: string[];
+      __ranklandEmitWsMessage?: (url: string, bytes: number[]) => void;
+    };
     win.__ranklandWsUrls = [];
+    win.__ranklandEmitWsMessage = (url: string, bytes: number[]) => {
+      const socket = sockets.get(url);
+      if (!socket) {
+        return;
+      }
+      socket.dispatchEvent(new MessageEvent('message', { data: new Uint8Array(bytes).buffer }));
+    };
 
     class StubWebSocket extends EventTarget {
       static CONNECTING = 0;
@@ -70,11 +81,13 @@ export async function stubWebSocket(page: Page) {
         super();
         this.url = url;
         win.__ranklandWsUrls?.push(url);
+        sockets.set(url, this);
         setTimeout(() => this.dispatchEvent(new Event('open')), 0);
       }
 
       close() {
         this.readyState = StubWebSocket.CLOSED;
+        sockets.delete(this.url);
         this.dispatchEvent(new Event('close'));
       }
 

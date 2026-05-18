@@ -29,6 +29,7 @@
       :data-live-id="liveId"
       :data-row-count="rowCount"
       :data-focus="focusQuery"
+      :class="{ 'live-content-with-scroll-solution': scrollSolutionEnabled }"
     >
       <header class="live-header">
         <div>
@@ -66,8 +67,17 @@ import { LiveRPO } from '@common/modules/live/live.rpo';
 import RanklandRanklist from '@client/components/rankland-ranklist.vue';
 import { useRanklandApiService } from '@client/plugins/rankland-api.plugin';
 import { formatTitle } from '@client/utils/title-format.util';
-import LiveScrollSolution, { type LiveScrollSolutionItem } from './live-scroll-solution.vue';
+import LiveScrollSolution from './live-scroll-solution.vue';
 import { classifyLiveLoadError, type LiveLoadErrorState } from './live-error';
+import {
+  SCROLL_SOLUTION_POP_INTERVAL,
+  enqueueScrollSolutions,
+  getNextScrollSolutionPop,
+  getScrollSolutionDelay,
+  getScrollSolutionVisibleLimit,
+  type DisplayedScrollSolutionItem,
+  type QueuedScrollSolutionItem,
+} from './live-scroll-solution-state';
 import { parseRealtimeSolutionBuffer } from './realtime-solutions';
 
 function firstQueryString(value: unknown): string | undefined {
@@ -119,7 +129,12 @@ const LivePage = defineComponent({
       pollRanklistTimer: undefined as number | undefined,
       ws: null as WebSocket | null,
       scrollSolutionStatus: 'disabled',
-      scrollSolutions: [] as LiveScrollSolutionItem[],
+      scrollSolutions: [] as DisplayedScrollSolutionItem[],
+      scrollSolutionQueue: [] as QueuedScrollSolutionItem[],
+      scrollSolutionPopTimer: undefined as number | undefined,
+      scrollSolutionDismissTimers: [] as number[],
+      scrollSolutionSequence: 0,
+      scrollSolutionContainerMaxHeight: 0,
     };
   },
   computed: {
@@ -137,6 +152,9 @@ const LivePage = defineComponent({
     },
     rowCount(): number {
       return this.ranklist?.rows?.length || 0;
+    },
+    scrollSolutionVisibleLimit(): number {
+      return getScrollSolutionVisibleLimit(this.scrollSolutionContainerMaxHeight);
     },
     ranklistTitle(): string {
       const title = this.ranklist?.contest?.title || this.info?.title;
@@ -165,9 +183,12 @@ const LivePage = defineComponent({
   },
   mounted() {
     this.hydrated = true;
+    this.updateScrollSolutionContainerHeight();
+    window.addEventListener('resize', this.updateScrollSolutionContainerHeight);
     this.loadLiveRanklist();
   },
   beforeUnmount() {
+    window.removeEventListener('resize', this.updateScrollSolutionContainerHeight);
     this.stopLiveUpdates();
   },
   methods: {
@@ -181,7 +202,7 @@ const LivePage = defineComponent({
       this.info = null;
       this.ranklist = null;
       this.loadError = undefined;
-      this.scrollSolutions = [];
+      this.resetScrollSolutions();
       this.scrollSolutionStatus = this.scrollSolutionEnabled ? 'connecting' : 'disabled';
 
       try {
@@ -225,6 +246,77 @@ const LivePage = defineComponent({
         this.ws.close();
         this.ws = null;
       }
+      this.stopScrollSolutionQueue();
+      for (const timer of this.scrollSolutionDismissTimers) {
+        window.clearTimeout(timer);
+      }
+      this.scrollSolutionDismissTimers = [];
+    },
+    updateScrollSolutionContainerHeight() {
+      this.scrollSolutionContainerMaxHeight = window.innerHeight;
+      this.scrollSolutions = this.scrollSolutions.slice(0, this.scrollSolutionVisibleLimit);
+    },
+    resetScrollSolutions() {
+      this.stopScrollSolutionQueue();
+      this.scrollSolutions = [];
+      this.scrollSolutionQueue = [];
+      this.scrollSolutionSequence = 0;
+      for (const timer of this.scrollSolutionDismissTimers) {
+        window.clearTimeout(timer);
+      }
+      this.scrollSolutionDismissTimers = [];
+    },
+    stopScrollSolutionQueue() {
+      if (this.scrollSolutionPopTimer !== undefined) {
+        window.clearTimeout(this.scrollSolutionPopTimer);
+        this.scrollSolutionPopTimer = undefined;
+      }
+    },
+    pushScrollSolutions(rows: QueuedScrollSolutionItem[]) {
+      const next = enqueueScrollSolutions(this.scrollSolutionQueue, rows);
+      this.scrollSolutionQueue = next.queue;
+      for (const item of next.immediate) {
+        this.showScrollSolution(item, getScrollSolutionDelay(item.result));
+      }
+      this.scheduleScrollSolutionPop(SCROLL_SOLUTION_POP_INTERVAL);
+    },
+    showScrollSolution(item: QueuedScrollSolutionItem, delay: number) {
+      const key = `${Date.now()}-${this.scrollSolutionSequence}`;
+      this.scrollSolutionSequence += 1;
+      const displayed = { ...item, key };
+      this.scrollSolutions = [displayed, ...this.scrollSolutions].slice(0, this.scrollSolutionVisibleLimit);
+      let dismissTimer = 0;
+      dismissTimer = window.setTimeout(() => {
+        this.scrollSolutions = this.scrollSolutions.filter((solution) => solution.key !== key);
+        this.scrollSolutionDismissTimers = this.scrollSolutionDismissTimers.filter((timer) => timer !== dismissTimer);
+      }, delay);
+      this.scrollSolutionDismissTimers.push(dismissTimer);
+    },
+    scheduleScrollSolutionPop(interval: number) {
+      if (this.scrollSolutionPopTimer !== undefined) {
+        return;
+      }
+      this.scrollSolutionPopTimer = window.setTimeout(() => {
+        this.scrollSolutionPopTimer = undefined;
+        this.popScrollSolutionFromQueue();
+      }, interval);
+    },
+    popScrollSolutionFromQueue() {
+      const [item, ...restQueue] = this.scrollSolutionQueue;
+      if (!item) {
+        return;
+      }
+
+      const timing = getNextScrollSolutionPop({
+        queueLength: this.scrollSolutionQueue.length,
+        visibleLimit: this.scrollSolutionVisibleLimit,
+        result: item.result,
+      });
+      this.scrollSolutionQueue = restQueue;
+      this.showScrollSolution(item, timing.delay);
+      if (this.scrollSolutionQueue.length > 0) {
+        this.scheduleScrollSolutionPop(timing.interval);
+      }
     },
     connectScrollSolution() {
       if (!this.info?.id || !this.scrollSolutionEnabled) {
@@ -250,7 +342,7 @@ const LivePage = defineComponent({
             return;
           }
 
-          this.scrollSolutions = [
+          this.pushScrollSolutions([
             {
               problemAlias: solution.problemAlias,
               result: solution.result,
@@ -261,8 +353,7 @@ const LivePage = defineComponent({
                 organization: user.organization ? resolveText(user.organization) : undefined,
               },
             },
-            ...this.scrollSolutions,
-          ].slice(0, 20);
+          ]);
         });
         ws.addEventListener('close', () => {
           this.scrollSolutionStatus = 'closed';
@@ -334,6 +425,11 @@ export default routeView(LivePage, '/live/:id', LiveRPO);
   font-size: 24px;
 }
 
+.live-content-with-scroll-solution {
+  margin-left: 250px;
+  margin-right: 16px;
+}
+
 .live-hydrated {
   color: #64748b;
   font-size: 12px;
@@ -356,6 +452,13 @@ export default routeView(LivePage, '/live/:id', LiveRPO);
 
   .live-scroll-toggle {
     justify-content: space-between;
+  }
+}
+
+@media (max-width: 767px) {
+  .live-content-with-scroll-solution {
+    margin-right: auto;
+    margin-left: auto;
   }
 }
 </style>
