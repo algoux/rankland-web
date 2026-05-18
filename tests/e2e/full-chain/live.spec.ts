@@ -90,6 +90,10 @@ test.describe('/live/:id full-chain route', () => {
     await expect(userModal.locator('.srk-modal')).toBeVisible();
     await expect(userModal).toContainText('Team Alpha');
     await expect(userModal).toContainText('Org A');
+    await expect(userModal.locator('[data-id="rankland-rank-time-panel"]')).toBeVisible();
+    await expect(userModal.locator('[data-id="rankland-rank-time-unit"]')).toHaveText('单位：min');
+    await expect(userModal.locator('[data-id="rankland-rank-time-event"]')).toContainText(['A', 'B']);
+    await expect(userModal.locator('[data-id="rankland-rank-time-curve"]')).toBeVisible();
     await userModal.getByRole('button', { name: 'Close' }).click();
     await expect(userModal.locator('.srk-modal')).toBeHidden();
 

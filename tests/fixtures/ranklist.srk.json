@@ -39,7 +39,8 @@
       "user": {
         "id": "team-alpha",
         "name": "Team Alpha",
-        "organization": "Org A"
+        "organization": "Org A",
+        "official": true
       },
       "score": { "value": 2, "time": [100, "min"] },
       "statuses": [

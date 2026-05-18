@@ -135,12 +135,92 @@
       </footer>
 
       <div data-id="rankland-ranklist-user-modal">
-        <DefaultUserModal
+        <Modal
           :open="!!activeUserPayload"
-          :user="activeUserPayload?.user"
-          :markers="ranklistState.staticRanklist.markers || []"
+          :title="activeUserTitle"
+          :width="960"
+          root-class-name="srk-general-modal-root"
+          wrap-class-name="rankland-user-modal"
           @close="handleUserModalClose"
-        />
+        >
+          <div v-if="activeUserPayload" class="rankland-user-modal-body">
+            <h3 data-id="rankland-user-modal-name" class="rankland-user-modal-name">{{ activeUserTitle }}</h3>
+            <p v-if="activeUserOrganization" data-id="rankland-user-modal-organization" class="rankland-user-modal-line">
+              {{ activeUserOrganization }}
+            </p>
+            <p v-if="activeUserPayload.user.official === false" class="rankland-user-modal-line">
+              ＊ 非正式参加者
+            </p>
+            <div v-if="activeUserTeamMembers.length > 0" class="rankland-user-modal-team-members">
+              <template v-for="(member, memberIndex) in activeUserTeamMembers" :key="memberIndex">
+                <span v-if="memberIndex > 0" class="rankland-user-modal-team-separator"> / </span>
+                <span>{{ resolveTextValue(member.name) }}</span>
+              </template>
+            </div>
+            <div v-if="activeUserMarkers.length > 0" class="rankland-user-modal-markers">
+              <span
+                v-for="marker in activeUserMarkers"
+                :key="marker.id"
+                class="rankland-user-modal-marker"
+              >
+                {{ resolveTextValue(marker.label) }}
+              </span>
+            </div>
+            <div v-if="activeUserPhoto" class="rankland-user-modal-photo">
+              <img :src="activeUserPhoto" alt="选手照片">
+            </div>
+            <p v-if="activeUserSlogan" class="rankland-user-modal-slogan">{{ activeUserSlogan }}</p>
+
+            <div
+              v-if="activeUserRankTimeData"
+              data-id="rankland-rank-time-panel"
+              class="rankland-rank-time-panel"
+            >
+              <div class="rankland-rank-time-header">
+                <h4>排名时间</h4>
+                <span data-id="rankland-rank-time-unit">单位：{{ activeUserRankTimeData.unit }}</span>
+              </div>
+              <svg
+                data-id="rankland-rank-time-curve"
+                class="rankland-rank-time-curve"
+                viewBox="0 0 320 150"
+                role="img"
+                aria-label="排名时间曲线"
+              >
+                <polyline
+                  :points="rankTimeCurvePoints"
+                  fill="none"
+                  stroke="#2563eb"
+                  stroke-width="3"
+                  stroke-linejoin="round"
+                  stroke-linecap="round"
+                />
+                <circle
+                  v-for="eventPoint in rankTimeEventMarkers"
+                  :key="`${eventPoint.problemAlias}-${eventPoint.time}`"
+                  :cx="eventPoint.cx"
+                  :cy="eventPoint.cy"
+                  r="5"
+                  :fill="eventPoint.fb ? '#15803d' : '#2563eb'"
+                />
+              </svg>
+              <p data-id="rankland-rank-time-summary" class="rankland-rank-time-summary">
+                当前主排名：{{ activeUserRankTimeLatestPoint?.rank }}，解题数：{{ activeUserRankTimeLatestPoint?.solved }}
+              </p>
+              <div class="rankland-rank-time-events">
+                <span
+                  v-for="eventPoint in activeUserRankTimeData.solvedEventPoints"
+                  :key="`${eventPoint.problemAlias}-${eventPoint.time}`"
+                  data-id="rankland-rank-time-event"
+                  class="rankland-rank-time-event"
+                >
+                  {{ eventPoint.problemAlias }} · {{ eventPoint.fb ? 'FB' : 'AC' }} ·
+                  {{ formatSolvedTime(eventPoint.solvedTime) }}
+                </span>
+              </div>
+            </div>
+          </div>
+        </Modal>
       </div>
 
       <div data-id="rankland-ranklist-solution-modal">
@@ -160,10 +240,16 @@
 <script lang="ts">
 import { defineComponent, type PropType } from 'vue';
 import type * as srk from '@algoux/standard-ranklist';
-import { formatTimeDuration, resolveText } from '@algoux/standard-ranklist-utils';
+import {
+  formatTimeDuration,
+  getSortedCalculatedRawSolutions,
+  resolveText,
+  resolveUserMarkers,
+  secToTimeStr,
+} from '@algoux/standard-ranklist-utils';
 import {
   DefaultSolutionModal,
-  DefaultUserModal,
+  Modal,
   ProgressBar,
   Ranklist,
   type SolutionClickPayload,
@@ -177,6 +263,15 @@ import {
   normalizeRanklandShareUrl,
   type RanklandEmbedKind,
 } from './rankland-ranklist-actions';
+import {
+  getAllRankTimeData,
+  getProperRankTimeChunkUnit,
+  selectUserMainRankTimeData,
+  type RankTimeDataSet,
+  type RankTimePoint,
+  type RankTimeSolvedEventPoint,
+  type SelectedUserMainRankTimeData,
+} from './rankland-rank-time';
 
 function formatDateTime(timestamp: number): string {
   return new Date(timestamp).toLocaleString('zh-CN', {
@@ -194,7 +289,7 @@ export default defineComponent({
   name: 'RanklandRanklist',
   components: {
     DefaultSolutionModal,
-    DefaultUserModal,
+    Modal,
     ProgressBar,
     Ranklist,
   },
@@ -247,6 +342,7 @@ export default defineComponent({
       activeUserPayload: null as UserClickPayload | null,
       activeSolutionPayload: null as SolutionClickPayload | null,
       actionStatus: '',
+      rankTimeDataSet: null as RankTimeDataSet | null,
     };
   },
   computed: {
@@ -273,10 +369,76 @@ export default defineComponent({
     embedKind(): RanklandEmbedKind {
       return this.isLive ? 'live' : 'ranklist';
     },
+    baseRanklistState() {
+      return createRanklandRanklistState(this.ranklist, {
+        timeTravelTime: this.timeTravelTime,
+      });
+    },
+    activeUserTitle(): string {
+      return this.activeUserPayload ? resolveText(this.activeUserPayload.user.name) : 'User Info';
+    },
+    activeUserOrganization(): string {
+      return this.activeUserPayload ? resolveText(this.activeUserPayload.user.organization) : '';
+    },
+    activeUserTeamMembers(): srk.ExternalUser[] {
+      return this.activeUserPayload?.user.teamMembers || [];
+    },
+    activeUserMarkers(): srk.Marker[] {
+      if (!this.activeUserPayload || this.baseRanklistState.kind !== 'ready') {
+        return [];
+      }
+      return resolveUserMarkers(this.activeUserPayload.user, this.baseRanklistState.staticRanklist.markers);
+    },
+    activeUserPhoto(): string {
+      return this.activeUserPayload?.user.photo || '';
+    },
+    activeUserSlogan(): string {
+      return (this.activeUserPayload?.user as srk.User & { x_slogan?: string }).x_slogan || '';
+    },
+    activeUserRankTimeData(): SelectedUserMainRankTimeData | null {
+      if (!this.activeUserPayload || this.activeUserPayload.user.official !== true || !this.rankTimeDataSet) {
+        return null;
+      }
+      if (this.baseRanklistState.kind !== 'ready') {
+        return null;
+      }
+      return selectUserMainRankTimeData({
+        rankTimeDataSet: this.rankTimeDataSet,
+        staticRows: this.baseRanklistState.staticRanklist.rows,
+        staticSeries: this.baseRanklistState.staticRanklist.series,
+        staticMarkers: this.baseRanklistState.staticRanklist.markers,
+        userId: this.activeUserPayload.user.id,
+        fixedMarker: this.filter.marker,
+      });
+    },
+    activeUserRankTimeLatestPoint(): RankTimePoint | null {
+      const points = this.activeUserRankTimeData?.points || [];
+      return points[points.length - 1] || null;
+    },
+    rankTimeCurvePoints(): string {
+      const points = this.activeUserRankTimeData?.points || [];
+      return points.map((point) => this.getRankTimeSvgPoint(point).join(',')).join(' ');
+    },
+    rankTimeEventMarkers(): Array<RankTimeSolvedEventPoint & { cx: number; cy: number }> {
+      return (this.activeUserRankTimeData?.solvedEventPoints || []).map((eventPoint) => {
+        const [cx, cy] = this.getRankTimeSvgPoint(eventPoint);
+        return {
+          ...eventPoint,
+          cx,
+          cy,
+        };
+      });
+    },
   },
   watch: {
     id() {
       this.resetControls();
+    },
+    ranklist() {
+      this.rankTimeDataSet = null;
+      if (this.activeUserPayload) {
+        this.rankTimeDataSet = this.createRankTimeDataSet();
+      }
     },
   },
   methods: {
@@ -293,6 +455,7 @@ export default defineComponent({
       this.activeUserPayload = null;
       this.activeSolutionPayload = null;
       this.actionStatus = '';
+      this.rankTimeDataSet = null;
     },
     resolveTextValue(value: srk.Text | undefined): string {
       return resolveText(value);
@@ -300,6 +463,7 @@ export default defineComponent({
     handleUserClick(payload: UserClickPayload) {
       this.activeUserPayload = payload;
       this.activeSolutionPayload = null;
+      this.rankTimeDataSet = this.rankTimeDataSet || this.createRankTimeDataSet();
     },
     handleSolutionClick(payload: SolutionClickPayload) {
       this.activeSolutionPayload = payload;
@@ -310,6 +474,32 @@ export default defineComponent({
     },
     handleSolutionModalClose() {
       this.activeSolutionPayload = null;
+    },
+    createRankTimeDataSet(): RankTimeDataSet {
+      return getAllRankTimeData(
+        this.ranklist,
+        getSortedCalculatedRawSolutions(this.ranklist.rows),
+        getProperRankTimeChunkUnit(this.ranklist.contest),
+      );
+    },
+    getRankTimeSvgPoint(point: Pick<RankTimePoint, 'time' | 'rank'>): [number, number] {
+      const data = this.activeUserRankTimeData;
+      if (!data || data.points.length === 0) {
+        return [20, 130];
+      }
+
+      const width = 280;
+      const height = 110;
+      const left = 24;
+      const top = 20;
+      const maxTime = data.points[data.points.length - 1].time || 1;
+      const maxRank = Math.max(...data.points.map((rankTimePoint) => rankTimePoint.rank), data.totalUsers, 1);
+      const x = left + (point.time / maxTime) * width;
+      const y = top + ((point.rank - 1) / Math.max(maxRank - 1, 1)) * height;
+      return [Number(x.toFixed(2)), Number(y.toFixed(2))];
+    },
+    formatSolvedTime(time: srk.TimeDuration): string {
+      return secToTimeStr(formatTimeDuration(time, 's'));
     },
     downloadSrkJson() {
       const file = createSrkExportFile(this.ranklist, this.actionName);
@@ -523,6 +713,99 @@ export default defineComponent({
 
 .rankland-ranklist-footer p {
   margin: 4px 0;
+}
+
+.rankland-user-modal-body {
+  color: #1f2937;
+}
+
+.rankland-user-modal-name {
+  margin: 0 0 8px;
+  font-size: 20px;
+  font-weight: 600;
+}
+
+.rankland-user-modal-line {
+  margin: 4px 0;
+}
+
+.rankland-user-modal-team-members,
+.rankland-user-modal-markers,
+.rankland-rank-time-events {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.rankland-user-modal-team-separator {
+  color: #94a3b8;
+}
+
+.rankland-user-modal-marker,
+.rankland-rank-time-event {
+  display: inline-flex;
+  align-items: center;
+  min-height: 24px;
+  padding: 2px 8px;
+  border-radius: 4px;
+  background: #f1f5f9;
+  color: #334155;
+  font-size: 12px;
+}
+
+.rankland-user-modal-photo {
+  margin-top: 16px;
+
+  img {
+    max-width: 100%;
+  }
+}
+
+.rankland-user-modal-slogan {
+  margin: 16px 0 0;
+}
+
+.rankland-rank-time-panel {
+  margin-top: 20px;
+  padding-top: 16px;
+  border-top: 1px solid #e5e7eb;
+}
+
+.rankland-rank-time-header {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 8px;
+
+  h4 {
+    margin: 0;
+    font-size: 16px;
+  }
+
+  span {
+    color: #64748b;
+    font-size: 13px;
+  }
+}
+
+.rankland-rank-time-curve {
+  display: block;
+  width: 100%;
+  height: 190px;
+  border: 1px solid #e2e8f0;
+  border-radius: 4px;
+  background:
+    linear-gradient(to right, rgb(148 163 184 / 16%) 1px, transparent 1px),
+    linear-gradient(to bottom, rgb(148 163 184 / 16%) 1px, transparent 1px);
+  background-size: 40px 32px;
+}
+
+.rankland-rank-time-summary {
+  margin: 8px 0 0;
+  color: #334155;
+  font-size: 13px;
 }
 
 .rankland-ranklist-error {
