@@ -5,7 +5,8 @@
     "title": "Test Contest 2024",
     "startAt": "2024-04-01T10:00:00+08:00",
     "duration": [5, "h"],
-    "frozenDuration": [1, "h"]
+    "frozenDuration": [1, "h"],
+    "banner": "banner.png"
   },
   "problems": [
     {
@@ -40,7 +41,8 @@
         "id": "team-alpha",
         "name": "Team Alpha",
         "organization": "Org A",
-        "official": true
+        "official": true,
+        "photo": "/team-alpha.png"
       },
       "score": { "value": 2, "time": [100, "min"] },
       "statuses": [

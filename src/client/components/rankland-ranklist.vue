@@ -6,6 +6,14 @@
     </div>
     <template v-else>
       <header v-if="showHeader" class="rankland-ranklist-header">
+        <div v-if="contestBannerSrc" class="rankland-ranklist-banner-wrap">
+          <img
+            data-id="rankland-ranklist-banner"
+            :src="contestBannerSrc"
+            alt="Contest Banner"
+            class="rankland-ranklist-banner"
+          >
+        </div>
         <h1 data-id="rankland-ranklist-title">{{ ranklistTitle }}</h1>
         <div data-id="rankland-ranklist-header-actions" class="rankland-ranklist-header-actions">
           <details data-id="rankland-ranklist-export-menu" class="rankland-ranklist-action-menu">
@@ -112,6 +120,7 @@
         <Ranklist
           :data="ranklistState.staticRanklist"
           striped-rows
+          :format-srk-asset-url="formatRanklistAssetUrl"
           @user-click="handleUserClick"
           @solution-click="handleSolutionClick"
         />
@@ -166,8 +175,8 @@
                 {{ resolveTextValue(marker.label) }}
               </span>
             </div>
-            <div v-if="activeUserPhoto" class="rankland-user-modal-photo">
-              <img :src="activeUserPhoto" alt="选手照片">
+            <div v-if="activeUserPhotoSrc" class="rankland-user-modal-photo">
+              <img data-id="rankland-user-modal-photo" :src="activeUserPhotoSrc" alt="选手照片">
             </div>
             <p v-if="activeUserSlogan" class="rankland-user-modal-slogan">{{ activeUserSlogan }}</p>
 
@@ -272,6 +281,7 @@ import {
   type RankTimeSolvedEventPoint,
   type SelectedUserMainRankTimeData,
 } from './rankland-rank-time';
+import { formatSrkAssetUrl } from '@client/utils/srk-asset.util';
 
 function formatDateTime(timestamp: number): string {
   return new Date(timestamp).toLocaleString('zh-CN', {
@@ -355,6 +365,9 @@ export default defineComponent({
     ranklistTitle(): string {
       return resolveText(this.ranklist.contest?.title);
     },
+    contestBannerSrc(): string {
+      return this.resolveSrkImageUrl(this.ranklist.contest?.banner);
+    },
     contestTimeRange(): string {
       const startAt = new Date(this.ranklist.contest.startAt).getTime();
       const endAt = startAt + formatTimeDuration(this.ranklist.contest.duration, 'ms');
@@ -389,8 +402,8 @@ export default defineComponent({
       }
       return resolveUserMarkers(this.activeUserPayload.user, this.baseRanklistState.staticRanklist.markers);
     },
-    activeUserPhoto(): string {
-      return this.activeUserPayload?.user.photo || '';
+    activeUserPhotoSrc(): string {
+      return this.resolveSrkImageUrl(this.activeUserPayload?.user.photo);
     },
     activeUserSlogan(): string {
       return (this.activeUserPayload?.user as srk.User & { x_slogan?: string }).x_slogan || '';
@@ -459,6 +472,16 @@ export default defineComponent({
     },
     resolveTextValue(value: srk.Text | undefined): string {
       return resolveText(value);
+    },
+    resolveSrkImageUrl(image: srk.Image | srk.ImageWithLink | undefined): string {
+      if (!image) {
+        return '';
+      }
+      const rawUrl = typeof image === 'string' ? image : image.link || image.image;
+      return this.formatRanklistAssetUrl(rawUrl);
+    },
+    formatRanklistAssetUrl(url: string): string {
+      return formatSrkAssetUrl(url, this.id);
     },
     handleUserClick(payload: UserClickPayload) {
       this.activeUserPayload = payload;
@@ -573,6 +596,17 @@ export default defineComponent({
 .rankland-ranklist-header h1 {
   margin: 0 0 4px;
   font-size: 28px;
+}
+
+.rankland-ranklist-banner-wrap {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 8px;
+}
+
+.rankland-ranklist-banner {
+  max-width: min(100%, 1820px);
+  max-height: 40vh;
 }
 
 .rankland-ranklist-header-actions {

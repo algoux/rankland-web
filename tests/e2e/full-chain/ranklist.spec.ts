@@ -40,6 +40,10 @@ test.describe('/ranklist/:id full-chain route', () => {
     await expect(page.getByText('Team Beta')).toBeVisible();
     await expect(page.locator('[data-id="ranklist-hydrated"]')).toHaveText('hydrated');
     await expect(page.locator('[data-id="rankland-ranklist-title"]')).toHaveText('Test Contest 2024');
+    await expect(page.locator('[data-id="rankland-ranklist-banner"]')).toHaveAttribute(
+      'src',
+      `${mockBaseURL}/srk-assets/test-key/banner.png`,
+    );
     await expect(page.locator('[data-id="rankland-ranklist-progress"]')).toBeVisible();
     await expect(page.locator('[data-id="rankland-ranklist-filters"]')).toBeVisible();
     await expect(page.locator('[data-id="rankland-ranklist-footer"]')).toContainText('Powered by Standard Ranklist');

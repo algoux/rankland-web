@@ -34,6 +34,16 @@ function sendJson(res, status, body) {
   res.end(JSON.stringify(body));
 }
 
+function sendPng(res, status, body) {
+  res.writeHead(status, {
+    'access-control-allow-headers': 'content-type',
+    'access-control-allow-methods': 'GET,POST,OPTIONS',
+    'access-control-allow-origin': '*',
+    'content-type': 'image/png',
+  });
+  res.end(body);
+}
+
 function routeRequest(req, res) {
   const url = new URL(req.url || '/', mockBaseURL);
   const method = req.method || 'GET';
@@ -94,6 +104,18 @@ function routeRequest(req, res) {
 
   if (method === 'GET' && url.pathname === '/statistics') {
     sendJson(res, 200, ok(statistics));
+    return;
+  }
+
+  if (method === 'GET' && /^\/srk-assets\/[^/]+\/[^/]+$/.test(url.pathname)) {
+    sendPng(
+      res,
+      200,
+      Buffer.from(
+        'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAFgwJ/lb6psAAAAABJRU5ErkJggg==',
+        'base64',
+      ),
+    );
     return;
   }
 
@@ -244,6 +266,7 @@ mockServer.listen(Number(mockPort), '127.0.0.1', () => {
       RANKLAND_CDN_API_BASE_CLIENT: mockBaseURL,
       RANKLAND_LIVE_POLLING_INTERVAL: '5000',
       RANKLAND_WS_BASE: `ws://127.0.0.1:${mockPort}`,
+      RANKLAND_SRK_STORAGE_BASE: `${mockBaseURL}/srk-assets`,
     },
   });
   startCleanupWatcher(appProcess.pid);
