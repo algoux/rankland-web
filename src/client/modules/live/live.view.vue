@@ -31,28 +31,36 @@
       :data-focus="focusQuery"
       :class="{ 'live-content-with-scroll-solution': scrollSolutionEnabled }"
     >
-      <header class="live-header">
-        <div>
-          <div data-id="live-hydrated" class="live-hydrated">{{ hydrated ? 'hydrated' : 'csr' }}</div>
-          <h1>{{ ranklistTitle }}</h1>
-        </div>
-        <label class="live-scroll-toggle">
-          <span>实时滚动提交状态</span>
-          <input
-            data-id="live-scroll-solution-toggle"
-            type="checkbox"
-            :checked="scrollSolutionEnabled"
-            @change="handleScrollSolutionToggle"
-          >
-        </label>
-      </header>
+      <div data-id="live-hydrated" class="live-hydrated">{{ hydrated ? 'hydrated' : 'csr' }}</div>
 
       <LiveScrollSolution
         v-if="scrollSolutionEnabled"
         :status="scrollSolutionStatus"
         :solutions="scrollSolutions"
       />
-      <RanklandRanklist :ranklist="ranklist" />
+      <RanklandRanklist
+        :ranklist="ranklist"
+        :name="id"
+        :id="id"
+        show-header
+        show-filter
+        show-progress
+        show-footer
+        is-live
+        table-class="live-ranklist-table"
+      >
+        <template #extra-action>
+          <label class="live-scroll-toggle">
+            <span>实时滚动提交状态</span>
+            <input
+              data-id="live-scroll-solution-toggle"
+              type="checkbox"
+              :checked="scrollSolutionEnabled"
+              @change="handleScrollSolutionToggle"
+            >
+          </label>
+        </template>
+      </RanklandRanklist>
     </section>
   </main>
 </template>
@@ -412,27 +420,16 @@ export default routeView(LivePage, '/live/:id', LiveRPO);
   white-space: pre-wrap;
 }
 
-.live-header {
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: 16px;
-  margin-bottom: 16px;
-}
-
-.live-header h1 {
-  margin: 4px 0 0;
-  font-size: 24px;
-}
-
 .live-content-with-scroll-solution {
   margin-left: 250px;
   margin-right: 16px;
 }
 
 .live-hydrated {
+  margin-bottom: 8px;
   color: #64748b;
   font-size: 12px;
+  text-align: center;
 }
 
 .live-scroll-toggle {
@@ -444,21 +441,14 @@ export default routeView(LivePage, '/live/:id', LiveRPO);
   font-size: 13px;
 }
 
-@media (max-width: 640px) {
-  .live-header {
-    align-items: stretch;
-    flex-direction: column;
-  }
-
-  .live-scroll-toggle {
-    justify-content: space-between;
-  }
-}
-
 @media (max-width: 767px) {
   .live-content-with-scroll-solution {
     margin-right: auto;
     margin-left: auto;
+  }
+
+  .live-scroll-toggle {
+    justify-content: space-between;
   }
 }
 </style>

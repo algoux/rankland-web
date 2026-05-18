@@ -48,8 +48,17 @@ test.describe('/live/:id full-chain route', () => {
     await expect(page.locator('[data-id="live-hydrated"]')).toHaveText('hydrated');
     await expect(page.locator('[data-id="live-scroll-solution-toggle"]')).toBeChecked();
     await expect(page.locator('[data-id="live-scroll-solution-status"]')).toHaveText('connected');
+    await expect(page.locator('[data-id="rankland-ranklist-title"]')).toHaveText('Test Contest 2024');
+    await expect(page.locator('[data-id="rankland-ranklist-progress"]')).toBeVisible();
+    await expect(page.locator('[data-id="rankland-ranklist-filters"]')).toBeVisible();
+    await expect(page.locator('[data-id="rankland-ranklist-extra-action"]')).toBeVisible();
+    await expect(page.locator('[data-id="rankland-ranklist-footer"]')).toContainText('Powered by Standard Ranklist');
     await expect(page.getByText('Team Alpha')).toBeVisible();
     await expect(page.getByText('Team Beta')).toBeVisible();
+
+    await page.selectOption('[data-id="rankland-ranklist-organization-filter"]', ['Org A']);
+    await expect(page.getByText('Team Alpha')).toBeVisible();
+    await expect(page.getByText('Team Beta')).toBeHidden();
 
     await expect
       .poll(async () =>

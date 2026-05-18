@@ -38,7 +38,8 @@
     {
       "user": {
         "id": "team-alpha",
-        "name": "Team Alpha"
+        "name": "Team Alpha",
+        "organization": "Org A"
       },
       "score": { "value": 2, "time": [100, "min"] },
       "statuses": [
@@ -49,7 +50,8 @@
     {
       "user": {
         "id": "team-beta",
-        "name": "Team Beta"
+        "name": "Team Beta",
+        "organization": "Org B"
       },
       "score": { "value": 1, "time": [55, "min"] },
       "statuses": [
