@@ -163,6 +163,99 @@ One Codex conversation should usually own one meaningful migration slice, such a
 
 After a slice is verified and committed, write a handoff block and start a fresh conversation for the next slice. Fresh conversations reduce drift from old debugging paths while still recovering project state from the repo.
 
+## Conversation I/O Protocol
+
+Use this protocol to make migration conversations predictable whether the user provides a full handoff or only writes "继续迁移".
+
+### Accepted Inputs
+
+The user may start or continue a migration session with one of:
+
+- a full handoff block from the previous session;
+- a short command such as `继续迁移`, `继续 RankLand 迁移`, or `下一步`;
+- a targeted request such as `修复 CI`, `继续 /search`, `检查当前状态`;
+- a review or planning request that should not change files until explicitly requested.
+
+When input is short, recover state from the repo rather than asking for repeated context. Use the current branch, recent commits, migration docs, and open specs/plans as the source of truth.
+
+### Session Intake
+
+At the beginning of a migration work session:
+
+1. Use the `rankland-migration` skill.
+2. Inspect branch, worktree, and recent commits.
+3. Read `AGENTS.md`, this playbook, `docs/migration/inventory.md`, `docs/migration/api-contract.md`, and relevant `docs/superpowers/specs` / `docs/superpowers/plans`.
+4. Confirm Node 24 and pnpm 8 before running implementation gates.
+5. Report a short intake summary before substantive edits:
+   - current branch and dirty/clean state;
+   - latest commit;
+   - inferred migration progress;
+   - current slice or recommended next slice;
+   - immediate risks or blockers;
+   - proposed subagent split, if useful.
+
+If the worktree is dirty, identify whether the changes are related to the requested slice. Do not overwrite or revert them. If the dirty state blocks safe work, report the blocker and ask for direction.
+
+### Planning Output
+
+For non-trivial migration slices, produce or update:
+
+- a design spec under `docs/superpowers/specs`;
+- an implementation plan under `docs/superpowers/plans`.
+
+The plan should name file-set ownership when workers may be used. Do not dispatch parallel workers that touch the same Vue page, generated routes, shared API service, package manifests, lockfiles, or broad config files.
+
+The planning response should include:
+
+- selected slice and scope;
+- non-goals;
+- test strategy;
+- expected verification gates;
+- decisions needed from the user, if any.
+
+When there are no blocking decisions, proceed with implementation instead of stopping at a proposal.
+
+### Execution Output
+
+While executing:
+
+- keep Codex conversation as working memory only;
+- persist durable decisions in specs, plans, migration docs, or commits;
+- use focused tests before implementation when behavior is new or risky;
+- run narrow verification before broad gates;
+- commit coherent completed pieces with Conventional Commits in Chinese;
+- request review before treating a major slice as complete.
+
+If a test or gate fails, switch to systematic debugging: report the exact failing command, root cause once known, the fix, and the fresh verification result.
+
+### Final Output
+
+At the end of a session or slice, report:
+
+- branch name and latest commit;
+- completed scope and key files or docs changed;
+- verification commands and results;
+- skipped gates and why;
+- Node and pnpm versions when gates were run;
+- remaining risks and deferred parity;
+- decisions needed from the user, if any;
+- recommended next slice and why;
+- whether the next step should continue in this conversation or start a fresh one;
+- a ready-to-paste handoff block for the next conversation when the current slice is complete.
+
+If the slice is not complete, do not produce a final handoff as if it were complete. Instead, report current status, failing or pending gates, uncommitted changes, and the exact next action to continue in the same conversation.
+
+### Decision Handling
+
+Only stop for user input when a decision cannot be recovered from repo context and a reasonable default would risk product behavior, route compatibility, or user changes. Good decision prompts are concrete:
+
+- choose whether to preserve a legacy behavior or intentionally defer it;
+- choose whether to split a broad slice;
+- choose whether to commit a documentation-only checkpoint;
+- choose whether to start a fresh conversation after a verified slice.
+
+Do not ask for confirmation for routine playbook actions such as reading docs, running narrow tests, writing required specs/plans, or fixing a clear gate failure.
+
 Use this handoff shape:
 
 ```text
