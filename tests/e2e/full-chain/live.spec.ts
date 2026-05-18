@@ -60,6 +60,26 @@ test.describe('/live/:id full-chain route', () => {
     await expect(page.getByText('Team Alpha')).toBeVisible();
     await expect(page.getByText('Team Beta')).toBeHidden();
 
+    await page.locator('.srk-user-cell', { hasText: 'Team Alpha' }).click();
+    const userModal = page.locator('[data-id="rankland-ranklist-user-modal"]');
+    await expect(userModal.locator('.srk-modal')).toBeVisible();
+    await expect(userModal).toContainText('Team Alpha');
+    await expect(userModal).toContainText('Org A');
+    await userModal.getByRole('button', { name: 'Close' }).click();
+    await expect(userModal.locator('.srk-modal')).toBeHidden();
+
+    await page
+      .locator('tr', { hasText: 'Team Alpha' })
+      .locator('.srk-prest-status-block-accepted')
+      .first()
+      .click();
+    const solutionModal = page.locator('[data-id="rankland-ranklist-solution-modal"]');
+    await expect(solutionModal.locator('.srk-modal')).toBeVisible();
+    await expect(solutionModal).toContainText('Solutions of A (Team Alpha)');
+    await expect(solutionModal).toContainText('Accepted');
+    await solutionModal.getByRole('button', { name: 'Close' }).click();
+    await expect(solutionModal.locator('.srk-modal')).toBeHidden();
+
     await expect
       .poll(async () =>
         page.evaluate(() => (window as unknown as { __ranklandWsUrls?: string[] }).__ranklandWsUrls || []),

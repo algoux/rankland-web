@@ -69,7 +69,12 @@
       </div>
 
       <div :class="tableClass">
-        <Ranklist :data="ranklistState.staticRanklist" striped-rows />
+        <Ranklist
+          :data="ranklistState.staticRanklist"
+          striped-rows
+          @user-click="handleUserClick"
+          @solution-click="handleSolutionClick"
+        />
       </div>
 
       <footer v-if="showFooter" data-id="rankland-ranklist-footer" class="rankland-ranklist-footer">
@@ -88,6 +93,26 @@
           <a href="https://github.com/algoux/srk-collection" target="_blank" rel="noreferrer">榜单合集</a>
         </p>
       </footer>
+
+      <div data-id="rankland-ranklist-user-modal">
+        <DefaultUserModal
+          :open="!!activeUserPayload"
+          :user="activeUserPayload?.user"
+          :markers="ranklistState.staticRanklist.markers || []"
+          @close="handleUserModalClose"
+        />
+      </div>
+
+      <div data-id="rankland-ranklist-solution-modal">
+        <DefaultSolutionModal
+          :open="!!activeSolutionPayload"
+          :user="activeSolutionPayload?.user"
+          :problem="activeSolutionPayload?.problem"
+          :problem-index="activeSolutionPayload?.problemIndex || 0"
+          :solutions="activeSolutionPayload?.solutions || []"
+          @close="handleSolutionModalClose"
+        />
+      </div>
     </template>
   </div>
 </template>
@@ -96,7 +121,14 @@
 import { defineComponent, type PropType } from 'vue';
 import type * as srk from '@algoux/standard-ranklist';
 import { formatTimeDuration, resolveText } from '@algoux/standard-ranklist-utils';
-import { ProgressBar, Ranklist } from '@algoux/standard-ranklist-renderer-component-vue';
+import {
+  DefaultSolutionModal,
+  DefaultUserModal,
+  ProgressBar,
+  Ranklist,
+  type SolutionClickPayload,
+  type UserClickPayload,
+} from '@algoux/standard-ranklist-renderer-component-vue';
 import '@algoux/standard-ranklist-renderer-component-styles';
 import { createRanklandRanklistState, type RanklandRanklistFilterState } from './rankland-ranklist-state';
 
@@ -115,6 +147,8 @@ function formatDateTime(timestamp: number): string {
 export default defineComponent({
   name: 'RanklandRanklist',
   components: {
+    DefaultSolutionModal,
+    DefaultUserModal,
     ProgressBar,
     Ranklist,
   },
@@ -164,6 +198,8 @@ export default defineComponent({
         marker: '',
       } as RanklandRanklistFilterState,
       timeTravelTime: null as number | null,
+      activeUserPayload: null as UserClickPayload | null,
+      activeSolutionPayload: null as SolutionClickPayload | null,
     };
   },
   computed: {
@@ -201,9 +237,25 @@ export default defineComponent({
         marker: '',
       };
       this.timeTravelTime = null;
+      this.activeUserPayload = null;
+      this.activeSolutionPayload = null;
     },
     resolveTextValue(value: srk.Text | undefined): string {
       return resolveText(value);
+    },
+    handleUserClick(payload: UserClickPayload) {
+      this.activeUserPayload = payload;
+      this.activeSolutionPayload = null;
+    },
+    handleSolutionClick(payload: SolutionClickPayload) {
+      this.activeSolutionPayload = payload;
+      this.activeUserPayload = null;
+    },
+    handleUserModalClose() {
+      this.activeUserPayload = null;
+    },
+    handleSolutionModalClose() {
+      this.activeSolutionPayload = null;
     },
   },
 });

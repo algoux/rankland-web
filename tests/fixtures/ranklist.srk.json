@@ -43,8 +43,21 @@
       },
       "score": { "value": 2, "time": [100, "min"] },
       "statuses": [
-        { "result": "AC", "time": [40, "min"], "tries": 1 },
-        { "result": "AC", "time": [60, "min"], "tries": 2 }
+        {
+          "result": "AC",
+          "time": [40, "min"],
+          "tries": 1,
+          "solutions": [{ "result": "AC", "time": [40, "min"] }]
+        },
+        {
+          "result": "AC",
+          "time": [60, "min"],
+          "tries": 2,
+          "solutions": [
+            { "result": "WA", "time": [50, "min"] },
+            { "result": "AC", "time": [60, "min"] }
+          ]
+        }
       ]
     },
     {
@@ -55,8 +68,21 @@
       },
       "score": { "value": 1, "time": [55, "min"] },
       "statuses": [
-        { "result": "AC", "time": [55, "min"], "tries": 1 },
-        { "result": "RJ", "tries": 3 }
+        {
+          "result": "AC",
+          "time": [55, "min"],
+          "tries": 1,
+          "solutions": [{ "result": "AC", "time": [55, "min"] }]
+        },
+        {
+          "result": "RJ",
+          "tries": 3,
+          "solutions": [
+            { "result": "WA", "time": [30, "min"] },
+            { "result": "WA", "time": [45, "min"] },
+            { "result": "WA", "time": [70, "min"] }
+          ]
+        }
       ]
     }
   ],
