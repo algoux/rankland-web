@@ -50,6 +50,16 @@ const clientRoutes = parseRoutes([
     otherOptions: undefined,
   },
   {
+    name: 'Playground',
+    path: '/playground',
+    fullPath: '/playground',
+    component: () => import(/* webpackChunkName: "Playground" */ '../modules/playground/playground.view.vue'),
+    routeProps: undefined,
+    priority: undefined,
+    renderMethod: undefined,
+    otherOptions: undefined,
+  },
+  {
     name: 'Ranklist',
     path: '/ranklist/:id',
     fullPath: '/ranklist/:id',

@@ -41,14 +41,25 @@ describe('client routes', () => {
       };
     });
 
-    const routes = (await import('@client/router/routes')).default as Array<{ name: string; routeProps?: unknown }>;
+    const routes = (await import('@client/router/routes')).default as Array<{
+      name: string;
+      path: string;
+      routeProps?: unknown;
+      renderMethod?: unknown;
+    }>;
     const { RanklistRPO } = await import('@common/modules/ranklist/ranklist.rpo');
     const { CollectionRPO } = await import('@common/modules/collection/collection.rpo');
     const ranklistRoute = routes.find((route) => route.name === 'Ranklist');
     const collectionRoute = routes.find((route) => route.name === 'Collection');
+    const playgroundRoute = routes.find((route) => route.name === 'Playground');
 
     expect(ranklistRoute?.routeProps).toBe(RanklistRPO);
     expect(collectionRoute?.routeProps).toBe(CollectionRPO);
+    expect(playgroundRoute).toMatchObject({
+      path: '/playground',
+      routeProps: undefined,
+      renderMethod: undefined,
+    });
   });
 
   it('adds the probe route with the expected path when the probe is enabled', async () => {
