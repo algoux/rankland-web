@@ -25,9 +25,17 @@
       :data-ranklist-id="ranklistId"
       :data-row-count="rowCount"
     >
-      <h1>{{ ranklist.info.name }}</h1>
       <div data-id="ranklist-hydrated">{{ hydrated ? 'hydrated' : 'ssr' }}</div>
-      <RanklandRanklist :ranklist="ranklist.srk" />
+      <RanklandRanklist
+        :ranklist="ranklist.srk"
+        :name="ranklistId"
+        :id="ranklistId"
+        show-header
+        show-filter
+        show-progress
+        show-footer
+        table-class="ranklist-detail-table"
+      />
     </section>
   </main>
 </template>

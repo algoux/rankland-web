@@ -1,5 +1,5 @@
 import { expect, test } from '@playwright/test';
-import type { APIRequestContext } from '@playwright/test';
+import type { APIRequestContext, Page } from '@playwright/test';
 import { denyExternalCalls, stubWebSocket } from '../helpers/mock-api';
 
 const mockPort = process.env.FULL_CHAIN_MOCK_PORT || '3101';
@@ -26,12 +26,26 @@ function makeRealtimeSolutionBytes() {
   return [...header, ...fields.flat()];
 }
 
+async function stubClipboard(page: Page) {
+  await page.addInitScript(() => {
+    Object.defineProperty(navigator, 'clipboard', {
+      configurable: true,
+      value: {
+        writeText: async (text: string) => {
+          (window as unknown as { __ranklandClipboardText?: string }).__ranklandClipboardText = text;
+        },
+      },
+    });
+  });
+}
+
 test.describe('/live/:id full-chain route', () => {
   test('hydrates the CSR live page, preserves queries, polls live ranklist, and guards WebSocket setup', async ({
     page,
     request,
   }) => {
     await denyExternalCalls(page);
+    await stubClipboard(page);
     await stubWebSocket(page);
     await request.post(`${mockBaseURL}/__reset`);
 
@@ -53,8 +67,19 @@ test.describe('/live/:id full-chain route', () => {
     await expect(page.locator('[data-id="rankland-ranklist-filters"]')).toBeVisible();
     await expect(page.locator('[data-id="rankland-ranklist-extra-action"]')).toBeVisible();
     await expect(page.locator('[data-id="rankland-ranklist-footer"]')).toContainText('Powered by Standard Ranklist');
+    await expect(page.locator('[data-id="rankland-ranklist-export-menu-button"]')).toBeVisible();
+    await expect(page.locator('[data-id="rankland-ranklist-share-menu-button"]')).toBeVisible();
     await expect(page.getByText('Team Alpha')).toBeVisible();
     await expect(page.getByText('Team Beta')).toBeVisible();
+
+    await page.locator('[data-id="rankland-ranklist-share-menu-button"]').click();
+    await page.locator('[data-id="rankland-ranklist-copy-embed-action"]').click();
+    await expect(page.locator('[data-id="rankland-ranklist-action-status"]')).toHaveText('嵌入代码已复制');
+    expect(
+      await page.evaluate(() => (window as unknown as { __ranklandClipboardText?: string }).__ranklandClipboardText),
+    ).toBe(
+      `<iframe src="http://127.0.0.1:${process.env.FULL_CHAIN_APP_PORT || '3100'}/live/live-test-key?focus=yes" border="0" frameborder="no" framespacing="0" allowfullscreen="true" style="width: 100%; height: 600px"></iframe>`,
+    );
 
     await page.selectOption('[data-id="rankland-ranklist-organization-filter"]', ['Org A']);
     await expect(page.getByText('Team Alpha')).toBeVisible();

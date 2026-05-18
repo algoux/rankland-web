@@ -7,6 +7,46 @@
     <template v-else>
       <header v-if="showHeader" class="rankland-ranklist-header">
         <h1 data-id="rankland-ranklist-title">{{ ranklistTitle }}</h1>
+        <div data-id="rankland-ranklist-header-actions" class="rankland-ranklist-header-actions">
+          <details data-id="rankland-ranklist-export-menu" class="rankland-ranklist-action-menu">
+            <summary data-id="rankland-ranklist-export-menu-button">导出</summary>
+            <div class="rankland-ranklist-action-list">
+              <button data-id="rankland-ranklist-export-srk-action" type="button" @click="downloadSrkJson">
+                标准榜单格式 (srk)
+              </button>
+              <button data-id="rankland-ranklist-export-gym-ghost-action" type="button" disabled>
+                Codeforces Gym Ghost (dat)
+              </button>
+              <button data-id="rankland-ranklist-export-vjudge-action" type="button" disabled>
+                Virtual Judge Replay (xlsx)
+              </button>
+              <button data-id="rankland-ranklist-export-xlsx-action" type="button" disabled>
+                Excel 表格 (xlsx)
+              </button>
+            </div>
+          </details>
+
+          <details data-id="rankland-ranklist-share-menu" class="rankland-ranklist-action-menu">
+            <summary data-id="rankland-ranklist-share-menu-button">分享</summary>
+            <div class="rankland-ranklist-action-list">
+              <button data-id="rankland-ranklist-copy-link-action" type="button" @click="copyCurrentPageLink">
+                复制本页链接
+              </button>
+              <button
+                v-if="id"
+                data-id="rankland-ranklist-copy-embed-action"
+                type="button"
+                @click="copyEmbedCode"
+              >
+                复制嵌入代码
+              </button>
+            </div>
+          </details>
+
+          <span v-if="actionStatus" data-id="rankland-ranklist-action-status" class="rankland-ranklist-action-status">
+            {{ actionStatus }}
+          </span>
+        </div>
         <p data-id="rankland-ranklist-time" class="rankland-ranklist-time">{{ contestTimeRange }}</p>
       </header>
 
@@ -131,6 +171,12 @@ import {
 } from '@algoux/standard-ranklist-renderer-component-vue';
 import '@algoux/standard-ranklist-renderer-component-styles';
 import { createRanklandRanklistState, type RanklandRanklistFilterState } from './rankland-ranklist-state';
+import {
+  buildRanklandEmbedCode,
+  createSrkExportFile,
+  normalizeRanklandShareUrl,
+  type RanklandEmbedKind,
+} from './rankland-ranklist-actions';
 
 function formatDateTime(timestamp: number): string {
   return new Date(timestamp).toLocaleString('zh-CN', {
@@ -200,6 +246,7 @@ export default defineComponent({
       timeTravelTime: null as number | null,
       activeUserPayload: null as UserClickPayload | null,
       activeSolutionPayload: null as SolutionClickPayload | null,
+      actionStatus: '',
     };
   },
   computed: {
@@ -220,6 +267,12 @@ export default defineComponent({
     hasExtraAction(): boolean {
       return !!this.$slots['extra-action'];
     },
+    actionName(): string {
+      return this.name || this.id || 'ranklist';
+    },
+    embedKind(): RanklandEmbedKind {
+      return this.isLive ? 'live' : 'ranklist';
+    },
   },
   watch: {
     id() {
@@ -239,6 +292,7 @@ export default defineComponent({
       this.timeTravelTime = null;
       this.activeUserPayload = null;
       this.activeSolutionPayload = null;
+      this.actionStatus = '';
     },
     resolveTextValue(value: srk.Text | undefined): string {
       return resolveText(value);
@@ -256,6 +310,60 @@ export default defineComponent({
     },
     handleSolutionModalClose() {
       this.activeSolutionPayload = null;
+    },
+    downloadSrkJson() {
+      const file = createSrkExportFile(this.ranklist, this.actionName);
+      const blob = new Blob([file.content], { type: file.type });
+      const url = window.URL.createObjectURL(blob);
+      const anchor = document.createElement('a');
+      anchor.href = url;
+      anchor.download = file.filename;
+      anchor.style.display = 'none';
+      document.body.appendChild(anchor);
+      anchor.click();
+      anchor.remove();
+      window.URL.revokeObjectURL(url);
+      this.actionStatus = 'SRK 已导出';
+    },
+    async copyCurrentPageLink() {
+      await this.copyText(normalizeRanklandShareUrl(window.location.href), '链接已复制');
+    },
+    async copyEmbedCode() {
+      await this.copyText(
+        buildRanklandEmbedCode({
+          origin: window.location.origin,
+          kind: this.embedKind,
+          id: this.id,
+        }),
+        '嵌入代码已复制',
+      );
+    },
+    async copyText(text: string, successMessage: string) {
+      try {
+        await this.writeClipboardText(text);
+        this.actionStatus = successMessage;
+      } catch (error) {
+        this.actionStatus = '复制失败';
+      }
+    },
+    async writeClipboardText(text: string) {
+      if (navigator.clipboard?.writeText) {
+        await navigator.clipboard.writeText(text);
+        return;
+      }
+
+      const textarea = document.createElement('textarea');
+      textarea.value = text;
+      textarea.style.position = 'fixed';
+      textarea.style.left = '-9999px';
+      document.body.appendChild(textarea);
+      textarea.focus();
+      textarea.select();
+      const copied = document.execCommand('copy');
+      textarea.remove();
+      if (!copied) {
+        throw new Error('Clipboard copy failed.');
+      }
     },
   },
 });
@@ -275,6 +383,81 @@ export default defineComponent({
 .rankland-ranklist-header h1 {
   margin: 0 0 4px;
   font-size: 28px;
+}
+
+.rankland-ranklist-header-actions {
+  display: inline-flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: center;
+  gap: 8px;
+  margin: 4px 0 8px;
+  font-size: 13px;
+}
+
+.rankland-ranklist-action-menu {
+  position: relative;
+  text-align: left;
+}
+
+.rankland-ranklist-action-menu summary {
+  min-width: 44px;
+  padding: 4px 10px;
+  border: 1px solid #cbd5e1;
+  border-radius: 4px;
+  color: #1f2937;
+  background: #fff;
+  cursor: pointer;
+  list-style: none;
+  text-align: center;
+}
+
+.rankland-ranklist-action-menu summary::-webkit-details-marker {
+  display: none;
+}
+
+.rankland-ranklist-action-list {
+  position: absolute;
+  z-index: 20;
+  top: calc(100% + 4px);
+  left: 50%;
+  display: flex;
+  width: max-content;
+  min-width: 190px;
+  max-width: min(280px, calc(100vw - 32px));
+  padding: 4px;
+  border: 1px solid #cbd5e1;
+  border-radius: 4px;
+  background: #fff;
+  box-shadow: 0 8px 24px rgb(15 23 42 / 12%);
+  flex-direction: column;
+  transform: translateX(-50%);
+}
+
+.rankland-ranklist-action-list button {
+  padding: 7px 10px;
+  border: 0;
+  border-radius: 3px;
+  color: #1f2937;
+  background: transparent;
+  cursor: pointer;
+  font: inherit;
+  text-align: left;
+  white-space: nowrap;
+}
+
+.rankland-ranklist-action-list button:hover:not(:disabled) {
+  background: #f1f5f9;
+}
+
+.rankland-ranklist-action-list button:disabled {
+  color: #94a3b8;
+  cursor: not-allowed;
+}
+
+.rankland-ranklist-action-status {
+  align-self: center;
+  color: #237804;
 }
 
 .rankland-ranklist-time {
