@@ -22,6 +22,7 @@ The migration preserves:
 The canonical reference files are:
 
 - `AGENTS.md` for repository working rules;
+- `docs/migration/status.md` for the current global migration dashboard;
 - `docs/migration/inventory.md` for route and source inventory;
 - `docs/migration/api-contract.md` for upstream API behavior;
 - `docs/superpowers/specs/*` for accepted designs;
@@ -176,7 +177,7 @@ The user may start or continue a migration session with one of:
 - a targeted request such as `修复 CI`, `继续 /search`, `检查当前状态`;
 - a review or planning request that should not change files until explicitly requested.
 
-When input is short, recover state from the repo rather than asking for repeated context. Use the current branch, recent commits, migration docs, and open specs/plans as the source of truth.
+When input is short, recover state from the repo rather than asking for repeated context. Use the current branch, recent commits, `docs/migration/status.md`, migration docs, and open specs/plans as the source of truth.
 
 ### Session Intake
 
@@ -184,11 +185,12 @@ At the beginning of a migration work session:
 
 1. Use the `rankland-migration` skill.
 2. Inspect branch, worktree, and recent commits.
-3. Read `AGENTS.md`, this playbook, `docs/migration/inventory.md`, `docs/migration/api-contract.md`, and relevant `docs/superpowers/specs` / `docs/superpowers/plans`.
+3. Read `AGENTS.md`, `docs/migration/status.md`, this playbook, `docs/migration/inventory.md`, `docs/migration/api-contract.md`, and relevant `docs/superpowers/specs` / `docs/superpowers/plans`.
 4. Confirm Node 24 and pnpm 8 before running implementation gates.
 5. Report a short intake summary before substantive edits:
    - current branch and dirty/clean state;
    - latest commit;
+   - dashboard current focus and route progress;
    - inferred migration progress;
    - current slice or recommended next slice;
    - immediate risks or blockers;
@@ -241,6 +243,7 @@ At the end of a session or slice, report:
 - decisions needed from the user, if any;
 - recommended next slice and why;
 - whether the next step should continue in this conversation or start a fresh one;
+- confirmation that `docs/migration/status.md` was updated, or why it was not;
 - a ready-to-paste handoff block for the next conversation when the current slice is complete.
 
 If the slice is not complete, do not produce a final handoff as if it were complete. Instead, report current status, failing or pending gates, uncommitted changes, and the exact next action to continue in the same conversation.
@@ -256,14 +259,23 @@ Only stop for user input when a decision cannot be recovered from repo context a
 
 Do not ask for confirmation for routine playbook actions such as reading docs, running narrow tests, writing required specs/plans, or fixing a clear gate failure.
 
-Use this handoff shape:
+Use this handoff shape. The first line must make the conversation visually distinguishable in a chat list:
 
 ```text
+【RankLand 迁移｜<slice name>｜<状态: 计划中/实现中/已验证/阻塞>｜<branch>】
+
 请使用 rankland-migration skill 继续 RankLand 迁移。
 
 Repo: /Users/cooper/Projects/RankLand/rankland-web
 当前分支: <branch>
 最新 commit: <hash> <message>
+
+状态面板:
+- 当前 slice: <slice>
+- 状态: <planned/in progress/verified/blocked>
+- 全局进度: <brief route/dashboard summary>
+- 下一步: <next action>
+- 需要决策: <none or concrete decisions>
 
 已完成:
 - <completed slice>
@@ -275,6 +287,7 @@ Repo: /Users/cooper/Projects/RankLand/rankland-web
 - 跳过的 gate: <reason>
 
 当前文档:
+- docs/migration/status.md
 - docs/migration/playbook.md
 - docs/migration/inventory.md
 - docs/migration/api-contract.md
@@ -286,7 +299,7 @@ Repo: /Users/cooper/Projects/RankLand/rankland-web
 - <questions to confirm>
 - <recommended subagent split>
 
-请先检查 git 状态和最近 commit，再按 playbook 继续。
+请先检查 git 状态、最近 commit 和 docs/migration/status.md，再按 playbook 继续。
 ```
 
 Do not use one indefinitely long conversation as the project memory. Do not rely on autonomous scheduled tasks to perform product migration without review. Scheduled tasks are for checks, reminders, and status synthesis.
@@ -299,7 +312,7 @@ Keep one recurring automation: daily pre-work migration brief.
 
 - Schedule: daily before the normal migration work window.
 - Workspace: `/Users/cooper/Projects/RankLand/rankland-web`.
-- Task: read `docs/migration/playbook.md`, `inventory.md`, `api-contract.md`, recent commits, and open specs/plans; summarize current migration state and the recommended next slice.
+- Task: read `docs/migration/status.md`, `playbook.md`, `inventory.md`, `api-contract.md`, recent commits, and open specs/plans; summarize current migration state and the recommended next slice.
 - Purpose: make it easy to start a fresh conversation with accurate context.
 
 Avoid scheduled automations that implement pages, rewrite specs, run expensive full gates, commit changes, or modify shared files without a human-triggered session. Those tasks require parity judgment and review.
@@ -307,6 +320,7 @@ Avoid scheduled automations that implement pages, rewrite specs, run expensive f
 ## Maintenance Rules
 
 - Keep `docs/migration/inventory.md` current when route scope changes.
+- Keep `docs/migration/status.md` current when a slice is verified, blocked, resumed, or changes the recommended next step.
 - Keep `docs/migration/api-contract.md` current when upstream API assumptions change.
 - Add a spec before broad page migrations or cross-runtime changes.
 - Add a plan when execution spans multiple files or verification gates.
