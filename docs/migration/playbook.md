@@ -306,16 +306,16 @@ Do not use one indefinitely long conversation as the project memory. Do not rely
 
 ## Codex Automation Strategy
 
-Use Codex automations as a brief generator, not as the main migration driver.
+Use Codex automations as a read-only migration conductor, not as the main migration driver.
 
-Keep one recurring automation: daily pre-work migration brief.
+Keep one recurring automation: RankLand migration two-hour progress brief.
 
-- Schedule: daily before the normal migration work window.
+- Schedule: every two hours during active migration periods.
 - Workspace: `/Users/cooper/Projects/RankLand/rankland-web`.
-- Task: read `docs/migration/status.md`, `playbook.md`, `inventory.md`, `api-contract.md`, recent commits, and open specs/plans; summarize current migration state and the recommended next slice.
-- Purpose: make it easy to start a fresh conversation with accurate context.
+- Task: read `docs/migration/status.md`, `playbook.md`, `inventory.md`, `api-contract.md`, recent commits, and open specs/plans; summarize current migration state, risks, recommended next action, subagent split, and a ready-to-paste Chinese continuation block using the Conversation I/O Protocol.
+- Purpose: keep the global migration state fresh and make it easy to start or resume a Codex migration conversation with accurate context.
 
-Avoid scheduled automations that implement pages, rewrite specs, run expensive full gates, commit changes, or modify shared files without a human-triggered session. Those tasks require parity judgment and review.
+Avoid scheduled automations that implement pages, rewrite specs, run expensive full gates, commit changes, create branches, or modify shared files without a human-triggered session. Those tasks require parity judgment and review. The automation may recommend concrete next actions, but execution remains in a human-triggered Codex conversation.
 
 ## Maintenance Rules
 
