@@ -191,4 +191,24 @@ test.describe('/live/:id full-chain route', () => {
     expect(liveInfoRequests).toHaveLength(1);
     expect(liveRanklistRequests).toHaveLength(0);
   });
+
+  test('disables scroll-solution mode, preserves other queries, and closes the WebSocket', async ({ page, request }) => {
+    await denyExternalCalls(page);
+    await stubWebSocket(page);
+    await request.post(`${mockBaseURL}/__reset`);
+
+    await page.goto('/live/live-test-key?token=t0&scrollSolution=1&focus=yes');
+
+    const wsUrl = `ws://127.0.0.1:${mockPort}/ranking/record/live-rid-1?token=t0`;
+    await expect(page.locator('[data-id="live-scroll-solution-status"]')).toHaveText('connected');
+    await page.locator('[data-id="live-scroll-solution-toggle"]').click();
+
+    await expect(page).toHaveURL(/\/live\/live-test-key\?token=t0&focus=yes$/);
+    await expect(page.locator('[data-id="live-scroll-solution"]')).toBeHidden();
+    await expect
+      .poll(async () =>
+        page.evaluate(() => (window as unknown as { __ranklandWsClosedUrls?: string[] }).__ranklandWsClosedUrls || []),
+      )
+      .toContain(wsUrl);
+  });
 });

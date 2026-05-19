@@ -56,10 +56,12 @@ export async function stubWebSocket(page: Page) {
     const sockets = new Map<string, EventTarget>();
     const win = window as unknown as {
       __ranklandWsUrls?: string[];
+      __ranklandWsClosedUrls?: string[];
       __ranklandEmitWsMessage?: (url: string, bytes: number[]) => void;
       __ranklandEmitWsError?: (url: string) => void;
     };
     win.__ranklandWsUrls = [];
+    win.__ranklandWsClosedUrls = [];
     win.__ranklandEmitWsMessage = (url: string, bytes: number[]) => {
       const socket = sockets.get(url);
       if (!socket) {
@@ -96,6 +98,7 @@ export async function stubWebSocket(page: Page) {
       close() {
         this.readyState = StubWebSocket.CLOSED;
         sockets.delete(this.url);
+        win.__ranklandWsClosedUrls?.push(this.url);
         this.dispatchEvent(new Event('close'));
       }
 
