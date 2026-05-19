@@ -211,4 +211,29 @@ test.describe('/live/:id full-chain route', () => {
       )
       .toContain(wsUrl);
   });
+
+  test('reports unexpected WebSocket close as a realtime error while keeping the ranklist visible', async ({
+    page,
+    request,
+  }) => {
+    await denyExternalCalls(page);
+    await stubWebSocket(page);
+    await request.post(`${mockBaseURL}/__reset`);
+
+    await page.goto('/live/live-test-key?token=t0&scrollSolution=1');
+
+    const wsUrl = `ws://127.0.0.1:${mockPort}/ranking/record/live-rid-1?token=t0`;
+    await expect(page.locator('[data-id="live-scroll-solution-status"]')).toHaveText('connected');
+    await page.evaluate((url) => {
+      (
+        window as unknown as {
+          __ranklandEmitWsClose: (url: string) => void;
+        }
+      ).__ranklandEmitWsClose(url);
+    }, wsUrl);
+
+    await expect(page.locator('[data-id="live-scroll-solution-status"]')).toHaveText('error');
+    await expect(page.locator('[data-id="live-ranklist-content"]')).toBeVisible();
+    await expect(page.locator('.srk-user-cell', { hasText: 'Team Alpha' })).toBeVisible();
+  });
 });

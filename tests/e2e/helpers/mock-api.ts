@@ -59,6 +59,7 @@ export async function stubWebSocket(page: Page) {
       __ranklandWsClosedUrls?: string[];
       __ranklandEmitWsMessage?: (url: string, bytes: number[]) => void;
       __ranklandEmitWsError?: (url: string) => void;
+      __ranklandEmitWsClose?: (url: string) => void;
     };
     win.__ranklandWsUrls = [];
     win.__ranklandWsClosedUrls = [];
@@ -75,6 +76,13 @@ export async function stubWebSocket(page: Page) {
         return;
       }
       socket.dispatchEvent(new Event('error'));
+    };
+    win.__ranklandEmitWsClose = (url: string) => {
+      const socket = sockets.get(url);
+      if (!socket) {
+        return;
+      }
+      socket.dispatchEvent(new Event('close'));
     };
 
     class StubWebSocket extends EventTarget {

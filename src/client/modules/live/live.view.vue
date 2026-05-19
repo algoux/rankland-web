@@ -364,7 +364,7 @@ const LivePage = defineComponent({
           ]);
         });
         ws.addEventListener('close', () => {
-          this.scrollSolutionStatus = 'closed';
+          this.scrollSolutionStatus = 'error';
         });
         ws.addEventListener('error', () => {
           this.scrollSolutionStatus = 'error';
