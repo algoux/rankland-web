@@ -5,9 +5,9 @@ This file is the quick global dashboard for the RankLand migration. Update it at
 ## Current Focus
 
 - Active branch: `migration/live-page-foundation`
-- Current slice: live product review NotFound full-chain coverage
-- Latest slice commit: `test: 补齐实时榜单 NotFound 全链路覆盖` (this commit)
-- Last recorded full gate: `corepack pnpm test:migration` passed for live NotFound full-chain coverage
+- Current slice: live WebSocket error full-chain coverage
+- Latest slice commit: `test: 补齐实时榜单 WebSocket 错误覆盖` (this commit)
+- Last recorded full gate: `corepack pnpm test:migration` passed for live WebSocket error coverage
 - Next recommended focus: continue live product review and remaining parity gaps
 
 ## Route Progress
@@ -19,7 +19,7 @@ This file is the quick global dashboard for the RankLand migration. Update it at
 | `/ranklist/:id` | SSR | Foundation + shared wrapper parity follow-ups verified | `migration/live-page-foundation` | Unit, route, full-chain E2E | Product polish after route parity review |
 | `/collection/:id` | SSR | Foundation verified | `migration/collection-page-foundation` | Unit, route, full-chain E2E | Exact menu/mobile/category icon parity |
 | `/playground` | CSR | Foundation verified | `migration/playground-page-foundation` | Unit, route, full-chain E2E | Monaco/editor parity and UX polish |
-| `/live/:id` | CSR | Foundation + parity follow-ups verified | `migration/live-page-foundation` | Unit, route, full-chain E2E including NotFound | Product review, realtime edge cases |
+| `/live/:id` | CSR | Foundation + parity follow-ups verified | `migration/live-page-foundation` | Unit, route, full-chain E2E including NotFound and WebSocket error | Product review, realtime reconnect/close edge cases |
 
 ## Infrastructure Progress
 
@@ -41,7 +41,7 @@ This file is the quick global dashboard for the RankLand migration. Update it at
 ## Known Risks
 
 - Route foundations preserve core behavior but do not yet guarantee exact visual parity with old React/Ant Design pages.
-- Live realtime behavior is covered by deterministic tests, but production WebSocket edge cases still need review.
+- Live realtime behavior has deterministic success, NotFound, and WebSocket error coverage, but production reconnect/close edge cases still need review.
 - SRK renderer wrapper is shared by multiple migrated routes, so remaining parity changes should be isolated and heavily tested.
 - Converter-backed SRK exports use lazy browser imports of `@algoux/standard-ranklist-convert-to@0.2.2`; `xlsx@0.18.5` remains a large but click-loaded dependency.
 - User modal rank-time parity uses a lightweight Vue/SVG curve instead of the old React `@antv/g2` chart, so exact tooltip and animation parity remains intentionally deferred.

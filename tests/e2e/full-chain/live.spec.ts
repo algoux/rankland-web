@@ -150,6 +150,17 @@ test.describe('/live/:id full-chain route', () => {
     await expect(scrollSolutionItem).toContainText('A');
     await expect(scrollSolutionItem).toContainText('AC');
 
+    await page.evaluate((url) => {
+      (
+        window as unknown as {
+          __ranklandEmitWsError: (url: string) => void;
+        }
+      ).__ranklandEmitWsError(url);
+    }, `ws://127.0.0.1:${mockPort}/ranking/record/live-rid-1?token=t0`);
+    await expect(page.locator('[data-id="live-scroll-solution-status"]')).toHaveText('error');
+    await expect(page.locator('[data-id="live-ranklist-content"]')).toBeVisible();
+    await expect(page.locator('.srk-user-cell', { hasText: 'Team Alpha' })).toBeVisible();
+
     const requests = await readRequests(request);
     const liveInfoRequests = requests.filter((requestRecord) => requestRecord.path === '/ranking/config/live-test-key');
     const liveRanklistRequests = requests.filter((requestRecord) => requestRecord.path === '/ranking/live-rid-1');

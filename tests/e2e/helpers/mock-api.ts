@@ -57,6 +57,7 @@ export async function stubWebSocket(page: Page) {
     const win = window as unknown as {
       __ranklandWsUrls?: string[];
       __ranklandEmitWsMessage?: (url: string, bytes: number[]) => void;
+      __ranklandEmitWsError?: (url: string) => void;
     };
     win.__ranklandWsUrls = [];
     win.__ranklandEmitWsMessage = (url: string, bytes: number[]) => {
@@ -65,6 +66,13 @@ export async function stubWebSocket(page: Page) {
         return;
       }
       socket.dispatchEvent(new MessageEvent('message', { data: new Uint8Array(bytes).buffer }));
+    };
+    win.__ranklandEmitWsError = (url: string) => {
+      const socket = sockets.get(url);
+      if (!socket) {
+        return;
+      }
+      socket.dispatchEvent(new Event('error'));
     };
 
     class StubWebSocket extends EventTarget {
