@@ -22,13 +22,13 @@
               <button data-id="rankland-ranklist-export-srk-action" type="button" @click="downloadSrkJson">
                 标准榜单格式 (srk)
               </button>
-              <button data-id="rankland-ranklist-export-gym-ghost-action" type="button" disabled>
+              <button data-id="rankland-ranklist-export-gym-ghost-action" type="button" @click="downloadGymGhostDat">
                 Codeforces Gym Ghost (dat)
               </button>
-              <button data-id="rankland-ranklist-export-vjudge-action" type="button" disabled>
+              <button data-id="rankland-ranklist-export-vjudge-action" type="button" @click="downloadVJudgeReplay">
                 Virtual Judge Replay (xlsx)
               </button>
-              <button data-id="rankland-ranklist-export-xlsx-action" type="button" disabled>
+              <button data-id="rankland-ranklist-export-xlsx-action" type="button" @click="downloadGeneralExcel">
                 Excel 表格 (xlsx)
               </button>
             </div>
@@ -268,9 +268,12 @@ import '@algoux/standard-ranklist-renderer-component-styles';
 import { createRanklandRanklistState, type RanklandRanklistFilterState } from './rankland-ranklist-state';
 import {
   buildRanklandEmbedCode,
+  createGymGhostExportFile,
   createSrkExportFile,
   normalizeRanklandShareUrl,
   type RanklandEmbedKind,
+  writeGeneralExcelFile,
+  writeVJudgeReplayFile,
 } from './rankland-ranklist-actions';
 import {
   getAllRankTimeData,
@@ -537,6 +540,40 @@ export default defineComponent({
       anchor.remove();
       window.URL.revokeObjectURL(url);
       this.actionStatus = 'SRK 已导出';
+    },
+    async downloadGymGhostDat() {
+      try {
+        const file = await createGymGhostExportFile(this.ranklist, this.actionName);
+        const blob = new Blob([file.content], { type: file.type });
+        const url = window.URL.createObjectURL(blob);
+        const anchor = document.createElement('a');
+        anchor.href = url;
+        anchor.download = file.filename;
+        anchor.style.display = 'none';
+        document.body.appendChild(anchor);
+        anchor.click();
+        anchor.remove();
+        window.URL.revokeObjectURL(url);
+        this.actionStatus = 'Gym Ghost 已导出';
+      } catch (error) {
+        this.actionStatus = 'Gym Ghost 导出失败';
+      }
+    },
+    async downloadVJudgeReplay() {
+      try {
+        await writeVJudgeReplayFile(this.ranklist, this.actionName);
+        this.actionStatus = 'VJudge Replay 已导出';
+      } catch (error) {
+        this.actionStatus = 'VJudge Replay 导出失败';
+      }
+    },
+    async downloadGeneralExcel() {
+      try {
+        await writeGeneralExcelFile(this.ranklist, this.actionName);
+        this.actionStatus = 'Excel 已导出';
+      } catch (error) {
+        this.actionStatus = 'Excel 导出失败';
+      }
     },
     async copyCurrentPageLink() {
       await this.copyText(normalizeRanklandShareUrl(window.location.href), '链接已复制');

@@ -72,6 +72,17 @@ test.describe('/live/:id full-chain route', () => {
     await expect(page.getByText('Team Alpha')).toBeVisible();
     await expect(page.getByText('Team Beta')).toBeVisible();
 
+    await page.locator('[data-id="rankland-ranklist-export-menu-button"]').click();
+    await expect(page.locator('[data-id="rankland-ranklist-export-gym-ghost-action"]')).toBeEnabled();
+    await expect(page.locator('[data-id="rankland-ranklist-export-vjudge-action"]')).toBeEnabled();
+    await expect(page.locator('[data-id="rankland-ranklist-export-xlsx-action"]')).toBeEnabled();
+
+    const liveGymGhostDownloadPromise = page.waitForEvent('download');
+    await page.locator('[data-id="rankland-ranklist-export-gym-ghost-action"]').click();
+    const liveGymGhostDownload = await liveGymGhostDownloadPromise;
+    expect(liveGymGhostDownload.suggestedFilename()).toBe('live-test-key_gymghost.dat');
+    await expect(page.locator('[data-id="rankland-ranklist-action-status"]')).toHaveText('Gym Ghost 已导出');
+
     await page.locator('[data-id="rankland-ranklist-share-menu-button"]').click();
     await page.locator('[data-id="rankland-ranklist-copy-embed-action"]').click();
     await expect(page.locator('[data-id="rankland-ranklist-action-status"]')).toHaveText('嵌入代码已复制');

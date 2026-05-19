@@ -59,6 +59,29 @@ test.describe('/ranklist/:id full-chain route', () => {
     expect(downloadPath).not.toBeNull();
     expect(JSON.parse(await readFile(downloadPath!, 'utf8')).contest.title).toBe('Test Contest 2024');
 
+    const gymGhostDownloadPromise = page.waitForEvent('download');
+    await page.locator('[data-id="rankland-ranklist-export-gym-ghost-action"]').click();
+    const gymGhostDownload = await gymGhostDownloadPromise;
+    expect(gymGhostDownload.suggestedFilename()).toBe('test-key_gymghost.dat');
+    const gymGhostDownloadPath = await gymGhostDownload.path();
+    expect(gymGhostDownloadPath).not.toBeNull();
+    const gymGhostContent = await readFile(gymGhostDownloadPath!, 'utf8');
+    expect(gymGhostContent).toContain('@contest "Test Contest 2024"');
+    expect(gymGhostContent).toContain('Team Alpha');
+    await expect(page.locator('[data-id="rankland-ranklist-action-status"]')).toHaveText('Gym Ghost 已导出');
+
+    const vjudgeDownloadPromise = page.waitForEvent('download');
+    await page.locator('[data-id="rankland-ranklist-export-vjudge-action"]').click();
+    const vjudgeDownload = await vjudgeDownloadPromise;
+    expect(vjudgeDownload.suggestedFilename()).toBe('test-key_vjreplay.xlsx');
+    await expect(page.locator('[data-id="rankland-ranklist-action-status"]')).toHaveText('VJudge Replay 已导出');
+
+    const excelDownloadPromise = page.waitForEvent('download');
+    await page.locator('[data-id="rankland-ranklist-export-xlsx-action"]').click();
+    const excelDownload = await excelDownloadPromise;
+    expect(excelDownload.suggestedFilename()).toBe('test-key.xlsx');
+    await expect(page.locator('[data-id="rankland-ranklist-action-status"]')).toHaveText('Excel 已导出');
+
     await page.locator('[data-id="rankland-ranklist-share-menu-button"]').click();
     await page.locator('[data-id="rankland-ranklist-copy-link-action"]').click();
     await expect(page.locator('[data-id="rankland-ranklist-action-status"]')).toHaveText('链接已复制');

@@ -17,6 +17,46 @@ export function createSrkExportFile(ranklist: srk.Ranklist, name: string): SrkEx
   };
 }
 
+export interface TextExportFile extends SrkExportFile {
+  encoding?: string;
+}
+
+async function importRanklistConverters() {
+  return import('@algoux/standard-ranklist-convert-to');
+}
+
+export async function createGymGhostExportFile(ranklist: srk.Ranklist, name: string): Promise<TextExportFile> {
+  const { CodeforcesGymGhostDATConverter } = await importRanklistConverters();
+  const file = new CodeforcesGymGhostDATConverter().convert(ranklist);
+
+  return {
+    filename: `${name}_gymghost.${file.ext}`,
+    content: file.content,
+    type: 'text/plain;charset=utf-8',
+    encoding: file.encoding,
+  };
+}
+
+export async function createVJudgeReplayWorkbook(ranklist: srk.Ranklist) {
+  const { VJudgeReplayConverter } = await importRanklistConverters();
+  return new VJudgeReplayConverter().convert(ranklist);
+}
+
+export async function createGeneralExcelWorkbook(ranklist: srk.Ranklist) {
+  const { GeneralExcelConverter } = await importRanklistConverters();
+  return new GeneralExcelConverter().convert(ranklist);
+}
+
+export async function writeVJudgeReplayFile(ranklist: srk.Ranklist, name: string) {
+  const { VJudgeReplayConverter } = await importRanklistConverters();
+  return new VJudgeReplayConverter().convertAndWrite(ranklist, `${name}_vjreplay.xlsx`);
+}
+
+export async function writeGeneralExcelFile(ranklist: srk.Ranklist, name: string) {
+  const { GeneralExcelConverter } = await importRanklistConverters();
+  return new GeneralExcelConverter().convertAndWrite(ranklist, `${name}.xlsx`);
+}
+
 export function normalizeRanklandShareUrl(fullUrl: string): string {
   const url = new URL(fullUrl);
   url.searchParams.delete('focus');
