@@ -120,6 +120,11 @@ function routeRequest(req, res) {
   }
 
   if (method === 'GET' && /^\/ranking\/config\/[^/]+$/.test(url.pathname)) {
+    if (url.pathname === '/ranking/config/missing-live') {
+      sendJson(res, 200, { code: 11, message: 'Live ranklist not found' });
+      return;
+    }
+
     sendJson(res, 200, ok(liveInfo));
     return;
   }

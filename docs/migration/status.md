@@ -5,9 +5,9 @@ This file is the quick global dashboard for the RankLand migration. Update it at
 ## Current Focus
 
 - Active branch: `migration/live-page-foundation`
-- Current slice: converter-backed exports implementation
-- Latest slice commit: `feat: 补齐 converter-backed 榜单导出` (this commit)
-- Last recorded full gate: `corepack pnpm test:migration` passed for converter-backed export parity
+- Current slice: live product review NotFound full-chain coverage
+- Latest slice commit: `test: 补齐实时榜单 NotFound 全链路覆盖` (this commit)
+- Last recorded full gate: `corepack pnpm test:migration` passed for live NotFound full-chain coverage
 - Next recommended focus: continue live product review and remaining parity gaps
 
 ## Route Progress
@@ -19,7 +19,7 @@ This file is the quick global dashboard for the RankLand migration. Update it at
 | `/ranklist/:id` | SSR | Foundation + shared wrapper parity follow-ups verified | `migration/live-page-foundation` | Unit, route, full-chain E2E | Product polish after route parity review |
 | `/collection/:id` | SSR | Foundation verified | `migration/collection-page-foundation` | Unit, route, full-chain E2E | Exact menu/mobile/category icon parity |
 | `/playground` | CSR | Foundation verified | `migration/playground-page-foundation` | Unit, route, full-chain E2E | Monaco/editor parity and UX polish |
-| `/live/:id` | CSR | Foundation + parity follow-ups verified | `migration/live-page-foundation` | Unit, route, full-chain E2E | Product review, realtime edge cases |
+| `/live/:id` | CSR | Foundation + parity follow-ups verified | `migration/live-page-foundation` | Unit, route, full-chain E2E including NotFound | Product review, realtime edge cases |
 
 ## Infrastructure Progress
 

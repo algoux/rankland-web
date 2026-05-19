@@ -160,4 +160,24 @@ test.describe('/live/:id full-chain route', () => {
     expect(requests.some((requestRecord) => requestRecord.path === '/rank/live-test-key')).toBe(false);
     expect(requests.some((requestRecord) => requestRecord.path === '/file/download')).toBe(false);
   });
+
+  test('renders the Not Found page when the backend returns missing live contest info', async ({ page, request }) => {
+    await denyExternalCalls(page);
+    await request.post(`${mockBaseURL}/__reset`);
+
+    const response = await page.goto('/live/missing-live');
+
+    expect(response).not.toBeNull();
+    expect(response?.ok()).toBe(true);
+    await expect(page).toHaveTitle('Not Found - RankLand');
+    await expect(page.locator('[data-id="live-not-found"]')).toBeVisible();
+    await expect(page.locator('[data-id="live-not-found-home-link"][href="/"]')).toBeVisible();
+
+    const requests = await readRequests(request);
+    const liveInfoRequests = requests.filter((requestRecord) => requestRecord.path === '/ranking/config/missing-live');
+    const liveRanklistRequests = requests.filter((requestRecord) => /^\/ranking\/[^/]+$/.test(requestRecord.path));
+
+    expect(liveInfoRequests).toHaveLength(1);
+    expect(liveRanklistRequests).toHaveLength(0);
+  });
 });
