@@ -41,4 +41,7 @@ gen.generate = () => {
 };
 
 gen.fullGenerate();
-gen.watch();
+
+if (process.argv.includes('--watch')) {
+  gen.watch();
+}
