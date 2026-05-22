@@ -11,7 +11,11 @@ const e2eProbeEnv = { RANKLAND_E2E_PROBE: '1' };
 const ranklandSiteEnv = {
   RANKLAND_SITE_ORIGIN: 'https://rankland.example',
   RANKLAND_SITE_ALIAS: 'cnn',
+  RANKLAND_HOST_CN: 'rankland.cn.example',
+  RANKLAND_HOST_GLOBAL: 'rankland.global.example',
   SITE_ALIAS: 'legacy-cnn',
+  HOST_CN: 'legacy.cn.example',
+  HOST_GLOBAL: 'legacy.global.example',
   BEIAN: '鲁ICP备00000000号',
 };
 const ranklandLiveEnv = {
