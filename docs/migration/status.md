@@ -5,8 +5,8 @@ This file is the quick global dashboard for the RankLand migration. Update it at
 ## Current Focus
 
 - Active branch: `migration/live-page-foundation`
-- Current slice: live WebSocket reconnect policy decision
-- Latest slice commit: `docs: 确认实时榜单 WebSocket 重连策略` (this commit)
+- Current slice: live scroll-solution status visibility polish
+- Latest slice commit: `fix: 隐藏实时榜单内部状态行` (this commit)
 - Last recorded full gate: `FULL_CHAIN_APP_PORT=3210 FULL_CHAIN_MOCK_PORT=3211 corepack pnpm test:e2e:full-chain -- tests/e2e/full-chain/live.spec.ts` passed 5 `/live/:id` full-chain tests
 - Next recommended focus: continue live realtime event display polish or move to app shell/layout parity
 
@@ -19,7 +19,7 @@ This file is the quick global dashboard for the RankLand migration. Update it at
 | `/ranklist/:id` | SSR | Foundation + shared wrapper parity follow-ups verified | `migration/live-page-foundation` | Unit, route, full-chain E2E | Product polish after route parity review |
 | `/collection/:id` | SSR | Foundation verified | `migration/collection-page-foundation` | Unit, route, full-chain E2E | Exact menu/mobile/category icon parity |
 | `/playground` | CSR | Foundation verified | `migration/playground-page-foundation` | Unit, route, full-chain E2E | Monaco/editor parity and UX polish |
-| `/live/:id` | CSR | Foundation + parity follow-ups verified | `migration/live-page-foundation` | Unit, route, full-chain E2E including NotFound, WebSocket error, unexpected WebSocket close, scroll-solution toggle close, and mobile toggle visibility | Product review, realtime event display polish |
+| `/live/:id` | CSR | Foundation + parity follow-ups verified | `migration/live-page-foundation` | Unit, route, full-chain E2E including NotFound, WebSocket error, unexpected WebSocket close, scroll-solution toggle close, mobile toggle visibility, and hidden internal status marker | Product review, realtime event display polish |
 
 ## Infrastructure Progress
 
@@ -41,7 +41,7 @@ This file is the quick global dashboard for the RankLand migration. Update it at
 ## Known Risks
 
 - Route foundations preserve core behavior but do not yet guarantee exact visual parity with old React/Ant Design pages.
-- Live realtime behavior has deterministic success, NotFound, WebSocket error, unexpected WebSocket close, scroll-solution toggle close, and mobile toggle visibility coverage. Automatic WebSocket reconnect/backoff is intentionally deferred as a product enhancement because the old React page did not reconnect after close/error.
+- Live realtime behavior has deterministic success, NotFound, WebSocket error, unexpected WebSocket close, scroll-solution toggle close, mobile toggle visibility, and hidden internal status marker coverage. Automatic WebSocket reconnect/backoff is intentionally deferred as a product enhancement because the old React page did not reconnect after close/error.
 - SRK renderer wrapper is shared by multiple migrated routes, so remaining parity changes should be isolated and heavily tested.
 - Converter-backed SRK exports use lazy browser imports of `@algoux/standard-ranklist-convert-to@0.2.2`; `xlsx@0.18.5` remains a large but click-loaded dependency.
 - User modal rank-time parity uses a lightweight Vue/SVG curve instead of the old React `@antv/g2` chart, so exact tooltip and animation parity remains intentionally deferred.

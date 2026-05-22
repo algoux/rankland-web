@@ -85,9 +85,7 @@ export default defineComponent({
 }
 
 .live-scroll-solution-status {
-  padding: 3px 6px;
-  color: var(--color-user-second-name);
-  font-size: 11px;
+  display: none;
 }
 
 .live-scroll-solution-list {

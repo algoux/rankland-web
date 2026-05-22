@@ -62,6 +62,7 @@ test.describe('/live/:id full-chain route', () => {
     await expect(page.locator('[data-id="live-hydrated"]')).toHaveText('hydrated');
     await expect(page.locator('[data-id="live-scroll-solution-toggle"]')).toBeChecked();
     await expect(page.locator('[data-id="live-scroll-solution-status"]')).toHaveText('connected');
+    await expect(page.locator('[data-id="live-scroll-solution-status"]')).toBeHidden();
     await expect(page.locator('[data-id="rankland-ranklist-title"]')).toHaveText('Test Contest 2024');
     await expect(page.locator('[data-id="rankland-ranklist-progress"]')).toBeVisible();
     await expect(page.locator('[data-id="rankland-ranklist-filters"]')).toBeVisible();
