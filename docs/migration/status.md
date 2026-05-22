@@ -5,10 +5,10 @@ This file is the quick global dashboard for the RankLand migration. Update it at
 ## Current Focus
 
 - Active branch: `migration/live-page-foundation`
-- Current slice: migration completion audit
-- Latest slice commit: `fix: 修复路由生成收口门禁` (this commit)
-- Last recorded full gate: `corepack pnpm test:migration` passed build, 24 unit files / 120 unit tests, 1 SSR smoke test, 1 shallow Playwright test, and 32 full-chain Playwright tests across all migrated public routes
-- Next recommended focus: product-decision slices for intentionally deferred parity polish, or final integration review if those deferrals are accepted
+- Current slice: final integration review
+- Latest slice commit: `docs: 完成迁移最终集成评审` (this commit)
+- Last recorded full gate: `corepack pnpm test:migration` passed build, 24 unit files / 120 unit tests, 1 SSR smoke test, 1 shallow Playwright test, and 32 full-chain Playwright tests across all migrated public routes during final integration review
+- Next recommended focus: accept the route-compatible migration with deferred product decisions, or choose one deferred product-polish slice
 
 ## Route Progress
 
@@ -31,7 +31,7 @@ This file is the quick global dashboard for the RankLand migration. Update it at
 | SRK Vue wrapper | Foundation + live controls + modal clicks + rank-time user modal + asset URL rewriting + basic export/share + converter-backed exports + footer contact prompt done | Remaining `StyledRanklistRenderer` parity is product/visual review driven |
 | Full-chain E2E harness | Done | Real bwcx/Koa app plus controlled mock RankLand backend |
 | Vue app shell | Foundation + contact modal + theme sync + visual review verified | Logo, primary navigation, site switch, BackTop, legacy focus-mode shell bypass, shared contact modal, system theme class sync, macOS Blink optimization class, desktop/mobile viewport bounds, and screenshot review are covered by full-chain E2E. Exact Ant Design/GA parity remains product polish. |
-| Migration process | Audited | Slice workflow, conversation I/O protocol, this dashboard, and the completion audit spec/plan are in `docs/migration` and `docs/superpowers` |
+| Migration process | Final review verified | Slice workflow, conversation I/O protocol, this dashboard, completion audit, and final integration review are in `docs/migration` and `docs/superpowers` |
 
 ## Deferred Product Decisions
 
@@ -53,7 +53,7 @@ This file is the quick global dashboard for the RankLand migration. Update it at
 
 ## Next Slice Queue
 
-1. Final integration review: decide whether the audited route-compatible migration can be merged with deferred product decisions listed above.
+1. Accept route-compatible migration as complete with deferred product decisions, or open one product-polish follow-up.
 2. Collection product parity: exact menu/mobile/category icon behavior.
 3. Playground product parity: Monaco/editor parity and UX polish.
 4. App shell product parity: exact Ant Design styling and analytics/pageview behavior.
