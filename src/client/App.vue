@@ -62,6 +62,11 @@ import { defineComponent } from 'vue';
 import { ranklandRoutes } from '@common/rankland-router';
 import logo from './assets/logo.png';
 
+type ThemeMediaQuery = MediaQueryList & {
+  addListener?: (listener: (event: MediaQueryListEvent | MediaQueryList) => void) => void;
+  removeListener?: (listener: (event: MediaQueryListEvent | MediaQueryList) => void) => void;
+};
+
 const navItems = [
   { path: ranklandRoutes.search.build(), label: '探索' },
   { path: ranklandRoutes.collection.build({ id: 'official' }), label: '榜单合集' },
@@ -75,6 +80,7 @@ export default defineComponent({
       logo,
       navItems,
       showBackTop: false,
+      themeMediaQuery: undefined as ThemeMediaQuery | undefined,
     };
   },
   computed: {
@@ -96,11 +102,20 @@ export default defineComponent({
     },
   },
   mounted() {
+    this.setupThemeSync();
+    this.setupPlatformOptimizations();
     this.updateBackTopVisibility();
     window.addEventListener('scroll', this.updateBackTopVisibility, { passive: true });
   },
   beforeUnmount() {
     window.removeEventListener('scroll', this.updateBackTopVisibility);
+    if (this.themeMediaQuery) {
+      if (this.themeMediaQuery.removeEventListener) {
+        this.themeMediaQuery.removeEventListener('change', this.applySystemTheme);
+      } else if (this.themeMediaQuery.removeListener) {
+        this.themeMediaQuery.removeListener(this.applySystemTheme);
+      }
+    }
   },
   methods: {
     isNavActive(path: string): boolean {
@@ -111,6 +126,32 @@ export default defineComponent({
     },
     scrollToTop() {
       window.scrollTo({ top: 0, behavior: 'smooth' });
+    },
+    setupThemeSync() {
+      if (!window.matchMedia) {
+        document.documentElement.className = 'light';
+        return;
+      }
+
+      this.themeMediaQuery = window.matchMedia('(prefers-color-scheme: dark)') as ThemeMediaQuery;
+      this.applySystemTheme(this.themeMediaQuery);
+      if (this.themeMediaQuery.addEventListener) {
+        this.themeMediaQuery.addEventListener('change', this.applySystemTheme);
+      } else if (this.themeMediaQuery.addListener) {
+        this.themeMediaQuery.addListener(this.applySystemTheme);
+      }
+    },
+    applySystemTheme(event: MediaQueryListEvent | MediaQueryList) {
+      document.documentElement.className = event.matches ? 'dark' : 'light';
+    },
+    setupPlatformOptimizations() {
+      const userAgent = window.navigator.userAgent;
+      const isMacOS = /Macintosh|Mac OS X/.test(userAgent);
+      const isBlink = /Chrome|Chromium|Edg\//.test(userAgent) && /AppleWebKit/.test(userAgent);
+
+      if (isMacOS && isBlink) {
+        document.body.classList.add('optimize-decrease-effects');
+      }
     },
   },
 });
