@@ -105,6 +105,7 @@ export default routeView(PlaygroundPage, '/playground');
 
 <style lang="less" scoped>
 .playground-page {
+  box-sizing: border-box;
   min-height: 70vh;
   padding: 24px 16px;
 }
@@ -143,6 +144,7 @@ export default routeView(PlaygroundPage, '/playground');
 }
 
 .playground-editor {
+  box-sizing: border-box;
   width: 100%;
   min-height: 640px;
   padding: 12px;

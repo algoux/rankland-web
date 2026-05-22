@@ -5,10 +5,10 @@ This file is the quick global dashboard for the RankLand migration. Update it at
 ## Current Focus
 
 - Active branch: `migration/live-page-foundation`
-- Current slice: ranklist/collection visual review
-- Latest slice commit: `test: 补充榜单合集视觉审查` (this commit)
-- Last recorded full gate: `FULL_CHAIN_APP_PORT=3210 FULL_CHAIN_MOCK_PORT=3211 corepack pnpm test:e2e:full-chain -- tests/e2e/full-chain/ranklist.spec.ts tests/e2e/full-chain/collection.spec.ts` passed 9 full-chain tests and produced ranklist/collection desktop/mobile screenshots
-- Next recommended focus: continue page-specific product/visual review for playground and live
+- Current slice: playground visual review
+- Latest slice commit: `fix: 修复演练场移动端溢出` (this commit)
+- Last recorded full gate: `FULL_CHAIN_APP_PORT=3210 FULL_CHAIN_MOCK_PORT=3211 corepack pnpm test:e2e:full-chain -- tests/e2e/full-chain/playground.spec.ts` passed 4 full-chain tests and produced playground desktop/mobile screenshots
+- Next recommended focus: live product/visual review and remaining parity gaps
 
 ## Route Progress
 
@@ -18,7 +18,7 @@ This file is the quick global dashboard for the RankLand migration. Update it at
 | `/search` | CSR | Foundation + visual review verified | `migration/live-page-foundation` | Unit, generated route, full-chain E2E, search desktop/mobile screenshot review | Product polish after route parity review |
 | `/ranklist/:id` | SSR | Foundation + shared wrapper parity follow-ups + visual review verified | `migration/live-page-foundation` | Unit, route, full-chain E2E including footer contact modal, ranklist desktop/mobile screenshot review | Product polish after route parity review |
 | `/collection/:id` | SSR | Foundation + visual review verified | `migration/live-page-foundation` | Unit, route, full-chain E2E, collection desktop/mobile screenshot review | Exact menu/mobile/category icon parity |
-| `/playground` | CSR | Foundation verified | `migration/playground-page-foundation` | Unit, route, full-chain E2E | Monaco/editor parity and UX polish |
+| `/playground` | CSR | Foundation + visual review verified | `migration/live-page-foundation` | Unit, route, full-chain E2E, playground desktop/mobile screenshot review | Monaco/editor parity and UX polish |
 | `/live/:id` | CSR | Foundation + parity follow-ups verified | `migration/live-page-foundation` | Unit, route, full-chain E2E including NotFound, WebSocket error, unexpected WebSocket close, scroll-solution toggle close, mobile toggle visibility, hidden internal status marker, desktop/mobile realtime layout bounds, and mobile progress label bounds | Product review; exact Toastify animation/pixel parity deferred as product enhancement |
 
 ## Infrastructure Progress
@@ -50,7 +50,7 @@ This file is the quick global dashboard for the RankLand migration. Update it at
 
 ## Next Slice Queue
 
-1. Page-specific product/visual review for playground and live.
-2. Live product review and remaining parity gaps.
-3. Collection product parity decisions: exact menu/mobile/category icon behavior.
+1. Live product/visual review and remaining parity gaps.
+2. Collection product parity decisions: exact menu/mobile/category icon behavior.
+3. Playground product parity decisions: Monaco/editor parity and UX polish.
 4. App shell remaining product decisions: exact Ant Design styling and analytics/pageview behavior.
