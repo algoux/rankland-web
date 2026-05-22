@@ -731,6 +731,19 @@ export default defineComponent({
   margin: 12px 16px;
 }
 
+@media (max-width: 767px) {
+  .rankland-ranklist-progress :deep(.srk-progress-secondary-area) {
+    flex-wrap: wrap;
+    gap: 4px 12px;
+  }
+
+  .rankland-ranklist-progress :deep(.srk-progress-secondary-area-left),
+  .rankland-ranklist-progress :deep(.srk-progress-secondary-area-right) {
+    flex: 1 1 140px;
+    min-width: 0;
+  }
+}
+
 .rankland-ranklist-controls {
   display: flex;
   align-items: center;

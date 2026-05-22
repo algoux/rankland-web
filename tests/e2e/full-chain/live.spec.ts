@@ -26,6 +26,22 @@ function makeRealtimeSolutionBytes() {
   return [...header, ...fields.flat()];
 }
 
+async function emitRealtimeSolution(page: Page, url: string) {
+  await page.evaluate(
+    ({ url, message }) => {
+      (
+        window as unknown as {
+          __ranklandEmitWsMessage?: (url: string, bytes: number[]) => void;
+        }
+      ).__ranklandEmitWsMessage?.(url, message);
+    },
+    {
+      url,
+      message: makeRealtimeSolutionBytes(),
+    },
+  );
+}
+
 async function stubClipboard(page: Page) {
   await page.addInitScript(() => {
     Object.defineProperty(navigator, 'clipboard', {
@@ -171,6 +187,87 @@ test.describe('/live/:id full-chain route', () => {
     expect(liveRanklistRequests[0].search).toContain('token=t0');
     expect(requests.some((requestRecord) => requestRecord.path === '/rank/live-test-key')).toBe(false);
     expect(requests.some((requestRecord) => requestRecord.path === '/file/download')).toBe(false);
+  });
+
+  test('keeps the realtime event panel within desktop and mobile viewport bounds', async ({ page, request }, testInfo) => {
+    await page.setViewportSize({ width: 1280, height: 720 });
+    await denyExternalCalls(page);
+    await stubWebSocket(page);
+    await request.post(`${mockBaseURL}/__reset`);
+
+    await page.goto('/live/live-test-key?token=t0&scrollSolution=1&focus=yes');
+
+    const wsUrl = `ws://127.0.0.1:${mockPort}/ranking/record/live-rid-1?token=t0`;
+    await expect(page.locator('[data-id="live-scroll-solution-status"]')).toHaveText('connected');
+    await emitRealtimeSolution(page, wsUrl);
+
+    const scrollSolutionItems = page.locator('[data-id="live-scroll-solution-item"]');
+    await expect(scrollSolutionItems).toHaveCount(1);
+    await expect(scrollSolutionItems).toContainText('Team Alpha');
+    await expect(scrollSolutionItems).toContainText('A');
+    await expect(scrollSolutionItems).toContainText('AC');
+
+    const measureLayout = () =>
+      page.evaluate(() => {
+        function rect(selector: string) {
+          const element = document.querySelector(selector);
+          if (!(element instanceof HTMLElement)) {
+            throw new Error(`Missing ${selector}`);
+          }
+          const box = element.getBoundingClientRect();
+          return {
+            bottom: box.bottom,
+            height: box.height,
+            left: box.left,
+            right: box.right,
+            top: box.top,
+            width: box.width,
+          };
+        }
+
+        return {
+          content: rect('[data-id="live-ranklist-content"]'),
+          item: rect('[data-id="live-scroll-solution-item"]'),
+          panel: rect('[data-id="live-scroll-solution"]'),
+          progressRight: rect('.srk-progress-secondary-area-right'),
+          viewport: {
+            height: window.innerHeight,
+            width: window.innerWidth,
+          },
+        };
+      });
+
+    const desktop = await measureLayout();
+    expect(Math.round(desktop.panel.width)).toBe(250);
+    expect(Math.round(desktop.item.height)).toBe(45);
+    expect(desktop.panel.left).toBeGreaterThanOrEqual(0);
+    expect(desktop.panel.right).toBeLessThanOrEqual(desktop.viewport.width);
+    expect(Math.abs(desktop.panel.bottom - desktop.viewport.height)).toBeLessThanOrEqual(1);
+    expect(desktop.content.left).toBeGreaterThanOrEqual(250);
+    const desktopScreenshot = testInfo.outputPath('live-realtime-desktop.png');
+    await page.screenshot({ fullPage: false, path: desktopScreenshot });
+    await testInfo.attach('live-realtime-desktop', {
+      path: desktopScreenshot,
+      contentType: 'image/png',
+    });
+
+    await page.setViewportSize({ width: 390, height: 844 });
+    await expect(scrollSolutionItems).toBeVisible();
+
+    const mobile = await measureLayout();
+    expect(Math.round(mobile.item.height)).toBe(45);
+    expect(mobile.panel.left).toBeGreaterThanOrEqual(0);
+    expect(mobile.panel.right).toBeLessThanOrEqual(mobile.viewport.width);
+    expect(mobile.panel.width).toBeLessThanOrEqual(mobile.viewport.width);
+    expect(mobile.content.left).toBeLessThan(250);
+    expect(mobile.progressRight.left).toBeGreaterThanOrEqual(0);
+    expect(mobile.progressRight.right).toBeLessThanOrEqual(mobile.viewport.width);
+    const mobileScreenshot = testInfo.outputPath('live-realtime-mobile.png');
+    await page.screenshot({ fullPage: false, path: mobileScreenshot });
+    await testInfo.attach('live-realtime-mobile', {
+      path: mobileScreenshot,
+      contentType: 'image/png',
+    });
   });
 
   test('hides the scroll-solution toggle on mobile while preserving live ranklist rendering', async ({
