@@ -448,7 +448,7 @@ export default routeView(LivePage, '/live/:id', LiveRPO);
   }
 
   .live-scroll-toggle {
-    justify-content: space-between;
+    display: none;
   }
 }
 </style>

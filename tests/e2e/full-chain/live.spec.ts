@@ -172,6 +172,24 @@ test.describe('/live/:id full-chain route', () => {
     expect(requests.some((requestRecord) => requestRecord.path === '/file/download')).toBe(false);
   });
 
+  test('hides the scroll-solution toggle on mobile while preserving live ranklist rendering', async ({
+    page,
+    request,
+  }) => {
+    await page.setViewportSize({ width: 390, height: 844 });
+    await denyExternalCalls(page);
+    await stubWebSocket(page);
+    await request.post(`${mockBaseURL}/__reset`);
+
+    await page.goto('/live/live-test-key?token=t0&focus=yes');
+
+    await expect(page.locator('[data-id="live-ranklist-content"]')).toBeVisible();
+    await expect(page.locator('[data-id="live-hydrated"]')).toHaveText('hydrated');
+    await expect(page.getByText('Team Alpha')).toBeVisible();
+    await expect(page.locator('[data-id="live-scroll-solution-toggle"]')).toBeHidden();
+    await expect(page.locator('[data-id="live-scroll-solution"]')).toBeHidden();
+  });
+
   test('renders the Not Found page when the backend returns missing live contest info', async ({ page, request }) => {
     await denyExternalCalls(page);
     await request.post(`${mockBaseURL}/__reset`);
