@@ -29,6 +29,14 @@ test.describe('/ full-chain route', () => {
     await expect(page.locator('[data-id="home-recommendation-search"][href="/search"]')).toBeVisible();
     await expect(page.locator('[data-id="home-recommendation-collection"][href="/collection/official"]')).toBeVisible();
     await expect(page.locator('[data-id="home-hydrated"]')).toHaveText('hydrated');
+    await page.locator('[data-id="home-contact"] [data-id="contact-us-trigger"]').click();
+    await expect(page.locator('[data-id="contact-us-dialog"]')).toBeVisible();
+    await expect(page.locator('[data-id="contact-us-email"][href="mailto:algoux.org@gmail.com"]')).toHaveText(
+      'algoux.org@gmail.com',
+    );
+    await expect(page.locator('[data-id="contact-us-qq-image"]')).toBeVisible();
+    await page.locator('[data-id="contact-us-close"]').click();
+    await expect(page.locator('[data-id="contact-us-dialog"]')).toHaveCount(0);
 
     const requestsResponse = await request.get(`${mockBaseURL}/__requests`);
     const requests = (await requestsResponse.json()) as Array<{ path: string }>;

@@ -141,6 +141,10 @@
           欢迎补充榜单数据至
           <a href="https://github.com/algoux/srk-collection" target="_blank" rel="noreferrer">榜单合集</a>
         </p>
+        <p>
+          需要专业的赛事外榜托管？
+          <ContactUs>联系我们</ContactUs>
+        </p>
       </footer>
 
       <div data-id="rankland-ranklist-user-modal">
@@ -265,6 +269,7 @@ import {
   type UserClickPayload,
 } from '@algoux/standard-ranklist-renderer-component-vue';
 import '@algoux/standard-ranklist-renderer-component-styles';
+import ContactUs from './contact-us.vue';
 import { createRanklandRanklistState, type RanklandRanklistFilterState } from './rankland-ranklist-state';
 import {
   buildRanklandEmbedCode,
@@ -301,6 +306,7 @@ function formatDateTime(timestamp: number): string {
 export default defineComponent({
   name: 'RanklandRanklist',
   components: {
+    ContactUs,
     DefaultSolutionModal,
     Modal,
     ProgressBar,

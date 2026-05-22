@@ -47,6 +47,15 @@ test.describe('/ranklist/:id full-chain route', () => {
     await expect(page.locator('[data-id="rankland-ranklist-progress"]')).toBeVisible();
     await expect(page.locator('[data-id="rankland-ranklist-filters"]')).toBeVisible();
     await expect(page.locator('[data-id="rankland-ranklist-footer"]')).toContainText('Powered by Standard Ranklist');
+    await expect(page.locator('[data-id="rankland-ranklist-footer"]')).toContainText('需要专业的赛事外榜托管？');
+    await page.locator('[data-id="rankland-ranklist-footer"] [data-id="contact-us-trigger"]').click();
+    await expect(page.locator('[data-id="contact-us-dialog"]')).toBeVisible();
+    await expect(page.locator('[data-id="contact-us-email"][href="mailto:algoux.org@gmail.com"]')).toHaveText(
+      'algoux.org@gmail.com',
+    );
+    await expect(page.locator('[data-id="contact-us-qq-image"]')).toBeVisible();
+    await page.locator('[data-id="contact-us-close"]').click();
+    await expect(page.locator('[data-id="contact-us-dialog"]')).toHaveCount(0);
     await expect(page.locator('[data-id="rankland-ranklist-export-menu-button"]')).toBeVisible();
     await expect(page.locator('[data-id="rankland-ranklist-share-menu-button"]')).toBeVisible();
 

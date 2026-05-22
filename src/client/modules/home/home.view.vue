@@ -97,7 +97,7 @@
       <h2>联系我们</h2>
       <p>
         如要为赛事寻求专业的实时外榜托管服务或希望补全/纠正本站数据，欢迎
-        <a href="mailto:algoux.org@gmail.com">与我们联系</a>。
+        <ContactUs>与我们联系</ContactUs>。
       </p>
     </section>
 
@@ -133,6 +133,7 @@ import { ranklandRoutes } from '@common/rankland-router';
 import type { IApiStatistics } from '@common/rankland-api';
 import type { AsyncDataOptions } from '@client/typings';
 import { formatTitle } from '@client/utils/title-format.util';
+import ContactUs from '@client/components/contact-us.vue';
 import pasteThenACLogo from './assets/paste-then-ac_logo.png';
 import algoBootstrapLogo from './assets/algo-bootstrap_logo.png';
 import { buildHomeAbsoluteUrl } from './home-site';
@@ -173,6 +174,9 @@ const siteNavigationJsonLd = JSON.stringify({
 
 const HomePage = defineComponent({
   name: 'Home',
+  components: {
+    ContactUs,
+  },
   props: {
     statistics: {
       type: Object as PropType<IApiStatistics>,
