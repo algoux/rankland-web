@@ -1,5 +1,5 @@
 import { expect, test } from '@playwright/test';
-import type { APIRequestContext, Page } from '@playwright/test';
+import type { APIRequestContext, Locator, Page } from '@playwright/test';
 import { denyExternalCalls, stubWebSocket } from '../helpers/mock-api';
 
 const mockPort = process.env.FULL_CHAIN_MOCK_PORT || '3101';
@@ -53,6 +53,27 @@ async function stubClipboard(page: Page) {
       },
     });
   });
+}
+
+async function expectElementWithinViewport(locator: Locator, page: Page) {
+  const box = await locator.boundingBox();
+  expect(box).not.toBeNull();
+  const viewport = page.viewportSize();
+  expect(viewport).not.toBeNull();
+
+  expect(box!.x).toBeGreaterThanOrEqual(0);
+  expect(box!.x + box!.width).toBeLessThanOrEqual(viewport!.width + 1);
+}
+
+async function expectNoHorizontalDocumentOverflow(page: Page) {
+  const overflow = await page.evaluate(() => ({
+    bodyScrollWidth: document.body.scrollWidth,
+    documentScrollWidth: document.documentElement.scrollWidth,
+    viewportWidth: window.innerWidth,
+  }));
+
+  expect(overflow.bodyScrollWidth).toBeLessThanOrEqual(overflow.viewportWidth + 1);
+  expect(overflow.documentScrollWidth).toBeLessThanOrEqual(overflow.viewportWidth + 1);
 }
 
 test.describe('/live/:id full-chain route', () => {
@@ -268,6 +289,43 @@ test.describe('/live/:id full-chain route', () => {
       path: mobileScreenshot,
       contentType: 'image/png',
     });
+  });
+
+  test('keeps the normal live page within desktop and mobile viewport bounds', async ({
+    page,
+    request,
+  }, testInfo) => {
+    await denyExternalCalls(page);
+    await request.post(`${mockBaseURL}/__reset`);
+
+    await page.setViewportSize({ width: 1280, height: 800 });
+    const desktopResponse = await page.goto('/live/live-test-key?token=t0');
+
+    expect(desktopResponse).not.toBeNull();
+    expect(desktopResponse?.ok()).toBe(true);
+    await expect(page.locator('[data-id="app-shell"]')).toBeVisible();
+    await expect(page.locator('[data-id="live-ranklist-content"]')).toBeVisible();
+    await expect(page.locator('[data-id="live-hydrated"]')).toHaveText('hydrated');
+    await expect(page.locator('[data-id="rankland-ranklist-title"]')).toHaveText('Test Contest 2024');
+    await expectNoHorizontalDocumentOverflow(page);
+    await expectElementWithinViewport(page.locator('[data-id="rankland-ranklist-header-actions"]'), page);
+    await expectElementWithinViewport(page.locator('[data-id="rankland-ranklist-progress"]'), page);
+    await expectElementWithinViewport(page.locator('[data-id="rankland-ranklist-footer"]'), page);
+    await page.screenshot({ path: testInfo.outputPath('live-page-desktop.png'), fullPage: true });
+
+    await page.setViewportSize({ width: 390, height: 844 });
+    const mobileResponse = await page.goto('/live/live-test-key?token=t0');
+
+    expect(mobileResponse).not.toBeNull();
+    expect(mobileResponse?.ok()).toBe(true);
+    await expect(page.locator('[data-id="app-shell"]')).toBeVisible();
+    await expect(page.locator('[data-id="live-ranklist-content"]')).toBeVisible();
+    await expect(page.locator('[data-id="live-hydrated"]')).toHaveText('hydrated');
+    await expectNoHorizontalDocumentOverflow(page);
+    await expectElementWithinViewport(page.locator('[data-id="rankland-ranklist-header-actions"]'), page);
+    await expectElementWithinViewport(page.locator('[data-id="rankland-ranklist-progress"]'), page);
+    await expectElementWithinViewport(page.locator('[data-id="rankland-ranklist-footer"]'), page);
+    await page.screenshot({ path: testInfo.outputPath('live-page-mobile.png'), fullPage: true });
   });
 
   test('hides the scroll-solution toggle on mobile while preserving live ranklist rendering', async ({

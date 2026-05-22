@@ -5,10 +5,10 @@ This file is the quick global dashboard for the RankLand migration. Update it at
 ## Current Focus
 
 - Active branch: `migration/live-page-foundation`
-- Current slice: playground visual review
-- Latest slice commit: `fix: 修复演练场移动端溢出` (this commit)
-- Last recorded full gate: `FULL_CHAIN_APP_PORT=3210 FULL_CHAIN_MOCK_PORT=3211 corepack pnpm test:e2e:full-chain -- tests/e2e/full-chain/playground.spec.ts` passed 4 full-chain tests and produced playground desktop/mobile screenshots
-- Next recommended focus: live product/visual review and remaining parity gaps
+- Current slice: live page visual review
+- Latest slice commit: `test: 补充实时榜单页面视觉审查` (this commit)
+- Last recorded full gate: `FULL_CHAIN_APP_PORT=3210 FULL_CHAIN_MOCK_PORT=3211 corepack pnpm test:e2e:full-chain -- tests/e2e/full-chain/live.spec.ts` passed 7 `/live/:id` full-chain tests and produced normal/realtime live desktop/mobile screenshots
+- Next recommended focus: migration completion audit and product-decision documentation for deferred parity items
 
 ## Route Progress
 
@@ -19,7 +19,7 @@ This file is the quick global dashboard for the RankLand migration. Update it at
 | `/ranklist/:id` | SSR | Foundation + shared wrapper parity follow-ups + visual review verified | `migration/live-page-foundation` | Unit, route, full-chain E2E including footer contact modal, ranklist desktop/mobile screenshot review | Product polish after route parity review |
 | `/collection/:id` | SSR | Foundation + visual review verified | `migration/live-page-foundation` | Unit, route, full-chain E2E, collection desktop/mobile screenshot review | Exact menu/mobile/category icon parity |
 | `/playground` | CSR | Foundation + visual review verified | `migration/live-page-foundation` | Unit, route, full-chain E2E, playground desktop/mobile screenshot review | Monaco/editor parity and UX polish |
-| `/live/:id` | CSR | Foundation + parity follow-ups verified | `migration/live-page-foundation` | Unit, route, full-chain E2E including NotFound, WebSocket error, unexpected WebSocket close, scroll-solution toggle close, mobile toggle visibility, hidden internal status marker, desktop/mobile realtime layout bounds, and mobile progress label bounds | Product review; exact Toastify animation/pixel parity deferred as product enhancement |
+| `/live/:id` | CSR | Foundation + parity follow-ups + visual review verified | `migration/live-page-foundation` | Unit, route, full-chain E2E including NotFound, WebSocket error, unexpected WebSocket close, scroll-solution toggle close, mobile toggle visibility, hidden internal status marker, desktop/mobile realtime layout bounds, normal live desktop/mobile screenshot review, and mobile progress label bounds | Product review; exact Toastify animation/pixel parity deferred as product enhancement |
 
 ## Infrastructure Progress
 
@@ -43,14 +43,15 @@ This file is the quick global dashboard for the RankLand migration. Update it at
 
 - Route foundations preserve core behavior but do not yet guarantee exact visual parity with old React/Ant Design pages.
 - Vue app shell now preserves the basic legacy chrome, focus-mode bypass, contact modal, system theme class sync, macOS Blink optimization class, and desktop/mobile viewport bounds, but exact Ant Design menu/dropdown styling and GA pageview dispatch are still deferred.
-- Live realtime behavior has deterministic success, NotFound, WebSocket error, unexpected WebSocket close, scroll-solution toggle close, mobile toggle visibility, hidden internal status marker, desktop/mobile realtime layout bounds, and mobile progress label bounds coverage. Automatic WebSocket reconnect/backoff and exact React Toastify animation/pixel parity are intentionally deferred as product enhancements.
+- Live realtime behavior has deterministic success, NotFound, WebSocket error, unexpected WebSocket close, scroll-solution toggle close, mobile toggle visibility, hidden internal status marker, desktop/mobile realtime layout bounds, normal live desktop/mobile page review, and mobile progress label bounds coverage. Automatic WebSocket reconnect/backoff and exact React Toastify animation/pixel parity are intentionally deferred as product enhancements.
 - SRK renderer wrapper is shared by multiple migrated routes, so remaining parity changes should be isolated and heavily tested.
 - Converter-backed SRK exports use lazy browser imports of `@algoux/standard-ranklist-convert-to@0.2.2`; `xlsx@0.18.5` remains a large but click-loaded dependency.
 - User modal rank-time parity uses a lightweight Vue/SVG curve instead of the old React `@antv/g2` chart, so exact tooltip and animation parity remains intentionally deferred.
 
 ## Next Slice Queue
 
-1. Live product/visual review and remaining parity gaps.
+1. Migration completion audit: run broader gates and align docs with final deferred parity decisions.
 2. Collection product parity decisions: exact menu/mobile/category icon behavior.
 3. Playground product parity decisions: Monaco/editor parity and UX polish.
 4. App shell remaining product decisions: exact Ant Design styling and analytics/pageview behavior.
+5. Live product parity decisions: automatic WebSocket reconnect/backoff and exact Toastify animation/pixel behavior.
