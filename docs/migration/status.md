@@ -5,17 +5,17 @@ This file is the quick global dashboard for the RankLand migration. Update it at
 ## Current Focus
 
 - Active branch: `migration/live-page-foundation`
-- Current slice: app shell visual review
-- Latest slice commit: `test: 补充应用外壳视觉审查` (this commit)
-- Last recorded full gate: `FULL_CHAIN_APP_PORT=3210 FULL_CHAIN_MOCK_PORT=3211 corepack pnpm test:e2e:full-chain -- tests/e2e/full-chain/app-shell.spec.ts` passed 5 app-shell full-chain tests and produced desktop/mobile screenshots
-- Next recommended focus: move to page-specific product review or live product review
+- Current slice: home/search visual review
+- Latest slice commit: `test: 补充首页搜索页视觉审查` (this commit)
+- Last recorded full gate: `FULL_CHAIN_APP_PORT=3210 FULL_CHAIN_MOCK_PORT=3211 corepack pnpm test:e2e:full-chain -- tests/e2e/full-chain/home.spec.ts tests/e2e/full-chain/search.spec.ts` passed 6 full-chain tests and produced home/search desktop/mobile screenshots
+- Next recommended focus: continue page-specific product/visual review for ranklist, collection, playground, and live
 
 ## Route Progress
 
 | Route | Render | Status | Branch / Slice | Coverage | Remaining parity / risk |
 | --- | --- | --- | --- | --- | --- |
-| `/` | SSR | Foundation + app shell + contact modal + app-shell visual review verified | `migration/live-page-foundation` | SSR smoke, shallow E2E, full-chain E2E, app shell/theme full-chain E2E, app shell desktop/mobile screenshot review, contact modal full-chain E2E | Exact Ant Design shell styling, broader SEO consistency |
-| `/search` | CSR | Foundation verified | `migration/search-page-foundation` | Unit, generated route, full-chain E2E | Product polish after route parity review |
+| `/` | SSR | Foundation + app shell + contact modal + visual review verified | `migration/live-page-foundation` | SSR smoke, shallow E2E, full-chain E2E, app shell/theme full-chain E2E, app shell desktop/mobile screenshot review, contact modal full-chain E2E, home desktop/mobile screenshot review | Exact Ant Design shell styling, broader SEO consistency |
+| `/search` | CSR | Foundation + visual review verified | `migration/live-page-foundation` | Unit, generated route, full-chain E2E, search desktop/mobile screenshot review | Product polish after route parity review |
 | `/ranklist/:id` | SSR | Foundation + shared wrapper parity follow-ups verified | `migration/live-page-foundation` | Unit, route, full-chain E2E including footer contact modal | Product polish after route parity review |
 | `/collection/:id` | SSR | Foundation verified | `migration/collection-page-foundation` | Unit, route, full-chain E2E | Exact menu/mobile/category icon parity |
 | `/playground` | CSR | Foundation verified | `migration/playground-page-foundation` | Unit, route, full-chain E2E | Monaco/editor parity and UX polish |
@@ -50,6 +50,6 @@ This file is the quick global dashboard for the RankLand migration. Update it at
 
 ## Next Slice Queue
 
-1. Page-specific product/visual review for home, search, ranklist, collection, playground, and live.
+1. Page-specific product/visual review for ranklist, collection, playground, and live.
 2. Live product review and remaining parity gaps.
 3. App shell remaining product decisions: exact Ant Design styling and analytics/pageview behavior.
