@@ -16,14 +16,18 @@ async function expectElementWithinViewport(locator: Locator, page: Page) {
 }
 
 async function expectNoHorizontalDocumentOverflow(page: Page) {
-  const overflow = await page.evaluate(() => ({
-    bodyScrollWidth: document.body.scrollWidth,
-    documentScrollWidth: document.documentElement.scrollWidth,
-    viewportWidth: window.innerWidth,
-  }));
+  await expect.poll(
+    () =>
+      page.evaluate(() => {
+        const viewportWidth = window.innerWidth;
 
-  expect(overflow.bodyScrollWidth).toBeLessThanOrEqual(overflow.viewportWidth + 1);
-  expect(overflow.documentScrollWidth).toBeLessThanOrEqual(overflow.viewportWidth + 1);
+        return Math.max(
+          document.body.scrollWidth - viewportWidth,
+          document.documentElement.scrollWidth - viewportWidth,
+        );
+      }),
+    { message: 'horizontal document overflow should settle after async page styles load' },
+  ).toBeLessThanOrEqual(1);
 }
 
 test.describe('/ full-chain route', () => {

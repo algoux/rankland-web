@@ -5,9 +5,9 @@ This file is the quick global dashboard for the RankLand migration. Update it at
 ## Current Focus
 
 - Active branch: `migration/live-page-foundation`
-- Current slice: final integration review
-- Latest slice commit: `docs: 完成迁移最终集成评审` (this commit)
-- Last recorded full gate: `corepack pnpm test:migration` passed build, 24 unit files / 120 unit tests, 1 SSR smoke test, 1 shallow Playwright test, and 32 full-chain Playwright tests across all migrated public routes during final integration review
+- Current slice: acceptance preflight
+- Latest slice commit: `test: 稳定首页移动端视觉门禁` (this commit)
+- Last recorded full gate: `corepack pnpm test:migration` passed build, 24 unit files / 120 unit tests, 1 SSR smoke test, 1 shallow Playwright test, and 32 full-chain Playwright tests across all migrated public routes during 2026-05-25 acceptance preflight
 - Next recommended focus: accept the route-compatible migration with deferred product decisions, or choose one deferred product-polish slice
 
 ## Route Progress
