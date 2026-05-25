@@ -9,22 +9,31 @@
 
 ## 准备
 
-1. 安装并使用 Node.js 16（推荐使用 fnm 自动切换版本）
-2. 安装并使用 pnpm v8
-3. 运行 `pnpm run init` 安装依赖
+本项目要求：
+
+- Node.js `^24.0.0`（当前 `.node-version` 为 `v24.11.1`）
+- pnpm `^8.0.0`（`packageManager` 锁定为 `pnpm@8.15.9`）
+
+推荐使用 fnm 和 Corepack：
+
+```bash
+fnm use 24
+corepack enable
+corepack pnpm install --frozen-lockfile
+```
 
 ## 开发
 
-1. 运行 `npm run dev`
+1. 运行 `corepack pnpm run dev`
 2. 在浏览器中打开 <http://127.0.0.1:3000/>
 
 ## 构建
 
-1. 运行 `npm run build`
+1. 运行 `corepack pnpm run build`
 
 ## 部署
 
-模板使用 PM2 作为生产环境部署工具，运行 `npm run deploy` 或 `npm run deploy:foreground`。
+模板使用 PM2 作为生产环境部署工具，运行 `corepack pnpm run deploy` 或 `corepack pnpm run deploy:foreground`。
 
 ## 开发指南
 

@@ -32,15 +32,17 @@ Read `docs/migration/playbook.md` and the relevant migration documents before ch
 
 ## Common Commands
 
+Use Node.js `^24.0.0` and pnpm `^8.0.0`; `.node-version` currently pins `v24.11.1`, and `package.json` pins `packageManager` to `pnpm@8.15.9`.
+
 ```bash
-pnpm install --frozen-lockfile
-pnpm run dev
-pnpm run build
-pnpm test:unit
-pnpm test:ssr
-pnpm test:e2e
-pnpm test:e2e:full-chain
-pnpm test:migration
+corepack pnpm install --frozen-lockfile
+corepack pnpm run dev
+corepack pnpm run build
+corepack pnpm test:unit
+corepack pnpm test:ssr
+corepack pnpm test:e2e
+corepack pnpm test:e2e:full-chain
+corepack pnpm test:migration
 ```
 
 ## Testing Guidance
