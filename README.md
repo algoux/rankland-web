@@ -11,8 +11,8 @@
 
 本项目要求：
 
-- Node.js `^24.0.0`（当前 `.node-version` 为 `v24.11.1`）
-- pnpm `^8.0.0`（`packageManager` 锁定为 `pnpm@8.15.9`）
+- Node.js `^24.0.0`
+- pnpm `^8.0.0`
 
 推荐使用 fnm 和 Corepack：
 
