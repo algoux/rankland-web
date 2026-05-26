@@ -66,6 +66,10 @@ async function expectHoverDropdownOpensAndCloses(page: Page, triggerTestId: stri
   await expect(item).toBeHidden();
 }
 
+async function expectNotificationMessage(page: Page, message: string) {
+  await expect(page.locator('.ant-notification-notice-message', { hasText: message })).toBeVisible();
+}
+
 async function getTableWrapperMarginLeft(page: Page) {
   return page.evaluate(() => {
     const wrapper = document.querySelector<HTMLElement>('[data-id="rankland-ranklist-table-wrapper"]');
@@ -237,14 +241,14 @@ test.describe('/ranklist/:id full-chain route', () => {
 
     await page.locator('[data-id="rankland-ranklist-share-menu-button"]').hover();
     await page.locator('[data-id="rankland-ranklist-copy-link-action"]').click();
-    await expect(page.locator('[data-id="rankland-ranklist-action-status"]')).toHaveText('链接已复制');
+    await expectNotificationMessage(page, '链接已复制');
     expect(
       await page.evaluate(() => (window as unknown as { __ranklandClipboardText?: string }).__ranklandClipboardText),
     ).toBe(`http://127.0.0.1:${process.env.FULL_CHAIN_APP_PORT || '3100'}/ranklist/test-key`);
 
     await page.locator('[data-id="rankland-ranklist-share-menu-button"]').hover();
     await page.locator('[data-id="rankland-ranklist-copy-embed-action"]').click();
-    await expect(page.locator('[data-id="rankland-ranklist-action-status"]')).toHaveText('嵌入代码已复制');
+    await expectNotificationMessage(page, '嵌入代码已复制');
     expect(
       await page.evaluate(() => (window as unknown as { __ranklandClipboardText?: string }).__ranklandClipboardText),
     ).toBe(

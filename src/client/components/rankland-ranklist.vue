@@ -365,6 +365,7 @@ import {
   type UserClickPayload,
 } from '@algoux/standard-ranklist-renderer-component-vue';
 import { CaretDownOutlined, DownloadOutlined, EyeOutlined, ShareAltOutlined } from '@ant-design/icons-vue';
+import { notification } from 'ant-design-vue';
 import '@algoux/standard-ranklist-renderer-component-styles';
 import ContactUs from './contact-us.vue';
 import RanklandRankTimeChart from './rankland-rank-time-chart.vue';
@@ -857,7 +858,13 @@ export default defineComponent({
     async copyText(text: string, successMessage: string) {
       try {
         await this.writeClipboardText(text);
-        this.actionStatus = successMessage;
+        notification.success({
+          message: successMessage,
+          duration: 2,
+          style: {
+            width: '280px',
+          },
+        });
       } catch (error) {
         this.actionStatus = '复制失败';
       }

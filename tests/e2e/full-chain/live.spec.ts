@@ -84,6 +84,10 @@ async function expectNoHorizontalDocumentOverflow(page: Page) {
   expect(overflow.documentScrollWidth).toBeLessThanOrEqual(overflow.viewportWidth + 1);
 }
 
+async function expectNotificationMessage(page: Page, message: string) {
+  await expect(page.locator('.ant-notification-notice-message', { hasText: message })).toBeVisible();
+}
+
 async function getTableWrapperMarginLeft(page: Page) {
   return page.evaluate(() => {
     const wrapper = document.querySelector<HTMLElement>('[data-id="rankland-ranklist-table-wrapper"]');
@@ -167,7 +171,7 @@ test.describe('/live/:id full-chain route', () => {
 
     await page.locator('[data-id="rankland-ranklist-share-menu-button"]').hover();
     await page.locator('[data-id="rankland-ranklist-copy-embed-action"]').click();
-    await expect(page.locator('[data-id="rankland-ranklist-action-status"]')).toHaveText('嵌入代码已复制');
+    await expectNotificationMessage(page, '嵌入代码已复制');
     expect(
       await page.evaluate(() => (window as unknown as { __ranklandClipboardText?: string }).__ranklandClipboardText),
     ).toBe(
