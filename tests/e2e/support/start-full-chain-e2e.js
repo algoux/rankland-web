@@ -18,6 +18,7 @@ const liveInfo = require(path.join(fixturesRoot, 'live-info.json'));
 const requests = [];
 const failedCollectionPaths = new Set();
 const failedRanklistPaths = new Set();
+const failedLiveInfoPaths = new Set();
 let appProcess;
 let cleanupWatcherProcess;
 let shuttingDown = false;
@@ -65,6 +66,7 @@ function routeRequest(req, res) {
     requests.length = 0;
     failedCollectionPaths.clear();
     failedRanklistPaths.clear();
+    failedLiveInfoPaths.clear();
     sendJson(res, 200, { ok: true });
     return;
   }
@@ -79,6 +81,13 @@ function routeRequest(req, res) {
   if (method === 'POST' && /^\/__fail-ranklist\/[^/]+$/.test(url.pathname)) {
     const uniqueKey = url.pathname.replace('/__fail-ranklist/', '');
     failedRanklistPaths.add(`/rank/${uniqueKey}`);
+    sendJson(res, 200, { ok: true });
+    return;
+  }
+
+  if (method === 'POST' && /^\/__fail-live-info\/[^/]+$/.test(url.pathname)) {
+    const uniqueKey = url.pathname.replace('/__fail-live-info/', '');
+    failedLiveInfoPaths.add(`/ranking/config/${uniqueKey}`);
     sendJson(res, 200, { ok: true });
     return;
   }
@@ -148,6 +157,11 @@ function routeRequest(req, res) {
   }
 
   if (method === 'GET' && /^\/ranking\/config\/[^/]+$/.test(url.pathname)) {
+    if (failedLiveInfoPaths.has(url.pathname)) {
+      sendJson(res, 500, { code: 500, message: 'Forced live info failure' });
+      return;
+    }
+
     if (url.pathname === '/ranking/config/missing-live') {
       sendJson(res, 200, { code: 11, message: 'Live ranklist not found' });
       return;

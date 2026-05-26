@@ -534,6 +534,32 @@ test.describe('/live/:id full-chain route', () => {
     expect(liveRanklistRequests).toHaveLength(0);
   });
 
+  test('renders the legacy live load error state with Ant Design refresh action', async ({ page, request }) => {
+    await denyExternalCalls(page);
+    await request.post(`${mockBaseURL}/__reset`);
+    await request.post(`${mockBaseURL}/__fail-live-info/live-test-key`);
+
+    const response = await page.goto('/live/live-test-key');
+
+    expect(response).not.toBeNull();
+    expect(response?.ok()).toBe(true);
+    await expect(page).toHaveTitle('Live - RankLand');
+    await expect(page.locator('[data-id="live-error"]')).toBeVisible();
+    await expect(page.locator('[data-id="live-error"] p')).toHaveText('An error occurred while loading data');
+    await expect(page.locator('[data-id="live-error"]')).toHaveCSS('text-align', 'center');
+    await expect(page.locator('[data-id="live-error"] pre')).toHaveCount(0);
+    await expect(page.locator('[data-id="live-refresh"]')).toHaveText('Refresh');
+    await expect(page.locator('[data-id="live-refresh"]')).toHaveClass(/ant-btn-primary/);
+    await expect(page.locator('[data-id="live-refresh"]')).toHaveClass(/ant-btn-sm/);
+
+    const requests = await readRequests(request);
+    const liveInfoRequests = requests.filter((requestRecord) => requestRecord.path === '/ranking/config/live-test-key');
+    const liveRanklistRequests = requests.filter((requestRecord) => /^\/ranking\/[^/]+$/.test(requestRecord.path));
+
+    expect(liveInfoRequests).toHaveLength(1);
+    expect(liveRanklistRequests).toHaveLength(0);
+  });
+
   test('disables scroll-solution mode, preserves other queries, and closes the WebSocket', async ({ page, request }) => {
     await denyExternalCalls(page);
     await stubWebSocket(page);

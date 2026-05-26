@@ -15,8 +15,9 @@
 
     <section v-else-if="hasGenericError" data-id="live-error" class="live-state">
       <p>An error occurred while loading data</p>
-      <pre>{{ loadError?.message }}</pre>
-      <button type="button" @click="refresh">Refresh</button>
+      <a-button data-id="live-refresh" type="primary" size="small" @click="refresh">
+        Refresh
+      </a-button>
     </section>
 
     <section v-else-if="!ranklist" data-id="live-loading" class="live-state">
@@ -455,19 +456,6 @@ export default routeView(LivePage, '/live/:id', LiveRPO);
 
 .live-state h3 {
   margin: 0 0 16px;
-}
-
-.live-state pre {
-  display: inline-block;
-  max-width: 100%;
-  margin: 12px 0;
-  padding: 12px;
-  border: 1px solid #fecaca;
-  border-radius: 4px;
-  color: #991b1b;
-  background: #fef2f2;
-  text-align: left;
-  white-space: pre-wrap;
 }
 
 .live-content-with-scroll-solution {
