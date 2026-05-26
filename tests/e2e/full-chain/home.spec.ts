@@ -54,6 +54,14 @@ test.describe('/ full-chain route', () => {
     await expect(page.locator('[data-id="home-total-view-count"]')).toHaveText('56789');
     await expect(page.locator('[data-id="home-recommendation-search"][href="/search"]')).toBeVisible();
     await expect(page.locator('[data-id="home-recommendation-collection"][href="/collection/official"]')).toBeVisible();
+    await expect(page.locator('[data-id="home-recommendations"] .ant-row')).toBeVisible();
+    await expect(page.locator('[data-id="home-recommendations"] .ant-col')).toHaveCount(2);
+    await expect(page.locator('[data-id="home-recommendations"] .ant-card-hoverable')).toHaveCount(2);
+    await expect(page.locator('[data-id="home-tools"] .ant-row')).toBeVisible();
+    await expect(page.locator('[data-id="home-tools"] .ant-col')).toHaveCount(2);
+    await expect(page.locator('[data-id="home-tools"] .ant-card-hoverable')).toHaveCount(2);
+    await expect(page.locator('[data-id="home-tool-paste-then-ac"][href="https://paste.then.ac/?utm_source=rankland"]')).toBeVisible();
+    await expect(page.locator('[data-id="home-tool-algo-bootstrap"][href="https://ab.algoux.cn/?utm_source=rankland"]')).toBeVisible();
     await expect(page.locator('[data-id="home-hydrated"]')).toHaveText('hydrated');
     await page.locator('[data-id="home-contact"] [data-id="contact-us-trigger"]').click();
     await expect(page.locator('[data-id="contact-us-dialog"]')).toBeVisible();

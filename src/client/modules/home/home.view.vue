@@ -11,58 +11,74 @@
 
     <section data-id="home-recommendations" class="home-section">
       <h2>为你推荐</h2>
-      <div class="home-card-grid">
-        <router-link
-          data-id="home-recommendation-search"
-          class="home-card"
-          :to="searchPath"
-        >
-          <strong>探索</strong>
-          <span>
-            在 <em data-id="home-total-srk-count">{{ totalSrkCountText }}</em> 个高质量程序设计竞赛榜单中自由浏览和搜索
-          </span>
-        </router-link>
-        <router-link
-          data-id="home-recommendation-collection"
-          class="home-card"
-          :to="collectionPath"
-        >
-          <strong>榜单合集</strong>
-          <span>查阅由 SDUTACM 和 algoUX 团队精心整理的历年赛事榜单合集</span>
-        </router-link>
-      </div>
+      <a-row :gutter="[16, 16]" style="margin-left: 0; margin-right: 0;">
+        <a-col :xs="24" :sm="12">
+          <router-link
+            data-id="home-recommendation-search"
+            class="home-card-link"
+            :to="searchPath"
+          >
+            <a-card hoverable class="home-card">
+              <h3>探索</h3>
+              <p>
+                在 <em data-id="home-total-srk-count">{{ totalSrkCountText }}</em> 个高质量程序设计竞赛榜单中自由浏览和搜索
+              </p>
+            </a-card>
+          </router-link>
+        </a-col>
+        <a-col :xs="24" :sm="12">
+          <router-link
+            data-id="home-recommendation-collection"
+            class="home-card-link"
+            :to="collectionPath"
+          >
+            <a-card hoverable class="home-card">
+              <h3>榜单合集</h3>
+              <p>查阅由 SDUTACM 和 algoUX 团队精心整理的历年赛事榜单合集</p>
+            </a-card>
+          </router-link>
+        </a-col>
+      </a-row>
     </section>
 
     <section data-id="home-tools" class="home-section">
       <h2>算竞周边工具</h2>
-      <div class="home-card-grid">
-        <a
-          data-id="home-tool-paste-then-ac"
-          class="home-card"
-          href="https://paste.then.ac/?utm_source=rankland"
-          target="_blank"
-          rel="noreferrer"
-        >
-          <span class="home-card-title">
-            <img :src="pasteThenACLogo" alt="paste.then.ac logo">
-            <strong>paste.then.ac</strong>
-          </span>
-          <span>免注册、更适合算竞宝宝体质的的代码剪贴板</span>
-        </a>
-        <a
-          data-id="home-tool-algo-bootstrap"
-          class="home-card"
-          href="https://ab.algoux.cn/?utm_source=rankland"
-          target="_blank"
-          rel="noreferrer"
-        >
-          <span class="home-card-title">
-            <img :src="algoBootstrapLogo" alt="Algo Bootstrap logo">
-            <strong>Algo Bootstrap</strong>
-          </span>
-          <span>一键配置 C++、Python 和 VS Code 编程环境</span>
-        </a>
-      </div>
+      <a-row :gutter="[16, 16]" style="margin-left: 0; margin-right: 0;">
+        <a-col :xs="24" :sm="12">
+          <a
+            data-id="home-tool-paste-then-ac"
+            class="home-card-link"
+            href="https://paste.then.ac/?utm_source=rankland"
+            target="_blank"
+            rel="noreferrer"
+          >
+            <a-card hoverable class="home-card">
+              <h3 class="home-card-title">
+                <img :src="pasteThenACLogo" alt="paste.then.ac logo">
+                <span>paste.then.ac</span>
+              </h3>
+              <p>免注册、更适合算竞宝宝体质的的代码剪贴板</p>
+            </a-card>
+          </a>
+        </a-col>
+        <a-col :xs="24" :sm="12">
+          <a
+            data-id="home-tool-algo-bootstrap"
+            class="home-card-link"
+            href="https://ab.algoux.cn/?utm_source=rankland"
+            target="_blank"
+            rel="noreferrer"
+          >
+            <a-card hoverable class="home-card">
+              <h3 class="home-card-title">
+                <img :src="algoBootstrapLogo" alt="Algo Bootstrap logo">
+                <span>Algo Bootstrap</span>
+              </h3>
+              <p>一键配置 C++、Python 和 VS Code 编程环境</p>
+            </a-card>
+          </a>
+        </a-col>
+      </a-row>
     </section>
 
     <section data-id="home-resources" class="home-section">
@@ -291,38 +307,35 @@ export default routeView(HomePage, '/', undefined, undefined, {
   padding-left: 22px;
 }
 
-.home-card-grid {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 16px;
+.home-section :deep(.ant-row) {
+  margin-right: 0 !important;
+  margin-left: 0 !important;
+}
+
+.home-card-link {
+  display: block;
+  height: 100%;
+  color: inherit;
+  text-decoration: none;
 }
 
 .home-card {
-  display: flex;
+  height: 100%;
+}
+
+.home-card :deep(.ant-card-body) {
   min-height: 128px;
-  flex-direction: column;
-  gap: 14px;
-  padding: 22px;
-  border: 1px solid #d8dee6;
-  border-radius: 8px;
-  color: inherit;
-  text-align: left;
-  text-decoration: none;
-  background: #fff;
-  transition: border-color 0.16s ease, box-shadow 0.16s ease;
 }
 
-.home-card:hover {
-  border-color: #2f7de1;
-  box-shadow: 0 8px 22px rgb(25 54 94 / 10%);
-}
-
-.home-card strong {
+.home-card h3 {
+  margin: 0 0 14px;
   color: #17202a;
   font-size: 20px;
+  line-height: 1.4;
 }
 
-.home-card span {
+.home-card p {
+  margin: 0;
   color: #3f4a56;
   line-height: 1.7;
 }
@@ -353,10 +366,6 @@ export default routeView(HomePage, '/', undefined, undefined, {
 @media (max-width: 720px) {
   .home-page {
     padding-top: 32px;
-  }
-
-  .home-card-grid {
-    grid-template-columns: 1fr;
   }
 }
 </style>
