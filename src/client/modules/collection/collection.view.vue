@@ -21,9 +21,7 @@
       </a-button>
     </section>
 
-    <section v-else-if="!collection" data-id="collection-loading" class="collection-state">
-      Loading
-    </section>
+    <a-spin v-else-if="!collection" data-id="collection-loading" class="collection-state" />
 
     <section
       v-else
