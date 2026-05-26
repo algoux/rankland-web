@@ -46,9 +46,10 @@ async function getMobileShellMetrics(page: Page) {
     const headerInner = document.querySelector<HTMLElement>('.app-header-inner');
     const logoLink = document.querySelector<HTMLElement>('[data-id="app-logo-link"]');
     const logoImage = document.querySelector<HTMLImageElement>('[data-id="app-logo-link"] img');
+    const navMenu = document.querySelector<HTMLElement>('[data-id="app-nav"]');
     const navItem = document.querySelector<HTMLElement>('[data-id="app-nav"] .ant-menu-item');
     const siteSwitch = document.querySelector<HTMLElement>('[data-id="app-site-switch"]');
-    if (!header || !headerInner || !logoLink || !logoImage || !navItem || !siteSwitch) {
+    if (!header || !headerInner || !logoLink || !logoImage || !navMenu || !navItem || !siteSwitch) {
       throw new Error('Missing app shell mobile metrics target');
     }
 
@@ -56,6 +57,7 @@ async function getMobileShellMetrics(page: Page) {
     const headerInnerStyle = window.getComputedStyle(headerInner);
     const logoLinkStyle = window.getComputedStyle(logoLink);
     const logoImageStyle = window.getComputedStyle(logoImage);
+    const navMenuStyle = window.getComputedStyle(navMenu);
     const navItemStyle = window.getComputedStyle(navItem);
     const siteSwitchStyle = window.getComputedStyle(siteSwitch);
     const logoBox = logoLink.getBoundingClientRect();
@@ -73,6 +75,7 @@ async function getMobileShellMetrics(page: Page) {
       logoLeft: `${Math.round(logoBox.left)}px`,
       logoImageWidth: logoImageStyle.width,
       logoImageHeight: logoImageStyle.height,
+      navMenuLineHeight: navMenuStyle.lineHeight,
       navItemPaddingLeft: navItemStyle.paddingLeft,
       navItemPaddingRight: navItemStyle.paddingRight,
       siteSwitchPaddingLeft: siteSwitchStyle.paddingLeft,
@@ -86,13 +89,15 @@ async function getDesktopShellMetrics(page: Page) {
     const header = document.querySelector<HTMLElement>('[data-id="app-header"]');
     const headerInner = document.querySelector<HTMLElement>('.app-header-inner');
     const logoLink = document.querySelector<HTMLElement>('[data-id="app-logo-link"]');
+    const navMenu = document.querySelector<HTMLElement>('[data-id="app-nav"]');
     const siteSwitch = document.querySelector<HTMLElement>('[data-id="app-site-switch"]');
-    if (!header || !headerInner || !logoLink || !siteSwitch) {
+    if (!header || !headerInner || !logoLink || !navMenu || !siteSwitch) {
       throw new Error('Missing app shell desktop metrics target');
     }
 
     const headerStyle = window.getComputedStyle(header);
     const headerInnerStyle = window.getComputedStyle(headerInner);
+    const navMenuStyle = window.getComputedStyle(navMenu);
     const siteSwitchStyle = window.getComputedStyle(siteSwitch);
     const logoBox = logoLink.getBoundingClientRect();
 
@@ -106,6 +111,7 @@ async function getDesktopShellMetrics(page: Page) {
       headerInnerMarginLeft: headerInnerStyle.marginLeft,
       headerInnerMarginRight: headerInnerStyle.marginRight,
       logoLeft: `${Math.round(logoBox.left)}px`,
+      navMenuLineHeight: navMenuStyle.lineHeight,
       siteSwitchHeight: siteSwitchStyle.height,
       siteSwitchMinHeight: siteSwitchStyle.minHeight,
       siteSwitchBorderRadius: siteSwitchStyle.borderRadius,
@@ -258,6 +264,7 @@ test.describe('app shell full-chain behavior', () => {
       headerInnerMarginLeft: '0px',
       headerInnerMarginRight: '0px',
       logoLeft: '50px',
+      navMenuLineHeight: '46px',
       siteSwitchHeight: '32px',
       siteSwitchMinHeight: '0px',
       siteSwitchBorderRadius: '2px',
@@ -287,6 +294,7 @@ test.describe('app shell full-chain behavior', () => {
       logoLeft: '20px',
       logoImageWidth: '40px',
       logoImageHeight: '40px',
+      navMenuLineHeight: '46px',
       navItemPaddingLeft: '16px',
       navItemPaddingRight: '16px',
       siteSwitchPaddingLeft: '8px',
