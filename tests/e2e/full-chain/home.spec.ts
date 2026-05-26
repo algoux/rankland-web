@@ -70,6 +70,15 @@ test.describe('/ full-chain route', () => {
     await expect(page.locator('[data-id="home-total-view-count"]')).toHaveText('56789');
     await expect(page.locator('[data-id="home-recommendation-search"][href="/search"]')).toBeVisible();
     await expect(page.locator('[data-id="home-recommendation-collection"][href="/collection/official"]')).toBeVisible();
+    await expect(page.locator('[data-id="home-hero"] p')).toHaveCSS('color', 'rgba(255, 255, 255, 0.85)');
+    await expect(page.locator('[data-id="home-resources"] li').first()).toHaveCSS(
+      'color',
+      'rgba(255, 255, 255, 0.85)',
+    );
+    await expect(page.locator('[data-id="home-about"] .home-separator')).toHaveCSS(
+      'color',
+      'rgba(255, 255, 255, 0.85)',
+    );
     await expect(page.locator('[data-id="home-recommendations"] .ant-row')).toBeVisible();
     await expect(page.locator('[data-id="home-recommendations"] .ant-col')).toHaveCount(2);
     await expect(page.locator('[data-id="home-recommendations"] .ant-card-hoverable')).toHaveCount(2);

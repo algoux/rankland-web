@@ -283,7 +283,7 @@ export default routeView(HomePage, '/', undefined, undefined, {
 .home-hero p {
   max-width: 760px;
   margin: 0;
-  color: #3f4a56;
+  color: var(--rankland-legacy-text-color);
   font-size: 16px;
   line-height: 1.8;
 }
@@ -307,7 +307,7 @@ export default routeView(HomePage, '/', undefined, undefined, {
 
 .home-section p,
 .home-section li {
-  color: #3f4a56;
+  color: var(--rankland-legacy-text-color);
   line-height: 1.8;
 }
 
@@ -379,7 +379,7 @@ export default routeView(HomePage, '/', undefined, undefined, {
 
 .home-separator {
   margin: 0 8px;
-  color: #8a96a3;
+  color: inherit;
 }
 
 @media (max-width: 720px) {
