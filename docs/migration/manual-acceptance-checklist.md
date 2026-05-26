@@ -113,6 +113,7 @@ App shell Ant Design Vue Layout/Menu/Dropdown/Button、站点切换 ArrowRight i
 - `[x]` 最近榜单或榜单内容展示可接受
 - `[x]` 搜索入口行为可接受
 - `[x]` 推荐卡片标题层级、`UnorderedListOutlined` / `TrophyOutlined` 图标与旧首页一致
+- `[x]` paste.then.ac 工具卡 logo 尺寸和 `2px` 内边距与旧首页一致
 - `[x]` 结构化内容和标题满足当前 SEO 基线
 - `[x]` 桌面端布局可接受
 - `[x]` 移动端布局可接受
@@ -127,7 +128,7 @@ App shell Ant Design Vue Layout/Menu/Dropdown/Button、站点切换 ArrowRight i
 备注：
 
 ```text
-2026-05-26 复核：home full-chain 断言 SSR HTML 包含首页内容、统计数据和 JSON-LD，hydration marker 正常；Ant Design Card/Row/Col 推荐/工具区、推荐卡片旧版 `h2` 标题和 `UnorderedListOutlined` / `TrophyOutlined` 图标、联系弹窗、桌面/移动端截图和 bounds 已覆盖。
+2026-05-26 复核：home full-chain 断言 SSR HTML 包含首页内容、统计数据和 JSON-LD，hydration marker 正常；Ant Design Card/Row/Col 推荐/工具区、推荐卡片旧版 `h2` 标题和 `UnorderedListOutlined` / `TrophyOutlined` 图标、paste.then.ac logo 24px 尺寸和 2px 内边距、联系弹窗、桌面/移动端截图和 bounds 已覆盖。
 ```
 
 ## 搜索页 `/search`

@@ -65,6 +65,9 @@ test.describe('/ full-chain route', () => {
     await expect(page.locator('[data-id="home-tools"] .ant-col')).toHaveCount(2);
     await expect(page.locator('[data-id="home-tools"] .ant-card-hoverable')).toHaveCount(2);
     await expect(page.locator('[data-id="home-tool-paste-then-ac"][href="https://paste.then.ac/?utm_source=rankland"]')).toBeVisible();
+    await expect(page.locator('[data-id="home-tool-paste-then-ac"] img[alt="paste.then.ac logo"]')).toHaveCSS('width', '24px');
+    await expect(page.locator('[data-id="home-tool-paste-then-ac"] img[alt="paste.then.ac logo"]')).toHaveCSS('height', '24px');
+    await expect(page.locator('[data-id="home-tool-paste-then-ac"] img[alt="paste.then.ac logo"]')).toHaveCSS('padding', '2px');
     await expect(page.locator('[data-id="home-tool-algo-bootstrap"][href="https://ab.algoux.cn/?utm_source=rankland"]')).toBeVisible();
     await expect(page.locator('[data-id="home-hydrated"]')).toHaveText('hydrated');
     await page.locator('[data-id="home-contact"] [data-id="contact-us-trigger"]').click();

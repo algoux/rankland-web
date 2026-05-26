@@ -60,7 +60,7 @@
           >
             <a-card hoverable class="home-card">
               <h2 class="home-card-title">
-                <img :src="pasteThenACLogo" alt="paste.then.ac logo">
+                <img :src="pasteThenACLogo" alt="paste.then.ac logo" class="home-card-logo-padded">
                 <span>paste.then.ac</span>
               </h2>
               <p>免注册、更适合算竞宝宝体质的的代码剪贴板</p>
@@ -365,6 +365,10 @@ export default routeView(HomePage, '/', undefined, undefined, {
   width: 24px;
   height: 24px;
   object-fit: contain;
+}
+
+.home-card-logo-padded {
+  padding: 2px;
 }
 
 .home-card-icon {
