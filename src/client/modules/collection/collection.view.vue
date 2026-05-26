@@ -111,7 +111,7 @@
         </div>
 
         <div v-else data-id="collection-empty-state" class="collection-empty-state">
-          <h1>请展开左侧边栏并选择一个榜单</h1>
+          <h3>请展开左侧边栏并选择一个榜单</h3>
         </div>
       </section>
     </section>
@@ -599,14 +599,23 @@ export default routeView(CollectionPage, '/collection/:id', CollectionRPO, undef
   padding-bottom: 32px;
 }
 
-.collection-state,
-.collection-empty-state {
+.collection-state {
   padding: 64px 16px;
+  text-align: center;
+}
+
+.collection-empty-state {
+  padding: 0;
   text-align: center;
 }
 
 .collection-state h3 {
   margin: 0 0 16px;
+}
+
+.collection-empty-state h3 {
+  margin: 0;
+  padding-top: 64px;
 }
 
 @media (max-width: 640px) {

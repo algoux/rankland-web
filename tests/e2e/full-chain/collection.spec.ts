@@ -253,6 +253,10 @@ test.describe('/collection/:id full-chain route', () => {
     await expect(page).toHaveTitle('榜单合集 - RankLand');
     await expect(page.locator('[data-id="collection-nav"]')).toBeVisible();
     await expect(page.locator('[data-id="collection-empty-state"]')).toBeVisible();
+    await expect(page.locator('[data-id="collection-empty-state"] h3')).toHaveText('请展开左侧边栏并选择一个榜单');
+    await expect(page.locator('[data-id="collection-empty-state"]')).toHaveCSS('padding-top', '0px');
+    await expect(page.locator('[data-id="collection-empty-state"] h3')).toHaveCSS('padding-top', '64px');
+    await expect(page.locator('[data-id="collection-empty-state"] h3')).toHaveCSS('text-align', 'center');
     await expect(page.locator('[data-id="collection-hydrated"]')).toHaveText('hydrated');
 
     const requestsResponse = await request.get(`${mockBaseURL}/__requests`);
