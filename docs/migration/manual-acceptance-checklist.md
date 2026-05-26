@@ -62,7 +62,7 @@ git status --short --branch
 备注：
 
 ```text
-2026-05-26 最新记录：search hydration marker visual parity 已通过 focused RED/GREEN、search full-chain 7/7、完整 `test:migration`（build、35 unit files / 151 unit tests、1 SSR smoke test、1 shallow Playwright test、52 full-chain Playwright tests）和 `git diff --check`。
+2026-05-26 最新记录：playground hydration marker visual parity 已通过 focused RED/GREEN、Playground full-chain 6/6、完整 `test:migration`（build、35 unit files / 151 unit tests、1 SSR smoke test、1 shallow Playwright test、52 full-chain Playwright tests）和 `git diff --check`。
 ```
 
 ## 全局外壳与跨路由行为
@@ -257,6 +257,7 @@ App shell Ant Design Vue Layout/Menu/Dropdown/Button、旧版全局 body light/d
 检查项：
 
 - `[x]` CSR 页面加载正常，且不依赖上游数据调用
+- `[x]` 测试用 hydration marker 不作为可见产品文本展示
 - `[x]` 内置 demo SRK 可以预览
 - `[x]` 粘贴合法 SRK JSON 后可以预览
 - `[x]` 粘贴格式错误 JSON 后展示可理解的 invalid JSON 状态
@@ -275,7 +276,7 @@ App shell Ant Design Vue Layout/Menu/Dropdown/Button、旧版全局 body light/d
 备注：
 
 ```text
-2026-05-26 复核：`tests/e2e/full-chain/playground.spec.ts` 覆盖旧 React 预览区右上角 `QuestionCircleOutlined` srk 文档入口位置、图标和地址。
+2026-05-26 复核：`tests/e2e/full-chain/playground.spec.ts` 覆盖 hydration marker 视觉隐藏、旧 React 预览区右上角 `QuestionCircleOutlined` srk 文档入口位置、图标和地址。
 ```
 
 ## 实时榜单页 `/live/:id`

@@ -121,6 +121,10 @@ test.describe('/playground full-chain route', () => {
     await expect(page).toHaveTitle('Playground | RankLand', { timeout: 15_000 });
     await expect(page.locator('[data-id="playground-page"]')).toBeVisible();
     await expect(page.locator('[data-id="playground-hydrated"]')).toHaveText('hydrated');
+    await expect(page.locator('[data-id="playground-hydrated"]')).toHaveCSS('width', '1px');
+    await expect(page.locator('[data-id="playground-hydrated"]')).toHaveCSS('height', '1px');
+    await expect(page.locator('[data-id="playground-hydrated"]')).toHaveCSS('overflow', 'hidden');
+    await expect(page.locator('[data-id="playground-hydrated"]')).toHaveCSS('color', 'rgba(0, 0, 0, 0)');
     await expectMonacoReady(page);
     await expect(page.locator('[data-id="playground-editor"] .monaco-editor')).toBeVisible();
     await expect(page.locator('[data-id="playground-editor"]')).toHaveAttribute('data-editor-language', 'json');

@@ -316,8 +316,10 @@ export default routeView(PlaygroundPage, '/playground');
 }
 
 .playground-hydrated {
-  color: #64748b;
-  font-size: 12px;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  color: transparent;
 }
 
 .playground-layout {
