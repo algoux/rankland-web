@@ -70,6 +70,25 @@ async function getHomeContentSpacing(page: Page) {
   });
 }
 
+async function getHomeLegacyWrapperStructure(page: Page) {
+  return page.evaluate(() => {
+    const content = document.querySelector<HTMLElement>('[data-id="home-content"]');
+    const intro = document.querySelector<HTMLElement>('[data-id="home-intro"]');
+    if (!content || !intro) {
+      throw new Error('Missing home legacy wrapper elements');
+    }
+
+    return {
+      contentTagName: content.tagName,
+      contentClassList: Array.from(content.classList),
+      introTagName: intro.tagName,
+      introClassList: Array.from(intro.classList),
+      introParentDataId: intro.parentElement?.getAttribute('data-id'),
+      introFirstChildDataId: (intro.firstElementChild as HTMLElement | null)?.getAttribute('data-id'),
+    };
+  });
+}
+
 async function getHomeRecommendationTitlePresentation(page: Page) {
   return page.evaluate(() => {
     const heading = document.querySelector<HTMLElement>('[data-id="home-recommendations"] > :first-child');
@@ -127,6 +146,14 @@ test.describe('/ full-chain route', () => {
     expect(html).toContain('https://rl.algoux.org/search?kw={search_term_string}');
     await expect(page).toHaveTitle('RankLand');
     await expect(page.locator('[data-id="home-content"]')).toBeVisible();
+    expect(await getHomeLegacyWrapperStructure(page)).toMatchObject({
+      contentTagName: 'MAIN',
+      contentClassList: expect.arrayContaining(['normal-content']),
+      introTagName: 'DIV',
+      introClassList: expect.arrayContaining(['home-intro']),
+      introParentDataId: 'home-content',
+      introFirstChildDataId: 'home-hero',
+    });
     await expect(page.locator('[data-id="home-total-srk-count"]')).toHaveText('1234');
     expect(await getHomeTotalSrkCountPresentation(page)).toMatchObject({
       tagName: 'STRONG',

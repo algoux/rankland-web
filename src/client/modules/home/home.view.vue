@@ -1,149 +1,151 @@
 <template>
-  <main data-id="home-content" class="home-page">
-    <section data-id="home-hero" class="home-hero">
-      <h1>欢迎来到 RankLand</h1>
-      <p>
-        这里是一个由算法竞赛爱好者们自发维护的、专注于托管和分享任何竞赛榜单的宝地，你可以轻松查阅 ICPC、CCPC
-        等赛事的历史榜单。
-      </p>
-      <div data-id="home-hydrated" class="home-hydrated">{{ hydrated ? 'hydrated' : 'ssr' }}</div>
-    </section>
+  <main data-id="home-content" class="normal-content home-page">
+    <div data-id="home-intro" class="home-intro">
+      <section data-id="home-hero" class="home-hero">
+        <h1>欢迎来到 RankLand</h1>
+        <p>
+          这里是一个由算法竞赛爱好者们自发维护的、专注于托管和分享任何竞赛榜单的宝地，你可以轻松查阅 ICPC、CCPC
+          等赛事的历史榜单。
+        </p>
+        <div data-id="home-hydrated" class="home-hydrated">{{ hydrated ? 'hydrated' : 'ssr' }}</div>
+      </section>
 
-    <section data-id="home-recommendations" class="home-section">
-      <h1 class="block-title">为你推荐</h1>
-      <a-row :gutter="[16, 16]" style="margin-left: 0; margin-right: 0;">
-        <a-col :xs="24" :sm="12">
-          <router-link
-            data-id="home-recommendation-search"
-            class="home-card-link"
-            :to="searchPath"
-          >
-            <a-card hoverable class="home-card">
-              <h2 class="home-card-title">
-                <UnorderedListOutlined class="home-card-icon" />
-                <span>探索</span>
-              </h2>
-              <p>
-                在 <strong data-id="home-total-srk-count">{{ totalSrkCountText }}</strong> 个高质量程序设计竞赛榜单中自由浏览和搜索
-              </p>
-            </a-card>
-          </router-link>
-        </a-col>
-        <a-col :xs="24" :sm="12">
-          <router-link
-            data-id="home-recommendation-collection"
-            class="home-card-link"
-            :to="collectionPath"
-          >
-            <a-card hoverable class="home-card">
-              <h2 class="home-card-title">
-                <TrophyOutlined class="home-card-icon" />
-                <span>榜单合集</span>
-              </h2>
-              <p>查阅由 SDUTACM 和 algoUX 团队精心整理的历年赛事榜单合集</p>
-            </a-card>
-          </router-link>
-        </a-col>
-      </a-row>
-    </section>
+      <section data-id="home-recommendations" class="home-section">
+        <h1 class="block-title">为你推荐</h1>
+        <a-row :gutter="[16, 16]" style="margin-left: 0; margin-right: 0;">
+          <a-col :xs="24" :sm="12">
+            <router-link
+              data-id="home-recommendation-search"
+              class="home-card-link"
+              :to="searchPath"
+            >
+              <a-card hoverable class="home-card">
+                <h2 class="home-card-title">
+                  <UnorderedListOutlined class="home-card-icon" />
+                  <span>探索</span>
+                </h2>
+                <p>
+                  在 <strong data-id="home-total-srk-count">{{ totalSrkCountText }}</strong> 个高质量程序设计竞赛榜单中自由浏览和搜索
+                </p>
+              </a-card>
+            </router-link>
+          </a-col>
+          <a-col :xs="24" :sm="12">
+            <router-link
+              data-id="home-recommendation-collection"
+              class="home-card-link"
+              :to="collectionPath"
+            >
+              <a-card hoverable class="home-card">
+                <h2 class="home-card-title">
+                  <TrophyOutlined class="home-card-icon" />
+                  <span>榜单合集</span>
+                </h2>
+                <p>查阅由 SDUTACM 和 algoUX 团队精心整理的历年赛事榜单合集</p>
+              </a-card>
+            </router-link>
+          </a-col>
+        </a-row>
+      </section>
 
-    <section data-id="home-tools" class="home-section">
-      <h1 class="block-title">算竞周边工具</h1>
-      <a-row :gutter="[16, 16]" style="margin-left: 0; margin-right: 0;">
-        <a-col :xs="24" :sm="12">
-          <a
-            data-id="home-tool-paste-then-ac"
-            class="home-card-link"
-            href="https://paste.then.ac/?utm_source=rankland"
-            target="_blank"
-            rel="noreferrer"
-          >
-            <a-card hoverable class="home-card">
-              <h2 class="home-card-title">
-                <img :src="pasteThenACLogo" alt="paste.then.ac logo" class="home-card-logo-padded">
-                <span>paste.then.ac</span>
-              </h2>
-              <p>免注册、更适合算竞宝宝体质的的代码剪贴板</p>
-            </a-card>
-          </a>
-        </a-col>
-        <a-col :xs="24" :sm="12">
-          <a
-            data-id="home-tool-algo-bootstrap"
-            class="home-card-link"
-            href="https://ab.algoux.cn/?utm_source=rankland"
-            target="_blank"
-            rel="noreferrer"
-          >
-            <a-card hoverable class="home-card">
-              <h2 class="home-card-title">
-                <img :src="algoBootstrapLogo" alt="Algo Bootstrap logo">
-                <span>Algo Bootstrap</span>
-              </h2>
-              <p>一键配置 C++、Python 和 VS Code 编程环境</p>
-            </a-card>
-          </a>
-        </a-col>
-      </a-row>
-    </section>
+      <section data-id="home-tools" class="home-section">
+        <h1 class="block-title">算竞周边工具</h1>
+        <a-row :gutter="[16, 16]" style="margin-left: 0; margin-right: 0;">
+          <a-col :xs="24" :sm="12">
+            <a
+              data-id="home-tool-paste-then-ac"
+              class="home-card-link"
+              href="https://paste.then.ac/?utm_source=rankland"
+              target="_blank"
+              rel="noreferrer"
+            >
+              <a-card hoverable class="home-card">
+                <h2 class="home-card-title">
+                  <img :src="pasteThenACLogo" alt="paste.then.ac logo" class="home-card-logo-padded">
+                  <span>paste.then.ac</span>
+                </h2>
+                <p>免注册、更适合算竞宝宝体质的的代码剪贴板</p>
+              </a-card>
+            </a>
+          </a-col>
+          <a-col :xs="24" :sm="12">
+            <a
+              data-id="home-tool-algo-bootstrap"
+              class="home-card-link"
+              href="https://ab.algoux.cn/?utm_source=rankland"
+              target="_blank"
+              rel="noreferrer"
+            >
+              <a-card hoverable class="home-card">
+                <h2 class="home-card-title">
+                  <img :src="algoBootstrapLogo" alt="Algo Bootstrap logo">
+                  <span>Algo Bootstrap</span>
+                </h2>
+                <p>一键配置 C++、Python 和 VS Code 编程环境</p>
+              </a-card>
+            </a>
+          </a-col>
+        </a-row>
+      </section>
 
-    <section data-id="home-resources" class="home-section">
-      <h1 class="block-title">资源和生态</h1>
-      <ul>
-        <li>
-          <a href="https://srk.algoux.org/?utm_source=rankland" target="_blank" rel="noreferrer">Standard Ranklist</a>
-          ：标准榜单格式（srk）旨在标准化榜单数据，欢迎了解和共建生态
-        </li>
-        <li>
-          <a href="https://github.com/algoux/srk-collection" target="_blank" rel="noreferrer">collection</a>
-          ：长期维护的历年算竞榜单合集
-        </li>
-        <li>
-          <a href="https://github.com/algoux/standard-ranklist-renderer-component" target="_blank" rel="noreferrer">
-            renderer-component
-          </a>
-          ：在 Web 项目中使用渲染组件展示标准榜单
-        </li>
-        <li>
-          <a href="https://github.com/algoux/standard-ranklist-utils" target="_blank" rel="noreferrer">utils</a>
-          ：标准榜单开发实用工具库
-        </li>
-        <li>
-          <a href="https://github.com/algoux/standard-ranklist-convert-to" target="_blank" rel="noreferrer">convert-to</a>
-          ：转换标准榜单到 Excel、Gym Ghost、VJ 等其他格式
-        </li>
-      </ul>
-    </section>
+      <section data-id="home-resources" class="home-section">
+        <h1 class="block-title">资源和生态</h1>
+        <ul>
+          <li>
+            <a href="https://srk.algoux.org/?utm_source=rankland" target="_blank" rel="noreferrer">Standard Ranklist</a>
+            ：标准榜单格式（srk）旨在标准化榜单数据，欢迎了解和共建生态
+          </li>
+          <li>
+            <a href="https://github.com/algoux/srk-collection" target="_blank" rel="noreferrer">collection</a>
+            ：长期维护的历年算竞榜单合集
+          </li>
+          <li>
+            <a href="https://github.com/algoux/standard-ranklist-renderer-component" target="_blank" rel="noreferrer">
+              renderer-component
+            </a>
+            ：在 Web 项目中使用渲染组件展示标准榜单
+          </li>
+          <li>
+            <a href="https://github.com/algoux/standard-ranklist-utils" target="_blank" rel="noreferrer">utils</a>
+            ：标准榜单开发实用工具库
+          </li>
+          <li>
+            <a href="https://github.com/algoux/standard-ranklist-convert-to" target="_blank" rel="noreferrer">convert-to</a>
+            ：转换标准榜单到 Excel、Gym Ghost、VJ 等其他格式
+          </li>
+        </ul>
+      </section>
 
-    <section data-id="home-contact" class="home-section">
-      <h1 class="block-title">联系我们</h1>
-      <p>
-        如要为赛事寻求专业的实时外榜托管服务或希望补全/纠正本站数据，欢迎
-        <ContactUs>与我们联系</ContactUs>。
-      </p>
-    </section>
+      <section data-id="home-contact" class="home-section">
+        <h1 class="block-title">联系我们</h1>
+        <p>
+          如要为赛事寻求专业的实时外榜托管服务或希望补全/纠正本站数据，欢迎
+          <ContactUs>与我们联系</ContactUs>。
+        </p>
+      </section>
 
-    <section data-id="home-about" class="home-section">
-      <h1 class="block-title">关于我们</h1>
-      <p>algoUX: Give your algorithm better UX</p>
-      <p>
-        Find us on <a href="https://github.com/algoux" target="_blank" rel="noreferrer">GitHub</a>
-      </p>
-      <p>© 2022-present algoUX. All Rights Reserved.</p>
-      <p>
-        榜单访问统计：至少 <span data-id="home-total-view-count">{{ totalViewCountText }}</span> 次
-      </p>
-      <p>
-        其他链接：
-        <a href="https://algoux.org" target="_blank" rel="noreferrer">首页</a>
-        <span class="home-separator">|</span>
-        <a href="https://servicestatus.algoux.org" target="_blank" rel="noreferrer">服务状态</a>
-      </p>
-      <p v-if="showBeian">
-        备案号：
-        <a data-id="home-beian-link" href="https://beian.miit.gov.cn/" target="_blank" rel="noreferrer">{{ beianText }}</a>
-      </p>
-    </section>
+      <section data-id="home-about" class="home-section">
+        <h1 class="block-title">关于我们</h1>
+        <p>algoUX: Give your algorithm better UX</p>
+        <p>
+          Find us on <a href="https://github.com/algoux" target="_blank" rel="noreferrer">GitHub</a>
+        </p>
+        <p>© 2022-present algoUX. All Rights Reserved.</p>
+        <p>
+          榜单访问统计：至少 <span data-id="home-total-view-count">{{ totalViewCountText }}</span> 次
+        </p>
+        <p>
+          其他链接：
+          <a href="https://algoux.org" target="_blank" rel="noreferrer">首页</a>
+          <span class="home-separator">|</span>
+          <a href="https://servicestatus.algoux.org" target="_blank" rel="noreferrer">服务状态</a>
+        </p>
+        <p v-if="showBeian">
+          备案号：
+          <a data-id="home-beian-link" href="https://beian.miit.gov.cn/" target="_blank" rel="noreferrer">{{ beianText }}</a>
+        </p>
+      </section>
+    </div>
   </main>
 </template>
 
