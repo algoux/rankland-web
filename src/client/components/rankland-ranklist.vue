@@ -228,7 +228,11 @@
             <p v-if="activeUserOrganization" data-id="rankland-user-modal-organization" class="rankland-user-modal-line">
               {{ activeUserOrganization }}
             </p>
-            <p v-if="activeUserPayload.user.official === false" class="rankland-user-modal-line">
+            <p
+              v-if="activeUserPayload.user.official === false"
+              data-id="rankland-user-modal-unofficial"
+              class="rankland-user-modal-unofficial"
+            >
               ＊ 非正式参加者
             </p>
             <div
@@ -1028,6 +1032,10 @@ export default defineComponent({
 
 .rankland-user-modal-line {
   margin: 4px 0;
+}
+
+.rankland-user-modal-unofficial {
+  margin: 16px 0 0;
 }
 
 .rankland-rank-time-events {

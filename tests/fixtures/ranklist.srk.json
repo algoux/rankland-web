@@ -91,6 +91,7 @@
         "id": "team-beta",
         "name": "Team Beta",
         "organization": "Org B",
+        "official": false,
         "markers": ["silver"]
       },
       "score": { "value": 1, "time": [55, "min"] },

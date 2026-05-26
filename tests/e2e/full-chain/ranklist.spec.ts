@@ -348,6 +348,24 @@ test.describe('/ranklist/:id full-chain route', () => {
     await userModal.getByRole('button', { name: 'Close' }).click();
     await expect(userModal.locator('.srk-modal')).toBeHidden();
 
+    await page.locator('.srk-user-cell', { hasText: 'Team Beta' }).click();
+    await expect(userModal.locator('.srk-modal')).toBeVisible();
+    const unofficialLine = userModal.locator('[data-id="rankland-user-modal-unofficial"]');
+    await expect(unofficialLine).toHaveText('＊ 非正式参加者');
+    const unofficialLineStyle = await unofficialLine.evaluate((element) => {
+      const style = window.getComputedStyle(element);
+      return {
+        marginTop: style.marginTop,
+        marginBottom: style.marginBottom,
+      };
+    });
+    expect(unofficialLineStyle).toMatchObject({
+      marginTop: '16px',
+      marginBottom: '0px',
+    });
+    await userModal.getByRole('button', { name: 'Close' }).click();
+    await expect(userModal.locator('.srk-modal')).toBeHidden();
+
     const requestsResponse = await request.get(`${mockBaseURL}/__requests`);
     const requests = (await requestsResponse.json()) as Array<{ path: string; search: string }>;
     const rankRequests = requests.filter((requestRecord) => requestRecord.path === '/rank/test-key');
