@@ -323,8 +323,6 @@ export default routeView(PlaygroundPage, '/playground');
   box-sizing: border-box;
   width: 100%;
   min-height: 360px;
-  border: 1px solid #cbd5e1;
-  border-radius: 4px;
   overflow: hidden;
 }
 
