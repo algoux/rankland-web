@@ -126,6 +126,8 @@ test.describe('app shell full-chain behavior', () => {
       'href',
       '//rl.algoux.cn/search?kw=Test%202024',
     );
+    await expect(page.locator('[data-id="app-site-switch-link"] .anticon-arrow-right')).toBeVisible();
+    await expect(page.locator('[data-id="app-site-switch-link"] .app-site-switch-arrow')).toHaveCount(0);
     await expect(page.locator('[data-id="search-page"]')).toBeVisible();
   });
 

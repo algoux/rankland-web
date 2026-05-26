@@ -47,13 +47,13 @@
                 >
                   <template v-if="siteAlias === 'cnn'">
                     全球站点
-                    <span class="app-site-switch-arrow">↗</span>
+                    <ArrowRightOutlined :rotate="-45" />
                   </template>
                   <template v-else>
                     <p class="app-site-switch-title">中国站点</p>
                     <p class="app-site-switch-subtitle">
                       <span>特别速度优化</span>
-                      <span class="app-site-switch-arrow">↗</span>
+                      <ArrowRightOutlined :rotate="-45" />
                     </p>
                   </template>
                 </a>
@@ -82,6 +82,7 @@
 
 <script lang="ts">
 import { defineComponent } from 'vue';
+import { ArrowRightOutlined } from '@ant-design/icons-vue';
 import { ranklandRoutes } from '@common/rankland-router';
 import {
   buildRanklandAnalyticsPage,
@@ -104,6 +105,9 @@ const navItems = [
 
 export default defineComponent({
   name: 'App',
+  components: {
+    ArrowRightOutlined,
+  },
   data() {
     return {
       logo,
