@@ -50,7 +50,7 @@
             >
               {{ item.name }}
             </router-link>
-            <span class="search-view-count">浏览 {{ item.viewCnt }}</span>
+            <span class="search-view-count"><EyeOutlined /> {{ item.viewCnt }}</span>
             <p class="search-created-at">创建于 {{ formatCreatedAt(item.createdAt) }}</p>
           </li>
         </ul>
@@ -74,7 +74,7 @@
             >
               {{ item.name }}
             </router-link>
-            <span class="search-view-count">浏览 {{ item.viewCnt }}</span>
+            <span class="search-view-count"><EyeOutlined /> {{ item.viewCnt }}</span>
             <p class="search-created-at">创建于 {{ formatCreatedAt(item.createdAt) }}</p>
           </li>
         </ul>
@@ -86,6 +86,7 @@
 <script lang="ts">
 import { defineComponent } from 'vue';
 import { routeView } from 'bwcx-client-vue3';
+import { EyeOutlined } from '@ant-design/icons-vue';
 import type { IApiRanklistInfo } from '@common/rankland-api';
 import { ranklandRoutes } from '@common/rankland-router';
 import { useRanklandApiService } from '@client/plugins/rankland-api.plugin';
@@ -99,6 +100,9 @@ import {
 
 const SearchPage = defineComponent({
   name: 'Search',
+  components: {
+    EyeOutlined,
+  },
   setup() {
     const ranklandApiService = useRanklandApiService();
     return { ranklandApiService };

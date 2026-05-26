@@ -49,6 +49,9 @@ test.describe('/search full-chain route', () => {
       'href',
       '/ranklist/test-key',
     );
+    await expect(
+      page.locator('[data-id="search-ranklist-item"][data-ranklist-key="test-key"] .anticon-eye'),
+    ).toBeVisible();
 
     const requests = await readRequests(request);
     expect(requests.filter((requestRecord) => requestRecord.path === '/rank/listall')).toHaveLength(1);
@@ -71,6 +74,9 @@ test.describe('/search full-chain route', () => {
       'href',
       '/ranklist/test-key',
     );
+    await expect(
+      page.locator('[data-id="search-ranklist-item"][data-ranklist-key="test-key"] .anticon-eye'),
+    ).toBeVisible();
 
     const requests = await readRequests(request);
     expect(requests.filter((requestRecord) => requestRecord.path === '/rank/listall')).toHaveLength(1);
