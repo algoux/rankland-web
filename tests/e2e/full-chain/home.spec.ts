@@ -89,6 +89,26 @@ async function getHomeLegacyWrapperStructure(page: Page) {
   });
 }
 
+async function getHomeLegacyBlockStructure(page: Page) {
+  return page.evaluate(() => {
+    const blockDataIds = ['home-recommendations', 'home-tools', 'home-resources', 'home-contact', 'home-about'];
+
+    return blockDataIds.map((dataId) => {
+      const block = document.querySelector<HTMLElement>(`[data-id="${dataId}"]`);
+      if (!block) {
+        throw new Error(`Missing home legacy block element: ${dataId}`);
+      }
+
+      return {
+        dataId,
+        tagName: block.tagName,
+        classList: Array.from(block.classList),
+        parentDataId: block.parentElement?.getAttribute('data-id'),
+      };
+    });
+  });
+}
+
 async function getHomeRecommendationTitlePresentation(page: Page) {
   return page.evaluate(() => {
     const heading = document.querySelector<HTMLElement>('[data-id="home-recommendations"] > :first-child');
@@ -154,6 +174,38 @@ test.describe('/ full-chain route', () => {
       introParentDataId: 'home-content',
       introFirstChildDataId: 'home-hero',
     });
+    expect(await getHomeLegacyBlockStructure(page)).toEqual([
+      {
+        dataId: 'home-recommendations',
+        tagName: 'DIV',
+        classList: expect.arrayContaining(['block', 'home-section']),
+        parentDataId: 'home-intro',
+      },
+      {
+        dataId: 'home-tools',
+        tagName: 'DIV',
+        classList: expect.arrayContaining(['block', 'home-section']),
+        parentDataId: 'home-intro',
+      },
+      {
+        dataId: 'home-resources',
+        tagName: 'DIV',
+        classList: expect.arrayContaining(['block', 'home-section']),
+        parentDataId: 'home-intro',
+      },
+      {
+        dataId: 'home-contact',
+        tagName: 'DIV',
+        classList: expect.arrayContaining(['block', 'home-section']),
+        parentDataId: 'home-intro',
+      },
+      {
+        dataId: 'home-about',
+        tagName: 'DIV',
+        classList: expect.arrayContaining(['block', 'home-section']),
+        parentDataId: 'home-intro',
+      },
+    ]);
     await expect(page.locator('[data-id="home-total-srk-count"]')).toHaveText('1234');
     expect(await getHomeTotalSrkCountPresentation(page)).toMatchObject({
       tagName: 'STRONG',

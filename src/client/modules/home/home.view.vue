@@ -10,7 +10,7 @@
         <div data-id="home-hydrated" class="home-hydrated">{{ hydrated ? 'hydrated' : 'ssr' }}</div>
       </section>
 
-      <section data-id="home-recommendations" class="home-section">
+      <div data-id="home-recommendations" class="block home-section">
         <h1 class="block-title">为你推荐</h1>
         <a-row :gutter="[16, 16]" style="margin-left: 0; margin-right: 0;">
           <a-col :xs="24" :sm="12">
@@ -46,9 +46,9 @@
             </router-link>
           </a-col>
         </a-row>
-      </section>
+      </div>
 
-      <section data-id="home-tools" class="home-section">
+      <div data-id="home-tools" class="block home-section">
         <h1 class="block-title">算竞周边工具</h1>
         <a-row :gutter="[16, 16]" style="margin-left: 0; margin-right: 0;">
           <a-col :xs="24" :sm="12">
@@ -86,9 +86,9 @@
             </a>
           </a-col>
         </a-row>
-      </section>
+      </div>
 
-      <section data-id="home-resources" class="home-section">
+      <div data-id="home-resources" class="block home-section">
         <h1 class="block-title">资源和生态</h1>
         <ul>
           <li>
@@ -114,17 +114,17 @@
             ：转换标准榜单到 Excel、Gym Ghost、VJ 等其他格式
           </li>
         </ul>
-      </section>
+      </div>
 
-      <section data-id="home-contact" class="home-section">
+      <div data-id="home-contact" class="block home-section">
         <h1 class="block-title">联系我们</h1>
         <p>
           如要为赛事寻求专业的实时外榜托管服务或希望补全/纠正本站数据，欢迎
           <ContactUs>与我们联系</ContactUs>。
         </p>
-      </section>
+      </div>
 
-      <section data-id="home-about" class="home-section">
+      <div data-id="home-about" class="block home-section">
         <h1 class="block-title">关于我们</h1>
         <p>algoUX: Give your algorithm better UX</p>
         <p>
@@ -144,7 +144,7 @@
           备案号：
           <a data-id="home-beian-link" href="https://beian.miit.gov.cn/" target="_blank" rel="noreferrer">{{ beianText }}</a>
         </p>
-      </section>
+      </div>
     </div>
   </main>
 </template>
