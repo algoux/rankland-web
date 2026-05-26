@@ -62,7 +62,7 @@ git status --short --branch
 备注：
 
 ```text
-2026-05-26 最新记录：playground hydration marker visual parity 已通过 focused RED/GREEN、Playground full-chain 6/6、完整 `test:migration`（build、35 unit files / 151 unit tests、1 SSR smoke test、1 shallow Playwright test、52 full-chain Playwright tests）和 `git diff --check`。
+2026-05-27 最新记录：live hydration marker visual parity 已通过 focused RED/GREEN、Live full-chain 10/10、完整 `test:migration`（build、35 unit files / 151 unit tests、1 SSR smoke test、1 shallow Playwright test、52 full-chain Playwright tests）和 `git diff --check`。
 ```
 
 ## 全局外壳与跨路由行为
@@ -290,6 +290,7 @@ App shell Ant Design Vue Layout/Menu/Dropdown/Button、旧版全局 body light/d
 检查项：
 
 - `[x]` CSR 页面加载和 hydration 正常
+- `[x]` 测试用 hydration marker 不作为可见产品文本展示
 - `[x]` query 参数按预期保留
 - `[x]` 实时榜单轮询可用
 - `[x]` WebSocket 建连行为可接受
@@ -313,7 +314,7 @@ App shell Ant Design Vue Layout/Menu/Dropdown/Button、旧版全局 body light/d
 备注：
 
 ```text
-2026-05-26 复核：live full-chain 使用 mock backend 和 stub WebSocket 覆盖 CSR hydration、query 保留、polling、WebSocket setup/reconnect/close、Toastify/scroll-solution、Not Found、普通/实时桌面移动端截图和 bounds。
+2026-05-27 复核：live full-chain 使用 mock backend 和 stub WebSocket 覆盖 CSR hydration、hydration marker 视觉隐藏、query 保留、polling、WebSocket setup/reconnect/close、Toastify/scroll-solution、Not Found、普通/实时桌面移动端截图和 bounds。
 ```
 
 ## API 与数据行为

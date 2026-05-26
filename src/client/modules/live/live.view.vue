@@ -469,10 +469,10 @@ export default routeView(LivePage, '/live/:id', LiveRPO);
 }
 
 .live-hydrated {
-  margin-bottom: 8px;
-  color: #64748b;
-  font-size: 12px;
-  text-align: center;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  color: transparent;
 }
 
 .live-scroll-toggle {

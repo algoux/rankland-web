@@ -157,6 +157,10 @@ test.describe('/live/:id full-chain route', () => {
       marginBottom: '32px',
     });
     await expect(page.locator('[data-id="live-hydrated"]')).toHaveText('hydrated');
+    await expect(page.locator('[data-id="live-hydrated"]')).toHaveCSS('width', '1px');
+    await expect(page.locator('[data-id="live-hydrated"]')).toHaveCSS('height', '1px');
+    await expect(page.locator('[data-id="live-hydrated"]')).toHaveCSS('overflow', 'hidden');
+    await expect(page.locator('[data-id="live-hydrated"]')).toHaveCSS('color', 'rgba(0, 0, 0, 0)');
     await expect(page.locator('[data-id="live-scroll-solution-toggle"]')).toHaveClass(/ant-switch/);
     await expect(page.locator('[data-id="live-scroll-solution-toggle"]')).toHaveClass(/ant-switch-small/);
     await expect(page.locator('[data-id="live-scroll-solution-toggle"]')).toHaveAttribute('aria-checked', 'true');
