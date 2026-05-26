@@ -40,6 +40,42 @@ async function readAnalyticsEvents(page: Page) {
   );
 }
 
+async function getMobileShellMetrics(page: Page) {
+  return page.evaluate(() => {
+    const header = document.querySelector<HTMLElement>('[data-id="app-header"]');
+    const headerInner = document.querySelector<HTMLElement>('.app-header-inner');
+    const logoLink = document.querySelector<HTMLElement>('[data-id="app-logo-link"]');
+    const logoImage = document.querySelector<HTMLImageElement>('[data-id="app-logo-link"] img');
+    const navItem = document.querySelector<HTMLElement>('[data-id="app-nav"] .ant-menu-item');
+    const siteSwitch = document.querySelector<HTMLElement>('[data-id="app-site-switch"]');
+    if (!header || !headerInner || !logoLink || !logoImage || !navItem || !siteSwitch) {
+      throw new Error('Missing app shell mobile metrics target');
+    }
+
+    const headerStyle = window.getComputedStyle(header);
+    const headerInnerStyle = window.getComputedStyle(headerInner);
+    const logoLinkStyle = window.getComputedStyle(logoLink);
+    const logoImageStyle = window.getComputedStyle(logoImage);
+    const navItemStyle = window.getComputedStyle(navItem);
+    const siteSwitchStyle = window.getComputedStyle(siteSwitch);
+
+    return {
+      headerHeight: headerStyle.height,
+      headerLineHeight: headerStyle.lineHeight,
+      headerInnerPaddingLeft: headerInnerStyle.paddingLeft,
+      headerInnerPaddingRight: headerInnerStyle.paddingRight,
+      logoWidth: logoLinkStyle.width,
+      logoHeight: logoLinkStyle.height,
+      logoImageWidth: logoImageStyle.width,
+      logoImageHeight: logoImageStyle.height,
+      navItemPaddingLeft: navItemStyle.paddingLeft,
+      navItemPaddingRight: navItemStyle.paddingRight,
+      siteSwitchPaddingLeft: siteSwitchStyle.paddingLeft,
+      siteSwitchPaddingRight: siteSwitchStyle.paddingRight,
+    };
+  });
+}
+
 test.describe('app shell full-chain behavior', () => {
   test.beforeEach(async ({ page }) => {
     await page.addInitScript(() => {
@@ -187,6 +223,20 @@ test.describe('app shell full-chain behavior', () => {
     await expectNoHorizontalDocumentOverflow(page);
     await expectElementWithinViewport(page.locator('[data-id="app-logo-link"]'), page);
     await expectElementWithinViewport(page.locator('[data-id="app-site-switch"]'), page);
+    expect(await getMobileShellMetrics(page)).toMatchObject({
+      headerHeight: '64px',
+      headerLineHeight: '64px',
+      headerInnerPaddingLeft: '20px',
+      headerInnerPaddingRight: '20px',
+      logoWidth: '64px',
+      logoHeight: '64px',
+      logoImageWidth: '40px',
+      logoImageHeight: '40px',
+      navItemPaddingLeft: '16px',
+      navItemPaddingRight: '16px',
+      siteSwitchPaddingLeft: '8px',
+      siteSwitchPaddingRight: '8px',
+    });
 
     await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight));
     await expect(page.locator('[data-id="app-back-top"]')).toBeVisible();
