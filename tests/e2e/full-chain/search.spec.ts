@@ -201,6 +201,43 @@ test.describe('/search full-chain route', () => {
     expect(requests.some((requestRecord) => requestRecord.path === '/rank/search')).toBe(false);
   });
 
+  test('renders legacy search list utility class tokens', async ({ page, request }) => {
+    await denyExternalCalls(page);
+    await request.post(`${mockBaseURL}/__reset`);
+
+    const resultResponse = await page.goto('/search?kw=Test%202024');
+
+    expect(resultResponse).not.toBeNull();
+    expect(resultResponse?.ok()).toBe(true);
+    await expect(page.locator('[data-id="search-result-section"]')).toHaveClass(/mt-10/);
+    await expect(page.locator('[data-id="search-result-section"] .search-section-title')).toHaveClass(/opacity-70/);
+    await expect(page.locator('[data-id="search-result-section"] .search-list')).toHaveClass(/mt-2/);
+    await expect(page.locator('[data-id="search-result-section"] .search-row-title')).toHaveClass(/mb-0/);
+    await expect(page.locator('[data-id="search-result-section"] .search-view-count')).toHaveClass(/ml-2/);
+    await expect(page.locator('[data-id="search-result-section"] .search-view-count')).toHaveClass(/opacity-70/);
+    await expect(page.locator('[data-id="search-result-section"] .search-created-at')).toHaveClass(/mb-0/);
+    await expect(page.locator('[data-id="search-result-section"] .search-created-at')).toHaveClass(/opacity-50/);
+    await expect(page.locator('[data-id="search-result-section"] .search-created-at')).toHaveClass(/text-sm/);
+
+    const recentResponse = await page.goto('/search');
+
+    expect(recentResponse).not.toBeNull();
+    expect(recentResponse?.ok()).toBe(true);
+    await expect(page.locator('[data-id="search-recent-section"]')).toHaveClass(/mt-10/);
+    await expect(page.locator('[data-id="search-recent-section"] .search-section-title')).toHaveClass(/opacity-70/);
+    await expect(page.locator('[data-id="search-recent-section"] .search-list')).toHaveClass(/mt-2/);
+    await expect(page.locator('[data-id="search-recent-section"] .search-row-title').first()).toHaveClass(/mb-0/);
+    await expect(page.locator('[data-id="search-recent-section"] .search-view-count').first()).toHaveClass(/ml-2/);
+    await expect(page.locator('[data-id="search-recent-section"] .search-view-count').first()).toHaveClass(
+      /opacity-70/,
+    );
+    await expect(page.locator('[data-id="search-recent-section"] .search-created-at').first()).toHaveClass(/mb-0/);
+    await expect(page.locator('[data-id="search-recent-section"] .search-created-at').first()).toHaveClass(
+      /opacity-50/,
+    );
+    await expect(page.locator('[data-id="search-recent-section"] .search-created-at').first()).toHaveClass(/text-sm/);
+  });
+
   test('renders zero search results without an extra empty-state message like the legacy page', async ({
     page,
     request,

@@ -29,18 +29,18 @@
       <section
         v-else-if="hasKeyword"
         data-id="search-result-section"
-        class="search-section"
+        class="search-section mt-10"
         :data-result-count="searchRows.length"
       >
-        <div class="search-section-title">搜索到 <span data-id="search-result-count">{{ searchRows.length }}</span> 个结果</div>
-        <a-list v-if="searchRows.length > 0" class="search-list" size="small" :data-source="searchRows">
+        <div class="search-section-title opacity-70">搜索到 <span data-id="search-result-count">{{ searchRows.length }}</span> 个结果</div>
+        <a-list v-if="searchRows.length > 0" class="search-list mt-2" size="small" :data-source="searchRows">
           <template #renderItem="{ item }">
             <a-list-item
               data-id="search-ranklist-item"
               class="search-list-item"
               :data-ranklist-key="item.uniqueKey"
             >
-              <p class="search-row-title">
+              <p class="search-row-title mb-0">
                 <router-link
                   data-id="search-ranklist-link"
                   :data-ranklist-key="item.uniqueKey"
@@ -48,25 +48,25 @@
                 >
                   {{ item.name }}
                 </router-link>
-                <span class="search-view-count"><EyeOutlined /> {{ item.viewCnt }}</span>
+                <span class="search-view-count ml-2 opacity-70"><EyeOutlined /> {{ item.viewCnt }}</span>
               </p>
-              <p class="search-created-at">创建于 {{ formatCreatedAt(item.createdAt) }}</p>
+              <p class="search-created-at mb-0 opacity-50 text-sm">创建于 {{ formatCreatedAt(item.createdAt) }}</p>
             </a-list-item>
           </template>
         </a-list>
       </section>
 
-      <section v-else data-id="search-recent-section" class="search-section">
-        <div class="search-section-title">最近更新</div>
-        <div v-if="recentRows.length === 0" class="search-empty-state">暂无最近更新的榜单</div>
-        <a-list v-else class="search-list" size="small" :data-source="recentRows">
+      <section v-else data-id="search-recent-section" class="search-section mt-10">
+        <div class="search-section-title opacity-70">最近更新</div>
+        <div v-if="recentRows.length === 0" class="search-empty-state mt-2">暂无最近更新的榜单</div>
+        <a-list v-else class="search-list mt-2" size="small" :data-source="recentRows">
           <template #renderItem="{ item }">
             <a-list-item
               data-id="search-ranklist-item"
               class="search-list-item"
               :data-ranklist-key="item.uniqueKey"
             >
-              <p class="search-row-title">
+              <p class="search-row-title mb-0">
                 <router-link
                   data-id="search-ranklist-link"
                   :data-ranklist-key="item.uniqueKey"
@@ -74,9 +74,9 @@
                 >
                   {{ item.name }}
                 </router-link>
-                <span class="search-view-count"><EyeOutlined /> {{ item.viewCnt }}</span>
+                <span class="search-view-count ml-2 opacity-70"><EyeOutlined /> {{ item.viewCnt }}</span>
               </p>
-              <p class="search-created-at">创建于 {{ formatCreatedAt(item.createdAt) }}</p>
+              <p class="search-created-at mb-0 opacity-50 text-sm">创建于 {{ formatCreatedAt(item.createdAt) }}</p>
             </a-list-item>
           </template>
         </a-list>
