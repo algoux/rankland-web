@@ -212,6 +212,17 @@
           需要专业的赛事外榜托管？
           <ContactUs>联系我们</ContactUs>
         </p>
+        <p v-if="footerSiteState.showBeian" data-id="rankland-ranklist-beian">
+          备案号：
+          <a
+            data-id="rankland-ranklist-beian-link"
+            href="https://beian.miit.gov.cn/"
+            target="_blank"
+            rel="noreferrer"
+          >
+            {{ footerSiteState.beianText }}
+          </a>
+        </p>
       </footer>
 
       <div data-id="rankland-ranklist-user-modal">
@@ -354,6 +365,7 @@ import {
 import '@algoux/standard-ranklist-renderer-component-styles';
 import ContactUs from './contact-us.vue';
 import RanklandRankTimeChart from './rankland-rank-time-chart.vue';
+import { createRanklandFooterSiteState } from './rankland-footer-site';
 import { createRanklandRanklistState, type RanklandRanklistFilterState } from './rankland-ranklist-state';
 import {
   buildRanklandEmbedCode,
@@ -494,6 +506,9 @@ export default defineComponent({
         filter: this.filter,
         timeTravelTime: this.timeTravelTime,
       });
+    },
+    footerSiteState() {
+      return createRanklandFooterSiteState();
     },
     ranklistTitle(): string {
       return resolveText(this.ranklist.contest?.title);

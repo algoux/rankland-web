@@ -165,6 +165,7 @@ test.describe('/ranklist/:id full-chain route', () => {
     });
     await expect(page.locator('[data-id="rankland-ranklist-footer"]')).toContainText('Powered by Standard Ranklist');
     await expect(page.locator('[data-id="rankland-ranklist-footer"]')).toContainText('需要专业的赛事外榜托管？');
+    await expect(page.locator('[data-id="rankland-ranklist-beian"]')).toHaveCount(0);
     await page.locator('[data-id="rankland-ranklist-footer"] [data-id="contact-us-trigger"]').click();
     await expect(page.locator('[data-id="contact-us-dialog"]')).toBeVisible();
     await expect(page.locator('[data-id="contact-us-email"][href="mailto:algoux.org@gmail.com"]')).toHaveText(
