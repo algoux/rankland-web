@@ -313,7 +313,7 @@
               所在奖区（{{ activeUserSegment.seriesTitle }}）：
               <span
                 data-id="rankland-user-modal-segment-label"
-                class="rankland-user-modal-segment-label"
+                class="rankland-user-modal-segment-label user-modal-segment-label"
                 :class="`bg-segment-${activeUserSegment.segmentStyle}`"
               >
                 {{ activeUserSegment.segmentTitle }}

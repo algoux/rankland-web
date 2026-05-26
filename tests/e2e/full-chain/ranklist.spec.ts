@@ -656,8 +656,10 @@ test.describe('/ranklist/:id full-chain route', () => {
       marginTop: '16px',
       marginBottom: '0px',
     });
-    await expect(userModal.locator('[data-id="rankland-user-modal-segment-label"]')).toHaveText('Gold');
-    await expect(userModal.locator('[data-id="rankland-user-modal-segment-label"]')).toHaveClass(/bg-segment-gold/);
+    const segmentLabel = userModal.locator('[data-id="rankland-user-modal-segment-label"]');
+    await expect(segmentLabel).toHaveText('Gold');
+    await expect(segmentLabel).toHaveClass(/bg-segment-gold/);
+    await expect(segmentLabel).toHaveClass(/(^|\s)user-modal-segment-label(\s|$)/);
     const slogan = userModal.locator('[data-id="rankland-user-modal-slogan"]');
     await expect(slogan).toHaveText('Keep moving forward');
     await expect(slogan).toHaveClass(/(^|\s)slogan(\s|$)/);
