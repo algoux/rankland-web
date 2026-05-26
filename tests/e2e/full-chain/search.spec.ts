@@ -100,6 +100,7 @@ test.describe('/search full-chain route', () => {
     expect(response).not.toBeNull();
     expect(response?.ok()).toBe(true);
     await expect(page.locator('[data-id="search-loading"].ant-spin')).toBeVisible();
+    await expect(page.locator('[data-id="search-loading"]')).toHaveClass(/mt-10/);
     await expect(page.locator('[data-id="search-recent-section"]')).toBeVisible();
   });
 
@@ -124,6 +125,8 @@ test.describe('/search full-chain route', () => {
     await expect(page.locator('[data-id="search-error"]')).toHaveText(
       '初始化榜单数据库失败，请刷新再试。',
     );
+    await expect(page.locator('[data-id="search-error"]')).toHaveClass(/mt-10/);
+    await expect(page.locator('[data-id="search-error"]')).toHaveClass(/text-red-500/);
     await expect(page.locator('[data-id="search-error"]')).toHaveCSS('margin-top', '40px');
     await expect(page.locator('[data-id="search-error"]')).toHaveCSS('color', 'rgb(239, 68, 68)');
   });

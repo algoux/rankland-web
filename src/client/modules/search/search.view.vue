@@ -20,9 +20,9 @@
         @search="submitSearch"
       />
 
-      <a-spin v-if="loading" data-id="search-loading" class="search-state" />
+      <a-spin v-if="loading" data-id="search-loading" class="search-state mt-10" />
 
-      <div v-else-if="loadError" data-id="search-error" class="search-state search-error">
+      <div v-else-if="loadError" data-id="search-error" class="search-state search-error mt-10 text-red-500">
         初始化榜单数据库失败，请刷新再试。
       </div>
 

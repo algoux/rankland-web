@@ -62,7 +62,7 @@ git status --short --branch
 备注：
 
 ```text
-2026-05-27 最新记录：search list utility class parity 已通过 focused Search RED/GREEN、完整 Search full-chain、完整 `test:migration`（build、35 unit files / 151 unit tests、1 SSR smoke test、1 shallow Playwright test、56 full-chain Playwright tests）和 `git diff --check`。
+2026-05-27 最新记录：search state utility class parity 已通过 focused Search RED/GREEN、完整 Search full-chain、完整 `test:migration`（build、35 unit files / 151 unit tests、1 SSR smoke test、1 shallow Playwright test、56 full-chain Playwright tests）和 `git diff --check`。
 ```
 
 ## 全局外壳与跨路由行为
@@ -162,6 +162,7 @@ App shell Ant Design Vue Layout/Menu/Dropdown/Button、旧版全局 body light/d
 - `[x]` 搜索框 enter button 使用旧版 Ant Design 默认 SearchOutlined 图标按钮，而不是自定义“搜索”文字按钮
 - `[x]` 最近榜单空状态保留旧版 `mt-2` 间距，并在深色模式下使用旧版 Ant Design 正文色
 - `[x]` 初始化失败状态保留旧版文案、`mt-10` 间距和 `text-red-500` 错误色
+- `[x]` 搜索 loading 和错误态保留旧版 `mt-10` / `text-red-500` 工具类
 - `[x]` 搜索结果和最近榜单行保留旧版 `mt-10` / `mt-2` / `mb-0` / `ml-2 opacity-70` / `opacity-50 text-sm` 工具类
 - `[x]` 结果数量展示或选择器文案可接受
 - `[x]` 搜索结果卡片和链接跳转正确
@@ -178,7 +179,7 @@ App shell Ant Design Vue Layout/Menu/Dropdown/Button、旧版全局 body light/d
 备注：
 
 ```text
-2026-05-27 复核：search full-chain 覆盖 CSR listAll、hydration marker 视觉隐藏、Fuse 本地搜索、空 kw、zero-result summary-only、Ant Design Input.Search/List/Spin、旧版 boolean `enterButton` 默认 SearchOutlined 图标按钮、初始化失败状态旧版文案、40px 顶部间距和 `text-red-500` 颜色、最近榜单空状态旧版 `mt-2` 间距和暗色正文色、搜索结果/最近榜单旧版工具类 token、网络请求无非预期 upstream/external call。
+2026-05-27 复核：search full-chain 覆盖 CSR listAll、hydration marker 视觉隐藏、Fuse 本地搜索、空 kw、zero-result summary-only、Ant Design Input.Search/List/Spin、旧版 boolean `enterButton` 默认 SearchOutlined 图标按钮、初始化失败状态旧版文案、40px 顶部间距和 `text-red-500` 颜色/工具类、loading 旧版 `mt-10` 工具类、最近榜单空状态旧版 `mt-2` 间距和暗色正文色、搜索结果/最近榜单旧版工具类 token、网络请求无非预期 upstream/external call。
 ```
 
 ## 榜单详情页 `/ranklist/:id`
@@ -487,7 +488,7 @@ URL:
 - `[x]` 接受路由兼容迁移完成，但保留列出的后续 slice
 - `[ ]` 暂不收口，先修复阻塞项
 
-无当前已复现阻塞；SRK header title typography parity、header text size parity、header view-count fallback parity、search list utility class parity、user modal root class parity、user modal organization line class parity、user modal team members class parity、user modal team separator raw text coverage、user modal markers class parity、user modal unofficial line class parity、user modal segment line class parity、user modal segment label class parity、user modal slogan spacing class parity、user modal photo wrapper class parity 和 user modal photo/slogan shared wrapper DOM parity 已补充，保留 product-review-driven SRK lower-level table pixel parity / route polish 作为后续 review-driven slice。
+无当前已复现阻塞；SRK header title typography parity、header text size parity、header view-count fallback parity、search state utility class parity、search list utility class parity、user modal root class parity、user modal organization line class parity、user modal team members class parity、user modal team separator raw text coverage、user modal markers class parity、user modal unofficial line class parity、user modal segment line class parity、user modal segment label class parity、user modal slogan spacing class parity、user modal photo wrapper class parity 和 user modal photo/slogan shared wrapper DOM parity 已补充，保留 product-review-driven SRK lower-level table pixel parity / route polish 作为后续 review-driven slice。
 
 最终收口前必须完成：
 
