@@ -238,6 +238,7 @@ test.describe('/live/:id full-chain route', () => {
     await expect(scrollSolutionItems).toContainText('Team Alpha');
     await expect(scrollSolutionItems).toContainText('A');
     await expect(scrollSolutionItems).toContainText('AC');
+    await page.waitForTimeout(800);
 
     const measureLayout = () =>
       page.evaluate(() => {
@@ -300,6 +301,86 @@ test.describe('/live/:id full-chain route', () => {
       path: mobileScreenshot,
       contentType: 'image/png',
     });
+  });
+
+  test('renders realtime events with the legacy Toastify container and Zoom presentation', async ({
+    page,
+    request,
+  }) => {
+    await page.setViewportSize({ width: 1280, height: 720 });
+    await denyExternalCalls(page);
+    await stubWebSocket(page);
+    await request.post(`${mockBaseURL}/__reset`);
+
+    await page.goto('/live/live-test-key?token=t0&scrollSolution=1&focus=yes');
+
+    const wsUrl = `ws://127.0.0.1:${mockPort}/ranking/record/live-rid-1?token=t0`;
+    await expect(page.locator('[data-id="live-scroll-solution-status"]')).toHaveText('connected');
+    await emitRealtimeSolution(page, wsUrl);
+
+    const container = page.locator('[data-id="live-scroll-solution"]');
+    const toast = page.locator('[data-id="live-scroll-solution-item"]').first();
+
+    await expect(container).toHaveClass(/plugin_scroll-solution-container/);
+    await expect(container).toHaveClass(/Toastify__toast-container/);
+    await expect(container).toHaveClass(/Toastify__toast-container--bottom-left/);
+    await expect(toast).toHaveClass(/Toastify__toast/);
+    await expect(toast).toHaveClass(/Toastify__zoom-enter/);
+    await expect(toast.locator('.container')).toContainText('Team Alpha');
+    await expect(toast.locator('.score')).toHaveText('2');
+    await expect(toast.locator('.problem')).toHaveText('A');
+    await expect(toast.locator('.result.result-ac')).toHaveText('AC');
+    await expect(container.locator('.Toastify__close-button')).toHaveCount(0);
+    await expect(container.locator('.Toastify__progress-bar')).toHaveCount(0);
+
+    const toastifyLayout = await page.evaluate(() => {
+      const containerElement = document.querySelector('[data-id="live-scroll-solution"]');
+      const toastElement = document.querySelector('[data-id="live-scroll-solution-item"]');
+      if (!(containerElement instanceof HTMLElement) || !(toastElement instanceof HTMLElement)) {
+        throw new Error('Missing live scroll-solution Toastify elements');
+      }
+
+      const containerBox = containerElement.getBoundingClientRect();
+      const containerStyle = getComputedStyle(containerElement);
+      const toastStyle = getComputedStyle(toastElement);
+
+      return {
+        container: {
+          bottom: containerBox.bottom,
+          left: containerBox.left,
+          padding: containerStyle.padding,
+          position: containerStyle.position,
+          width: containerBox.width,
+          zIndex: containerStyle.zIndex,
+        },
+        toast: {
+          animationDuration: toastStyle.animationDuration,
+          animationFillMode: toastStyle.animationFillMode,
+          animationName: toastStyle.animationName,
+          borderRadius: toastStyle.borderRadius,
+          cssHeight: toastStyle.height,
+          marginBottom: toastStyle.marginBottom,
+          minHeight: toastStyle.minHeight,
+          padding: toastStyle.padding,
+        },
+        viewportHeight: window.innerHeight,
+      };
+    });
+
+    expect(toastifyLayout.container.position).toBe('fixed');
+    expect(Math.round(toastifyLayout.container.width)).toBe(250);
+    expect(Math.round(toastifyLayout.container.left)).toBe(0);
+    expect(Math.abs(toastifyLayout.container.bottom - toastifyLayout.viewportHeight)).toBeLessThanOrEqual(1);
+    expect(toastifyLayout.container.padding).toBe('0px');
+    expect(toastifyLayout.container.zIndex).toBe('9999');
+    expect(toastifyLayout.toast.cssHeight).toBe('45px');
+    expect(toastifyLayout.toast.marginBottom).toBe('0px');
+    expect(toastifyLayout.toast.borderRadius).toBe('0px');
+    expect(toastifyLayout.toast.padding).toBe('0px');
+    expect(toastifyLayout.toast.minHeight).toBe('0px');
+    expect(toastifyLayout.toast.animationName).toBe('Toastify__zoomIn');
+    expect(toastifyLayout.toast.animationDuration).toBe('0.75s');
+    expect(toastifyLayout.toast.animationFillMode).toBe('forwards');
   });
 
   test('keeps the normal live page within desktop and mobile viewport bounds', async ({

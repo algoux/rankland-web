@@ -1,24 +1,31 @@
 <template>
-  <aside class="live-scroll-solution" data-id="live-scroll-solution">
+  <aside
+    class="live-scroll-solution plugin_scroll-solution-container Toastify__toast-container Toastify__toast-container--bottom-left"
+    data-id="live-scroll-solution"
+  >
     <div data-id="live-scroll-solution-status" class="live-scroll-solution-status">{{ status }}</div>
     <ul class="live-scroll-solution-list">
       <li
         v-for="solution in solutions"
         :key="solution.key"
-        class="live-scroll-solution-item"
+        class="live-scroll-solution-item Toastify__toast Toastify__toast--default Toastify__zoom-enter"
         data-id="live-scroll-solution-item"
       >
-        <span class="live-scroll-solution-score">{{ solution.solved }}</span>
-        <span class="live-scroll-solution-user">
-          <span class="live-scroll-solution-user-name">{{ solution.user.name }}</span>
-          <span v-if="solution.user.organization" class="live-scroll-solution-user-organization">
-            {{ solution.user.organization }}
-          </span>
-        </span>
-        <span class="live-scroll-solution-problem">{{ solution.problemAlias }}</span>
-        <span class="live-scroll-solution-result" :class="getResultClass(solution.result)">
-          <span>{{ getResultText(solution.result) }}</span>
-        </span>
+        <div class="Toastify__toast-body">
+          <div class="container">
+            <div class="score live-scroll-solution-score">{{ solution.solved }}</div>
+            <div class="user live-scroll-solution-user">
+              <span class="user-name live-scroll-solution-user-name">{{ solution.user.name }}</span>
+              <span v-if="solution.user.organization" class="user-second-name live-scroll-solution-user-organization">
+                {{ solution.user.organization }}
+              </span>
+            </div>
+            <div class="problem live-scroll-solution-problem">{{ solution.problemAlias }}</div>
+            <div class="result live-scroll-solution-result" :class="getResultClass(solution.result)">
+              <span>{{ getResultText(solution.result) }}</span>
+            </div>
+          </div>
+        </div>
       </li>
     </ul>
   </aside>
@@ -67,8 +74,10 @@ export default defineComponent({
   position: fixed;
   bottom: 0;
   left: 0;
-  z-index: 20;
+  z-index: 9999;
   width: 250px;
+  padding: 0;
+  box-sizing: border-box;
   color: var(--text);
   background: var(--bg);
   font-family: 'Helvetica Neue', Helvetica, 'Microsoft Yahei', Arial, sans-serif;
@@ -95,10 +104,37 @@ export default defineComponent({
 }
 
 .live-scroll-solution-item {
+  position: relative;
+  display: flex;
+  height: 45px;
+  min-height: initial;
+  max-height: 800px;
+  margin-bottom: 0;
+  padding: 0;
+  overflow: hidden;
+  border-radius: 0;
+  box-sizing: border-box;
+  color: var(--text);
+  background: var(--bg);
+  cursor: default;
+  direction: ltr;
+  font-size: 14px;
+}
+
+.Toastify__toast-body,
+.container {
+  width: 100%;
+}
+
+.Toastify__toast-body {
+  flex: 1 1 auto;
+  margin: auto 0;
+}
+
+.container {
   display: flex;
   align-items: center;
   height: 45px;
-  font-size: 14px;
 }
 
 .live-scroll-solution-score {
@@ -205,5 +241,39 @@ export default defineComponent({
     border: 1px solid #cbd5e1;
     border-radius: 4px;
   }
+}
+</style>
+
+<style lang="less">
+@keyframes Toastify__zoomIn {
+  from {
+    opacity: 0;
+    transform: scale3d(0.3, 0.3, 0.3);
+  }
+
+  50% {
+    opacity: 1;
+  }
+}
+
+@keyframes Toastify__zoomOut {
+  from {
+    opacity: 1;
+  }
+
+  50% {
+    opacity: 0;
+    transform: scale3d(0.3, 0.3, 0.3);
+  }
+
+  to {
+    opacity: 0;
+  }
+}
+
+.live-scroll-solution-item.Toastify__zoom-enter {
+  animation-name: Toastify__zoomIn;
+  animation-duration: 750ms;
+  animation-fill-mode: forwards;
 }
 </style>

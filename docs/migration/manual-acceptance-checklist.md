@@ -297,8 +297,8 @@ iframe无法测试，Gym Ghost/VJudge replay 导出的文件我不确定
 
 需要决策：
 
-- 自动 WebSocket reconnect/backoff：`[ ]` 接受延期 / `[ ]` 后续处理 / `[ ]` 阻塞
-- Toastify 动画和像素级一致：`[ ]` 接受当前实现 / `[ ]` 后续处理 / `[ ]` 阻塞
+- 自动 WebSocket reconnect/backoff：`[x]` 接受当前实现 / `[ ]` 后续处理 / `[ ]` 阻塞
+- Toastify 动画和像素级一致：`[x]` 接受当前实现 / `[ ]` 后续处理 / `[ ]` 阻塞
 
 备注：
 
@@ -374,8 +374,8 @@ iframe无法测试，Gym Ghost/VJudge replay 导出的文件我不确定
 | 首页更完整 SEO/content polish | `[x]` | `[ ]` | `[ ]` | |
 | 合集页菜单、移动端、分类 icon 精确行为 | `[ ]` | `[x]` | `[ ]` | |
 | 演练场 Monaco/editor parity | `[ ]` | `[ ]` | `[ ]` | |
-| Live WebSocket reconnect/backoff | `[ ]` | `[ ]` | `[ ]` | |
-| Live Toastify 动画和像素级一致 | `[ ]` | `[x]` | `[ ]` | |
+| Live WebSocket reconnect/backoff | `[ ]` | `[ ]` | `[ ]` | 已处理，full-chain 覆盖错误关闭/异常关闭后的 reconnect |
+| Live Toastify 动画和像素级一致 | `[ ]` | `[ ]` | `[ ]` | 已处理，full-chain 覆盖 Toastify 容器、toast 行、Zoom 动画和像素覆盖 |
 | SRK renderer 精确 `StyledRanklistRenderer` 视觉 parity | `[ ]` | `[x]` | `[ ]` | |
 | Rank-time 旧版 `@antv/g2` tooltip 和动画 parity | `[ ]` | `[x]` | `[ ]` | |
 

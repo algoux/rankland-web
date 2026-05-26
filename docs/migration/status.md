@@ -5,10 +5,10 @@ This file is the quick global dashboard for the RankLand migration. Update it at
 ## Current Focus
 
 - Active branch: `migration/live-page-foundation`
-- Current slice: Home Ant Design content parity
-- Latest slice commit: `feat: 收口首页内容卡片一致性` (this commit)
-- Last recorded full gate: `corepack pnpm test:migration` passed build, 27 unit files / 130 unit tests, 1 SSR smoke test, 1 shallow Playwright test, and 38 full-chain Playwright tests across all migrated public routes during 2026-05-26 Home Ant Design content parity pre-commit verification
-- Next recommended focus: Live Toastify animation parity or rank-time chart parity review
+- Current slice: Live Toastify animation/pixel parity
+- Latest slice commit: `feat: 收口实时提交提示动画一致性` (this commit)
+- Last recorded full gate: `corepack pnpm test:migration` passed build, 27 unit files / 130 unit tests, 1 SSR smoke test, 1 shallow Playwright test, and 39 full-chain Playwright tests across all migrated public routes during 2026-05-26 Live Toastify parity pre-commit verification
+- Next recommended focus: rank-time chart parity review or collection remaining-height/pixel polish
 
 ## Route Progress
 
@@ -19,7 +19,7 @@ This file is the quick global dashboard for the RankLand migration. Update it at
 | `/ranklist/:id` | SSR | Foundation + shared wrapper header metadata/hover dropdown parity + visual review + completion audit verified | `migration/live-page-foundation` | Unit, route, full-chain E2E including view count, contributors, reference links, hover export/share dropdown open-close, footer contact modal, ranklist desktop/mobile screenshot review, `test:migration` | Product polish after route parity review |
 | `/collection/:id` | SSR | Foundation + Ant Design Vue menu/category icon/mobile collapse product parity + selected-ranklist shared wrapper parity + visual review + completion audit verified | `migration/live-page-foundation` | Unit, route, full-chain E2E, Ant Design Vue menu/category icon/mobile collapse coverage, selected-ranklist wrapper header/filter/progress/footer/action coverage, collection desktop/mobile screenshot review, `test:migration` | Exact remaining-height calculation and pixel animation parity remain product polish |
 | `/playground` | CSR | Foundation + Ant Design Vue welcome modal/action + Monaco editor/schema/theme/remaining-height product parity + visual review + completion audit verified | `migration/live-page-foundation` | Unit, route, full-chain E2E, one-time welcome modal/localStorage coverage, Monaco readiness/schema/theme coverage, playground desktop/mobile screenshot review, `test:migration` | Exact old Monaco `0.34.0` package-version parity and synthetic Monaco editing in Playwright remain deferred risk; product editor path is verified by hydration/build and stable preview coverage |
-| `/live/:id` | CSR | Foundation + parity follow-ups + reconnect/backoff + visual review + completion audit verified | `migration/live-page-foundation` | Unit, route, full-chain E2E including NotFound, WebSocket error reconnect, unexpected WebSocket close reconnect, scroll-solution toggle close, mobile toggle visibility, hidden internal status marker, desktop/mobile realtime layout bounds, normal live desktop/mobile screenshot review, mobile progress label bounds, and `test:migration` | Exact Toastify animation/pixel parity remains a deferred product enhancement |
+| `/live/:id` | CSR | Foundation + parity follow-ups + reconnect/backoff + Toastify animation/pixel parity + visual review + completion audit verified | `migration/live-page-foundation` | Unit, route, full-chain E2E including NotFound, WebSocket error reconnect, unexpected WebSocket close reconnect, scroll-solution toggle close, mobile toggle visibility, hidden internal status marker, desktop/mobile realtime layout bounds, legacy Toastify container/Zoom presentation, normal live desktop/mobile screenshot review, mobile progress label bounds, and `test:migration` | Product polish after route parity review |
 
 ## Infrastructure Progress
 
@@ -38,7 +38,7 @@ This file is the quick global dashboard for the RankLand migration. Update it at
 - Home: old React Ant Design recommendation/tool card layout is restored with Ant Design Vue Card/Row/Col while preserving SSR statistics, canonical/OG/JSON-LD, contact modal, and app-shell viewport bounds.
 - Collection: exact remaining-height calculation and pixel animation parity remain product polish.
 - Playground: one-time welcome modal, Ant Design Vue preview action, Monaco editor, SRK schema diagnostics, theme-aware editor theme, and remaining-height behavior are restored. Exact old Monaco `0.34.0` package-version parity is intentionally not preserved because the verified Vue wrapper requires Monaco `>=0.43.0`.
-- Live: automatic WebSocket reconnect/backoff is restored as a product enhancement; exact Toastify animation/pixel behavior remains deferred.
+- Live: automatic WebSocket reconnect/backoff and legacy Toastify container/Zoom animation behavior are restored as product enhancements.
 - SRK renderer wrapper: header metadata, contributors, contest reference links, Ant Design Vue hover export/share dropdowns, and collection selected-ranklist wrapper controls are restored. Remaining exact table pixel and rank-time chart parity should be handled by product-review-driven slices.
 
 ## Known Risks
@@ -47,13 +47,12 @@ This file is the quick global dashboard for the RankLand migration. Update it at
 - Vue app shell now preserves the legacy chrome with Ant Design Vue Layout/Menu/Dropdown/Button/BackTop, focus-mode bypass, contact modal, pre-hydration theme bootstrap, system theme class sync, macOS Blink optimization class, GA initialization/pageview dispatch, and desktop/mobile viewport bounds. The Home page restores the old Ant Design Card/Row/Col recommendation and tool layout through Ant Design Vue, with row gutter margins constrained to avoid SSR/hydration first-frame horizontal overflow. The Ant Design Vue Menu is intentionally client-only because its ResizeObserver overflow wrapper causes SSR/client hydration node mismatches when rendered server-side. Analytics uses a lightweight local gtag adapter instead of `react-ga4`; full-chain E2E verifies dispatch intent through an E2E-only probe while external Google requests remain denied.
 - Collection navigation now uses Ant Design Vue inline Menu, category logo assets, persisted collapse state, and mobile selected-ranklist collapse behavior. The Ant Design Vue Menu is intentionally client-only because its ResizeObserver overflow wrapper also causes SSR/client hydration node mismatches in inline mode.
 - Playground now restores the old one-time welcome modal keyed by `PlaygroundWelcomeMessageRead`, uses Ant Design Vue Button/Tag/Modal for the visible editor action and shortcut cue, mounts a client-side Monaco JSON editor through `@guolao/vue-monaco-editor@1.6.0` and `monaco-editor@0.43.0`, serves `/monaco-editor/vs` locally from Koa, configures SRK schema diagnostics, syncs dark/light Monaco theme, and keeps loader configuration out of SSR import side effects. Synthetic Monaco editing through Playwright and synchronous `editor.setValue()` both hang in the current Vite 2 full-chain harness, so invalid/render-error states use an E2E-only preview hook while the product path uses Monaco `@change`, Preview, and `Ctrl/Cmd + S`.
-- Live realtime behavior has deterministic success, NotFound, WebSocket error reconnect, unexpected WebSocket close reconnect, scroll-solution toggle close without reconnect, mobile toggle visibility, hidden internal status marker, desktop/mobile realtime layout bounds, normal live desktop/mobile page review, and mobile progress label bounds coverage. Reconnect uses bounded exponential backoff at 1000 ms, 2000 ms, 4000 ms, 8000 ms, then 10000 ms. Exact React Toastify animation/pixel parity remains intentionally deferred as a product enhancement.
+- Live realtime behavior has deterministic success, NotFound, WebSocket error reconnect, unexpected WebSocket close reconnect, scroll-solution toggle close without reconnect, mobile toggle visibility, hidden internal status marker, desktop/mobile realtime layout bounds, legacy Toastify container classes, Toastify row shape, hidden close/progress affordances, `Toastify__zoomIn` animation coverage, normal live desktop/mobile page review, and mobile progress label bounds coverage. Reconnect uses bounded exponential backoff at 1000 ms, 2000 ms, 4000 ms, 8000 ms, then 10000 ms.
 - SRK renderer wrapper is shared by multiple migrated routes. This slice adds deterministic contributor/ref-link fixture coverage and route-level full-chain tests across ranklist, collection, live, and playground; remaining parity changes should stay isolated and heavily tested.
 - Converter-backed SRK exports use lazy browser imports of `@algoux/standard-ranklist-convert-to@0.2.2`; `xlsx@0.18.5` remains a large but click-loaded dependency.
 - User modal rank-time parity uses a lightweight Vue/SVG curve instead of the old React `@antv/g2` chart, so exact tooltip and animation parity remains intentionally deferred.
 
 ## Next Slice Queue
 
-1. Live product parity: exact Toastify animation/pixel behavior.
-2. Rank-time parity: old `@antv/g2` tooltip and animation behavior, if product review requires exact chart parity.
-3. Collection product polish: exact remaining-height calculation and pixel animation parity, if product review requires it.
+1. Rank-time parity: old `@antv/g2` tooltip and animation behavior, if product review requires exact chart parity.
+2. Collection product polish: exact remaining-height calculation and pixel animation parity, if product review requires it.
