@@ -134,6 +134,31 @@ async function getFooterParagraphSpacing(page: Page) {
   });
 }
 
+async function getFilterControlSpacing(page: Page) {
+  return page.evaluate(() => {
+    const filters = document.querySelector<HTMLElement>('[data-id="rankland-ranklist-filters"]');
+    const organizationFilterLabel = document
+      .querySelector<HTMLElement>('[data-id="rankland-ranklist-organization-filter"]')
+      ?.closest<HTMLElement>('.rankland-ranklist-filter');
+    const checkbox = document.querySelector<HTMLElement>('.rankland-ranklist-checkbox');
+    const markerFilter = document.querySelector<HTMLElement>('[data-id="rankland-ranklist-marker-filter"]');
+    if (!filters || !organizationFilterLabel || !checkbox || !markerFilter) {
+      throw new Error('Missing ranklist filter controls');
+    }
+    const filtersStyle = window.getComputedStyle(filters);
+    const organizationFilterLabelStyle = window.getComputedStyle(organizationFilterLabel);
+    const checkboxStyle = window.getComputedStyle(checkbox);
+    const markerFilterStyle = window.getComputedStyle(markerFilter);
+    return {
+      filtersColumnGap: filtersStyle.columnGap,
+      organizationFilterColumnGap: organizationFilterLabelStyle.columnGap,
+      checkboxMarginLeft: checkboxStyle.marginLeft,
+      checkboxColumnGap: checkboxStyle.columnGap,
+      markerMarginLeft: markerFilterStyle.marginLeft,
+    };
+  });
+}
+
 async function getRouteContentSpacing(page: Page, selector: string) {
   return page.evaluate((selector) => {
     const element = document.querySelector<HTMLElement>(selector);
@@ -517,11 +542,13 @@ test.describe('/ranklist/:id full-chain route', () => {
   test('renders legacy Ant Design filter controls and preserves filtering behavior', async ({ page, request }) => {
     await denyExternalCalls(page);
     await request.post(`${mockBaseURL}/__reset`);
+    await page.setViewportSize({ width: 1280, height: 800 });
 
     const response = await page.goto('/ranklist/test-key?focus=yes');
 
     expect(response).not.toBeNull();
     expect(response?.ok()).toBe(true);
+    await expect(page.locator('[data-id="ranklist-hydrated"]')).toHaveText('hydrated');
     await expect(page.locator('[data-id="rankland-ranklist-filters"]')).toBeVisible();
     await expect(page.locator('[data-id="rankland-ranklist-organization-filter"]')).toHaveClass(/ant-select/);
     await expect(page.locator('[data-id="rankland-ranklist-official-filter"]')).toHaveClass(/ant-switch/);
@@ -531,6 +558,13 @@ test.describe('/ranklist/:id full-chain route', () => {
       'Gold Group',
       'Silver Group',
     ]);
+    expect(await getFilterControlSpacing(page)).toMatchObject({
+      filtersColumnGap: '0px',
+      organizationFilterColumnGap: '8px',
+      checkboxMarginLeft: '20px',
+      checkboxColumnGap: '4px',
+      markerMarginLeft: '20px',
+    });
 
     await expect(page.locator('.srk-user-cell', { hasText: 'Team Alpha' })).toBeVisible();
     await expect(page.locator('.srk-user-cell', { hasText: 'Team Beta' })).toBeVisible();

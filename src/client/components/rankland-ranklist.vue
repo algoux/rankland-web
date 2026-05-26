@@ -1035,27 +1035,33 @@ export default defineComponent({
   margin: 12px 16px 0;
 }
 
-.rankland-ranklist-filters {
+:global(.rankland-ranklist-filters) {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: 12px;
+  gap: 0;
 }
 
-.rankland-ranklist-filter,
-.rankland-ranklist-checkbox,
-.rankland-ranklist-marker-filter,
+:global(.rankland-ranklist-filter),
 .rankland-ranklist-extra-action {
   display: inline-flex;
   align-items: center;
   gap: 8px;
 }
 
+:global(.rankland-ranklist-checkbox) {
+  margin-left: 20px;
+  gap: 4px;
+}
+
 .rankland-ranklist-select {
   width: 160px;
 }
 
-.rankland-ranklist-marker-filter {
+:global(.rankland-ranklist-marker-filter) {
+  display: inline-flex;
+  align-items: center;
+  margin-left: 20px;
   white-space: nowrap;
 }
 
@@ -1289,9 +1295,15 @@ export default defineComponent({
     flex-direction: column;
   }
 
-  .rankland-ranklist-filters {
+  :global(.rankland-ranklist-filters) {
     align-items: stretch;
     flex-direction: column;
+    gap: 12px;
+  }
+
+  :global(.rankland-ranklist-checkbox),
+  :global(.rankland-ranklist-marker-filter) {
+    margin-left: 0;
   }
 
   .rankland-ranklist-select {
