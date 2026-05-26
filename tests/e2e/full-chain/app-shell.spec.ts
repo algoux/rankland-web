@@ -158,6 +158,7 @@ test.describe('app shell full-chain behavior', () => {
     });
 
     await expect(page.locator('html')).toHaveClass('light');
+    await expect(page.locator('body')).toHaveCSS('background-color', 'rgb(242, 242, 242)');
   });
 
   test('keeps the app shell within desktop and mobile viewport bounds', async ({ page, request }, testInfo) => {
