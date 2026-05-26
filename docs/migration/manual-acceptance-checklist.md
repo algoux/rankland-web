@@ -75,6 +75,7 @@ git status --short --branch
 - `[x]` Logo 和主导航链接跳转到预期路由
 - `[x]` 站点切换行为可接受
 - `[x]` 桌面端外壳 header padding、内层宽度和 logo 左边缘与旧版一致
+- `[x]` 站点切换按钮高度、最小高度、圆角和水平 padding 与旧版 Ant Design text button 一致
 - `[x]` 移动端外壳 header、logo、导航和站点切换尺寸与旧版一致
 - `[x]` `focus=yes` 在应兼容旧版聚焦模式的页面隐藏全局外壳
 - `[x]` 联系弹窗可以打开、关闭，并展示邮箱和 QQ 群图片
@@ -97,7 +98,7 @@ git status --short --branch
 ```text
 macOS Blink 优化 class 已由 `tests/e2e/full-chain/app-shell.spec.ts` 和 `tests/unit/app-shell-srk-style.spec.ts` 覆盖。
 直达页面标题由各 route full-chain 覆盖；前端跳转后的标题由 app-shell CSR navigation full-chain 覆盖。标题分隔符已还原旧 React `Title | RankLand`。
-App shell Ant Design Vue Layout/Menu/Dropdown/Button、站点切换 ArrowRight icon、桌面旧版 50px header padding、无居中 max-width/无内层 gap、移动端旧版 20px header padding/无内层 padding/无内层 gap、64px header/logo 容器、40px logo 图片、16px nav item padding、8px 站点切换 padding、focus mode、theme bootstrap/sync、analytics pageview、legacy title separator、fallback 404 和桌面/移动端 bounds 已有 full-chain 覆盖。
+App shell Ant Design Vue Layout/Menu/Dropdown/Button、站点切换 ArrowRight icon、站点切换旧版 32px button height/0px min-height/2px radius/8px 水平 padding、桌面旧版 50px header padding、无居中 max-width/无内层 gap、移动端旧版 20px header padding/无内层 padding/无内层 gap、64px header/logo 容器、40px logo 图片、16px nav item padding、8px 站点切换 padding、focus mode、theme bootstrap/sync、analytics pageview、legacy title separator、fallback 404 和桌面/移动端 bounds 已有 full-chain 覆盖。
 ```
 
 ## 首页 `/`

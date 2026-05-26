@@ -86,12 +86,14 @@ async function getDesktopShellMetrics(page: Page) {
     const header = document.querySelector<HTMLElement>('[data-id="app-header"]');
     const headerInner = document.querySelector<HTMLElement>('.app-header-inner');
     const logoLink = document.querySelector<HTMLElement>('[data-id="app-logo-link"]');
-    if (!header || !headerInner || !logoLink) {
+    const siteSwitch = document.querySelector<HTMLElement>('[data-id="app-site-switch"]');
+    if (!header || !headerInner || !logoLink || !siteSwitch) {
       throw new Error('Missing app shell desktop metrics target');
     }
 
     const headerStyle = window.getComputedStyle(header);
     const headerInnerStyle = window.getComputedStyle(headerInner);
+    const siteSwitchStyle = window.getComputedStyle(siteSwitch);
     const logoBox = logoLink.getBoundingClientRect();
 
     return {
@@ -104,6 +106,9 @@ async function getDesktopShellMetrics(page: Page) {
       headerInnerMarginLeft: headerInnerStyle.marginLeft,
       headerInnerMarginRight: headerInnerStyle.marginRight,
       logoLeft: `${Math.round(logoBox.left)}px`,
+      siteSwitchHeight: siteSwitchStyle.height,
+      siteSwitchMinHeight: siteSwitchStyle.minHeight,
+      siteSwitchBorderRadius: siteSwitchStyle.borderRadius,
     };
   });
 }
@@ -253,6 +258,9 @@ test.describe('app shell full-chain behavior', () => {
       headerInnerMarginLeft: '0px',
       headerInnerMarginRight: '0px',
       logoLeft: '50px',
+      siteSwitchHeight: '32px',
+      siteSwitchMinHeight: '0px',
+      siteSwitchBorderRadius: '2px',
     });
     await page.screenshot({ path: testInfo.outputPath('app-shell-desktop.png'), fullPage: true });
 
