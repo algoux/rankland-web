@@ -137,6 +137,7 @@ test.describe('/playground full-chain route', () => {
     await expect(editorReadyMarker).toHaveCSS('overflow', 'hidden');
     await expect(editorReadyMarker).toHaveCSS('color', 'rgba(0, 0, 0, 0)');
     await expect(page.locator('[data-id="playground-editor"] .monaco-editor')).toBeVisible();
+    await expect(page.locator('[data-id="playground-preview-action"]')).toHaveCount(0);
     await expect(page.locator('[data-id="playground-editor"]')).toHaveAttribute('data-editor-language', 'json');
     await expect(page.locator('[data-id="playground-editor"]')).toHaveAttribute('data-editor-diagnostics', 'srk-schema');
     await expect(page.locator('[data-id="playground-docs-link"]')).toHaveAttribute(
@@ -236,7 +237,7 @@ test.describe('/playground full-chain route', () => {
     await expect(page.locator('[data-id="playground-preview"]')).toBeVisible();
     await expectNoHorizontalDocumentOverflow(page);
     await expectElementWithinViewport(page.locator('[data-id="playground-editor"]'), page);
-    await expectElementWithinViewport(page.locator('[data-id="playground-preview-action"]'), page);
+    await expect(page.locator('[data-id="playground-preview-action"]')).toHaveCount(0);
     await expectElementWithinViewport(page.locator('[data-id="playground-preview"]'), page);
     await page.screenshot({
       path: testInfo.outputPath('playground-desktop.png'),
@@ -258,7 +259,7 @@ test.describe('/playground full-chain route', () => {
     await expect(mobilePage.locator('[data-id="playground-preview"]')).toBeVisible();
     await expectNoHorizontalDocumentOverflow(mobilePage);
     await expectElementWithinViewport(mobilePage.locator('[data-id="playground-editor"]'), mobilePage);
-    await expectElementWithinViewport(mobilePage.locator('[data-id="playground-preview-action"]'), mobilePage);
+    await expect(mobilePage.locator('[data-id="playground-preview-action"]')).toHaveCount(0);
     await expectElementWithinViewport(mobilePage.locator('[data-id="playground-preview"]'), mobilePage);
     await mobilePage.screenshot({
       path: testInfo.outputPath('playground-mobile.png'),

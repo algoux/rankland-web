@@ -44,14 +44,6 @@
             </template>
           </VueMonacoEditor>
         </div>
-        <a-button
-          data-id="playground-preview-action"
-          class="playground-preview-action"
-          type="primary"
-          @click="previewSource"
-        >
-          Preview
-        </a-button>
       </div>
 
       <div class="playground-preview-pane">
@@ -348,10 +340,6 @@ export default routeView(PlaygroundPage, '/playground');
   justify-content: center;
   color: #64748b;
   font-size: 13px;
-}
-
-.playground-preview-action {
-  align-self: flex-start;
 }
 
 .playground-preview-pane {
