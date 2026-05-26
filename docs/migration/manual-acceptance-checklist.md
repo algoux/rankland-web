@@ -62,7 +62,7 @@ git status --short --branch
 备注：
 
 ```text
-2026-05-27 最新记录：home card paragraph spacing parity 已通过 focused RED/GREEN、Home full-chain 3/3、完整 `test:migration`（build、35 unit files / 151 unit tests、1 SSR smoke test、1 shallow Playwright test、53 full-chain Playwright tests）和 `git diff --check`。
+2026-05-27 最新记录：srk header title typography parity 已通过 focused RED/GREEN、完整 `test:migration`（build、35 unit files / 151 unit tests、1 SSR smoke test、1 shallow Playwright test、53 full-chain Playwright tests）和 `git diff --check`。
 ```
 
 ## 全局外壳与跨路由行为
@@ -190,6 +190,7 @@ App shell Ant Design Vue Layout/Menu/Dropdown/Button、旧版全局 body light/d
 - `[x]` SSR 首屏可以看到榜单内容
 - `[x]` Hydration 后榜单内容保持正常
 - `[x]` 有效榜单的 SRK 表格渲染达到验收标准
+- `[x]` SRK header title 使用旧版 `h1.text-center.mb-1` 的 32px/500/4px 标题排版
 - `[x]` SRK 备注 pill 使用旧版 light/dark primary rgba 边框
 - `[x]` 缺失榜单展示 Not Found
 - `[x]` 筛选和进度控制可用
@@ -215,7 +216,7 @@ App shell Ant Design Vue Layout/Menu/Dropdown/Button、旧版全局 body light/d
 备注：
 
 ```text
-2026-05-26 复核：ranklist full-chain 覆盖 SSR/hydration、Not Found、Gym Ghost/VJudge/XLSX 下载、iframe 嵌入代码、hover 打开/关闭导出和分享 dropdown、SRK wrapper header/filter/progress/table/footer/user-modal/rank-time 多项旧版视觉行为；其中 header meta 到 contributors 的旧版 0px 额外间距、SRK 备注 pill light `rgba(255, 129, 4, 0.8)` 与 dark `rgba(246, 172, 6, 0.8)` 边框、header ref-link/footer contact trigger light `#ff8104` 与 dark `#f6ac06` 链接色已有 computed layout/style 断言。
+2026-05-27 复核：ranklist full-chain 覆盖 SSR/hydration、Not Found、Gym Ghost/VJudge/XLSX 下载、iframe 嵌入代码、hover 打开/关闭导出和分享 dropdown、SRK wrapper header/filter/progress/table/footer/user-modal/rank-time 多项旧版视觉行为；其中 header title 旧版 32px/500/4px 排版、header meta 到 contributors 的旧版 0px 额外间距、SRK 备注 pill light `rgba(255, 129, 4, 0.8)` 与 dark `rgba(246, 172, 6, 0.8)` 边框、header ref-link/footer contact trigger light `#ff8104` 与 dark `#f6ac06` 链接色已有 computed layout/style 断言。
 ```
 
 ## 合集页 `/collection/:id`
@@ -393,7 +394,7 @@ App shell Ant Design Vue Layout/Menu/Dropdown/Button、旧版全局 body light/d
 | 演练场 Monaco/editor parity | `[x]` | `[ ]` | `[ ]` | Monaco 0.43 保留为已验证 Vue wrapper 依赖；旧 0.34 包版本不再精确保留 |
 | Live WebSocket reconnect/backoff | `[ ]` | `[ ]` | `[ ]` | 已处理，full-chain 覆盖错误关闭/异常关闭后的 reconnect |
 | Live Toastify 动画和像素级一致 | `[ ]` | `[ ]` | `[ ]` | 已处理，full-chain 覆盖 Toastify 容器、toast 行、Zoom 动画和像素覆盖 |
-| SRK renderer 精确 `StyledRanklistRenderer` 视觉 parity | `[x]` | `[ ]` | `[ ]` | 已处理多个 wrapper/低层视觉切片；若后续产品 review 发现具体差异，再开独立 slice |
+| SRK renderer 精确 `StyledRanklistRenderer` 视觉 parity | `[x]` | `[ ]` | `[ ]` | 已处理多个 wrapper/低层视觉切片，包括 header title 32px/500/4px；若后续产品 review 发现具体差异，再开独立 slice |
 | Rank-time 旧版 `@antv/g2` tooltip 和动画 parity | `[ ]` | `[ ]` | `[ ]` | 已处理，full-chain 覆盖 G2 图表容器/canvas，unit 覆盖 tooltip/动画模型 |
 
 其他延期决策：
@@ -451,7 +452,7 @@ URL:
 - `[x]` 接受路由兼容迁移完成，但保留列出的后续 slice
 - `[ ]` 暂不收口，先修复阻塞项
 
-无当前已复现阻塞；保留 product-review-driven SRK lower-level table pixel parity / route polish 作为后续 review-driven slice。
+无当前已复现阻塞；SRK header title typography parity 已补充，保留 product-review-driven SRK lower-level table pixel parity / route polish 作为后续 review-driven slice。
 
 最终收口前必须完成：
 

@@ -981,7 +981,8 @@ export default defineComponent({
 
 .rankland-ranklist-header h1 {
   margin: 0 0 4px;
-  font-size: 28px;
+  font-size: 32px;
+  font-weight: 500;
 }
 
 .rankland-ranklist-banner-wrap {

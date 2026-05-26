@@ -122,6 +122,21 @@ async function getHeaderMetaBlockSpacing(page: Page) {
   });
 }
 
+async function getRanklistHeaderTitlePresentation(page: Page) {
+  return page.evaluate(() => {
+    const title = document.querySelector<HTMLElement>('[data-id="rankland-ranklist-title"]');
+    if (!title) {
+      throw new Error('Missing ranklist header title');
+    }
+    const style = window.getComputedStyle(title);
+    return {
+      fontSize: style.fontSize,
+      fontWeight: style.fontWeight,
+      marginBottom: style.marginBottom,
+    };
+  });
+}
+
 async function getRanklistLinkColors(page: Page) {
   return page.evaluate(() => {
     const viewCount = document.querySelector<HTMLElement>('[data-id="rankland-ranklist-view-count"]');
@@ -324,6 +339,11 @@ test.describe('/ranklist/:id full-chain route', () => {
     await expect(page.locator('.srk-user-cell', { hasText: 'Team Beta' })).toBeVisible();
     await expect(page.locator('[data-id="ranklist-hydrated"]')).toHaveText('hydrated');
     await expect(page.locator('[data-id="rankland-ranklist-title"]')).toHaveText('Test Contest 2024');
+    expect(await getRanklistHeaderTitlePresentation(page)).toMatchObject({
+      fontSize: '32px',
+      fontWeight: '500',
+      marginBottom: '4px',
+    });
     await expect(page.locator('[data-id="rankland-ranklist-view-count"]')).toHaveText('42');
     await expect(page.locator('[data-id="rankland-ranklist-view-count"] .anticon-eye')).toBeVisible();
     await expect(page.locator('[data-id="rankland-ranklist-contributors"]')).toContainText(
