@@ -25,7 +25,7 @@ The review still does not claim that every possible production SRK fixture has b
 | SRK renderer wrapper migrated behavior | `src/client/components/rankland-ranklist.vue` and related helpers cover Ant Design Vue filter/progress/header actions, hover dropdowns, export/share actions, embed code, render-error Alert, modal clicks, user modal details, G2 rank-time panel, asset URL rewriting, footer/contact prompt, conditional beian footer, live controls, route spacing, table wrapper offset/top spacing, remarks pill styling, dark-theme propagation, macOS Blink table-header override, and SRK status score spacing; unit and full-chain tests cover those behaviors. | Verified |
 | Live page parity | `tests/e2e/full-chain/live.spec.ts` covers CSR hydration, query preservation, polling, WebSocket setup guard, realtime event display, WebSocket error/close reconnect, scroll-solution toggle close, query preservation, mobile toggle hiding, Toastify row/container/Zoom presentation, NotFound, loading/error states, normal live screenshots, realtime screenshots, and mobile progress bounds. | Verified |
 | Page-level visual review | Full-chain visual/layout tests produce screenshots and assert viewport bounds for app shell, home, search, ranklist, collection, playground, and live normal/realtime views. | Verified |
-| Final migration gate | `corepack pnpm test:migration` passed build, 35 unit files / 151 unit tests, 1 SSR smoke test, 1 shallow Playwright test, and 52 full-chain Playwright tests during the 2026-05-26 SRK render-error Ant Design Alert parity pre-commit verification. | Verified |
+| Final migration gate | `corepack pnpm test:migration` passed build, 35 unit files / 151 unit tests, 1 SSR smoke test, 1 shallow Playwright test, and 52 full-chain Playwright tests during the 2026-05-26 playground docs-link route polish pre-commit verification. | Verified |
 | Production deployment, remote push, branch merge, or old implementation deletion | Explicitly out of scope for this migration working branch unless requested by Cooper. | Not performed |
 
 ## Deferred Product Decisions
@@ -33,7 +33,7 @@ The review still does not claim that every possible production SRK fixture has b
 These are not hidden blockers for the currently verified product-restoration surface. They are explicit follow-up decisions or review-driven areas.
 
 - Home: broader SEO/content polish beyond verified structured data, SSR content, Ant Design content layout, and contact modal behavior remains accepted as non-blocking.
-- Playground: exact old Monaco `0.34.0` package-version parity is intentionally not preserved because the verified Vue wrapper requires Monaco `>=0.43.0`; synthetic Monaco editing remains a harness limitation, while the product editor path is verified by build/hydration and stable preview coverage.
+- Playground: exact old Monaco `0.34.0` package-version parity is intentionally not preserved because the verified Vue wrapper requires Monaco `>=0.43.0`; synthetic Monaco editing remains a harness limitation, while the product editor path, preview-pane `QuestionCircleOutlined` docs link, and stable preview coverage are verified by build/hydration and full-chain tests.
 - SRK renderer wrapper: remaining lower-level exact table pixel parity should be handled only when product review identifies a concrete difference.
 - Production deployment, remote push, branch merge, and old implementation deletion remain out of scope unless requested.
 
@@ -58,5 +58,5 @@ Fresh verification on 2026-05-26:
 - `node -v`: `v24.11.1`
 - `corepack pnpm -v`: `8.15.9`
 - `corepack pnpm run gen:client-router`: generated 8 client routes, exited cleanly; warning only: `Skipped due to language "js" is not supported. Only [ts,tsx] are supported (file: src/client/modules/fallback/not-found.view.vue)`
-- `corepack pnpm test:migration`: passed build, 35 unit files / 151 unit tests, 1 SSR smoke test, 1 shallow Playwright test, and 52 full-chain Playwright tests during the legacy page title separator parity verification
-- `git diff --check`: passed in the latest verified SRK render-error Ant Design Alert slice
+- `corepack pnpm test:migration`: passed build, 35 unit files / 151 unit tests, 1 SSR smoke test, 1 shallow Playwright test, and 52 full-chain Playwright tests during the playground docs-link route polish verification
+- `git diff --check`: passed in the latest verified playground docs-link route polish slice

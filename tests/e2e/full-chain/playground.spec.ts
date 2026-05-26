@@ -129,6 +129,11 @@ test.describe('/playground full-chain route', () => {
       'href',
       'https://srk.algoux.org/zh/',
     );
+    await expect(page.locator('.playground-preview-pane [data-id="playground-docs-link"]')).toBeVisible();
+    await expect(page.locator('[data-id="playground-docs-link"] .anticon-question-circle')).toBeVisible();
+    await expect(page.locator('[data-id="playground-docs-link"]')).toHaveCSS('position', 'absolute');
+    await expect(page.locator('[data-id="playground-docs-link"]')).toHaveCSS('right', '16px');
+    await expect(page.locator('[data-id="playground-docs-link"]')).toHaveCSS('top', '16px');
     await expect(page.locator('[data-id="playground-preview"]')).toBeVisible();
     await expect(page.locator('[data-id="playground-preview-meta"]')).toHaveCount(0);
     await expect(page.locator('[data-id="playground-row-count"]')).toHaveCount(0);

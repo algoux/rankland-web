@@ -9,14 +9,6 @@
     <section class="playground-toolbar">
       <div data-id="playground-hydrated" class="playground-hydrated">{{ hydrated ? 'hydrated' : 'csr' }}</div>
       <h1>Playground</h1>
-      <a
-        data-id="playground-docs-link"
-        href="https://srk.algoux.org/zh/"
-        target="_blank"
-        rel="noreferrer"
-      >
-        srk 文档
-      </a>
     </section>
 
     <section class="playground-layout">
@@ -66,6 +58,16 @@
       </div>
 
       <div class="playground-preview-pane">
+        <a
+          data-id="playground-docs-link"
+          class="playground-docs-link"
+          href="https://srk.algoux.org/zh/"
+          target="_blank"
+          rel="noreferrer"
+        >
+          <QuestionCircleOutlined /> srk 文档
+        </a>
+
         <div v-if="editorErrorMessage" data-id="playground-editor-error" class="playground-state playground-state-error">
           <h3>Failed to load Monaco editor</h3>
           <pre>{{ editorErrorMessage }}</pre>
@@ -117,6 +119,7 @@
 import { defineComponent } from 'vue';
 import { routeView } from 'bwcx-client-vue3';
 import { throttle } from 'lodash';
+import { QuestionCircleOutlined } from '@ant-design/icons-vue';
 import demoRanklist from './assets/demo-ranklist.srk.json';
 import RanklandRanklist from '@client/components/rankland-ranklist.vue';
 import { formatTitle } from '@client/utils/title-format.util';
@@ -138,6 +141,7 @@ type MonacoEditor = PlaygroundMonacoApi['editor']['IStandaloneCodeEditor'];
 const PlaygroundPage = defineComponent({
   name: 'Playground',
   components: {
+    QuestionCircleOutlined,
     RanklandRanklist,
     VueMonacoEditor,
   },
@@ -360,8 +364,20 @@ export default routeView(PlaygroundPage, '/playground');
 }
 
 .playground-preview-pane {
+  position: relative;
   min-width: 0;
   overflow-x: auto;
+}
+
+.playground-docs-link {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  z-index: 1;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  line-height: 1.5;
 }
 
 .playground-state {

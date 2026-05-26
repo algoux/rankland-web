@@ -250,6 +250,7 @@ App shell Ant Design Vue Layout/Menu/Dropdown/Button、站点切换 ArrowRight i
 - `[x]` 粘贴对象 JSON 但不是可渲染 SRK 时展示可理解的转换错误
 - `[x]` 编辑区控件可用
 - `[x]` 预览区可用
+- `[x]` 预览区右上角 `srk 文档` 入口位置、问号图标、外链地址与旧版一致
 - `[x]` 桌面端编辑区和预览区布局可接受
 - `[x]` 移动端编辑区和预览区布局可接受
 
@@ -261,7 +262,7 @@ App shell Ant Design Vue Layout/Menu/Dropdown/Button、站点切换 ArrowRight i
 备注：
 
 ```text
-
+2026-05-26 复核：`tests/e2e/full-chain/playground.spec.ts` 覆盖旧 React 预览区右上角 `QuestionCircleOutlined` srk 文档入口位置、图标和地址。
 ```
 
 ## 实时榜单页 `/live/:id`
