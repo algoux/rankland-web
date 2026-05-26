@@ -62,7 +62,7 @@ git status --short --branch
 备注：
 
 ```text
-2026-05-27 最新记录：playground welcome docs copy parity 已通过 focused Playground welcome modal RED/GREEN、完整 `test:migration`（build、35 unit files / 151 unit tests、1 SSR smoke test、1 shallow Playwright test、54 full-chain Playwright tests）和 `git diff --check`。
+2026-05-27 最新记录：SRK header view-count fallback parity 已通过 focused Ranklist RED/GREEN、完整 `test:migration`（build、35 unit files / 151 unit tests、1 SSR smoke test、1 shallow Playwright test、55 full-chain Playwright tests）和 `git diff --check`。
 ```
 
 ## 全局外壳与跨路由行为
@@ -195,6 +195,7 @@ App shell Ant Design Vue Layout/Menu/Dropdown/Button、旧版全局 body light/d
 - `[x]` 有效榜单的 SRK 表格渲染达到验收标准
 - `[x]` SRK header title 使用旧版 `h1.text-center.mb-1` 的 32px/500/4px 标题排版
 - `[x]` SRK header meta、贡献者、相关链接和时间使用旧版 Ant Design body 14px 字号
+- `[x]` SRK header 在 metadata 缺失 `viewCnt` 时仍保留旧版 Eye icon 和 `-` 占位
 - `[x]` SRK header 导出/分享操作图标使用旧版 light/dark 链接主色和 hover 色
 - `[x]` SRK 备注 pill 使用旧版 light/dark primary rgba 边框
 - `[x]` 缺失榜单展示 Not Found

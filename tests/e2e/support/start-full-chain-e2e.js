@@ -148,6 +148,13 @@ function routeRequest(req, res) {
       return;
     }
 
+    if (url.pathname === '/rank/no-view-count-key') {
+      const ranklistInfoWithoutViewCount = { ...ranklistInfo };
+      delete ranklistInfoWithoutViewCount.viewCnt;
+      sendJson(res, 200, ok(ranklistInfoWithoutViewCount));
+      return;
+    }
+
     sendJson(res, 200, ok(ranklistInfo));
     return;
   }

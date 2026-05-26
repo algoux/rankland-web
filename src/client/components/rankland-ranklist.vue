@@ -514,7 +514,7 @@ export default defineComponent({
     },
     meta: {
       type: Object as PropType<RanklandRanklistMeta>,
-      default: () => ({}),
+      required: false,
     },
   },
   data() {
@@ -563,7 +563,7 @@ export default defineComponent({
       return this.name || this.id || 'ranklist';
     },
     hasViewCount(): boolean {
-      return typeof this.meta.viewCnt === 'number';
+      return !!this.meta;
     },
     headerContributors(): HeaderContributor[] {
       if (this.ranklistState.kind !== 'ready' || !Array.isArray(this.ranklistState.staticRanklist.contributors)) {

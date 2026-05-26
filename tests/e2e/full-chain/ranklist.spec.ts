@@ -993,4 +993,18 @@ test.describe('/ranklist/:id full-chain route', () => {
     await expectElementWithinViewport(page.locator('[data-id="rankland-ranklist-footer"]'), page);
     await page.screenshot({ path: testInfo.outputPath('ranklist-mobile.png'), fullPage: true });
   });
+
+  test('renders the legacy view count fallback when metadata omits viewCnt', async ({ page, request }) => {
+    await denyExternalCalls(page);
+    await forceSystemLightMode(page);
+    await request.post(`${mockBaseURL}/__reset`);
+
+    const response = await page.goto('/ranklist/no-view-count-key?focus=yes');
+
+    expect(response).not.toBeNull();
+    expect(response?.ok()).toBe(true);
+    await expect(page.locator('[data-id="rankland-ranklist-title"]')).toHaveText('Test Contest 2024');
+    await expect(page.locator('[data-id="rankland-ranklist-view-count"]')).toHaveText('-');
+    await expect(page.locator('[data-id="rankland-ranklist-view-count"] .anticon-eye')).toBeVisible();
+  });
 });
