@@ -89,6 +89,23 @@ async function getHomeRecommendationTitlePresentation(page: Page) {
   });
 }
 
+async function getHomeTotalSrkCountPresentation(page: Page) {
+  return page.evaluate(() => {
+    const count = document.querySelector<HTMLElement>('[data-id="home-total-srk-count"]');
+    if (!count) {
+      throw new Error('Missing home total srk count');
+    }
+
+    const style = getComputedStyle(count);
+    return {
+      tagName: count.tagName,
+      fontStyle: style.fontStyle,
+      fontWeight: style.fontWeight,
+      text: count.textContent?.trim(),
+    };
+  });
+}
+
 test.describe('/ full-chain route', () => {
   test('renders the RankLand home page through SSR, hydration, RanklandApiService, and the mock backend', async ({
     page,
@@ -111,6 +128,12 @@ test.describe('/ full-chain route', () => {
     await expect(page).toHaveTitle('RankLand');
     await expect(page.locator('[data-id="home-content"]')).toBeVisible();
     await expect(page.locator('[data-id="home-total-srk-count"]')).toHaveText('1234');
+    expect(await getHomeTotalSrkCountPresentation(page)).toMatchObject({
+      tagName: 'STRONG',
+      fontStyle: 'normal',
+      fontWeight: '700',
+      text: '1234',
+    });
     await expect(page.locator('[data-id="home-total-view-count"]')).toHaveText('56789');
     await expect(page.locator('[data-id="home-recommendation-search"][href="/search"]')).toBeVisible();
     await expect(page.locator('[data-id="home-recommendation-collection"][href="/collection/official"]')).toBeVisible();
@@ -204,7 +227,9 @@ test.describe('/ full-chain route', () => {
     await expect(page.locator('[data-id="home-content"]')).toBeVisible();
     await expect(page.locator('[data-id="home-hero"]')).toBeVisible();
     await expect(page.locator('[data-id="home-recommendations"]')).toBeVisible();
-    expect(await getHomeContentSpacing(page)).toMatchObject({
+    await expect.poll(() => getHomeContentSpacing(page), {
+      message: 'home desktop content spacing should settle after async page styles load',
+    }).toMatchObject({
       maxWidth: 'none',
       paddingTop: '32px',
       paddingRight: '50px',
@@ -224,7 +249,9 @@ test.describe('/ full-chain route', () => {
     expect(mobileResponse).not.toBeNull();
     expect(mobileResponse?.ok()).toBe(true);
     await expect(page.locator('[data-id="home-content"]')).toBeVisible();
-    expect(await getHomeContentSpacing(page)).toMatchObject({
+    await expect.poll(() => getHomeContentSpacing(page), {
+      message: 'home mobile content spacing should settle after async page styles load',
+    }).toMatchObject({
       maxWidth: 'none',
       paddingTop: '32px',
       paddingRight: '20px',
@@ -253,7 +280,7 @@ test.describe('/ full-chain route', () => {
     expect(response).not.toBeNull();
     expect(response?.ok()).toBe(true);
     const html = await response!.text();
-    expect(html).toMatch(/<em data-id="home-total-srk-count"[^>]*>-<\/em>/);
+    expect(html).toMatch(/<strong data-id="home-total-srk-count"[^>]*>-<\/strong>/);
     expect(html).toMatch(/<span data-id="home-total-view-count"[^>]*>-<\/span>/);
     await expect(page.locator('[data-id="home-total-srk-count"]')).toHaveText('-');
     await expect(page.locator('[data-id="home-total-view-count"]')).toHaveText('-');

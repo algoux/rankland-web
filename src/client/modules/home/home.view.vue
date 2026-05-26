@@ -24,7 +24,7 @@
                 <span>探索</span>
               </h2>
               <p>
-                在 <em data-id="home-total-srk-count">{{ totalSrkCountText }}</em> 个高质量程序设计竞赛榜单中自由浏览和搜索
+                在 <strong data-id="home-total-srk-count">{{ totalSrkCountText }}</strong> 个高质量程序设计竞赛榜单中自由浏览和搜索
               </p>
             </a-card>
           </router-link>
