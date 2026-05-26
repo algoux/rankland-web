@@ -1,6 +1,7 @@
 import './index.less';
 import 'ant-design-vue/dist/reset.css';
 import {
+  Alert,
   Button,
   Card,
   Col,
@@ -32,6 +33,7 @@ import type { RanklandApiService } from '@common/rankland-api';
 Vue.registerHooks(['setup', 'beforeRouteEnter', 'beforeRouteUpdate', 'beforeRouteLeave', 'asyncData']);
 
 const antDesignComponents = [
+  Alert,
   Button,
   Card,
   Col,

@@ -1,8 +1,17 @@
 <template>
   <div class="rankland-ranklist">
-    <div v-if="ranklistState.kind === 'error'" data-id="rankland-ranklist-render-error" class="rankland-ranklist-error">
-      <h3>Error occurred when rendering srk</h3>
-      <pre>{{ ranklistState.message }}</pre>
+    <div
+      v-if="ranklistState.kind === 'error'"
+      data-id="rankland-ranklist-render-error"
+      class="rankland-ranklist-error"
+      role="alert"
+    >
+      <a-alert
+        message="Error occurred when rendering srk"
+        :description="ranklistState.message"
+        type="error"
+        show-icon
+      />
     </div>
     <template v-else>
       <header v-if="showHeader" class="rankland-ranklist-header">
@@ -1311,16 +1320,8 @@ export default defineComponent({
 }
 
 .rankland-ranklist-error {
-  padding: 16px;
-  border: 1px solid #fecaca;
-  border-radius: 4px;
-  color: #991b1b;
-  background: #fef2f2;
-
-  pre {
-    margin: 8px 0 0;
-    white-space: pre-wrap;
-  }
+  max-width: 400px;
+  margin: 100px auto;
 }
 
 @media (max-width: 767px) {

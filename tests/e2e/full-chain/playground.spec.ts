@@ -181,6 +181,15 @@ test.describe('/playground full-chain route', () => {
     await replaceMonacoSource(page, '{"type":"general"}');
 
     await expect(page.locator('[data-id="rankland-ranklist-render-error"]')).toBeVisible();
+    await expect(page.locator('[data-id="rankland-ranklist-render-error"]')).toHaveAttribute('role', 'alert');
+    await expect(page.locator('[data-id="rankland-ranklist-render-error"]')).toHaveCSS('max-width', '400px');
+    await expect(page.locator('[data-id="rankland-ranklist-render-error"]')).toHaveCSS('margin-top', '100px');
+    await expect(page.locator('[data-id="rankland-ranklist-render-error"] .ant-alert.ant-alert-error')).toBeVisible();
+    await expect(page.locator('[data-id="rankland-ranklist-render-error"] .ant-alert-icon')).toBeVisible();
+    await expect(page.locator('[data-id="rankland-ranklist-render-error"] .ant-alert-message')).toHaveText(
+      'Error occurred when rendering srk',
+    );
+    await expect(page.locator('[data-id="rankland-ranklist-render-error"] .ant-alert-description')).not.toBeEmpty();
     await expect(page.locator('[data-id="rankland-ranklist-render-error"]')).toContainText(
       'Error occurred when rendering srk',
     );
