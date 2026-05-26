@@ -255,7 +255,7 @@ export default routeView(SearchPage, '/search');
 }
 
 .search-empty-state {
-  margin-top: 12px;
+  margin-top: 8px;
   color: #64748b;
 }
 

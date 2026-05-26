@@ -82,6 +82,32 @@ test.describe('/search full-chain route', () => {
     await expect(page.locator('[data-id="search-recent-section"]')).toBeVisible();
   });
 
+  test('renders the recent empty state with the legacy mt-2 spacing', async ({ page, request }) => {
+    await denyExternalCalls(page);
+    await request.post(`${mockBaseURL}/__reset`);
+    await page.route('**/rank/listall', async (route) => {
+      await route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify({ code: 0, message: 'success', data: { ranks: [] } }),
+      });
+    });
+
+    const response = await page.goto('/search');
+
+    expect(response).not.toBeNull();
+    expect(response?.ok()).toBe(true);
+    await expect(page.locator('[data-id="search-recent-section"]')).toBeVisible();
+    await expect(page.locator('[data-id="search-ranklist-item"]')).toHaveCount(0);
+    await expect(page.locator('[data-id="search-recent-section"] .search-empty-state')).toHaveText(
+      '暂无最近更新的榜单',
+    );
+    await expect(page.locator('[data-id="search-recent-section"] .search-empty-state')).toHaveCSS(
+      'margin-top',
+      '8px',
+    );
+  });
+
   test('shows Fuse results for kw query and preserves result count selector', async ({ page, request }) => {
     await denyExternalCalls(page);
     await request.post(`${mockBaseURL}/__reset`);
