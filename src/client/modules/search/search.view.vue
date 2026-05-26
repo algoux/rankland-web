@@ -1,5 +1,5 @@
 <template>
-  <main data-id="search-page" class="search-page">
+  <main data-id="search-page" class="search-page normal-content">
     <Head>
       <title>{{ pageTitle }}</title>
       <meta property="og:title" :content="pageTitle">
@@ -188,12 +188,17 @@ export default routeView(SearchPage, '/search');
 <style lang="less" scoped>
 .search-page {
   min-height: 70vh;
-  padding: 48px 16px;
 }
 
-.search-panel {
-  max-width: 840px;
-  margin: 0 auto;
+.normal-content {
+  padding: 32px 50px;
+}
+
+@media screen and (max-width: 768px) {
+  .normal-content {
+    padding-right: 20px;
+    padding-left: 20px;
+  }
 }
 
 .search-hydrated {

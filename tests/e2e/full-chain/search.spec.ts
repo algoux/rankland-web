@@ -42,6 +42,7 @@ test.describe('/search full-chain route', () => {
     expect(response?.ok()).toBe(true);
     await expect(page).toHaveTitle('探索 - RankLand');
     await expect(page.locator('[data-id="search-page"]')).toBeVisible();
+    await expect(page.locator('[data-id="search-page"]')).toHaveClass(/normal-content/);
     await expect(page.locator('[data-id="search-hydrated"]')).toHaveText('hydrated');
     await expect(page.locator('h3.mb-6', { hasText: '在榜单数据库中探索' })).toBeVisible();
     await expect(page.locator('.ant-input-search:has([data-id="search-input"])')).toBeVisible();
@@ -160,6 +161,9 @@ test.describe('/search full-chain route', () => {
     await expect(page.locator('[data-id="search-page"]')).toBeVisible();
     await expect(page.locator('[data-id="search-result-section"]')).toBeVisible();
     await expect(page.locator('[data-id="search-ranklist-item"]')).toHaveCount(1);
+    await expect(page.locator('[data-id="search-page"]')).toHaveCSS('padding-top', '32px');
+    await expect(page.locator('[data-id="search-page"]')).toHaveCSS('padding-left', '50px');
+    await expect(page.locator('[data-id="search-page"]')).toHaveCSS('padding-right', '50px');
     await expectNoHorizontalDocumentOverflow(page);
     await expectElementWithinViewport(page.locator('[data-id="search-input"]'), page);
     await expectElementWithinViewport(page.locator('[data-id="search-submit"]'), page);
@@ -173,6 +177,8 @@ test.describe('/search full-chain route', () => {
     expect(mobileResponse?.ok()).toBe(true);
     await expect(page.locator('[data-id="search-page"]')).toBeVisible();
     await expect(page.locator('[data-id="search-result-section"]')).toBeVisible();
+    await expect(page.locator('[data-id="search-page"]')).toHaveCSS('padding-left', '20px');
+    await expect(page.locator('[data-id="search-page"]')).toHaveCSS('padding-right', '20px');
     await expectNoHorizontalDocumentOverflow(page);
     await expectElementWithinViewport(page.locator('[data-id="search-input"]'), page);
     await expectElementWithinViewport(page.locator('[data-id="search-submit"]'), page);
