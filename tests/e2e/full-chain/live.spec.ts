@@ -494,7 +494,10 @@ test.describe('/live/:id full-chain route', () => {
     expect(response?.ok()).toBe(true);
     await expect(page).toHaveTitle('Not Found - RankLand');
     await expect(page.locator('[data-id="live-not-found"]')).toBeVisible();
+    await expect(page.locator('[data-id="live-not-found"] h3')).toHaveText('Ranklist Not Found');
     await expect(page.locator('[data-id="live-not-found-home-link"][href="/"]')).toBeVisible();
+    await expect(page.locator('[data-id="live-not-found-home-link"] .ant-btn')).toHaveClass(/ant-btn-primary/);
+    await expect(page.locator('[data-id="live-not-found-home-link"] .ant-btn')).toHaveClass(/ant-btn-sm/);
 
     const requests = await readRequests(request);
     const liveInfoRequests = requests.filter((requestRecord) => requestRecord.path === '/ranking/config/missing-live');

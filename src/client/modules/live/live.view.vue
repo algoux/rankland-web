@@ -7,8 +7,10 @@
     </Head>
 
     <section v-if="isNotFound" data-id="live-not-found" class="live-state">
-      <h1>Ranklist Not Found</h1>
-      <router-link to="/" data-id="live-not-found-home-link">Back to Home</router-link>
+      <h3>Ranklist Not Found</h3>
+      <router-link to="/" data-id="live-not-found-home-link">
+        <a-button type="primary" size="small">Back to Home</a-button>
+      </router-link>
     </section>
 
     <section v-else-if="hasGenericError" data-id="live-error" class="live-state">
@@ -450,6 +452,10 @@ export default routeView(LivePage, '/live/:id', LiveRPO);
 .live-state {
   padding-top: 64px;
   text-align: center;
+}
+
+.live-state h3 {
+  margin: 0 0 16px;
 }
 
 .live-state pre {

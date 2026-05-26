@@ -5,9 +5,11 @@
       <link rel="canonical" :href="canonicalUrl">
     </Head>
 
-    <section v-if="isNotFound" data-id="ranklist-not-found">
-      <h1>Ranklist Not Found</h1>
-      <router-link to="/" data-id="ranklist-not-found-home-link">Back to Home</router-link>
+    <section v-if="isNotFound" data-id="ranklist-not-found" class="ranklist-state">
+      <h3>Ranklist Not Found</h3>
+      <router-link to="/" data-id="ranklist-not-found-home-link">
+        <a-button type="primary" size="small">Back to Home</a-button>
+      </router-link>
     </section>
 
     <section v-else-if="hasGenericError" data-id="ranklist-error">
@@ -135,6 +137,15 @@ export default routeView(RanklistPage, '/ranklist/:id', RanklistRPO, undefined, 
 </script>
 
 <style lang="less" scoped>
+.ranklist-state {
+  padding-top: 64px;
+  text-align: center;
+}
+
+.ranklist-state h3 {
+  margin: 0 0 16px;
+}
+
 .ranklist-content {
   margin: 32px 0;
 }

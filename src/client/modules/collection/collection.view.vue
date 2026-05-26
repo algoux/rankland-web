@@ -8,8 +8,10 @@
     </Head>
 
     <section v-if="isNotFound" data-id="collection-not-found" class="collection-state">
-      <h1>Collection Not Found</h1>
-      <router-link to="/" data-id="collection-not-found-home-link">Back to Home</router-link>
+      <h3>Collection Not Found</h3>
+      <router-link to="/" data-id="collection-not-found-home-link">
+        <a-button type="primary" size="small">Back to Home</a-button>
+      </router-link>
     </section>
 
     <section v-else-if="hasCollectionError" data-id="collection-error" class="collection-state">
@@ -601,6 +603,10 @@ export default routeView(CollectionPage, '/collection/:id', CollectionRPO, undef
 .collection-empty-state {
   padding: 64px 16px;
   text-align: center;
+}
+
+.collection-state h3 {
+  margin: 0 0 16px;
 }
 
 @media (max-width: 640px) {

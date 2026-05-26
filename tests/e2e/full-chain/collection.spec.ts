@@ -273,7 +273,10 @@ test.describe('/collection/:id full-chain route', () => {
     expect(response?.ok()).toBe(true);
     await expect(page).toHaveTitle('Not Found - RankLand');
     await expect(page.locator('[data-id="collection-not-found"]')).toBeVisible();
+    await expect(page.locator('[data-id="collection-not-found"] h3')).toHaveText('Collection Not Found');
     await expect(page.locator('[data-id="collection-not-found-home-link"][href="/"]')).toBeVisible();
+    await expect(page.locator('[data-id="collection-not-found-home-link"] .ant-btn')).toHaveClass(/ant-btn-primary/);
+    await expect(page.locator('[data-id="collection-not-found-home-link"] .ant-btn')).toHaveClass(/ant-btn-sm/);
 
     const requestsResponse = await request.get(`${mockBaseURL}/__requests`);
     const requests = (await requestsResponse.json()) as Array<{ path: string }>;
