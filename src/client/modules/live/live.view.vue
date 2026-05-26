@@ -54,12 +54,12 @@
         <template #extra-action>
           <label class="live-scroll-toggle">
             <span>实时滚动提交状态</span>
-            <input
+            <a-switch
               data-id="live-scroll-solution-toggle"
-              type="checkbox"
               :checked="scrollSolutionEnabled"
+              size="small"
               @change="handleScrollSolutionToggle"
-            >
+            />
           </label>
         </template>
       </RanklandRanklist>
@@ -421,8 +421,7 @@ const LivePage = defineComponent({
         this.connectScrollSolutionSocket(this.scrollSolutionReconnectAttempt, runId);
       }, delay);
     },
-    handleScrollSolutionToggle(event: Event) {
-      const checked = (event.target as HTMLInputElement).checked;
+    handleScrollSolutionToggle(checked: boolean) {
       const query = { ...this.$route.query };
       if (checked) {
         query.scrollSolution = '1';
