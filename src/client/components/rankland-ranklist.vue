@@ -319,7 +319,7 @@
                 {{ activeUserSegment.segmentTitle }}
               </span>
             </p>
-            <div v-if="activeUserPhotoSrc" class="rankland-user-modal-photo">
+            <div v-if="activeUserPhotoSrc" class="rankland-user-modal-photo mt-4">
               <img data-id="rankland-user-modal-photo" :src="activeUserPhotoSrc" alt="选手照片">
             </div>
             <p
