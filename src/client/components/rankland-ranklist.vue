@@ -17,7 +17,7 @@
         <h1 data-id="rankland-ranklist-title">{{ ranklistTitle }}</h1>
         <div data-id="rankland-ranklist-header-meta" class="rankland-ranklist-header-meta">
           <span v-if="hasViewCount" data-id="rankland-ranklist-view-count" class="rankland-ranklist-view-count">
-            浏览 {{ meta.viewCnt }}
+            <EyeOutlined /> {{ meta.viewCnt || '-' }}
           </span>
           <div data-id="rankland-ranklist-header-actions" class="rankland-ranklist-header-actions">
             <a-dropdown data-id="rankland-ranklist-export-menu" :trigger="['hover']" placement="bottom">
@@ -362,7 +362,7 @@ import {
   type SolutionClickPayload,
   type UserClickPayload,
 } from '@algoux/standard-ranklist-renderer-component-vue';
-import { CaretDownOutlined, DownloadOutlined, ShareAltOutlined } from '@ant-design/icons-vue';
+import { CaretDownOutlined, DownloadOutlined, EyeOutlined, ShareAltOutlined } from '@ant-design/icons-vue';
 import '@algoux/standard-ranklist-renderer-component-styles';
 import ContactUs from './contact-us.vue';
 import RanklandRankTimeChart from './rankland-rank-time-chart.vue';
@@ -440,6 +440,7 @@ export default defineComponent({
     ContactUs,
     DefaultSolutionModal,
     DownloadOutlined,
+    EyeOutlined,
     Modal,
     ProgressBar,
     Ranklist,

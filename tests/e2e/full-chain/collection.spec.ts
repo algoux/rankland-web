@@ -120,7 +120,8 @@ test.describe('/collection/:id full-chain route', () => {
     await expect(page.locator('.srk-user-cell', { hasText: 'Team Beta' })).toBeVisible();
     await expect(page.locator('[data-id="collection-hydrated"]')).toHaveText('hydrated');
     await expect(page.locator('[data-id="rankland-ranklist-title"]')).toHaveText('Test Contest 2024');
-    await expect(page.locator('[data-id="rankland-ranklist-view-count"]')).toHaveText('浏览 42');
+    await expect(page.locator('[data-id="rankland-ranklist-view-count"]')).toHaveText('42');
+    await expect(page.locator('[data-id="rankland-ranklist-view-count"] .anticon-eye')).toBeVisible();
     await expect(page.locator('[data-id="rankland-ranklist-progress"]')).toBeVisible();
     await expect(page.locator('[data-id="rankland-ranklist-filters"]')).toBeVisible();
     expect(await getTableWrapperMarginLeft(page)).toBe('0px');

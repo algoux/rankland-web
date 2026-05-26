@@ -123,7 +123,8 @@ test.describe('/ranklist/:id full-chain route', () => {
     await expect(page.locator('.srk-user-cell', { hasText: 'Team Beta' })).toBeVisible();
     await expect(page.locator('[data-id="ranklist-hydrated"]')).toHaveText('hydrated');
     await expect(page.locator('[data-id="rankland-ranklist-title"]')).toHaveText('Test Contest 2024');
-    await expect(page.locator('[data-id="rankland-ranklist-view-count"]')).toHaveText('浏览 42');
+    await expect(page.locator('[data-id="rankland-ranklist-view-count"]')).toHaveText('42');
+    await expect(page.locator('[data-id="rankland-ranklist-view-count"] .anticon-eye')).toBeVisible();
     await expect(page.locator('[data-id="rankland-ranklist-contributors"]')).toContainText(
       '贡献者：https://github.com/rankland-alpha, Team Beta',
     );
