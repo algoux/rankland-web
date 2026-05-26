@@ -20,9 +20,7 @@
       </a-button>
     </section>
 
-    <section v-else-if="!ranklist" data-id="live-loading" class="live-state">
-      Loading
-    </section>
+    <a-spin v-else-if="!ranklist" data-id="live-loading" class="live-state" />
 
     <section
       v-else

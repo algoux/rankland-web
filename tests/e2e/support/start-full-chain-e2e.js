@@ -19,6 +19,7 @@ const requests = [];
 const failedCollectionPaths = new Set();
 const failedRanklistPaths = new Set();
 const failedLiveInfoPaths = new Set();
+const delayedLiveInfoPaths = new Map();
 let appProcess;
 let cleanupWatcherProcess;
 let shuttingDown = false;
@@ -67,6 +68,7 @@ function routeRequest(req, res) {
     failedCollectionPaths.clear();
     failedRanklistPaths.clear();
     failedLiveInfoPaths.clear();
+    delayedLiveInfoPaths.clear();
     sendJson(res, 200, { ok: true });
     return;
   }
@@ -88,6 +90,14 @@ function routeRequest(req, res) {
   if (method === 'POST' && /^\/__fail-live-info\/[^/]+$/.test(url.pathname)) {
     const uniqueKey = url.pathname.replace('/__fail-live-info/', '');
     failedLiveInfoPaths.add(`/ranking/config/${uniqueKey}`);
+    sendJson(res, 200, { ok: true });
+    return;
+  }
+
+  if (method === 'POST' && /^\/__delay-live-info\/[^/]+$/.test(url.pathname)) {
+    const uniqueKey = url.pathname.replace('/__delay-live-info/', '');
+    const delayMs = Number(url.searchParams.get('ms') || 1000);
+    delayedLiveInfoPaths.set(`/ranking/config/${uniqueKey}`, Number.isFinite(delayMs) ? delayMs : 1000);
     sendJson(res, 200, { ok: true });
     return;
   }
@@ -164,6 +174,13 @@ function routeRequest(req, res) {
 
     if (url.pathname === '/ranking/config/missing-live') {
       sendJson(res, 200, { code: 11, message: 'Live ranklist not found' });
+      return;
+    }
+
+    if (delayedLiveInfoPaths.has(url.pathname)) {
+      setTimeout(() => {
+        sendJson(res, 200, ok(liveInfo));
+      }, delayedLiveInfoPaths.get(url.pathname));
       return;
     }
 

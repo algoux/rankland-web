@@ -511,6 +511,22 @@ test.describe('/live/:id full-chain route', () => {
     await expect(page.locator('[data-id="live-scroll-solution"]')).toBeHidden();
   });
 
+  test('renders the legacy Ant Design loading spinner while live ranklist info is loading', async ({
+    page,
+    request,
+  }) => {
+    await denyExternalCalls(page);
+    await request.post(`${mockBaseURL}/__reset`);
+    await request.post(`${mockBaseURL}/__delay-live-info/live-test-key?ms=1000`);
+
+    const response = await page.goto('/live/live-test-key', { waitUntil: 'domcontentloaded' });
+
+    expect(response).not.toBeNull();
+    expect(response?.ok()).toBe(true);
+    await expect(page.locator('[data-id="live-loading"].ant-spin')).toBeVisible();
+    await expect(page.locator('[data-id="live-ranklist-content"]')).toBeVisible();
+  });
+
   test('renders the Not Found page when the backend returns missing live contest info', async ({ page, request }) => {
     await denyExternalCalls(page);
     await request.post(`${mockBaseURL}/__reset`);
