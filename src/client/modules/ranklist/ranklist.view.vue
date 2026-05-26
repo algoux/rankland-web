@@ -22,6 +22,7 @@
     <section
       v-else
       data-id="ranklist-content"
+      class="ranklist-content"
       :data-ranklist-id="ranklistId"
       :data-row-count="rowCount"
     >
@@ -132,3 +133,9 @@ export default routeView(RanklistPage, '/ranklist/:id', RanklistRPO, undefined, 
   renderMethod: RenderMethodKind.SSR,
 });
 </script>
+
+<style lang="less" scoped>
+.ranklist-content {
+  margin: 32px 0;
+}
+</style>

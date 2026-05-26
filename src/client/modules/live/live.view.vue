@@ -444,7 +444,7 @@ export default routeView(LivePage, '/live/:id', LiveRPO);
 .live-state,
 .live-content {
   max-width: 1280px;
-  margin: 0 auto;
+  margin: 32px auto;
 }
 
 .live-state {

@@ -77,6 +77,21 @@ async function getTableWrapperMarginLeft(page: Page) {
   });
 }
 
+async function getRouteContentSpacing(page: Page, selector: string) {
+  return page.evaluate((selector) => {
+    const element = document.querySelector<HTMLElement>(selector);
+    if (!element) {
+      throw new Error(`Missing route content element: ${selector}`);
+    }
+    const style = window.getComputedStyle(element);
+    return {
+      marginTop: style.marginTop,
+      marginBottom: style.marginBottom,
+      paddingBottom: style.paddingBottom,
+    };
+  }, selector);
+}
+
 test.describe('/collection/:id full-chain route', () => {
   test('renders selected ranklist through SSR, hydration, RanklandApiService, and the mock backend', async ({
     page,
@@ -95,6 +110,9 @@ test.describe('/collection/:id full-chain route', () => {
     await expect(
       page.locator('[data-id="collection-ranklist-content"][data-ranklist-id="test-key"][data-row-count="2"]'),
     ).toBeVisible();
+    expect(await getRouteContentSpacing(page, '[data-id="collection-ranklist-content"]')).toMatchObject({
+      paddingBottom: '32px',
+    });
     await expect(
       page.locator('[data-id="collection-menu-item-test-key"][data-collection-key="test-key"]'),
     ).toHaveAttribute('aria-current', 'page');

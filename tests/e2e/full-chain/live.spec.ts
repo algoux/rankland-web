@@ -94,6 +94,21 @@ async function getTableWrapperMarginLeft(page: Page) {
   });
 }
 
+async function getRouteContentSpacing(page: Page, selector: string) {
+  return page.evaluate((selector) => {
+    const element = document.querySelector<HTMLElement>(selector);
+    if (!element) {
+      throw new Error(`Missing route content element: ${selector}`);
+    }
+    const style = window.getComputedStyle(element);
+    return {
+      marginTop: style.marginTop,
+      marginBottom: style.marginBottom,
+      paddingBottom: style.paddingBottom,
+    };
+  }, selector);
+}
+
 async function selectRanklistOrganization(page: Page, organization: string) {
   await page.locator('[data-id="rankland-ranklist-organization-filter"] .ant-select-selector').click();
   await page.locator('.ant-select-dropdown .ant-select-item-option', { hasText: organization }).click();
@@ -120,6 +135,10 @@ test.describe('/live/:id full-chain route', () => {
         '[data-id="live-ranklist-content"][data-ranklist-id="live-test-key"][data-live-id="live-rid-1"][data-row-count="2"][data-focus="yes"]',
       ),
     ).toBeVisible();
+    expect(await getRouteContentSpacing(page, '[data-id="live-ranklist-content"]')).toMatchObject({
+      marginTop: '32px',
+      marginBottom: '32px',
+    });
     await expect(page.locator('[data-id="live-hydrated"]')).toHaveText('hydrated');
     await expect(page.locator('[data-id="live-scroll-solution-toggle"]')).toBeChecked();
     await expect(page.locator('[data-id="live-scroll-solution-status"]')).toHaveText('connected');

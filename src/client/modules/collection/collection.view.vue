@@ -91,6 +91,7 @@
         <div
           v-else-if="ranklist"
           data-id="collection-ranklist-content"
+          class="collection-ranklist-content"
           :data-ranklist-id="rankId"
           :data-row-count="rowCount"
         >
@@ -590,6 +591,10 @@ export default routeView(CollectionPage, '/collection/:id', CollectionRPO, undef
   max-width: 100vw;
   overflow-x: auto;
   padding: 16px;
+}
+
+.collection-ranklist-content {
+  padding-bottom: 32px;
 }
 
 .collection-state,
