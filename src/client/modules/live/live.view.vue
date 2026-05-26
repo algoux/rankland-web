@@ -480,8 +480,7 @@ export default routeView(LivePage, '/live/:id', LiveRPO);
   flex-shrink: 0;
   align-items: center;
   gap: 4px;
-  color: #334155;
-  font-size: 13px;
+  font-size: 14px;
 }
 
 @media (max-width: 767px) {

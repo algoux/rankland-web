@@ -165,6 +165,8 @@ test.describe('/live/:id full-chain route', () => {
     await expect(page.locator('[data-id="live-scroll-solution-toggle"]')).toHaveClass(/ant-switch-small/);
     await expect(page.locator('[data-id="live-scroll-solution-toggle"]')).toHaveAttribute('aria-checked', 'true');
     await expect(page.locator('.live-scroll-toggle')).toHaveCSS('column-gap', '4px');
+    await expect(page.locator('.live-scroll-toggle')).toHaveCSS('font-size', '14px');
+    await expect(page.locator('.live-scroll-toggle')).toHaveCSS('color', 'rgba(0, 0, 0, 0.85)');
     await expect(page.locator('[data-id="live-scroll-solution-status"]')).toHaveText('connected');
     await expect(page.locator('[data-id="live-scroll-solution-status"]')).toBeHidden();
     await expect(page.locator('[data-id="rankland-ranklist-title"]')).toHaveText('Test Contest 2024');
