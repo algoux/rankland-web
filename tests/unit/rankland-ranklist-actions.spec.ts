@@ -19,6 +19,18 @@ describe('rankland ranklist browser actions', () => {
     expect(JSON.parse(file.content).contest.title).toBe('Test Contest 2024');
   });
 
+  it('strips the legacy live-only _now field from exported SRK JSON', () => {
+    const ranklist = {
+      ...JSON.parse(JSON.stringify(fixture)),
+      _now: '2024-01-01T00:00:00.000Z',
+    } as srk.Ranklist & { _now: string };
+
+    const file = createSrkExportFile(ranklist, 'live-test-key');
+
+    expect(JSON.parse(file.content)).not.toHaveProperty('_now');
+    expect(ranklist._now).toBe('2024-01-01T00:00:00.000Z');
+  });
+
   it('builds Codeforces Gym Ghost DAT export metadata', async () => {
     const file = await createGymGhostExportFile(fixture as srk.Ranklist, 'test-key');
 
