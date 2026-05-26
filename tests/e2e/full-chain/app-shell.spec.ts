@@ -98,16 +98,34 @@ test.describe('app shell full-chain behavior', () => {
     expect(response).not.toBeNull();
     expect(response?.ok()).toBe(true);
     await expect(page.locator('[data-id="app-shell"]')).toBeVisible();
+    await expect(page.locator('[data-id="app-shell"]')).toHaveClass(/ant-layout/);
+    await expect(page.locator('[data-id="app-header"]')).toHaveClass(/ant-layout-header/);
     await expect(page.locator('[data-id="app-logo-link"]')).toHaveAttribute('href', '/');
+    await expect(page.locator('[data-id="app-nav"]')).toHaveClass(/ant-menu-horizontal/);
     await expect(page.locator('[data-id="app-nav-link"][href="/search"]')).toHaveText('探索');
     await expect(page.locator('[data-id="app-nav-link"][href="/collection/official"]')).toHaveText('榜单合集');
     await expect(page.locator('[data-id="app-nav-link"][href="/playground"]')).toHaveText('演练场');
     await expect(page.locator('[data-id="app-nav-link"][aria-current="page"]')).toHaveAttribute('href', '/search');
-    await expect(page.locator('[data-id="app-site-switch"]')).toHaveAttribute(
+    await expect(page.locator('[data-id="app-nav"] .ant-menu-item-selected')).toContainText('探索');
+    await expect(page.locator('[data-id="app-site-switch"]')).toHaveClass(/ant-btn/);
+    await expect(page.locator('[data-id="app-site-switch"]')).toHaveClass(/ant-dropdown-trigger/);
+    await page.locator('[data-id="app-site-switch"]').hover();
+    await expect(page.locator('[data-id="app-site-switch-link"]')).toHaveAttribute(
       'href',
       '//rl.algoux.cn/search?kw=Test%202024',
     );
     await expect(page.locator('[data-id="search-page"]')).toBeVisible();
+  });
+
+  test('bootstraps the system theme before the app is hydrated', async ({ request }) => {
+    const response = await request.get('/');
+
+    expect(response.ok()).toBe(true);
+    const html = await response.text();
+    const bootstrapIndex = html.indexOf('data-rankland-theme-bootstrap');
+    expect(bootstrapIndex).toBeGreaterThan(-1);
+    expect(bootstrapIndex).toBeLessThan(html.indexOf('<body'));
+    expect(html).toContain("document.documentElement.className = systemThemeMediaQuery.matches ? 'dark' : 'light'");
   });
 
   test('syncs system theme and macOS Blink optimization after hydration', async ({ page, request }) => {
@@ -157,6 +175,7 @@ test.describe('app shell full-chain behavior', () => {
 
     await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight));
     await expect(page.locator('[data-id="app-back-top"]')).toBeVisible();
+    await expect(page.locator('[data-id="app-back-top"]')).toHaveClass(/ant-back-top/);
     await expectElementWithinViewport(page.locator('[data-id="app-back-top"]'), page);
     await page.screenshot({ path: testInfo.outputPath('app-shell-mobile.png'), fullPage: true });
   });

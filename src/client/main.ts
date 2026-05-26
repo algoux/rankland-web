@@ -1,4 +1,6 @@
 import './index.less';
+import 'ant-design-vue/dist/reset.css';
+import { Button, Dropdown, FloatButton, Layout, Menu } from 'ant-design-vue';
 import { ClientOnly } from 'vite-ssr';
 import { createHead, Head } from '@vueuse/head';
 import type { HookParams } from 'vite-ssr/vue/types';
@@ -12,6 +14,8 @@ import type { RanklandApiService } from '@common/rankland-api';
 
 Vue.registerHooks(['setup', 'beforeRouteEnter', 'beforeRouteUpdate', 'beforeRouteLeave', 'asyncData']);
 
+const antDesignComponents = [Button, Dropdown, FloatButton, Layout, Menu];
+
 export function mainEntry({
   app,
   router,
@@ -23,6 +27,9 @@ export function mainEntry({
 }: HookParams & { api: ApiType; apiClient: ApiClientType; ranklandApiService: RanklandApiService }) {
   const head = createHead();
   app.use(head);
+  for (const component of antDesignComponents) {
+    app.use(component);
+  }
   app.use(BwcxClientRouterPlugin, {
     routesMap: clientRoutesMap,
   });

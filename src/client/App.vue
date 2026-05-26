@@ -5,56 +5,79 @@
     </Suspense>
   </router-view>
 
-  <div v-else data-id="app-shell" class="app-shell">
-    <header class="app-header">
+  <a-layout v-else data-id="app-shell" class="app-shell">
+    <a-layout-header data-id="app-header" class="app-header">
       <div class="app-header-inner">
         <router-link data-id="app-logo-link" class="app-logo" to="/" aria-label="RankLand">
           <img :src="logo" alt="RankLand">
         </router-link>
 
-        <nav class="app-nav" aria-label="RankLand">
-          <router-link
-            v-for="item in navItems"
-            :key="item.path"
-            data-id="app-nav-link"
-            class="app-nav-link"
-            :class="{ active: isNavActive(item.path) }"
-            :aria-current="isNavActive(item.path) ? 'page' : undefined"
-            :to="item.path"
+        <ClientOnly>
+          <a-menu
+            data-id="app-nav"
+            class="app-nav nav-menu"
+            mode="horizontal"
+            disabled-overflow
+            :selected-keys="[selectedNavKey]"
           >
-            {{ item.label }}
-          </router-link>
-        </nav>
+            <a-menu-item v-for="item in navItems" :key="item.path">
+              <router-link
+                data-id="app-nav-link"
+                :aria-current="isNavActive(item.path) ? 'page' : undefined"
+                :to="item.path"
+              >
+                {{ item.label }}
+              </router-link>
+            </a-menu-item>
+          </a-menu>
+        </ClientOnly>
 
-        <a
-          data-id="app-site-switch"
-          class="app-site-switch"
-          :href="siteSwitchHref"
-          target="_blank"
-          rel="noreferrer"
-        >
-          {{ siteSwitchLabel }}
-        </a>
+        <a-dropdown placement="bottomRight">
+          <a-button data-id="app-site-switch" class="app-site-switch" type="text">
+            切换
+          </a-button>
+          <template #overlay>
+            <a-menu>
+              <a-menu-item key="site-switch">
+                <a
+                  data-id="app-site-switch-link"
+                  :href="siteSwitchHref"
+                  target="_blank"
+                  rel="noreferrer"
+                >
+                  <template v-if="siteAlias === 'cnn'">
+                    全球站点
+                    <span class="app-site-switch-arrow">↗</span>
+                  </template>
+                  <template v-else>
+                    <p class="app-site-switch-title">中国站点</p>
+                    <p class="app-site-switch-subtitle">
+                      <span>特别速度优化</span>
+                      <span class="app-site-switch-arrow">↗</span>
+                    </p>
+                  </template>
+                </a>
+              </a-menu-item>
+            </a-menu>
+          </template>
+        </a-dropdown>
       </div>
-    </header>
+    </a-layout-header>
 
-    <router-view v-slot="{ Component }">
-      <Suspense>
-        <component :is="Component" />
-      </Suspense>
-    </router-view>
+    <a-layout-content>
+      <router-view v-slot="{ Component }">
+        <Suspense>
+          <component :is="Component" />
+        </Suspense>
+      </router-view>
+    </a-layout-content>
 
-    <button
-      v-show="showBackTop"
+    <a-back-top
       data-id="app-back-top"
-      class="app-back-top"
-      type="button"
-      aria-label="回到顶部"
-      @click="scrollToTop"
-    >
-      ↑
-    </button>
-  </div>
+      class="app-back-top ant-back-top"
+      :visibility-height="240"
+    />
+  </a-layout>
 </template>
 
 <script lang="ts">
@@ -79,7 +102,6 @@ export default defineComponent({
     return {
       logo,
       navItems,
-      showBackTop: false,
       themeMediaQuery: undefined as ThemeMediaQuery | undefined,
     };
   },
@@ -100,15 +122,16 @@ export default defineComponent({
     siteAlias(): string | undefined {
       return process.env.RANKLAND_SITE_ALIAS || process.env.SITE_ALIAS;
     },
+    selectedNavKey(): string {
+      const activeItem = this.navItems.find((item) => this.isNavActive(item.path));
+      return activeItem?.path || '';
+    },
   },
   mounted() {
     this.setupThemeSync();
     this.setupPlatformOptimizations();
-    this.updateBackTopVisibility();
-    window.addEventListener('scroll', this.updateBackTopVisibility, { passive: true });
   },
   beforeUnmount() {
-    window.removeEventListener('scroll', this.updateBackTopVisibility);
     if (this.themeMediaQuery) {
       if (this.themeMediaQuery.removeEventListener) {
         this.themeMediaQuery.removeEventListener('change', this.applySystemTheme);
@@ -120,12 +143,6 @@ export default defineComponent({
   methods: {
     isNavActive(path: string): boolean {
       return this.$route.path === path || (path !== '/' && this.$route.path.startsWith(`${path}/`));
-    },
-    updateBackTopVisibility() {
-      this.showBackTop = window.scrollY > 240;
-    },
-    scrollToTop() {
-      window.scrollTo({ top: 0, behavior: 'smooth' });
     },
     setupThemeSync() {
       if (!window.matchMedia) {
