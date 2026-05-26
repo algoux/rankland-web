@@ -125,6 +125,9 @@ test.describe('/playground full-chain route', () => {
     await expect(page.locator('[data-id="playground-hydrated"]')).toHaveCSS('height', '1px');
     await expect(page.locator('[data-id="playground-hydrated"]')).toHaveCSS('overflow', 'hidden');
     await expect(page.locator('[data-id="playground-hydrated"]')).toHaveCSS('color', 'rgba(0, 0, 0, 0)');
+    await expect(page.locator('[data-id="playground-hydrated"]')).toHaveCSS('position', 'absolute');
+    await expect(page.locator('.playground-toolbar')).toHaveCount(0);
+    await expect(page.getByRole('heading', { name: 'Playground' })).toHaveCount(0);
     await expectMonacoReady(page);
     const editorReadyMarker = page.locator('[data-id="playground-editor-ready"]');
     await expect(editorReadyMarker).toHaveText('ready');

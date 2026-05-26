@@ -6,10 +6,7 @@
       <link rel="canonical" href="/playground">
     </Head>
 
-    <section class="playground-toolbar">
-      <div data-id="playground-hydrated" class="playground-hydrated">{{ hydrated ? 'hydrated' : 'csr' }}</div>
-      <h1>Playground</h1>
-    </section>
+    <div data-id="playground-hydrated" class="playground-hydrated">{{ hydrated ? 'hydrated' : 'csr' }}</div>
 
     <section class="playground-layout">
       <div class="playground-editor-pane">
@@ -302,20 +299,8 @@ export default routeView(PlaygroundPage, '/playground');
   padding: 24px 16px;
 }
 
-.playground-toolbar {
-  display: flex;
-  align-items: center;
-  gap: 16px;
-  max-width: 1280px;
-  margin: 0 auto 16px;
-
-  h1 {
-    margin: 0;
-    font-size: 24px;
-  }
-}
-
 .playground-hydrated {
+  position: absolute;
   width: 1px;
   height: 1px;
   overflow: hidden;

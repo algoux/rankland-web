@@ -62,7 +62,7 @@ git status --short --branch
 备注：
 
 ```text
-2026-05-27 最新记录：playground editor-ready marker visual parity 已通过 focused Playground RED/GREEN、完整 `test:migration`（build、35 unit files / 151 unit tests、1 SSR smoke test、1 shallow Playwright test、54 full-chain Playwright tests）和 `git diff --check`。
+2026-05-27 最新记录：playground toolbar chrome parity 已通过 focused Playground RED/GREEN、完整 `test:migration`（build、35 unit files / 151 unit tests、1 SSR smoke test、1 shallow Playwright test、54 full-chain Playwright tests）和 `git diff --check`。
 ```
 
 ## 全局外壳与跨路由行为
@@ -277,6 +277,7 @@ App shell Ant Design Vue Layout/Menu/Dropdown/Button、旧版全局 body light/d
 检查项：
 
 - `[x]` CSR 页面加载正常，且不依赖上游数据调用
+- `[x]` 页面不展示旧 React 不存在的 `Playground` 顶部标题栏
 - `[x]` 测试用 hydration marker 不作为可见产品文本展示
 - `[x]` 测试用 editor-ready marker 不作为可见产品文本展示
 - `[x]` 内置 demo SRK 可以预览
@@ -297,7 +298,7 @@ App shell Ant Design Vue Layout/Menu/Dropdown/Button、旧版全局 body light/d
 备注：
 
 ```text
-2026-05-27 复核：`tests/e2e/full-chain/playground.spec.ts` 覆盖 hydration marker 和 editor-ready marker 视觉隐藏、旧 React 预览区右上角 `QuestionCircleOutlined` srk 文档入口位置、图标和地址。
+2026-05-27 复核：`tests/e2e/full-chain/playground.spec.ts` 覆盖旧 React 不存在的 `Playground` 顶部标题栏已移除、hydration marker 和 editor-ready marker 视觉隐藏、旧 React 预览区右上角 `QuestionCircleOutlined` srk 文档入口位置、图标和地址。
 ```
 
 ## 实时榜单页 `/live/:id`
