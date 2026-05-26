@@ -62,7 +62,7 @@ git status --short --branch
 备注：
 
 ```text
-2026-05-26 最新记录：contact modal Ant Design parity 已通过 focused RED/GREEN、home/ranklist contact-related full-chain 2/2、完整 `test:migration`（build、35 unit files / 151 unit tests、1 SSR smoke test、1 shallow Playwright test、52 full-chain Playwright tests）和 `git diff --check`。
+2026-05-26 最新记录：home card dark Ant Design parity 已通过 focused RED/GREEN、home full-chain 2/2、完整 `test:migration`（build、35 unit files / 151 unit tests、1 SSR smoke test、1 shallow Playwright test、52 full-chain Playwright tests）和 `git diff --check`。
 ```
 
 ## 全局外壳与跨路由行为
@@ -134,7 +134,7 @@ App shell Ant Design Vue Layout/Menu/Dropdown/Button、旧版全局 body light/d
 备注：
 
 ```text
-2026-05-26 复核：home full-chain 断言 SSR HTML 包含首页内容、统计数据和 JSON-LD，hydration marker 正常；Ant Design Card/Row/Col 推荐/工具区、推荐卡片旧版 `h2` 标题和 `UnorderedListOutlined` / `TrophyOutlined` 图标、标题图标/logo 的旧版 `mr-3` 右间距、paste.then.ac logo 24px 尺寸和 2px 内边距、联系弹窗 Ant Design Modal 深色样式、桌面/移动端截图和 bounds 已覆盖。
+2026-05-26 复核：home full-chain 断言 SSR HTML 包含首页内容、统计数据和 JSON-LD，hydration marker 正常；Ant Design Card/Row/Col 推荐/工具区、推荐卡片旧版 dark Card 背景/边框/圆角/文字色、旧版 `h2` 标题和 `UnorderedListOutlined` / `TrophyOutlined` 图标、标题图标/logo 的旧版 `mr-3` 右间距、paste.then.ac logo 24px 尺寸和 2px 内边距、联系弹窗 Ant Design Modal 深色样式、桌面/移动端截图和 bounds 已覆盖。
 ```
 
 ## 搜索页 `/search`

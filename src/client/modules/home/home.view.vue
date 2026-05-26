@@ -338,19 +338,19 @@ export default routeView(HomePage, '/', undefined, undefined, {
 
 .home-card h2 {
   margin: 0 0 14px;
-  color: #17202a;
+  color: inherit;
   font-size: 20px;
   line-height: 1.4;
 }
 
 .home-card p {
   margin: 0;
-  color: #3f4a56;
+  color: inherit;
   line-height: 1.7;
 }
 
 .home-card em {
-  color: #17202a;
+  color: inherit;
   font-style: normal;
   font-weight: 700;
 }

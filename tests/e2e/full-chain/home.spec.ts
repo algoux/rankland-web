@@ -73,6 +73,13 @@ test.describe('/ full-chain route', () => {
     await expect(page.locator('[data-id="home-recommendations"] .ant-row')).toBeVisible();
     await expect(page.locator('[data-id="home-recommendations"] .ant-col')).toHaveCount(2);
     await expect(page.locator('[data-id="home-recommendations"] .ant-card-hoverable')).toHaveCount(2);
+    const recommendationCard = page.locator('[data-id="home-recommendation-search"] .home-card.ant-card');
+    await expect(recommendationCard).toHaveCSS('background-color', 'rgb(20, 20, 20)');
+    await expect(recommendationCard).toHaveCSS('border-top-color', 'rgb(48, 48, 48)');
+    await expect(recommendationCard).toHaveCSS('border-radius', '2px');
+    await expect(recommendationCard).toHaveCSS('color', 'rgba(255, 255, 255, 0.85)');
+    await expect(recommendationCard.locator('h2')).toHaveCSS('color', 'rgba(255, 255, 255, 0.85)');
+    await expect(recommendationCard.locator('p')).toHaveCSS('color', 'rgba(255, 255, 255, 0.85)');
     await expect(page.locator('[data-id="home-recommendation-search"] .ant-card h2')).toContainText('探索');
     await expect(page.locator('[data-id="home-recommendation-search"] .home-card-title')).toHaveCSS('column-gap', '0px');
     await expect(page.locator('[data-id="home-recommendation-search"] .anticon-unordered-list')).toBeVisible();
