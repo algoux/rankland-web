@@ -259,30 +259,7 @@
                 <h4>排名时间</h4>
                 <span data-id="rankland-rank-time-unit">单位：{{ activeUserRankTimeData.unit }}</span>
               </div>
-              <svg
-                data-id="rankland-rank-time-curve"
-                class="rankland-rank-time-curve"
-                viewBox="0 0 320 150"
-                role="img"
-                aria-label="排名时间曲线"
-              >
-                <polyline
-                  :points="rankTimeCurvePoints"
-                  fill="none"
-                  stroke="#2563eb"
-                  stroke-width="3"
-                  stroke-linejoin="round"
-                  stroke-linecap="round"
-                />
-                <circle
-                  v-for="eventPoint in rankTimeEventMarkers"
-                  :key="`${eventPoint.problemAlias}-${eventPoint.time}`"
-                  :cx="eventPoint.cx"
-                  :cy="eventPoint.cy"
-                  r="5"
-                  :fill="eventPoint.fb ? '#15803d' : '#2563eb'"
-                />
-              </svg>
+              <RanklandRankTimeChart :rank-time-data="activeUserRankTimeData" />
               <p data-id="rankland-rank-time-summary" class="rankland-rank-time-summary">
                 当前主排名：{{ activeUserRankTimeLatestPoint?.rank }}，解题数：{{ activeUserRankTimeLatestPoint?.solved }}
               </p>
@@ -337,6 +314,7 @@ import {
 } from '@algoux/standard-ranklist-renderer-component-vue';
 import '@algoux/standard-ranklist-renderer-component-styles';
 import ContactUs from './contact-us.vue';
+import RanklandRankTimeChart from './rankland-rank-time-chart.vue';
 import { createRanklandRanklistState, type RanklandRanklistFilterState } from './rankland-ranklist-state';
 import {
   buildRanklandEmbedCode,
@@ -353,7 +331,6 @@ import {
   selectUserMainRankTimeData,
   type RankTimeDataSet,
   type RankTimePoint,
-  type RankTimeSolvedEventPoint,
   type SelectedUserMainRankTimeData,
 } from './rankland-rank-time';
 import { formatSrkAssetUrl } from '@client/utils/srk-asset.util';
@@ -399,6 +376,7 @@ export default defineComponent({
     Modal,
     ProgressBar,
     Ranklist,
+    RanklandRankTimeChart,
   },
   props: {
     ranklist: {
@@ -572,20 +550,6 @@ export default defineComponent({
       const points = this.activeUserRankTimeData?.points || [];
       return points[points.length - 1] || null;
     },
-    rankTimeCurvePoints(): string {
-      const points = this.activeUserRankTimeData?.points || [];
-      return points.map((point) => this.getRankTimeSvgPoint(point).join(',')).join(' ');
-    },
-    rankTimeEventMarkers(): Array<RankTimeSolvedEventPoint & { cx: number; cy: number }> {
-      return (this.activeUserRankTimeData?.solvedEventPoints || []).map((eventPoint) => {
-        const [cx, cy] = this.getRankTimeSvgPoint(eventPoint);
-        return {
-          ...eventPoint,
-          cx,
-          cy,
-        };
-      });
-    },
   },
   watch: {
     id() {
@@ -648,22 +612,6 @@ export default defineComponent({
         getSortedCalculatedRawSolutions(this.ranklist.rows),
         getProperRankTimeChunkUnit(this.ranklist.contest),
       );
-    },
-    getRankTimeSvgPoint(point: Pick<RankTimePoint, 'time' | 'rank'>): [number, number] {
-      const data = this.activeUserRankTimeData;
-      if (!data || data.points.length === 0) {
-        return [20, 130];
-      }
-
-      const width = 280;
-      const height = 110;
-      const left = 24;
-      const top = 20;
-      const maxTime = data.points[data.points.length - 1].time || 1;
-      const maxRank = Math.max(...data.points.map((rankTimePoint) => rankTimePoint.rank), data.totalUsers, 1);
-      const x = left + (point.time / maxTime) * width;
-      const y = top + ((point.rank - 1) / Math.max(maxRank - 1, 1)) * height;
-      return [Number(x.toFixed(2)), Number(y.toFixed(2))];
     },
     formatSolvedTime(time: srk.TimeDuration): string {
       return secToTimeStr(formatTimeDuration(time, 's'));
@@ -991,13 +939,6 @@ export default defineComponent({
 .rankland-rank-time-curve {
   display: block;
   width: 100%;
-  height: 190px;
-  border: 1px solid #e2e8f0;
-  border-radius: 4px;
-  background:
-    linear-gradient(to right, rgb(148 163 184 / 16%) 1px, transparent 1px),
-    linear-gradient(to bottom, rgb(148 163 184 / 16%) 1px, transparent 1px);
-  background-size: 40px 32px;
 }
 
 .rankland-rank-time-summary {

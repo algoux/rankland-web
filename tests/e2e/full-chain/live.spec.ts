@@ -154,7 +154,17 @@ test.describe('/live/:id full-chain route', () => {
     await expect(userModal.locator('[data-id="rankland-rank-time-panel"]')).toBeVisible();
     await expect(userModal.locator('[data-id="rankland-rank-time-unit"]')).toHaveText('单位：min');
     await expect(userModal.locator('[data-id="rankland-rank-time-event"]')).toContainText(['A', 'B']);
-    await expect(userModal.locator('[data-id="rankland-rank-time-curve"]')).toBeVisible();
+    const rankTimeChart = userModal.locator('[data-id="rankland-rank-time-g2-chart"]');
+    await expect(rankTimeChart).toBeVisible();
+    await expect(rankTimeChart).toHaveAttribute('data-chart-library', '@antv/g2');
+    await expect(rankTimeChart).toHaveAttribute('data-line-animation', 'pathIn:2000');
+    await expect(rankTimeChart).toHaveAttribute('data-event-animation', 'zoomIn:200');
+    await expect(rankTimeChart).toHaveAttribute('data-tooltip-items', '主排名,解题数');
+    await expect(rankTimeChart).toHaveAttribute('data-event-tooltip', 'AC:A (0:40:00)');
+    await expect(userModal.locator('[data-id="rankland-rank-time-curve"] canvas')).toBeVisible();
+    expect(
+      await userModal.locator('[data-id="rankland-rank-time-curve"]').evaluate((element) => getComputedStyle(element).height),
+    ).toBe('400px');
     await userModal.getByRole('button', { name: 'Close' }).click();
     await expect(userModal.locator('.srk-modal')).toBeHidden();
 

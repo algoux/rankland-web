@@ -7,6 +7,7 @@ import {
   regenerateRowsByIncrementalSolutions,
   resolveThemeColor,
   resolveUserMarkers,
+  secToTimeStr,
   type CalculatedSolutionTetrad,
   type StaticRanklist,
 } from '@algoux/standard-ranklist-utils';
@@ -49,6 +50,134 @@ export interface SelectedUserMainRankTimeData {
   solvedEventPoints: RankTimeSolvedEventPoint[];
   seriesSegments: RankTimeSeriesSegment[];
   totalUsers: number;
+}
+
+export interface RankTimeChartEventBadge extends RankTimeSolvedEventPoint {
+  fill: string;
+  textFill: string;
+  markerFillOpacity: number;
+  markerSize: number;
+  animation: {
+    type: 'zoomIn';
+    duration: number;
+    delay: number;
+  };
+  tooltip: {
+    name: 'FB' | 'AC';
+    color: string;
+    value: string;
+  };
+}
+
+export interface RankTimeChartModel {
+  axis: {
+    xTitle: string;
+    yTitle: string;
+  };
+  colors: {
+    primary: string;
+    solved: string;
+    ac: string;
+    fb: string;
+  };
+  containerHeight: number;
+  eventBadges: RankTimeChartEventBadge[];
+  lineAnimation: {
+    type: 'pathIn';
+    duration: number;
+  };
+  maxRank: number;
+  maxTime: number;
+  tooltipInteraction: {
+    darkCrosshairsStroke: string;
+    lightCrosshairsStroke: string;
+    crosshairsLineWidth: number;
+  };
+  yTicks: number[];
+  getLineTooltipTitle: (point: RankTimePoint) => string;
+  getLineTooltipItems: (point: RankTimePoint, index: number) => Array<{ name: string; color?: string; value: number }>;
+}
+
+const RANK_TIME_PRIMARY_COLOR = '#5b8ff9';
+const RANK_TIME_SOLVED_COLOR = '#64de7c';
+const RANK_TIME_AC_COLOR = '#99ff99';
+const RANK_TIME_FB_COLOR = '#009900';
+const RANK_TIME_LINE_ANIMATION_DURATION = 2000;
+const RANK_TIME_EVENT_ANIMATION_DURATION = 200;
+const RANK_TIME_EVENT_ANIMATION_DELAY_OFFSET = 200;
+
+export function createRankTimeChartModel(data: SelectedUserMainRankTimeData): RankTimeChartModel {
+  const maxTime = data.points[data.points.length - 1]?.time || 0;
+  const maxPointRank = data.points.length > 0 ? Math.max(...data.points.map((item) => item.rank)) : 1;
+  const maxRank = Math.min(Math.max(50, maxPointRank + 10), data.totalUsers || maxPointRank);
+  const yTicks = [1];
+  for (let i = 50; i <= maxRank; i += 50) {
+    yTicks.push(i);
+  }
+
+  return {
+    axis: {
+      xTitle: `时间（${data.unit}）`,
+      yTitle: '主排名',
+    },
+    colors: {
+      primary: RANK_TIME_PRIMARY_COLOR,
+      solved: RANK_TIME_SOLVED_COLOR,
+      ac: RANK_TIME_AC_COLOR,
+      fb: RANK_TIME_FB_COLOR,
+    },
+    containerHeight: 400,
+    eventBadges: data.solvedEventPoints.map((point) => {
+      const isFirstBlood = !!point.fb;
+      return {
+        ...point,
+        fill: isFirstBlood ? RANK_TIME_FB_COLOR : RANK_TIME_PRIMARY_COLOR,
+        textFill: '#fff',
+        markerFillOpacity: 0.65,
+        markerSize: 24,
+        animation: {
+          type: 'zoomIn',
+          duration: RANK_TIME_EVENT_ANIMATION_DURATION,
+          delay:
+            (maxTime ? (point.time / maxTime) * RANK_TIME_LINE_ANIMATION_DURATION : RANK_TIME_LINE_ANIMATION_DURATION) +
+            RANK_TIME_EVENT_ANIMATION_DELAY_OFFSET,
+        },
+        tooltip: {
+          name: isFirstBlood ? 'FB' : 'AC',
+          color: isFirstBlood ? RANK_TIME_FB_COLOR : RANK_TIME_AC_COLOR,
+          value: `${point.problemAlias} (${secToTimeStr(formatTimeDuration(point.solvedTime, 's'))})`,
+        },
+      };
+    }),
+    lineAnimation: {
+      type: 'pathIn',
+      duration: RANK_TIME_LINE_ANIMATION_DURATION,
+    },
+    maxRank,
+    maxTime,
+    tooltipInteraction: {
+      darkCrosshairsStroke: '#dadada',
+      lightCrosshairsStroke: '#373737',
+      crosshairsLineWidth: 1,
+    },
+    yTicks,
+    getLineTooltipTitle(point) {
+      return secToTimeStr(formatTimeDuration([point.time, data.unit], 's'));
+    },
+    getLineTooltipItems(point) {
+      return [
+        {
+          name: '主排名',
+          value: point.rank,
+        },
+        {
+          name: '解题数',
+          color: RANK_TIME_SOLVED_COLOR,
+          value: point.solved,
+        },
+      ];
+    },
+  };
 }
 
 export function getProperRankTimeChunkUnit(contest: srk.Contest): srk.TimeDuration {

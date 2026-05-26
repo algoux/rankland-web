@@ -47,6 +47,7 @@
     "@algoux/standard-ranklist-renderer-component-styles": "0.5.1",
     "@algoux/standard-ranklist-renderer-component-vue": "0.5.1",
     "@algoux/standard-ranklist-utils": "^0.2.9",
+    "@antv/g2": "5.0.13",
     "@guolao/vue-monaco-editor": "1.6.0",
     "@koa/cors": "^5.0.0",
     "@vue/runtime-core": "^3.4.0",
