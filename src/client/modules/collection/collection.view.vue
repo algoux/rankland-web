@@ -43,17 +43,9 @@
           :style="collapseButtonStyle"
           @click="toggleCollapsed"
         >
-          <span v-if="collapsed" class="anticon anticon-menu-unfold" aria-hidden="true">
-            <svg viewBox="0 0 1024 1024" focusable="false" aria-hidden="true">
-              <path d="M112 192h800v96H112zM112 468h480v88H112zM112 736h800v96H112zM704 384l192 128-192 128z" />
-            </svg>
-          </span>
+          <MenuUnfoldOutlined v-if="collapsed" />
           <template v-else>
-            <span class="anticon anticon-menu-fold" aria-hidden="true">
-              <svg viewBox="0 0 1024 1024" focusable="false" aria-hidden="true">
-                <path d="M112 192h800v96H112zM432 468h480v88H432zM112 736h800v96H112zM320 384 128 512l192 128z" />
-              </svg>
-            </span>
+            <MenuFoldOutlined />
             <span>折叠</span>
           </template>
         </a-button>
@@ -130,6 +122,7 @@ import type { IApiCollection, IApiRanklist } from '@common/rankland-api';
 import { CollectionItemType, type IApiCollectionItem } from '@common/rankland-api';
 import { CollectionRPO } from '@common/modules/collection/collection.rpo';
 import { ranklandRoutes } from '@common/rankland-router';
+import { MenuFoldOutlined, MenuUnfoldOutlined } from '@ant-design/icons-vue';
 import type { AsyncDataOptions } from '@client/typings';
 import { formatTitle } from '@client/utils/title-format.util';
 import RanklandRanklist from '@client/components/rankland-ranklist.vue';
@@ -165,6 +158,8 @@ interface CollectionAsyncDataState {
 const CollectionPage = defineComponent({
   name: 'Collection',
   components: {
+    MenuFoldOutlined,
+    MenuUnfoldOutlined,
     RanklandRanklist,
   },
   props: {
