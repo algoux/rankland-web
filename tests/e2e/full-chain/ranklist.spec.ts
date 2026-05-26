@@ -682,6 +682,8 @@ test.describe('/ranklist/:id full-chain route', () => {
     const slogan = userModal.locator('[data-id="rankland-user-modal-slogan"]');
     await expect(slogan).toHaveText('Keep moving forward');
     await expect(slogan).toHaveClass(/(^|\s)slogan(\s|$)/);
+    await expect(slogan).toHaveClass(/(^|\s)mt-4(\s|$)/);
+    await expect(slogan).toHaveClass(/(^|\s)mb-2(\s|$)/);
     const sloganStyle = await slogan.evaluate((element) => {
       const style = window.getComputedStyle(element);
       const beforeStyle = window.getComputedStyle(element, '::before');
@@ -689,6 +691,8 @@ test.describe('/ranklist/:id full-chain route', () => {
         textAlign: style.textAlign,
         fontSize: style.fontSize,
         fontFamily: style.fontFamily,
+        marginTop: style.marginTop,
+        marginBottom: style.marginBottom,
         beforeContent: beforeStyle.content,
         beforeDisplay: beforeStyle.display,
         beforeFontSize: beforeStyle.fontSize,
@@ -697,6 +701,8 @@ test.describe('/ranklist/:id full-chain route', () => {
     expect(sloganStyle).toMatchObject({
       textAlign: 'center',
       fontSize: '32px',
+      marginTop: '16px',
+      marginBottom: '8px',
       beforeContent: '"SLOGAN"',
       beforeDisplay: 'block',
       beforeFontSize: '14px',

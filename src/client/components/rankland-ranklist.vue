@@ -325,7 +325,7 @@
             <p
               v-if="activeUserSlogan"
               data-id="rankland-user-modal-slogan"
-              class="rankland-user-modal-slogan slogan"
+              class="rankland-user-modal-slogan slogan mt-4 mb-2"
             >
               {{ activeUserSlogan }}
             </p>
