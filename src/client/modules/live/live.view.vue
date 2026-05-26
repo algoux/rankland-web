@@ -444,12 +444,19 @@ export default routeView(LivePage, '/live/:id', LiveRPO);
 .live-state,
 .live-content {
   max-width: 1280px;
-  margin: 32px auto;
+  margin-right: auto;
+  margin-left: auto;
 }
 
 .live-state {
-  padding-top: 64px;
+  margin-top: 64px;
+  margin-bottom: 32px;
   text-align: center;
+}
+
+.live-content {
+  margin-top: 32px;
+  margin-bottom: 32px;
 }
 
 .live-state h3 {

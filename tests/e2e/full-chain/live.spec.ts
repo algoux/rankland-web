@@ -119,7 +119,9 @@ async function getRouteContentSpacing(page: Page, selector: string) {
     return {
       marginTop: style.marginTop,
       marginBottom: style.marginBottom,
+      paddingTop: style.paddingTop,
       paddingBottom: style.paddingBottom,
+      textAlign: style.textAlign,
     };
   }, selector);
 }
@@ -524,6 +526,11 @@ test.describe('/live/:id full-chain route', () => {
     expect(response).not.toBeNull();
     expect(response?.ok()).toBe(true);
     await expect(page.locator('[data-id="live-loading"].ant-spin')).toBeVisible();
+    expect(await getRouteContentSpacing(page, '[data-id="live-loading"]')).toMatchObject({
+      marginTop: '64px',
+      paddingTop: '0px',
+      textAlign: 'center',
+    });
     await expect(page.locator('[data-id="live-ranklist-content"]')).toBeVisible();
   });
 
