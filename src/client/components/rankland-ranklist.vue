@@ -401,7 +401,7 @@ export default defineComponent({
     },
     showProgress: {
       type: Boolean,
-      default: false,
+      default: true,
     },
     showFooter: {
       type: Boolean,

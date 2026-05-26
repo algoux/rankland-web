@@ -132,6 +132,7 @@ test.describe('/playground full-chain route', () => {
     await expect(page.locator('[data-id="playground-preview"]')).toBeVisible();
     await expect(page.locator('[data-id="playground-row-count"]')).toHaveText('3');
     await expect(page.locator('[data-id="rankland-ranklist-filters"]')).toBeVisible();
+    await expect(page.locator('[data-id="rankland-ranklist-progress"]')).toBeVisible();
     await expect(page.locator('[data-id="rankland-ranklist-organization-filter"]')).toHaveClass(/ant-select/);
     await expect(page.locator('[data-id="rankland-ranklist-official-filter"]')).toHaveClass(/ant-switch/);
     await expect(page.getByText('Seoul National University')).toBeVisible();
@@ -197,22 +198,34 @@ test.describe('/playground full-chain route', () => {
     await expectElementWithinViewport(page.locator('[data-id="playground-editor"]'), page);
     await expectElementWithinViewport(page.locator('[data-id="playground-preview-action"]'), page);
     await expectElementWithinViewport(page.locator('[data-id="playground-preview"]'), page);
-    await page.screenshot({ path: testInfo.outputPath('playground-desktop.png'), fullPage: true });
+    await page.screenshot({
+      path: testInfo.outputPath('playground-desktop.png'),
+      fullPage: false,
+      animations: 'disabled',
+    });
 
-    await page.setViewportSize({ width: 390, height: 844 });
-    const mobileResponse = await page.goto('/playground');
+    const mobilePage = await page.context().newPage();
+    await denyExternalCalls(mobilePage);
+    await markPlaygroundWelcomeRead(mobilePage);
+    await mobilePage.setViewportSize({ width: 390, height: 844 });
+    const mobileResponse = await mobilePage.goto('/playground');
 
     expect(mobileResponse).not.toBeNull();
     expect(mobileResponse?.ok()).toBe(true);
-    await expect(page.locator('[data-id="playground-page"]')).toBeVisible();
-    await expect(page.locator('[data-id="playground-hydrated"]')).toHaveText('hydrated');
-    await expectMonacoReady(page);
-    await expect(page.locator('[data-id="playground-preview"]')).toBeVisible();
-    await expectNoHorizontalDocumentOverflow(page);
-    await expectElementWithinViewport(page.locator('[data-id="playground-editor"]'), page);
-    await expectElementWithinViewport(page.locator('[data-id="playground-preview-action"]'), page);
-    await expectElementWithinViewport(page.locator('[data-id="playground-preview"]'), page);
-    await page.screenshot({ path: testInfo.outputPath('playground-mobile.png'), fullPage: true });
+    await expect(mobilePage.locator('[data-id="playground-page"]')).toBeVisible();
+    await expect(mobilePage.locator('[data-id="playground-hydrated"]')).toHaveText('hydrated');
+    await expectMonacoReady(mobilePage);
+    await expect(mobilePage.locator('[data-id="playground-preview"]')).toBeVisible();
+    await expectNoHorizontalDocumentOverflow(mobilePage);
+    await expectElementWithinViewport(mobilePage.locator('[data-id="playground-editor"]'), mobilePage);
+    await expectElementWithinViewport(mobilePage.locator('[data-id="playground-preview-action"]'), mobilePage);
+    await expectElementWithinViewport(mobilePage.locator('[data-id="playground-preview"]'), mobilePage);
+    await mobilePage.screenshot({
+      path: testInfo.outputPath('playground-mobile.png'),
+      fullPage: false,
+      animations: 'disabled',
+    });
+    await mobilePage.close();
   });
 
   test('uses the dark Monaco theme when the RankLand shell is dark', async ({ page, request }) => {
