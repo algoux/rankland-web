@@ -25,7 +25,12 @@
       "title": "Problem A",
       "alias": "A",
       "statistics": { "accepted": 10, "submitted": 30 },
-      "style": { "backgroundColor": "#58a2d1" }
+      "style": {
+        "backgroundColor": {
+          "light": "#58a2d1",
+          "dark": "#0f172a"
+        }
+      }
     },
     {
       "title": "Problem B",

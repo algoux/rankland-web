@@ -185,6 +185,7 @@
 
         <Ranklist
           :data="ranklistState.staticRanklist"
+          :theme="ranklistTheme"
           striped-rows
           :format-srk-asset-url="formatRanklistAssetUrl"
           @user-click="handleUserClick"
@@ -432,6 +433,8 @@ export default defineComponent({
       activeSolutionPayload: null as SolutionClickPayload | null,
       actionStatus: '',
       rankTimeDataSet: null as RankTimeDataSet | null,
+      ranklistTheme: 'light' as 'light' | 'dark',
+      themeObserver: undefined as MutationObserver | undefined,
     };
   },
   computed: {
@@ -562,7 +565,23 @@ export default defineComponent({
       }
     },
   },
+  mounted() {
+    this.syncRanklistTheme();
+    this.themeObserver = new MutationObserver(() => {
+      this.syncRanklistTheme();
+    });
+    this.themeObserver.observe(document.documentElement, {
+      attributes: true,
+      attributeFilter: ['class'],
+    });
+  },
+  beforeUnmount() {
+    this.themeObserver?.disconnect();
+  },
   methods: {
+    syncRanklistTheme() {
+      this.ranklistTheme = document.documentElement.classList.contains('dark') ? 'dark' : 'light';
+    },
     handleTimeTravel(time: number | null) {
       this.timeTravelTime = time;
     },

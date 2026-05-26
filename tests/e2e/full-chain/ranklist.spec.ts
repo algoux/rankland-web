@@ -19,6 +19,21 @@ async function stubClipboard(page: import('@playwright/test').Page) {
   });
 }
 
+async function forceSystemDarkMode(page: Page) {
+  await page.addInitScript(() => {
+    window.matchMedia = ((query: string) => ({
+      media: query,
+      matches: query === '(prefers-color-scheme: dark)',
+      onchange: null,
+      addEventListener: () => undefined,
+      removeEventListener: () => undefined,
+      addListener: () => undefined,
+      removeListener: () => undefined,
+      dispatchEvent: () => true,
+    })) as typeof window.matchMedia;
+  });
+}
+
 async function expectElementWithinViewport(locator: Locator, page: Page) {
   const box = await locator.boundingBox();
   expect(box).not.toBeNull();
@@ -301,6 +316,25 @@ test.describe('/ranklist/:id full-chain route', () => {
 
     await expect(page.locator('.srk-user-cell', { hasText: 'Team Alpha' })).toBeVisible();
     await expect(page.locator('.srk-user-cell', { hasText: 'Team Beta' })).toBeHidden();
+  });
+
+  test('passes the RankLand dark theme into the low-level SRK table renderer', async ({ page, request }) => {
+    await denyExternalCalls(page);
+    await forceSystemDarkMode(page);
+    await request.post(`${mockBaseURL}/__reset`);
+
+    const response = await page.goto('/ranklist/test-key');
+
+    expect(response).not.toBeNull();
+    expect(response?.ok()).toBe(true);
+    await expect(page.locator('html')).toHaveClass('dark');
+    await expect(page.locator('[data-id="rankland-ranklist-title"]')).toHaveText('Test Contest 2024');
+
+    await expect.poll(async () => {
+      return page.locator('.srk-problem-header').first().evaluate((element) => {
+        return window.getComputedStyle(element).backgroundImage;
+      });
+    }).toContain('rgb(15, 23, 42)');
   });
 
   test('keeps the ranklist page wrappers within desktop and mobile viewport bounds', async ({
