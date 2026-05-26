@@ -248,6 +248,28 @@ test.describe('/ranklist/:id full-chain route', () => {
     await expect(userModal.locator('[data-id="rankland-user-modal-segment"]')).toContainText('所在奖区（Rank）：');
     await expect(userModal.locator('[data-id="rankland-user-modal-segment-label"]')).toHaveText('Gold');
     await expect(userModal.locator('[data-id="rankland-user-modal-segment-label"]')).toHaveClass(/bg-segment-gold/);
+    const slogan = userModal.locator('[data-id="rankland-user-modal-slogan"]');
+    await expect(slogan).toHaveText('Keep moving forward');
+    const sloganStyle = await slogan.evaluate((element) => {
+      const style = window.getComputedStyle(element);
+      const beforeStyle = window.getComputedStyle(element, '::before');
+      return {
+        textAlign: style.textAlign,
+        fontSize: style.fontSize,
+        fontFamily: style.fontFamily,
+        beforeContent: beforeStyle.content,
+        beforeDisplay: beforeStyle.display,
+        beforeFontSize: beforeStyle.fontSize,
+      };
+    });
+    expect(sloganStyle).toMatchObject({
+      textAlign: 'center',
+      fontSize: '32px',
+      beforeContent: '"SLOGAN"',
+      beforeDisplay: 'block',
+      beforeFontSize: '14px',
+    });
+    expect(sloganStyle.fontFamily).toContain('ZCOOL XiaoWei');
     await userModal.getByRole('button', { name: 'Close' }).click();
     await expect(userModal.locator('.srk-modal')).toBeHidden();
 

@@ -60,7 +60,8 @@
         "organization": "Org A",
         "official": true,
         "markers": ["gold"],
-        "photo": "/team-alpha.png"
+        "photo": "/team-alpha.png",
+        "x_slogan": "Keep moving forward"
       },
       "score": { "value": 2, "time": [100, "min"] },
       "statuses": [

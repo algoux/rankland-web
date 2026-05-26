@@ -263,7 +263,13 @@
             <div v-if="activeUserPhotoSrc" class="rankland-user-modal-photo">
               <img data-id="rankland-user-modal-photo" :src="activeUserPhotoSrc" alt="选手照片">
             </div>
-            <p v-if="activeUserSlogan" class="rankland-user-modal-slogan">{{ activeUserSlogan }}</p>
+            <p
+              v-if="activeUserSlogan"
+              data-id="rankland-user-modal-slogan"
+              class="rankland-user-modal-slogan"
+            >
+              {{ activeUserSlogan }}
+            </p>
 
             <div
               v-if="activeUserRankTimeData"
@@ -1042,7 +1048,16 @@ export default defineComponent({
 }
 
 .rankland-user-modal-slogan {
-  margin: 16px 0 0;
+  margin: 16px 0 8px;
+  font-family: 'ZCOOL XiaoWei', serif;
+  font-size: 32px;
+  text-align: center;
+}
+
+.rankland-user-modal-slogan::before {
+  display: block;
+  font-size: 14px;
+  content: 'SLOGAN';
 }
 
 .rankland-rank-time-panel {
