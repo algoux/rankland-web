@@ -1023,7 +1023,6 @@ export default defineComponent({
 
 .rankland-ranklist-ref-link-extra-action {
   margin-left: 4px;
-  color: #1677ff;
   cursor: pointer;
 }
 

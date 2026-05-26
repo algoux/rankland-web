@@ -125,14 +125,20 @@ async function getHeaderMetaBlockSpacing(page: Page) {
 async function getRanklistLinkColors(page: Page) {
   return page.evaluate(() => {
     const refLink = document.querySelector<HTMLElement>('[data-id="rankland-ranklist-ref-links"] a');
+    const refLinkLine = document.querySelector<HTMLElement>('[data-id="rankland-ranklist-ref-links"]');
+    const extraRefLinkTrigger = document.querySelector<HTMLElement>(
+      '[data-id="rankland-ranklist-ref-link-extra-action"]',
+    );
     const footerContactTrigger = document.querySelector<HTMLElement>(
       '[data-id="rankland-ranklist-footer"] [data-id="contact-us-trigger"]',
     );
-    if (!refLink || !footerContactTrigger) {
+    if (!refLink || !refLinkLine || !extraRefLinkTrigger || !footerContactTrigger) {
       throw new Error('Missing ranklist link color target');
     }
     return {
       refLinkColor: window.getComputedStyle(refLink).color,
+      refLinkLineColor: window.getComputedStyle(refLinkLine).color,
+      extraRefLinkTriggerColor: window.getComputedStyle(extraRefLinkTrigger).color,
       footerContactTriggerColor: window.getComputedStyle(footerContactTrigger).color,
     };
   });
@@ -313,8 +319,13 @@ test.describe('/ranklist/:id full-chain route', () => {
     await expect(page.locator('[data-id="rankland-ranklist-ref-link-extra-action"] .anticon-caret-down')).toBeVisible();
     await expect.poll(() => getRanklistLinkColors(page)).toMatchObject({
       refLinkColor: 'rgb(255, 129, 4)',
+      extraRefLinkTriggerColor: 'rgb(71, 85, 105)',
+      refLinkLineColor: 'rgb(71, 85, 105)',
       footerContactTriggerColor: 'rgb(255, 129, 4)',
     });
+    expect((await getRanklistLinkColors(page)).extraRefLinkTriggerColor).not.toBe(
+      (await getRanklistLinkColors(page)).refLinkColor,
+    );
     await page.locator('[data-id="rankland-ranklist-ref-links"] a').first().hover();
     await expect(page.locator('[data-id="rankland-ranklist-ref-links"] a').first()).toHaveCSS(
       'color',
