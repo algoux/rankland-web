@@ -21,8 +21,8 @@
           </span>
           <div data-id="rankland-ranklist-header-actions" class="rankland-ranklist-header-actions">
             <a-dropdown data-id="rankland-ranklist-export-menu" :trigger="['hover']" placement="bottom">
-              <a-button data-id="rankland-ranklist-export-menu-button" size="small">
-                导出
+              <a-button data-id="rankland-ranklist-export-menu-button" size="small" title="导出" aria-label="导出">
+                <DownloadOutlined />
               </a-button>
               <template #overlay>
                 <a-menu data-id="rankland-ranklist-export-menu-overlay">
@@ -55,8 +55,8 @@
             </a-dropdown>
 
             <a-dropdown data-id="rankland-ranklist-share-menu" :trigger="['hover']" placement="bottom">
-              <a-button data-id="rankland-ranklist-share-menu-button" size="small">
-                分享
+              <a-button data-id="rankland-ranklist-share-menu-button" size="small" title="分享" aria-label="分享">
+                <ShareAltOutlined />
               </a-button>
               <template #overlay>
                 <a-menu data-id="rankland-ranklist-share-menu-overlay">
@@ -362,6 +362,7 @@ import {
   type SolutionClickPayload,
   type UserClickPayload,
 } from '@algoux/standard-ranklist-renderer-component-vue';
+import { DownloadOutlined, ShareAltOutlined } from '@ant-design/icons-vue';
 import '@algoux/standard-ranklist-renderer-component-styles';
 import ContactUs from './contact-us.vue';
 import RanklandRankTimeChart from './rankland-rank-time-chart.vue';
@@ -437,10 +438,12 @@ export default defineComponent({
   components: {
     ContactUs,
     DefaultSolutionModal,
+    DownloadOutlined,
     Modal,
     ProgressBar,
     Ranklist,
     RanklandRankTimeChart,
+    ShareAltOutlined,
   },
   props: {
     ranklist: {

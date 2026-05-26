@@ -176,6 +176,8 @@ test.describe('/ranklist/:id full-chain route', () => {
     await expect(page.locator('[data-id="contact-us-dialog"]')).toHaveCount(0);
     await expect(page.locator('[data-id="rankland-ranklist-export-menu-button"]')).toBeVisible();
     await expect(page.locator('[data-id="rankland-ranklist-share-menu-button"]')).toBeVisible();
+    await expect(page.locator('[data-id="rankland-ranklist-export-menu-button"] .anticon-download')).toBeVisible();
+    await expect(page.locator('[data-id="rankland-ranklist-share-menu-button"] .anticon-share-alt')).toBeVisible();
     await expectHoverDropdownOpensAndCloses(
       page,
       'rankland-ranklist-export-menu-button',
