@@ -40,6 +40,17 @@ async function expectNoHorizontalDocumentOverflow(page: Page) {
   expect(overflow.documentScrollWidth).toBeLessThanOrEqual(overflow.viewportWidth + 1);
 }
 
+async function expectHoverDropdownOpensAndCloses(page: Page, triggerTestId: string, itemTestId: string) {
+  const trigger = page.locator(`[data-id="${triggerTestId}"]`);
+  const item = page.locator(`[data-id="${itemTestId}"]`);
+
+  await expect(item).toBeHidden();
+  await trigger.hover();
+  await expect(item).toBeVisible();
+  await page.mouse.move(10, 10);
+  await expect(item).toBeHidden();
+}
+
 test.describe('/ranklist/:id full-chain route', () => {
   test('renders the ranklist detail page through SSR, hydration, RanklandApiService, and the mock backend', async ({
     page,
@@ -58,10 +69,18 @@ test.describe('/ranklist/:id full-chain route', () => {
     await expect(
       page.locator('[data-id="ranklist-content"][data-ranklist-id="test-key"][data-row-count="2"]'),
     ).toBeVisible();
-    await expect(page.getByText('Team Alpha')).toBeVisible();
-    await expect(page.getByText('Team Beta')).toBeVisible();
+    await expect(page.locator('.srk-user-cell', { hasText: 'Team Alpha' })).toBeVisible();
+    await expect(page.locator('.srk-user-cell', { hasText: 'Team Beta' })).toBeVisible();
     await expect(page.locator('[data-id="ranklist-hydrated"]')).toHaveText('hydrated');
     await expect(page.locator('[data-id="rankland-ranklist-title"]')).toHaveText('Test Contest 2024');
+    await expect(page.locator('[data-id="rankland-ranklist-view-count"]')).toHaveText('浏览 42');
+    await expect(page.locator('[data-id="rankland-ranklist-contributors"]')).toContainText(
+      '贡献者：https://github.com/rankland-alpha, Team Beta',
+    );
+    await expect(page.locator('[data-id="rankland-ranklist-ref-links"]')).toContainText(
+      '相关链接：Official Site, Mirror, Statements',
+    );
+    await expect(page.locator('[data-id="rankland-ranklist-ref-link-extra-action"]')).toHaveText('and 1 more');
     await expect(page.locator('[data-id="rankland-ranklist-banner"]')).toHaveAttribute(
       'src',
       `${mockBaseURL}/srk-assets/test-key/banner.png`,
@@ -80,8 +99,23 @@ test.describe('/ranklist/:id full-chain route', () => {
     await expect(page.locator('[data-id="contact-us-dialog"]')).toHaveCount(0);
     await expect(page.locator('[data-id="rankland-ranklist-export-menu-button"]')).toBeVisible();
     await expect(page.locator('[data-id="rankland-ranklist-share-menu-button"]')).toBeVisible();
+    await expectHoverDropdownOpensAndCloses(
+      page,
+      'rankland-ranklist-export-menu-button',
+      'rankland-ranklist-export-srk-action',
+    );
+    await expectHoverDropdownOpensAndCloses(
+      page,
+      'rankland-ranklist-share-menu-button',
+      'rankland-ranklist-copy-link-action',
+    );
+    await expectHoverDropdownOpensAndCloses(
+      page,
+      'rankland-ranklist-ref-link-extra-action',
+      'rankland-ranklist-ref-link-extra-archive',
+    );
 
-    await page.locator('[data-id="rankland-ranklist-export-menu-button"]').click();
+    await page.locator('[data-id="rankland-ranklist-export-menu-button"]').hover();
     const downloadPromise = page.waitForEvent('download');
     await page.locator('[data-id="rankland-ranklist-export-srk-action"]').click();
     const download = await downloadPromise;
@@ -90,6 +124,7 @@ test.describe('/ranklist/:id full-chain route', () => {
     expect(downloadPath).not.toBeNull();
     expect(JSON.parse(await readFile(downloadPath!, 'utf8')).contest.title).toBe('Test Contest 2024');
 
+    await page.locator('[data-id="rankland-ranklist-export-menu-button"]').hover();
     const gymGhostDownloadPromise = page.waitForEvent('download');
     await page.locator('[data-id="rankland-ranklist-export-gym-ghost-action"]').click();
     const gymGhostDownload = await gymGhostDownloadPromise;
@@ -101,25 +136,28 @@ test.describe('/ranklist/:id full-chain route', () => {
     expect(gymGhostContent).toContain('Team Alpha');
     await expect(page.locator('[data-id="rankland-ranklist-action-status"]')).toHaveText('Gym Ghost 已导出');
 
+    await page.locator('[data-id="rankland-ranklist-export-menu-button"]').hover();
     const vjudgeDownloadPromise = page.waitForEvent('download');
     await page.locator('[data-id="rankland-ranklist-export-vjudge-action"]').click();
     const vjudgeDownload = await vjudgeDownloadPromise;
     expect(vjudgeDownload.suggestedFilename()).toBe('test-key_vjreplay.xlsx');
     await expect(page.locator('[data-id="rankland-ranklist-action-status"]')).toHaveText('VJudge Replay 已导出');
 
+    await page.locator('[data-id="rankland-ranklist-export-menu-button"]').hover();
     const excelDownloadPromise = page.waitForEvent('download');
     await page.locator('[data-id="rankland-ranklist-export-xlsx-action"]').click();
     const excelDownload = await excelDownloadPromise;
     expect(excelDownload.suggestedFilename()).toBe('test-key.xlsx');
     await expect(page.locator('[data-id="rankland-ranklist-action-status"]')).toHaveText('Excel 已导出');
 
-    await page.locator('[data-id="rankland-ranklist-share-menu-button"]').click();
+    await page.locator('[data-id="rankland-ranklist-share-menu-button"]').hover();
     await page.locator('[data-id="rankland-ranklist-copy-link-action"]').click();
     await expect(page.locator('[data-id="rankland-ranklist-action-status"]')).toHaveText('链接已复制');
     expect(
       await page.evaluate(() => (window as unknown as { __ranklandClipboardText?: string }).__ranklandClipboardText),
     ).toBe(`http://127.0.0.1:${process.env.FULL_CHAIN_APP_PORT || '3100'}/ranklist/test-key`);
 
+    await page.locator('[data-id="rankland-ranklist-share-menu-button"]').hover();
     await page.locator('[data-id="rankland-ranklist-copy-embed-action"]').click();
     await expect(page.locator('[data-id="rankland-ranklist-action-status"]')).toHaveText('嵌入代码已复制');
     expect(

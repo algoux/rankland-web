@@ -15,46 +15,112 @@
           >
         </div>
         <h1 data-id="rankland-ranklist-title">{{ ranklistTitle }}</h1>
-        <div data-id="rankland-ranklist-header-actions" class="rankland-ranklist-header-actions">
-          <details data-id="rankland-ranklist-export-menu" class="rankland-ranklist-action-menu">
-            <summary data-id="rankland-ranklist-export-menu-button">导出</summary>
-            <div class="rankland-ranklist-action-list">
-              <button data-id="rankland-ranklist-export-srk-action" type="button" @click="downloadSrkJson">
-                标准榜单格式 (srk)
-              </button>
-              <button data-id="rankland-ranklist-export-gym-ghost-action" type="button" @click="downloadGymGhostDat">
-                Codeforces Gym Ghost (dat)
-              </button>
-              <button data-id="rankland-ranklist-export-vjudge-action" type="button" @click="downloadVJudgeReplay">
-                Virtual Judge Replay (xlsx)
-              </button>
-              <button data-id="rankland-ranklist-export-xlsx-action" type="button" @click="downloadGeneralExcel">
-                Excel 表格 (xlsx)
-              </button>
-            </div>
-          </details>
-
-          <details data-id="rankland-ranklist-share-menu" class="rankland-ranklist-action-menu">
-            <summary data-id="rankland-ranklist-share-menu-button">分享</summary>
-            <div class="rankland-ranklist-action-list">
-              <button data-id="rankland-ranklist-copy-link-action" type="button" @click="copyCurrentPageLink">
-                复制本页链接
-              </button>
-              <button
-                v-if="id"
-                data-id="rankland-ranklist-copy-embed-action"
-                type="button"
-                @click="copyEmbedCode"
-              >
-                复制嵌入代码
-              </button>
-            </div>
-          </details>
-
-          <span v-if="actionStatus" data-id="rankland-ranklist-action-status" class="rankland-ranklist-action-status">
-            {{ actionStatus }}
+        <div data-id="rankland-ranklist-header-meta" class="rankland-ranklist-header-meta">
+          <span v-if="hasViewCount" data-id="rankland-ranklist-view-count" class="rankland-ranklist-view-count">
+            浏览 {{ meta.viewCnt }}
           </span>
+          <div data-id="rankland-ranklist-header-actions" class="rankland-ranklist-header-actions">
+            <a-dropdown data-id="rankland-ranklist-export-menu" :trigger="['hover']" placement="bottom">
+              <a-button data-id="rankland-ranklist-export-menu-button" size="small">
+                导出
+              </a-button>
+              <template #overlay>
+                <a-menu data-id="rankland-ranklist-export-menu-overlay">
+                  <a-menu-item key="export-srk">
+                    <button data-id="rankland-ranklist-export-srk-action" type="button" @click="downloadSrkJson">
+                      标准榜单格式 (srk)
+                    </button>
+                  </a-menu-item>
+                  <a-menu-item key="export-gym-ghost">
+                    <button
+                      data-id="rankland-ranklist-export-gym-ghost-action"
+                      type="button"
+                      @click="downloadGymGhostDat"
+                    >
+                      Codeforces Gym Ghost (dat)
+                    </button>
+                  </a-menu-item>
+                  <a-menu-item key="export-vjudge">
+                    <button data-id="rankland-ranklist-export-vjudge-action" type="button" @click="downloadVJudgeReplay">
+                      Virtual Judge Replay (xlsx)
+                    </button>
+                  </a-menu-item>
+                  <a-menu-item key="export-xlsx">
+                    <button data-id="rankland-ranklist-export-xlsx-action" type="button" @click="downloadGeneralExcel">
+                      Excel 表格 (xlsx)
+                    </button>
+                  </a-menu-item>
+                </a-menu>
+              </template>
+            </a-dropdown>
+
+            <a-dropdown data-id="rankland-ranklist-share-menu" :trigger="['hover']" placement="bottom">
+              <a-button data-id="rankland-ranklist-share-menu-button" size="small">
+                分享
+              </a-button>
+              <template #overlay>
+                <a-menu data-id="rankland-ranklist-share-menu-overlay">
+                  <a-menu-item key="copy-link">
+                    <button data-id="rankland-ranklist-copy-link-action" type="button" @click="copyCurrentPageLink">
+                      复制本页链接
+                    </button>
+                  </a-menu-item>
+                  <a-menu-item v-if="id" key="copy-embed">
+                    <button data-id="rankland-ranklist-copy-embed-action" type="button" @click="copyEmbedCode">
+                      复制嵌入代码
+                    </button>
+                  </a-menu-item>
+                </a-menu>
+              </template>
+            </a-dropdown>
+
+            <span v-if="actionStatus" data-id="rankland-ranklist-action-status" class="rankland-ranklist-action-status">
+              {{ actionStatus }}
+            </span>
+          </div>
         </div>
+        <p
+          v-if="headerContributors.length > 0"
+          data-id="rankland-ranklist-contributors"
+          class="rankland-ranklist-contributors"
+        >
+          贡献者：<template v-for="(contributor, contributorIndex) in headerContributors" :key="contributor.key">
+            <span v-if="contributorIndex > 0">, </span>
+            <a v-if="contributor.href" :href="contributor.href" target="_blank" rel="noreferrer">
+              {{ contributor.label }}
+            </a>
+            <span v-else>{{ contributor.label }}</span>
+          </template>
+        </p>
+        <p v-if="mainRefLinks.length > 0" data-id="rankland-ranklist-ref-links" class="rankland-ranklist-ref-links">
+          相关链接：<template v-for="(refLink, refLinkIndex) in mainRefLinks" :key="refLink.key">
+            <span v-if="refLinkIndex > 0">, </span>
+            <a :href="refLink.href" target="_blank" rel="noreferrer">{{ refLink.label }}</a>
+          </template>
+          <a-dropdown
+            v-if="extraRefLinks.length > 0"
+            :trigger="['hover']"
+            placement="bottom"
+          >
+            <span data-id="rankland-ranklist-ref-link-extra-action" class="rankland-ranklist-ref-link-extra-action">
+              and {{ extraRefLinks.length }} more
+            </span>
+            <template #overlay>
+              <a-menu data-id="rankland-ranklist-ref-link-extra-overlay">
+                <a-menu-item v-for="refLink in extraRefLinks" :key="refLink.key">
+                  <a
+                    :data-id="`rankland-ranklist-ref-link-extra-${refLink.dataId}`"
+                    :href="refLink.href"
+                    target="_blank"
+                    rel="noreferrer"
+                  >
+                    {{ refLink.label }}
+                  </a>
+                </a-menu-item>
+              </a-menu>
+            </template>
+          </a-dropdown>
+        </p>
         <p data-id="rankland-ranklist-time" class="rankland-ranklist-time">{{ contestTimeRange }}</p>
       </header>
 
@@ -256,6 +322,7 @@ import type * as srk from '@algoux/standard-ranklist';
 import {
   formatTimeDuration,
   getSortedCalculatedRawSolutions,
+  resolveContributor,
   resolveText,
   resolveUserMarkers,
   secToTimeStr,
@@ -301,6 +368,27 @@ function formatDateTime(timestamp: number): string {
     minute: '2-digit',
     second: '2-digit',
   });
+}
+
+interface RanklandRanklistMeta {
+  viewCnt?: number;
+}
+
+interface HeaderContributor {
+  key: string;
+  label: string;
+  href: string;
+}
+
+interface HeaderRefLink {
+  key: string;
+  label: string;
+  href: string;
+  dataId: string;
+}
+
+function normalizeHeaderDataId(value: string): string {
+  return value.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '') || 'link';
 }
 
 export default defineComponent({
@@ -349,6 +437,10 @@ export default defineComponent({
       type: String,
       default: '',
     },
+    meta: {
+      type: Object as PropType<RanklandRanklistMeta>,
+      default: () => ({}),
+    },
   },
   data() {
     return {
@@ -387,6 +479,49 @@ export default defineComponent({
     },
     actionName(): string {
       return this.name || this.id || 'ranklist';
+    },
+    hasViewCount(): boolean {
+      return typeof this.meta.viewCnt === 'number';
+    },
+    headerContributors(): HeaderContributor[] {
+      if (this.ranklistState.kind !== 'ready' || !Array.isArray(this.ranklistState.staticRanklist.contributors)) {
+        return [];
+      }
+
+      return this.ranklistState.staticRanklist.contributors
+        .map((contributor, index) => {
+          const resolved = resolveContributor(contributor);
+          if (!resolved) {
+            return null;
+          }
+          return {
+            key: `${index}-${JSON.stringify(contributor)}`,
+            label: resolved.name,
+            href: resolved.url || '',
+          };
+        })
+        .filter((contributor): contributor is HeaderContributor => !!contributor);
+    },
+    headerRefLinks(): HeaderRefLink[] {
+      if (this.ranklistState.kind !== 'ready' || !Array.isArray(this.ranklistState.staticRanklist.contest.refLinks)) {
+        return [];
+      }
+
+      return this.ranklistState.staticRanklist.contest.refLinks.map((refLink, index) => {
+        const label = resolveText(refLink.title);
+        return {
+          key: `${index}-${refLink.link}`,
+          label,
+          href: refLink.link,
+          dataId: normalizeHeaderDataId(label),
+        };
+      });
+    },
+    mainRefLinks(): HeaderRefLink[] {
+      return this.headerRefLinks.slice(0, 3);
+    },
+    extraRefLinks(): HeaderRefLink[] {
+      return this.headerRefLinks.slice(3);
     },
     embedKind(): RanklandEmbedKind {
       return this.isLive ? 'live' : 'ranklist';
@@ -652,74 +787,47 @@ export default defineComponent({
   max-height: 40vh;
 }
 
+.rankland-ranklist-header-meta,
 .rankland-ranklist-header-actions {
   display: inline-flex;
   flex-wrap: wrap;
-  align-items: flex-start;
+  align-items: center;
   justify-content: center;
   gap: 8px;
   margin: 4px 0 8px;
   font-size: 13px;
 }
 
-.rankland-ranklist-action-menu {
-  position: relative;
-  text-align: left;
+.rankland-ranklist-header-actions {
+  margin: 0;
 }
 
-.rankland-ranklist-action-menu summary {
-  min-width: 44px;
-  padding: 4px 10px;
-  border: 1px solid #cbd5e1;
-  border-radius: 4px;
-  color: #1f2937;
-  background: #fff;
+.rankland-ranklist-view-count {
+  color: #475569;
+}
+
+.rankland-ranklist-contributors,
+.rankland-ranklist-ref-links {
+  margin: 0;
+  color: #475569;
+  font-size: 13px;
+}
+
+.rankland-ranklist-ref-link-extra-action {
+  margin-left: 4px;
+  color: #1677ff;
   cursor: pointer;
-  list-style: none;
-  text-align: center;
 }
 
-.rankland-ranklist-action-menu summary::-webkit-details-marker {
-  display: none;
-}
-
-.rankland-ranklist-action-list {
-  position: absolute;
-  z-index: 20;
-  top: calc(100% + 4px);
-  left: 50%;
-  display: flex;
-  width: max-content;
-  min-width: 190px;
-  max-width: min(280px, calc(100vw - 32px));
-  padding: 4px;
-  border: 1px solid #cbd5e1;
-  border-radius: 4px;
-  background: #fff;
-  box-shadow: 0 8px 24px rgb(15 23 42 / 12%);
-  flex-direction: column;
-  transform: translateX(-50%);
-}
-
-.rankland-ranklist-action-list button {
-  padding: 7px 10px;
+.rankland-ranklist-header-actions button,
+:global(.ant-dropdown-menu-item) button {
+  width: 100%;
+  padding: 0;
   border: 0;
-  border-radius: 3px;
-  color: #1f2937;
   background: transparent;
   cursor: pointer;
   font: inherit;
   text-align: left;
-  white-space: nowrap;
-}
-
-.rankland-ranklist-action-list button:hover:not(:disabled) {
-  background: #f1f5f9;
-}
-
-.rankland-ranklist-action-list button:disabled {
-  color: #94a3b8;
-  cursor: not-allowed;
 }
 
 .rankland-ranklist-action-status {

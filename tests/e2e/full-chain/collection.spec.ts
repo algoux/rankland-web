@@ -47,9 +47,17 @@ test.describe('/collection/:id full-chain route', () => {
     await expect(
       page.locator('[data-id="collection-menu-item-test-key"][data-collection-key="test-key"]'),
     ).toHaveAttribute('aria-current', 'page');
-    await expect(page.getByText('Team Alpha')).toBeVisible();
-    await expect(page.getByText('Team Beta')).toBeVisible();
+    await expect(page.locator('.srk-user-cell', { hasText: 'Team Alpha' })).toBeVisible();
+    await expect(page.locator('.srk-user-cell', { hasText: 'Team Beta' })).toBeVisible();
     await expect(page.locator('[data-id="collection-hydrated"]')).toHaveText('hydrated');
+    await expect(page.locator('[data-id="rankland-ranklist-title"]')).toHaveText('Test Contest 2024');
+    await expect(page.locator('[data-id="rankland-ranklist-view-count"]')).toHaveText('浏览 42');
+    await expect(page.locator('[data-id="rankland-ranklist-progress"]')).toBeVisible();
+    await expect(page.locator('[data-id="rankland-ranklist-filters"]')).toBeVisible();
+    await expect(page.locator('[data-id="rankland-ranklist-footer"]')).toContainText('Powered by Standard Ranklist');
+    await expect(page.locator('[data-id="rankland-ranklist-export-menu-button"]')).toBeVisible();
+    await page.locator('[data-id="rankland-ranklist-export-menu-button"]').hover();
+    await expect(page.locator('[data-id="rankland-ranklist-export-srk-action"]')).toBeVisible();
 
     const requestsResponse = await request.get(`${mockBaseURL}/__requests`);
     const requests = (await requestsResponse.json()) as Array<{ path: string; search: string }>;

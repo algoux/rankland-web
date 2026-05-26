@@ -115,10 +115,10 @@ test.describe('/live/:id full-chain route', () => {
     await expect(page.locator('[data-id="rankland-ranklist-footer"]')).toContainText('Powered by Standard Ranklist');
     await expect(page.locator('[data-id="rankland-ranklist-export-menu-button"]')).toBeVisible();
     await expect(page.locator('[data-id="rankland-ranklist-share-menu-button"]')).toBeVisible();
-    await expect(page.getByText('Team Alpha')).toBeVisible();
-    await expect(page.getByText('Team Beta')).toBeVisible();
+    await expect(page.locator('.srk-user-cell', { hasText: 'Team Alpha' })).toBeVisible();
+    await expect(page.locator('.srk-user-cell', { hasText: 'Team Beta' })).toBeVisible();
 
-    await page.locator('[data-id="rankland-ranklist-export-menu-button"]').click();
+    await page.locator('[data-id="rankland-ranklist-export-menu-button"]').hover();
     await expect(page.locator('[data-id="rankland-ranklist-export-gym-ghost-action"]')).toBeEnabled();
     await expect(page.locator('[data-id="rankland-ranklist-export-vjudge-action"]')).toBeEnabled();
     await expect(page.locator('[data-id="rankland-ranklist-export-xlsx-action"]')).toBeEnabled();
@@ -129,7 +129,7 @@ test.describe('/live/:id full-chain route', () => {
     expect(liveGymGhostDownload.suggestedFilename()).toBe('live-test-key_gymghost.dat');
     await expect(page.locator('[data-id="rankland-ranklist-action-status"]')).toHaveText('Gym Ghost 已导出');
 
-    await page.locator('[data-id="rankland-ranklist-share-menu-button"]').click();
+    await page.locator('[data-id="rankland-ranklist-share-menu-button"]').hover();
     await page.locator('[data-id="rankland-ranklist-copy-embed-action"]').click();
     await expect(page.locator('[data-id="rankland-ranklist-action-status"]')).toHaveText('嵌入代码已复制');
     expect(
@@ -139,8 +139,8 @@ test.describe('/live/:id full-chain route', () => {
     );
 
     await page.selectOption('[data-id="rankland-ranklist-organization-filter"]', ['Org A']);
-    await expect(page.getByText('Team Alpha')).toBeVisible();
-    await expect(page.getByText('Team Beta')).toBeHidden();
+    await expect(page.locator('.srk-user-cell', { hasText: 'Team Alpha' })).toBeVisible();
+    await expect(page.locator('.srk-user-cell', { hasText: 'Team Beta' })).toBeHidden();
 
     await page.locator('.srk-user-cell', { hasText: 'Team Alpha' }).click();
     const userModal = page.locator('[data-id="rankland-ranklist-user-modal"]');

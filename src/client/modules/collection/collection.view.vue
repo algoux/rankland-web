@@ -85,8 +85,17 @@
           :data-ranklist-id="rankId"
           :data-row-count="rowCount"
         >
-          <h1>{{ ranklist.info.name }}</h1>
-          <RanklandRanklist v-if="!renderSwitchLock" :ranklist="ranklist.srk" />
+          <RanklandRanklist
+            v-if="!renderSwitchLock"
+            :ranklist="ranklist.srk"
+            :name="rankId"
+            :id="rankId"
+            :meta="ranklist.info"
+            show-header
+            show-filter
+            show-progress
+            show-footer
+          />
         </div>
 
         <div v-else data-id="collection-empty-state" class="collection-empty-state">

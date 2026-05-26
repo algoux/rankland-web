@@ -30,6 +30,7 @@
         :ranklist="ranklist.srk"
         :name="ranklistId"
         :id="ranklistId"
+        :meta="ranklist.info"
         show-header
         show-filter
         show-progress

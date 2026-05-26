@@ -6,8 +6,15 @@
     "startAt": "2024-04-01T10:00:00+08:00",
     "duration": [5, "h"],
     "frozenDuration": [1, "h"],
-    "banner": "banner.png"
+    "banner": "banner.png",
+    "refLinks": [
+      { "title": "Official Site", "link": "https://example.com/official" },
+      { "title": "Mirror", "link": "https://example.com/mirror" },
+      { "title": "Statements", "link": "https://example.com/statements" },
+      { "title": "Archive", "link": "https://example.com/archive" }
+    ]
   },
+  "contributors": ["https://github.com/rankland-alpha", "Team Beta"],
   "problems": [
     {
       "title": "Problem A",
