@@ -1153,7 +1153,7 @@ export default defineComponent({
 }
 
 .rankland-user-modal-body {
-  color: #1f2937;
+  color: var(--rankland-legacy-text-color);
 }
 
 .rankland-user-modal-line {

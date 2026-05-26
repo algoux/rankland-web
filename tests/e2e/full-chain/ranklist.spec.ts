@@ -148,6 +148,18 @@ async function getRanklistLinkColors(page: Page) {
   });
 }
 
+async function getUserModalBodyColor(page: Page) {
+  return page.evaluate(() => {
+    const modalBody = document.querySelector<HTMLElement>(
+      '[data-id="rankland-ranklist-user-modal"] .rankland-user-modal-body',
+    );
+    if (!modalBody) {
+      throw new Error('Missing rankland user modal body');
+    }
+    return window.getComputedStyle(modalBody).color;
+  });
+}
+
 async function getTableWrapperMarginLeft(page: Page) {
   return page.evaluate(() => {
     const wrapper = document.querySelector<HTMLElement>('[data-id="rankland-ranklist-table-wrapper"]');
@@ -277,6 +289,12 @@ async function selectRanklistOrganization(page: Page, organization: string, expe
   await option.click();
   await page.keyboard.press('Escape');
   await expect(selectedTag).toHaveText(`已选择 ${expectedSelectedCount} 个`);
+}
+
+async function reloadRanklistAndWaitForHydration(page: Page) {
+  await page.reload();
+  await expect(page.locator('[data-id="ranklist-hydrated"]')).toHaveText('hydrated');
+  await expect(page.locator('[data-id="rankland-ranklist-filters"]')).toBeVisible();
 }
 
 test.describe('/ranklist/:id full-chain route', () => {
@@ -759,21 +777,21 @@ test.describe('/ranklist/:id full-chain route', () => {
     const organizationFilter = page.locator('[data-id="rankland-ranklist-organization-filter"]');
     await expect(organizationFilter.locator('.ant-select-selection-item')).toHaveText('已选择 2 个');
 
-    await page.reload();
+    await reloadRanklistAndWaitForHydration(page);
 
     await selectRanklistOrganization(page, 'Org A', 1);
 
     await expect(page.locator('.srk-user-cell', { hasText: 'Team Alpha' })).toBeVisible();
     await expect(page.locator('.srk-user-cell', { hasText: 'Team Beta' })).toHaveCount(0);
 
-    await page.reload();
+    await reloadRanklistAndWaitForHydration(page);
     await expect(page.locator('[data-id="rankland-ranklist-official-filter"]')).toBeVisible();
     await page.locator('[data-id="rankland-ranklist-official-filter"]').click();
 
     await expect(page.locator('.srk-user-cell', { hasText: 'Team Alpha' })).toBeVisible();
     await expect(page.locator('.srk-user-cell', { hasText: 'Team Beta' })).toHaveCount(0);
 
-    await page.reload();
+    await reloadRanklistAndWaitForHydration(page);
     await expect(page.locator('[data-id="rankland-ranklist-marker-filter"]')).toBeVisible();
     await page.locator('[data-id="rankland-ranklist-marker-filter"] .ant-radio-button-wrapper', { hasText: 'Gold Group' }).click();
 
@@ -812,6 +830,11 @@ test.describe('/ranklist/:id full-chain route', () => {
         return window.getComputedStyle(element).backgroundImage;
       });
     }).toContain('rgb(15, 23, 42)');
+
+    await page.locator('.srk-user-cell', { hasText: 'Team Alpha' }).click();
+    const userModal = page.locator('[data-id="rankland-ranklist-user-modal"]');
+    await expect(userModal.locator('.srk-modal')).toBeVisible();
+    await expect.poll(() => getUserModalBodyColor(page)).toBe('rgba(255, 255, 255, 0.85)');
   });
 
   test('keeps the ranklist page wrappers within desktop and mobile viewport bounds', async ({
