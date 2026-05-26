@@ -145,6 +145,32 @@ async function getHomeTotalSrkCountPresentation(page: Page) {
   });
 }
 
+async function getHomeCardParagraphPresentation(page: Page) {
+  return page.evaluate(() => {
+    const cardDataIds = [
+      'home-recommendation-search',
+      'home-recommendation-collection',
+      'home-tool-paste-then-ac',
+      'home-tool-algo-bootstrap',
+    ];
+
+    return cardDataIds.map((dataId) => {
+      const paragraph = document.querySelector<HTMLElement>(`[data-id="${dataId}"] .ant-card p`);
+      if (!paragraph) {
+        throw new Error(`Missing home card paragraph: ${dataId}`);
+      }
+
+      const style = getComputedStyle(paragraph);
+      return {
+        dataId,
+        classList: Array.from(paragraph.classList),
+        marginTop: style.marginTop,
+        marginBottom: style.marginBottom,
+      };
+    });
+  });
+}
+
 test.describe('/ full-chain route', () => {
   test('renders the RankLand home page through SSR, hydration, RanklandApiService, and the mock backend', async ({
     page,
@@ -253,6 +279,32 @@ test.describe('/ full-chain route', () => {
     await expect(page.locator('[data-id="home-tools"] .ant-row')).toBeVisible();
     await expect(page.locator('[data-id="home-tools"] .ant-col')).toHaveCount(2);
     await expect(page.locator('[data-id="home-tools"] .ant-card-hoverable')).toHaveCount(2);
+    expect(await getHomeCardParagraphPresentation(page)).toEqual([
+      {
+        dataId: 'home-recommendation-search',
+        classList: expect.arrayContaining(['mt-4', 'mb-0']),
+        marginTop: '16px',
+        marginBottom: '0px',
+      },
+      {
+        dataId: 'home-recommendation-collection',
+        classList: expect.arrayContaining(['mt-4', 'mb-0']),
+        marginTop: '16px',
+        marginBottom: '0px',
+      },
+      {
+        dataId: 'home-tool-paste-then-ac',
+        classList: expect.arrayContaining(['mt-4', 'mb-0']),
+        marginTop: '16px',
+        marginBottom: '0px',
+      },
+      {
+        dataId: 'home-tool-algo-bootstrap',
+        classList: expect.arrayContaining(['mt-4', 'mb-0']),
+        marginTop: '16px',
+        marginBottom: '0px',
+      },
+    ]);
     await expect(page.locator('[data-id="home-tool-paste-then-ac"][href="https://paste.then.ac/?utm_source=rankland"]')).toBeVisible();
     await expect(page.locator('[data-id="home-tool-paste-then-ac"] img[alt="paste.then.ac logo"]')).toHaveCSS('width', '24px');
     await expect(page.locator('[data-id="home-tool-paste-then-ac"] img[alt="paste.then.ac logo"]')).toHaveCSS('height', '24px');

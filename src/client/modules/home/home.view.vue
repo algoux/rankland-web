@@ -24,7 +24,7 @@
                   <UnorderedListOutlined class="home-card-icon" />
                   <span>探索</span>
                 </h2>
-                <p>
+                <p class="mt-4 mb-0">
                   在 <strong data-id="home-total-srk-count">{{ totalSrkCountText }}</strong> 个高质量程序设计竞赛榜单中自由浏览和搜索
                 </p>
               </a-card>
@@ -41,7 +41,7 @@
                   <TrophyOutlined class="home-card-icon" />
                   <span>榜单合集</span>
                 </h2>
-                <p>查阅由 SDUTACM 和 algoUX 团队精心整理的历年赛事榜单合集</p>
+                <p class="mt-4 mb-0">查阅由 SDUTACM 和 algoUX 团队精心整理的历年赛事榜单合集</p>
               </a-card>
             </router-link>
           </a-col>
@@ -64,7 +64,7 @@
                   <img :src="pasteThenACLogo" alt="paste.then.ac logo" class="home-card-logo-padded">
                   <span>paste.then.ac</span>
                 </h2>
-                <p>免注册、更适合算竞宝宝体质的的代码剪贴板</p>
+                <p class="mt-4 mb-0">免注册、更适合算竞宝宝体质的的代码剪贴板</p>
               </a-card>
             </a>
           </a-col>
@@ -81,7 +81,7 @@
                   <img :src="algoBootstrapLogo" alt="Algo Bootstrap logo">
                   <span>Algo Bootstrap</span>
                 </h2>
-                <p>一键配置 C++、Python 和 VS Code 编程环境</p>
+                <p class="mt-4 mb-0">一键配置 C++、Python 和 VS Code 编程环境</p>
               </a-card>
             </a>
           </a-col>
@@ -346,7 +346,7 @@ export default routeView(HomePage, '/', undefined, undefined, {
 }
 
 .home-card p {
-  margin: 0;
+  margin: 16px 0 0;
   color: inherit;
   line-height: 1.7;
 }
