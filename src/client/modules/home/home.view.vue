@@ -358,12 +358,13 @@ export default routeView(HomePage, '/', undefined, undefined, {
 .home-card-title {
   display: inline-flex;
   align-items: center;
-  gap: 10px;
+  gap: 0;
 }
 
 .home-card-title img {
   width: 24px;
   height: 24px;
+  margin-right: 12px;
   object-fit: contain;
 }
 
@@ -372,6 +373,7 @@ export default routeView(HomePage, '/', undefined, undefined, {
 }
 
 .home-card-icon {
+  margin-right: 12px;
   font-size: 24px;
 }
 

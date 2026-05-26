@@ -58,9 +58,12 @@ test.describe('/ full-chain route', () => {
     await expect(page.locator('[data-id="home-recommendations"] .ant-col')).toHaveCount(2);
     await expect(page.locator('[data-id="home-recommendations"] .ant-card-hoverable')).toHaveCount(2);
     await expect(page.locator('[data-id="home-recommendation-search"] .ant-card h2')).toContainText('探索');
+    await expect(page.locator('[data-id="home-recommendation-search"] .home-card-title')).toHaveCSS('column-gap', '0px');
     await expect(page.locator('[data-id="home-recommendation-search"] .anticon-unordered-list')).toBeVisible();
+    await expect(page.locator('[data-id="home-recommendation-search"] .anticon-unordered-list')).toHaveCSS('margin-right', '12px');
     await expect(page.locator('[data-id="home-recommendation-collection"] .ant-card h2')).toContainText('榜单合集');
     await expect(page.locator('[data-id="home-recommendation-collection"] .anticon-trophy')).toBeVisible();
+    await expect(page.locator('[data-id="home-recommendation-collection"] .anticon-trophy')).toHaveCSS('margin-right', '12px');
     await expect(page.locator('[data-id="home-tools"] .ant-row')).toBeVisible();
     await expect(page.locator('[data-id="home-tools"] .ant-col')).toHaveCount(2);
     await expect(page.locator('[data-id="home-tools"] .ant-card-hoverable')).toHaveCount(2);
@@ -68,6 +71,7 @@ test.describe('/ full-chain route', () => {
     await expect(page.locator('[data-id="home-tool-paste-then-ac"] img[alt="paste.then.ac logo"]')).toHaveCSS('width', '24px');
     await expect(page.locator('[data-id="home-tool-paste-then-ac"] img[alt="paste.then.ac logo"]')).toHaveCSS('height', '24px');
     await expect(page.locator('[data-id="home-tool-paste-then-ac"] img[alt="paste.then.ac logo"]')).toHaveCSS('padding', '2px');
+    await expect(page.locator('[data-id="home-tool-paste-then-ac"] img[alt="paste.then.ac logo"]')).toHaveCSS('margin-right', '12px');
     await expect(page.locator('[data-id="home-tool-algo-bootstrap"][href="https://ab.algoux.cn/?utm_source=rankland"]')).toBeVisible();
     await expect(page.locator('[data-id="home-hydrated"]')).toHaveText('hydrated');
     await page.locator('[data-id="home-contact"] [data-id="contact-us-trigger"]').click();
