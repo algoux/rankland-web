@@ -26,6 +26,47 @@ async function expectNoHorizontalDocumentOverflow(page: Page) {
   expect(overflow.documentScrollWidth).toBeLessThanOrEqual(overflow.viewportWidth + 1);
 }
 
+async function getCollectionLayoutMetrics(page: Page) {
+  return page.evaluate(() => {
+    const getElement = (selector: string) => {
+      const element = document.querySelector<HTMLElement>(selector);
+      if (!element) {
+        throw new Error(`Missing element: ${selector}`);
+      }
+
+      return element;
+    };
+
+    const nav = getElement('[data-id="collection-nav"]');
+    const menu = getElement('[data-id="collection-nav-menu"]');
+    const button = getElement('[data-id="collection-collapse-button"]');
+    const panel = getElement('[data-id="collection-ranklist-panel"]');
+    const header = document.querySelector<HTMLElement>('.ant-layout-header');
+    const navStyle = window.getComputedStyle(nav);
+    const menuStyle = window.getComputedStyle(menu);
+    const buttonStyle = window.getComputedStyle(button);
+    const panelStyle = window.getComputedStyle(panel);
+
+    return {
+      expectedRemainingHeight: document.body.clientHeight - (header?.getBoundingClientRect().height || 0),
+      navHeight: Number.parseFloat(navStyle.height),
+      navWidth: Number.parseFloat(navStyle.width),
+      navInlineHeight: nav.style.height,
+      navInlineWidth: nav.style.width,
+      navTransition: navStyle.transition,
+      menuHeight: Number.parseFloat(menuStyle.height),
+      menuInlineHeight: menu.style.height,
+      buttonWidth: Number.parseFloat(buttonStyle.width),
+      buttonInlineWidth: button.style.width,
+      buttonTransition: buttonStyle.transition,
+      panelDisplay: panelStyle.display,
+      panelMarginLeft: Number.parseFloat(panelStyle.marginLeft),
+      panelInlineMarginLeft: panel.style.marginLeft,
+      panelTransition: panelStyle.transition,
+    };
+  });
+}
+
 test.describe('/collection/:id full-chain route', () => {
   test('renders selected ranklist through SSR, hydration, RanklandApiService, and the mock backend', async ({
     page,
@@ -119,6 +160,56 @@ test.describe('/collection/:id full-chain route', () => {
     await expect(page).toHaveURL('/collection/official?rankId=another-key');
     await expect(page.locator('[data-id="collection-content"]')).toHaveClass(/is-nav-collapsed/);
     await expect(page.locator('[data-id="collection-ranklist-panel"]')).toBeVisible();
+  });
+
+  test('matches the legacy remaining-height and nav animation layout contract', async ({ page, request }) => {
+    await denyExternalCalls(page);
+    await page.addInitScript(() => window.localStorage.removeItem('CollectionNavCollapsed'));
+    await request.post(`${mockBaseURL}/__reset`);
+    await page.setViewportSize({ width: 1280, height: 800 });
+
+    const response = await page.goto('/collection/official?rankId=test-key');
+
+    expect(response).not.toBeNull();
+    expect(response?.ok()).toBe(true);
+    await expect(page.locator('[data-id="collection-hydrated"]')).toHaveText('hydrated');
+
+    let metrics = await getCollectionLayoutMetrics(page);
+    expect(metrics.navInlineHeight).toBe(`${metrics.expectedRemainingHeight}px`);
+    expect(metrics.navHeight).toBeCloseTo(metrics.expectedRemainingHeight, 1);
+    expect(metrics.navInlineWidth).toBe('300px');
+    expect(metrics.menuInlineHeight).toBe(`${metrics.expectedRemainingHeight - 40}px`);
+    expect(metrics.menuHeight).toBeCloseTo(metrics.expectedRemainingHeight - 40, 1);
+    expect(metrics.buttonInlineWidth).toBe('300px');
+    expect(metrics.buttonWidth).toBeCloseTo(300, 1);
+    expect(metrics.panelInlineMarginLeft).toBe('300px');
+    expect(metrics.panelMarginLeft).toBeCloseTo(300, 1);
+    expect(metrics.panelDisplay).not.toBe('none');
+    expect(metrics.navTransition).toContain('width 0.3s');
+    expect(metrics.buttonTransition).toContain('width 0.3s');
+    expect(metrics.panelTransition).toContain('margin-left 0.3s');
+
+    await page.locator('[data-id="collection-collapse-button"]').click();
+    await expect(page.locator('[data-id="collection-content"]')).toHaveClass(/is-nav-collapsed/);
+    await page.waitForTimeout(350);
+
+    metrics = await getCollectionLayoutMetrics(page);
+    expect(metrics.navInlineWidth).toBe('80px');
+    expect(metrics.buttonInlineWidth).toBe('80px');
+    expect(metrics.panelInlineMarginLeft).toBe('80px');
+    expect(metrics.panelMarginLeft).toBeCloseTo(80, 1);
+
+    await page.setViewportSize({ width: 390, height: 844 });
+    await page.locator('[data-id="collection-collapse-button"]').click();
+    await expect(page.locator('[data-id="collection-content"]')).not.toHaveClass(/is-nav-collapsed/);
+    await page.waitForTimeout(350);
+
+    metrics = await getCollectionLayoutMetrics(page);
+    expect(metrics.navInlineWidth).toBe('390px');
+    expect(metrics.buttonInlineWidth).toBe('390px');
+    expect(metrics.panelInlineMarginLeft).toBe('0px');
+    expect(metrics.panelMarginLeft).toBeCloseTo(0, 1);
+    expect(metrics.panelDisplay).toBe('none');
   });
 
   test('renders collection empty state when no rankId is selected', async ({ page, request }) => {

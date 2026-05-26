@@ -27,11 +27,18 @@
       class="collection-page"
       :class="{ 'is-nav-collapsed': collapsed, 'is-mobile-layout': isMobileLayout }"
     >
-      <aside data-id="collection-nav" class="collection-nav" :style="{ width: `${navWidth}px` }">
+      <aside
+        data-id="collection-nav"
+        class="collection-nav"
+        :data-nav-width="navWidth"
+        :data-remaining-height="remainingHeight"
+        :style="navStyle"
+      >
         <a-button
           data-id="collection-collapse-button"
           class="collection-collapse-button"
           size="large"
+          :style="collapseButtonStyle"
           @click="toggleCollapsed"
         >
           <span v-if="collapsed" class="anticon anticon-menu-unfold" aria-hidden="true">
@@ -58,12 +65,13 @@
             :inline-collapsed="collapsed"
             :open-keys="collapsed ? [] : openKeys"
             :selected-keys="selectedMenuKeys"
+            :style="menuStyle"
             @click="handleMenuClick"
           />
         </ClientOnly>
       </aside>
 
-      <div class="collection-hidden-header" :style="{ width: `${navWidth}px` }">
+      <div class="collection-hidden-header" :style="hiddenHeaderStyle">
         <img :src="logo" alt="RankLand" width="32" height="32">
         <h2>榜单合集</h2>
       </div>
@@ -71,6 +79,7 @@
       <section
         data-id="collection-ranklist-panel"
         class="collection-ranklist-panel"
+        :style="ranklistPanelStyle"
       >
         <div data-id="collection-hydrated">{{ hydrated ? 'hydrated' : 'ssr' }}</div>
 
@@ -130,11 +139,13 @@ import {
   type CollectionLoadErrorState,
   type SelectedRanklistLoadErrorState,
 } from './collection-error';
-
-const COLLAPSED_STORAGE_KEY = 'CollectionNavCollapsed';
-const MOBILE_LAYOUT_WIDTH = 640;
-const DESKTOP_NAV_WIDTH = 300;
-const COLLAPSED_NAV_WIDTH = 80;
+import {
+  COLLECTION_COLLAPSED_STORAGE_KEY,
+  COLLECTION_MARGIN_TRANSITION,
+  COLLECTION_WIDTH_TRANSITION,
+  getCollectionLayoutState,
+  getCollectionRemainingHeight,
+} from './collection-layout';
 
 interface CollectionAsyncDataState {
   collection?: IApiCollection;
@@ -182,8 +193,11 @@ const CollectionPage = defineComponent({
       hydrated: false,
       isMobileLayout: false,
       renderSwitchLock: false,
+      viewportWidth: 1280,
+      remainingHeight: 0,
       theme: 'light' as 'light' | 'dark',
       themeObserver: undefined as MutationObserver | undefined,
+      bodyResizeObserver: undefined as ResizeObserver | undefined,
     };
   },
   computed: {
@@ -202,11 +216,48 @@ const CollectionPage = defineComponent({
       return this.rankId && !this.ranklistIdInvalid ? [this.rankId] : [];
     },
     navWidth(): number {
-      if (this.collapsed) {
-        return COLLAPSED_NAV_WIDTH;
-      }
-
-      return this.isMobileLayout ? window.innerWidth : DESKTOP_NAV_WIDTH;
+      return this.collectionLayout.navWidth;
+    },
+    menuHeight(): number {
+      return this.collectionLayout.menuHeight;
+    },
+    collectionLayout() {
+      return getCollectionLayoutState({
+        clientWidth: this.viewportWidth,
+        remainingHeight: this.remainingHeight,
+        collapsed: this.collapsed,
+      });
+    },
+    navStyle(): Record<string, string> {
+      return {
+        width: `${this.navWidth}px`,
+        height: `${this.remainingHeight}px`,
+        transition: COLLECTION_WIDTH_TRANSITION,
+      };
+    },
+    collapseButtonStyle(): Record<string, string> {
+      return {
+        width: `${this.navWidth}px`,
+        transition: COLLECTION_WIDTH_TRANSITION,
+      };
+    },
+    menuStyle(): Record<string, string> {
+      return {
+        height: `${this.menuHeight}px`,
+      };
+    },
+    hiddenHeaderStyle(): Record<string, string> {
+      return {
+        width: `${this.navWidth}px`,
+        transition: COLLECTION_WIDTH_TRANSITION,
+      };
+    },
+    ranklistPanelStyle(): Record<string, string | undefined> {
+      return {
+        marginLeft: this.collectionLayout.ranklistMarginLeft,
+        display: this.collectionLayout.ranklistDisplay,
+        transition: COLLECTION_MARGIN_TRANSITION,
+      };
     },
     menuItems(): ItemType[] {
       if (!this.collection) {
@@ -251,11 +302,14 @@ const CollectionPage = defineComponent({
     this.setupThemeTracking();
     this.updateViewportState();
     window.addEventListener('resize', this.updateViewportState, { passive: true });
+    this.bodyResizeObserver = new ResizeObserver(this.updateViewportState);
+    this.bodyResizeObserver.observe(document.body);
     this.cleanupInvalidRankId();
   },
   beforeUnmount() {
     window.removeEventListener('resize', this.updateViewportState);
     this.themeObserver?.disconnect();
+    this.bodyResizeObserver?.disconnect();
   },
   watch: {
     ranklistIdInvalid() {
@@ -277,8 +331,14 @@ const CollectionPage = defineComponent({
       window.location.reload();
     },
     updateViewportState() {
-      this.isMobileLayout = window.innerWidth < MOBILE_LAYOUT_WIDTH;
-      const stored = window.localStorage.getItem(COLLAPSED_STORAGE_KEY);
+      this.viewportWidth = window.innerWidth;
+      const headerHeight = document.querySelector('.ant-layout-header')?.getBoundingClientRect().height || 0;
+      this.remainingHeight = getCollectionRemainingHeight({
+        bodyClientHeight: document.body.clientHeight,
+        headerHeight,
+      });
+      this.isMobileLayout = this.collectionLayout.isMobileLayout;
+      const stored = window.localStorage.getItem(COLLECTION_COLLAPSED_STORAGE_KEY);
 
       if (stored === 'true' || stored === 'false') {
         this.collapsed = stored === 'true';
@@ -300,14 +360,14 @@ const CollectionPage = defineComponent({
     },
     toggleCollapsed() {
       this.collapsed = !this.collapsed;
-      window.localStorage.setItem(COLLAPSED_STORAGE_KEY, String(this.collapsed));
+      window.localStorage.setItem(COLLECTION_COLLAPSED_STORAGE_KEY, String(this.collapsed));
     },
     handleMenuClick(info: { key: string | number }) {
       const key = String(info.key);
       if (key === this.rankId) {
         if (this.isMobileLayout) {
           this.collapsed = true;
-          window.localStorage.setItem(COLLAPSED_STORAGE_KEY, 'true');
+          window.localStorage.setItem(COLLECTION_COLLAPSED_STORAGE_KEY, 'true');
         }
         return;
       }
@@ -320,7 +380,7 @@ const CollectionPage = defineComponent({
 
       if (this.isMobileLayout) {
         this.collapsed = true;
-        window.localStorage.setItem(COLLAPSED_STORAGE_KEY, 'true');
+        window.localStorage.setItem(COLLECTION_COLLAPSED_STORAGE_KEY, 'true');
       }
     },
     createMenuItem(item: IApiCollectionItem): ItemType {
@@ -444,11 +504,9 @@ export default routeView(CollectionPage, '/collection/:id', CollectionRPO, undef
   overflow: hidden;
   background: #f7f7f7;
   border-right: 1px solid #d9d9d9;
-  transition: width 0.3s cubic-bezier(0.2, 0, 0, 1);
 }
 
 .collection-collapse-button {
-  width: 100%;
   border-right: 0;
   border-left: 0;
   border-radius: 0;
@@ -469,7 +527,7 @@ export default routeView(CollectionPage, '/collection/:id', CollectionRPO, undef
 }
 
 .srk-collection-nav-menu {
-  flex: 1 1 auto;
+  flex: 0 0 auto;
   min-height: 0;
   overflow-x: clip;
   overflow-y: auto;
@@ -499,7 +557,6 @@ export default routeView(CollectionPage, '/collection/:id', CollectionRPO, undef
   align-items: center;
   justify-content: center;
   height: 64px;
-  transition: width 0.3s cubic-bezier(0.2, 0, 0, 1);
 }
 
 .collection-hidden-header img {
@@ -531,14 +588,8 @@ export default routeView(CollectionPage, '/collection/:id', CollectionRPO, undef
   box-sizing: border-box;
   min-width: 0;
   max-width: 100vw;
-  margin-left: 300px;
   overflow-x: auto;
   padding: 16px;
-  transition: margin-left 0.3s cubic-bezier(0.2, 0, 0, 1);
-}
-
-.collection-page.is-nav-collapsed .collection-ranklist-panel {
-  margin-left: 80px;
 }
 
 .collection-state,
@@ -550,18 +601,12 @@ export default routeView(CollectionPage, '/collection/:id', CollectionRPO, undef
 @media (max-width: 640px) {
   .collection-nav {
     top: 56px;
-    height: calc(100vh - 56px);
     border-right: 0;
     border-bottom: 1px solid #d9d9d9;
   }
 
   .collection-ranklist-panel {
-    margin-left: 0;
     padding: 12px;
-  }
-
-  .collection-page:not(.is-nav-collapsed) .collection-ranklist-panel {
-    display: none;
   }
 }
 </style>
