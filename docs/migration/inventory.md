@@ -10,6 +10,7 @@
 | `/collection/:id` | `rankland-fe/src/pages/collection/[id].tsx` | `src/client/modules/collection/collection.view.vue` | SSR |
 | `/playground` | `rankland-fe/src/pages/playground/index.tsx` | `src/client/modules/playground/playground.view.vue` | CSR |
 | `/live/:id` | `rankland-fe/src/pages/live/[id].tsx` | `src/client/modules/live/live.view.vue` | CSR |
+| `/:catchAll(.*)` | `rankland-fe/src/pages/404.tsx` | `src/client/modules/fallback/not-found.view.vue` | CSR fallback |
 
 ## Shared Source Components
 

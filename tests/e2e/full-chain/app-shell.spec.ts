@@ -217,6 +217,20 @@ test.describe('app shell full-chain behavior', () => {
     await expect(page.locator('[data-id="search-page"]')).toBeVisible();
   });
 
+  test('renders the legacy fallback 404 copy and spacing for unknown public routes', async ({ page, request }) => {
+    await denyExternalCalls(page);
+    await request.post(`${mockBaseURL}/__reset`);
+
+    const response = await page.goto('/unknown-public-route');
+
+    expect(response).not.toBeNull();
+    expect(response?.status()).toBe(404);
+    await expect(page.locator('[data-id="fallback-not-found"]')).toHaveText('404 Not Found · 你来到了榜单荒地');
+    await expect(page.locator('[data-id="fallback-not-found"]')).toHaveCSS('margin-top', '128px');
+    await expect(page.locator('[data-id="fallback-not-found"]')).toHaveCSS('font-size', '20px');
+    await expect(page.locator('[data-id="fallback-not-found"]')).toHaveCSS('text-align', 'center');
+  });
+
   test('initializes analytics once and sends pageviews for initial and CSR navigation routes', async ({
     page,
     request,
