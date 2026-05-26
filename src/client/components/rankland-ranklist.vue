@@ -1004,7 +1004,7 @@ export default defineComponent({
   justify-content: center;
   gap: 8px;
   margin: 4px 0 0;
-  font-size: 13px;
+  font-size: 14px;
 }
 
 .rankland-ranklist-header-actions {
@@ -1019,7 +1019,7 @@ export default defineComponent({
 .rankland-ranklist-ref-links {
   margin: 0;
   color: var(--rankland-legacy-text-color);
-  font-size: 13px;
+  font-size: 14px;
 }
 
 .rankland-ranklist-ref-link-extra-action {
@@ -1060,7 +1060,7 @@ export default defineComponent({
 .rankland-ranklist-time {
   margin: 0;
   color: var(--rankland-legacy-text-color);
-  font-size: 13px;
+  font-size: 14px;
 }
 
 .rankland-ranklist-progress {

@@ -137,6 +137,24 @@ async function getRanklistHeaderTitlePresentation(page: Page) {
   });
 }
 
+async function getRanklistHeaderTextSizes(page: Page) {
+  return page.evaluate(() => {
+    const viewCount = document.querySelector<HTMLElement>('[data-id="rankland-ranklist-view-count"]');
+    const contributors = document.querySelector<HTMLElement>('[data-id="rankland-ranklist-contributors"]');
+    const refLinks = document.querySelector<HTMLElement>('[data-id="rankland-ranklist-ref-links"]');
+    const time = document.querySelector<HTMLElement>('[data-id="rankland-ranklist-time"]');
+    if (!viewCount || !contributors || !refLinks || !time) {
+      throw new Error('Missing ranklist header text-size target');
+    }
+    return {
+      viewCountFontSize: window.getComputedStyle(viewCount).fontSize,
+      contributorsFontSize: window.getComputedStyle(contributors).fontSize,
+      refLinksFontSize: window.getComputedStyle(refLinks).fontSize,
+      timeFontSize: window.getComputedStyle(time).fontSize,
+    };
+  });
+}
+
 async function getRanklistLinkColors(page: Page) {
   return page.evaluate(() => {
     const viewCount = document.querySelector<HTMLElement>('[data-id="rankland-ranklist-view-count"]');
@@ -343,6 +361,12 @@ test.describe('/ranklist/:id full-chain route', () => {
       fontSize: '32px',
       fontWeight: '500',
       marginBottom: '4px',
+    });
+    expect(await getRanklistHeaderTextSizes(page)).toMatchObject({
+      viewCountFontSize: '14px',
+      contributorsFontSize: '14px',
+      refLinksFontSize: '14px',
+      timeFontSize: '14px',
     });
     await expect(page.locator('[data-id="rankland-ranklist-view-count"]')).toHaveText('42');
     await expect(page.locator('[data-id="rankland-ranklist-view-count"] .anticon-eye')).toBeVisible();
