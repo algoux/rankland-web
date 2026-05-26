@@ -154,6 +154,7 @@ test.describe('/playground full-chain route', () => {
     await expect(page.locator('[data-id="playground-invalid-json"]')).toContainText(
       'Input valid srk JSON and press Ctrl/Cmd + S to preview',
     );
+    await expect(page.locator('[data-id="playground-invalid-json"] pre')).toHaveCount(0);
 
     const requests = await readRequests(request);
     expect(requests).toHaveLength(0);

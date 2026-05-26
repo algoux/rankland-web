@@ -81,7 +81,6 @@
             <a-tag color="blue" class="playground-shortcut-tag">Ctrl/Cmd + S</a-tag>
             to preview
           </h3>
-          <pre>{{ parseState.message }}</pre>
         </div>
 
         <section v-else data-id="playground-preview" class="playground-preview">
