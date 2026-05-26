@@ -12,9 +12,11 @@
       </router-link>
     </section>
 
-    <section v-else-if="hasGenericError" data-id="ranklist-error">
+    <section v-else-if="hasGenericError" data-id="ranklist-error" class="ranklist-state">
       <p>An error occurred while loading data</p>
-      <button type="button" @click="refresh">Refresh</button>
+      <a-button data-id="ranklist-refresh" type="primary" size="small" @click="refresh">
+        Refresh
+      </a-button>
     </section>
 
     <section v-else-if="!ranklist" data-id="ranklist-loading">
@@ -138,7 +140,7 @@ export default routeView(RanklistPage, '/ranklist/:id', RanklistRPO, undefined, 
 
 <style lang="less" scoped>
 .ranklist-state {
-  padding-top: 64px;
+  margin-top: 64px;
   text-align: center;
 }
 

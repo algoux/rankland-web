@@ -561,6 +561,33 @@ test.describe('/ranklist/:id full-chain route', () => {
     expect(rankRequests).toHaveLength(1);
   });
 
+  test('renders the legacy ranklist load error state with Ant Design refresh action', async ({ page, request }) => {
+    await denyExternalCalls(page);
+    await request.post(`${mockBaseURL}/__reset`);
+    await request.post(`${mockBaseURL}/__fail-ranklist/test-key`);
+
+    const response = await page.goto('/ranklist/test-key');
+
+    expect(response).not.toBeNull();
+    expect(response?.ok()).toBe(true);
+    await expect(page).toHaveTitle('RankLand');
+    await expect(page.locator('[data-id="ranklist-error"]')).toBeVisible();
+    await expect(page.locator('[data-id="ranklist-error"] p')).toHaveText('An error occurred while loading data');
+    await expect(page.locator('[data-id="ranklist-error"]')).toHaveCSS('margin-top', '64px');
+    await expect(page.locator('[data-id="ranklist-error"]')).toHaveCSS('text-align', 'center');
+    await expect(page.locator('[data-id="ranklist-refresh"]')).toHaveText('Refresh');
+    await expect(page.locator('[data-id="ranklist-refresh"]')).toHaveClass(/ant-btn-primary/);
+    await expect(page.locator('[data-id="ranklist-refresh"]')).toHaveClass(/ant-btn-sm/);
+
+    const requestsResponse = await request.get(`${mockBaseURL}/__requests`);
+    const requests = (await requestsResponse.json()) as Array<{ path: string }>;
+    const rankRequests = requests.filter((requestRecord) => requestRecord.path === '/rank/test-key');
+    const srkFileRequests = requests.filter((requestRecord) => requestRecord.path === '/file/download');
+
+    expect(rankRequests).toHaveLength(1);
+    expect(srkFileRequests).toHaveLength(0);
+  });
+
   test('renders legacy Ant Design filter controls and preserves filtering behavior', async ({ page, request }) => {
     await denyExternalCalls(page);
     await request.post(`${mockBaseURL}/__reset`);
