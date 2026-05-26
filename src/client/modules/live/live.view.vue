@@ -86,6 +86,10 @@ import {
   type DisplayedScrollSolutionItem,
   type QueuedScrollSolutionItem,
 } from './live-scroll-solution-state';
+import {
+  getLiveWebSocketReconnectDelay,
+  getNextLiveWebSocketReconnectAttempt,
+} from './live-websocket-reconnect';
 import { parseRealtimeSolutionBuffer } from './realtime-solutions';
 
 function firstQueryString(value: unknown): string | undefined {
@@ -136,6 +140,9 @@ const LivePage = defineComponent({
       loadingRunId: 0,
       pollRanklistTimer: undefined as number | undefined,
       ws: null as WebSocket | null,
+      scrollSolutionConnectionRunId: 0,
+      scrollSolutionReconnectAttempt: 0,
+      scrollSolutionReconnectTimer: undefined as number | undefined,
       scrollSolutionStatus: 'disabled',
       scrollSolutions: [] as DisplayedScrollSolutionItem[],
       scrollSolutionQueue: [] as QueuedScrollSolutionItem[],
@@ -250,6 +257,8 @@ const LivePage = defineComponent({
         window.clearInterval(this.pollRanklistTimer);
         this.pollRanklistTimer = undefined;
       }
+      this.scrollSolutionConnectionRunId += 1;
+      this.cancelScrollSolutionReconnect();
       if (this.ws) {
         this.ws.close();
         this.ws = null;
@@ -279,6 +288,13 @@ const LivePage = defineComponent({
         window.clearTimeout(this.scrollSolutionPopTimer);
         this.scrollSolutionPopTimer = undefined;
       }
+    },
+    cancelScrollSolutionReconnect() {
+      if (this.scrollSolutionReconnectTimer !== undefined) {
+        window.clearTimeout(this.scrollSolutionReconnectTimer);
+        this.scrollSolutionReconnectTimer = undefined;
+      }
+      this.scrollSolutionReconnectAttempt = 0;
     },
     pushScrollSolutions(rows: QueuedScrollSolutionItem[]) {
       const next = enqueueScrollSolutions(this.scrollSolutionQueue, rows);
@@ -332,14 +348,29 @@ const LivePage = defineComponent({
         return;
       }
 
+      this.cancelScrollSolutionReconnect();
+      this.connectScrollSolutionSocket(0, this.scrollSolutionConnectionRunId);
+    },
+    connectScrollSolutionSocket(attempt: number, runId: number) {
+      if (!this.info?.id || !this.scrollSolutionEnabled || runId !== this.scrollSolutionConnectionRunId) {
+        return;
+      }
+
       try {
         const tokenQuery = this.tokenQuery ? `?token=${encodeURIComponent(this.tokenQuery)}` : '';
         const ws = new WebSocket(`${getLiveWebSocketBase()}/ranking/record/${this.info.id}${tokenQuery}`);
         ws.binaryType = 'arraybuffer';
         ws.addEventListener('open', () => {
+          if (runId !== this.scrollSolutionConnectionRunId) {
+            return;
+          }
           this.scrollSolutionStatus = 'connected';
+          this.scrollSolutionReconnectAttempt = 0;
         });
         ws.addEventListener('message', (event) => {
+          if (runId !== this.scrollSolutionConnectionRunId) {
+            return;
+          }
           if (!(event.data instanceof ArrayBuffer)) {
             return;
           }
@@ -363,16 +394,30 @@ const LivePage = defineComponent({
             },
           ]);
         });
-        ws.addEventListener('close', () => {
-          this.scrollSolutionStatus = 'error';
-        });
-        ws.addEventListener('error', () => {
-          this.scrollSolutionStatus = 'error';
-        });
+        ws.addEventListener('close', () => this.handleScrollSolutionSocketFailure(runId));
+        ws.addEventListener('error', () => this.handleScrollSolutionSocketFailure(runId));
         this.ws = ws;
       } catch (error) {
-        this.scrollSolutionStatus = 'error';
+        this.handleScrollSolutionSocketFailure(runId);
       }
+    },
+    handleScrollSolutionSocketFailure(runId: number) {
+      if (!this.info?.id || !this.scrollSolutionEnabled || runId !== this.scrollSolutionConnectionRunId) {
+        return;
+      }
+      if (this.scrollSolutionReconnectTimer !== undefined) {
+        return;
+      }
+
+      const attempt = this.scrollSolutionReconnectAttempt;
+      const delay = getLiveWebSocketReconnectDelay(attempt);
+      this.scrollSolutionReconnectAttempt = getNextLiveWebSocketReconnectAttempt(attempt);
+      this.scrollSolutionStatus = 'reconnecting';
+      this.ws = null;
+      this.scrollSolutionReconnectTimer = window.setTimeout(() => {
+        this.scrollSolutionReconnectTimer = undefined;
+        this.connectScrollSolutionSocket(this.scrollSolutionReconnectAttempt, runId);
+      }, delay);
     },
     handleScrollSolutionToggle(event: Event) {
       const checked = (event.target as HTMLInputElement).checked;

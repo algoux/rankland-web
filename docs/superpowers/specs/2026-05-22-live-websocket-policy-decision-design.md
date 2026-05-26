@@ -27,6 +27,8 @@ Do not add automatic WebSocket reconnect in the migration parity phase.
 
 This preserves the old public behavior and avoids introducing new event duplication, queue ordering, lifecycle, or token-refresh semantics during migration. A reconnect/backoff design may be added later as a product improvement, but it should be specified separately from React-to-Vue parity.
 
+Update 2026-05-26: that later product-improvement phase is now specified in `docs/superpowers/specs/2026-05-26-live-reconnect-parity-design.md` and implemented as bounded automatic reconnect/backoff. This earlier decision remains the historical migration-parity record.
+
 ## Non-Goals
 
 This decision slice does not change runtime code, retry behavior, socket.io producer behavior, realtime event rendering, or scroll-solution visual styling.

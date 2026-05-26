@@ -42,6 +42,14 @@ async function emitRealtimeSolution(page: Page, url: string) {
   );
 }
 
+async function readRanklandWebSocketUrls(page: Page) {
+  return page.evaluate(() =>
+    ((window as unknown as { __ranklandWsUrls?: string[] }).__ranklandWsUrls || []).filter((url) =>
+      url.includes('/ranking/record/'),
+    ),
+  );
+}
+
 async function stubClipboard(page: Page) {
   await page.addInitScript(() => {
     Object.defineProperty(navigator, 'clipboard', {
@@ -163,9 +171,7 @@ test.describe('/live/:id full-chain route', () => {
     await expect(solutionModal.locator('.srk-modal')).toBeHidden();
 
     await expect
-      .poll(async () =>
-        page.evaluate(() => (window as unknown as { __ranklandWsUrls?: string[] }).__ranklandWsUrls || []),
-      )
+      .poll(async () => readRanklandWebSocketUrls(page))
       .toContain(`ws://127.0.0.1:${mockPort}/ranking/record/live-rid-1?token=t0`);
 
     await page.evaluate(
@@ -195,9 +201,14 @@ test.describe('/live/:id full-chain route', () => {
         }
       ).__ranklandEmitWsError(url);
     }, `ws://127.0.0.1:${mockPort}/ranking/record/live-rid-1?token=t0`);
-    await expect(page.locator('[data-id="live-scroll-solution-status"]')).toHaveText('error');
+    await expect(page.locator('[data-id="live-scroll-solution-status"]')).toHaveText('reconnecting');
     await expect(page.locator('[data-id="live-ranklist-content"]')).toBeVisible();
     await expect(page.locator('.srk-user-cell', { hasText: 'Team Alpha' })).toBeVisible();
+    await expect.poll(async () => readRanklandWebSocketUrls(page)).toEqual([
+      `ws://127.0.0.1:${mockPort}/ranking/record/live-rid-1?token=t0`,
+      `ws://127.0.0.1:${mockPort}/ranking/record/live-rid-1?token=t0`,
+    ]);
+    await expect(page.locator('[data-id="live-scroll-solution-status"]')).toHaveText('connected');
 
     const requests = await readRequests(request);
     const liveInfoRequests = requests.filter((requestRecord) => requestRecord.path === '/ranking/config/live-test-key');
@@ -386,7 +397,7 @@ test.describe('/live/:id full-chain route', () => {
       .toContain(wsUrl);
   });
 
-  test('reports unexpected WebSocket close as a realtime error while keeping the ranklist visible', async ({
+  test('reconnects after unexpected WebSocket close while keeping the ranklist visible', async ({
     page,
     request,
   }) => {
@@ -406,8 +417,12 @@ test.describe('/live/:id full-chain route', () => {
       ).__ranklandEmitWsClose(url);
     }, wsUrl);
 
-    await expect(page.locator('[data-id="live-scroll-solution-status"]')).toHaveText('error');
+    await expect(page.locator('[data-id="live-scroll-solution-status"]')).toHaveText('reconnecting');
     await expect(page.locator('[data-id="live-ranklist-content"]')).toBeVisible();
     await expect(page.locator('.srk-user-cell', { hasText: 'Team Alpha' })).toBeVisible();
+    await expect
+      .poll(async () => readRanklandWebSocketUrls(page))
+      .toEqual([wsUrl, wsUrl]);
+    await expect(page.locator('[data-id="live-scroll-solution-status"]')).toHaveText('connected');
   });
 });
