@@ -62,7 +62,7 @@ git status --short --branch
 备注：
 
 ```text
-2026-05-27 最新记录：srk header action icon color parity 已通过 focused RED/GREEN、完整 `test:migration`（build、35 unit files / 151 unit tests、1 SSR smoke test、1 shallow Playwright test、53 full-chain Playwright tests）和 `git diff --check`。
+2026-05-27 最新记录：search load error color parity 已通过 focused RED/GREEN、完整 `test:migration`（build、35 unit files / 151 unit tests、1 SSR smoke test、1 shallow Playwright test、54 full-chain Playwright tests）和 `git diff --check`。
 ```
 
 ## 全局外壳与跨路由行为
@@ -159,6 +159,7 @@ App shell Ant Design Vue Layout/Menu/Dropdown/Button、旧版全局 body light/d
 - `[x]` `kw` 查询展示匹配结果
 - `[x]` 空 `kw` 按最近榜单状态处理
 - `[x]` 最近榜单空状态保留旧版 `mt-2` 间距，并在深色模式下使用旧版 Ant Design 正文色
+- `[x]` 初始化失败状态保留旧版文案、`mt-10` 间距和 `text-red-500` 错误色
 - `[x]` 结果数量展示或选择器文案可接受
 - `[x]` 搜索结果卡片和链接跳转正确
 - `[x]` 浏览器后退、前进行为可接受
@@ -174,7 +175,7 @@ App shell Ant Design Vue Layout/Menu/Dropdown/Button、旧版全局 body light/d
 备注：
 
 ```text
-2026-05-26 复核：search full-chain 覆盖 CSR listAll、hydration marker 视觉隐藏、Fuse 本地搜索、空 kw、zero-result summary-only、Ant Design Input.Search/List/Spin、最近榜单空状态旧版 `mt-2` 间距和暗色正文色、网络请求无非预期 upstream/external call。
+2026-05-27 复核：search full-chain 覆盖 CSR listAll、hydration marker 视觉隐藏、Fuse 本地搜索、空 kw、zero-result summary-only、Ant Design Input.Search/List/Spin、初始化失败状态旧版文案、40px 顶部间距和 `text-red-500` 颜色、最近榜单空状态旧版 `mt-2` 间距和暗色正文色、网络请求无非预期 upstream/external call。
 ```
 
 ## 榜单详情页 `/ranklist/:id`

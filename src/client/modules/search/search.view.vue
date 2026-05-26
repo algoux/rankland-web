@@ -226,7 +226,7 @@ export default routeView(SearchPage, '/search');
 }
 
 .search-error {
-  color: #b42318;
+  color: #ef4444;
 }
 
 .search-section-title {

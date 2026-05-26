@@ -101,6 +101,31 @@ test.describe('/search full-chain route', () => {
     await expect(page.locator('[data-id="search-recent-section"]')).toBeVisible();
   });
 
+  test('renders the legacy search load error color when ranklist initialization fails', async ({
+    page,
+    request,
+  }) => {
+    await denyExternalCalls(page);
+    await request.post(`${mockBaseURL}/__reset`);
+    await page.route('**/rank/listall', async (route) => {
+      await route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify({ code: 500, message: 'mock listall failure', data: null }),
+      });
+    });
+
+    const response = await page.goto('/search');
+
+    expect(response).not.toBeNull();
+    expect(response?.ok()).toBe(true);
+    await expect(page.locator('[data-id="search-error"]')).toHaveText(
+      '初始化榜单数据库失败，请刷新再试。',
+    );
+    await expect(page.locator('[data-id="search-error"]')).toHaveCSS('margin-top', '40px');
+    await expect(page.locator('[data-id="search-error"]')).toHaveCSS('color', 'rgb(239, 68, 68)');
+  });
+
   test('renders the recent empty state with the legacy mt-2 spacing', async ({ page, request }) => {
     await denyExternalCalls(page);
     await request.post(`${mockBaseURL}/__reset`);
