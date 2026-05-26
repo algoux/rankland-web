@@ -1045,11 +1045,27 @@ export default defineComponent({
   border-radius: 0;
   background: transparent;
   box-shadow: none;
+  color: var(--rankland-link-color);
+}
+
+.rankland-ranklist-header-actions .rankland-ranklist-header-action-trigger:hover,
+.rankland-ranklist-header-actions .rankland-ranklist-header-action-trigger:focus {
+  background: transparent;
+  color: var(--rankland-link-hover-color);
+}
+
+.rankland-ranklist-header-actions .rankland-ranklist-header-action-trigger :deep(.anticon) {
+  color: inherit;
 }
 
 .rankland-ranklist-header-actions .rankland-ranklist-header-action-separated {
   padding-left: 8px;
   border-left: 1px solid #9ca3af;
+}
+
+.rankland-ranklist-header-actions .rankland-ranklist-header-action-separated:hover,
+.rankland-ranklist-header-actions .rankland-ranklist-header-action-separated:focus {
+  border-left-color: #9ca3af;
 }
 
 .rankland-ranklist-action-status {

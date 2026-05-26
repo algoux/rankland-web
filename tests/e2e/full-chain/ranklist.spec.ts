@@ -95,6 +95,7 @@ async function getHeaderActionTriggerStyle(page: Page, selector: string) {
       borderRightWidth: style.borderRightWidth,
       borderBottomWidth: style.borderBottomWidth,
       borderRadius: style.borderRadius,
+      color: style.color,
     };
   });
 }
@@ -468,8 +469,15 @@ test.describe('/ranklist/:id full-chain route', () => {
         borderRightWidth: '0px',
         borderBottomWidth: '0px',
         borderRadius: '0px',
+        color: 'rgb(255, 129, 4)',
       });
     }
+    await page.locator('[data-id="rankland-ranklist-export-menu-button"]').hover();
+    await expect(page.locator('[data-id="rankland-ranklist-export-menu-button"]')).toHaveCSS(
+      'color',
+      'rgb(255, 157, 46)',
+    );
+    await page.mouse.move(10, 10);
     await page.locator('[data-id="rankland-ranklist-export-menu-button"]').hover();
     await expect(page.locator('[data-id="rankland-ranklist-export-menu-group"]')).toContainText('导出为');
     await page.mouse.move(10, 10);
@@ -860,6 +868,20 @@ test.describe('/ranklist/:id full-chain route', () => {
       refLinkLineColor: 'rgba(255, 255, 255, 0.85)',
       footerContactTriggerColor: 'rgb(246, 172, 6)',
     });
+    for (const selector of [
+      '[data-id="rankland-ranklist-export-menu-button"]',
+      '[data-id="rankland-ranklist-share-menu-button"]',
+    ]) {
+      expect(await getHeaderActionTriggerStyle(page, selector)).toMatchObject({
+        color: 'rgb(246, 172, 6)',
+      });
+    }
+    await page.locator('[data-id="rankland-ranklist-export-menu-button"]').hover();
+    await expect(page.locator('[data-id="rankland-ranklist-export-menu-button"]')).toHaveCSS(
+      'color',
+      'rgb(167, 119, 11)',
+    );
+    await page.mouse.move(10, 10);
     await page.locator('[data-id="rankland-ranklist-ref-links"] a').first().hover();
     await expect(page.locator('[data-id="rankland-ranklist-ref-links"] a').first()).toHaveCSS(
       'color',

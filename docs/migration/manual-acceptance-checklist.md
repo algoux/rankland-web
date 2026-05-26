@@ -62,7 +62,7 @@ git status --short --branch
 备注：
 
 ```text
-2026-05-27 最新记录：srk header text size parity 已通过 focused RED/GREEN、完整 `test:migration`（build、35 unit files / 151 unit tests、1 SSR smoke test、1 shallow Playwright test、53 full-chain Playwright tests）和 `git diff --check`。
+2026-05-27 最新记录：srk header action icon color parity 已通过 focused RED/GREEN、完整 `test:migration`（build、35 unit files / 151 unit tests、1 SSR smoke test、1 shallow Playwright test、53 full-chain Playwright tests）和 `git diff --check`。
 ```
 
 ## 全局外壳与跨路由行为
@@ -192,6 +192,7 @@ App shell Ant Design Vue Layout/Menu/Dropdown/Button、旧版全局 body light/d
 - `[x]` 有效榜单的 SRK 表格渲染达到验收标准
 - `[x]` SRK header title 使用旧版 `h1.text-center.mb-1` 的 32px/500/4px 标题排版
 - `[x]` SRK header meta、贡献者、相关链接和时间使用旧版 Ant Design body 14px 字号
+- `[x]` SRK header 导出/分享操作图标使用旧版 light/dark 链接主色和 hover 色
 - `[x]` SRK 备注 pill 使用旧版 light/dark primary rgba 边框
 - `[x]` 缺失榜单展示 Not Found
 - `[x]` 筛选和进度控制可用
@@ -217,7 +218,7 @@ App shell Ant Design Vue Layout/Menu/Dropdown/Button、旧版全局 body light/d
 备注：
 
 ```text
-2026-05-27 复核：ranklist full-chain 覆盖 SSR/hydration、Not Found、Gym Ghost/VJudge/XLSX 下载、iframe 嵌入代码、hover 打开/关闭导出和分享 dropdown、SRK wrapper header/filter/progress/table/footer/user-modal/rank-time 多项旧版视觉行为；其中 header title 旧版 32px/500/4px 排版、header meta/贡献者/相关链接/时间旧版 14px 字号、header meta 到 contributors 的旧版 0px 额外间距、SRK 备注 pill light `rgba(255, 129, 4, 0.8)` 与 dark `rgba(246, 172, 6, 0.8)` 边框、header ref-link/footer contact trigger light `#ff8104` 与 dark `#f6ac06` 链接色已有 computed layout/style 断言。
+2026-05-27 复核：ranklist full-chain 覆盖 SSR/hydration、Not Found、Gym Ghost/VJudge/XLSX 下载、iframe 嵌入代码、hover 打开/关闭导出和分享 dropdown、SRK wrapper header/filter/progress/table/footer/user-modal/rank-time 多项旧版视觉行为；其中 header title 旧版 32px/500/4px 排版、header meta/贡献者/相关链接/时间旧版 14px 字号、header meta 到 contributors 的旧版 0px 额外间距、header 导出/分享操作图标 light `#ff8104` 与 dark `#f6ac06` 主色及 light `#ff9d2e` 与 dark `#a7770b` hover 色、SRK 备注 pill light `rgba(255, 129, 4, 0.8)` 与 dark `rgba(246, 172, 6, 0.8)` 边框、header ref-link/footer contact trigger light `#ff8104` 与 dark `#f6ac06` 链接色已有 computed layout/style 断言。
 ```
 
 ## 合集页 `/collection/:id`
