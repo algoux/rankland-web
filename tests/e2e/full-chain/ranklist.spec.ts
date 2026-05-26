@@ -660,6 +660,7 @@ test.describe('/ranklist/:id full-chain route', () => {
     await expect(userModal.locator('[data-id="rankland-user-modal-segment-label"]')).toHaveClass(/bg-segment-gold/);
     const slogan = userModal.locator('[data-id="rankland-user-modal-slogan"]');
     await expect(slogan).toHaveText('Keep moving forward');
+    await expect(slogan).toHaveClass(/(^|\s)slogan(\s|$)/);
     const sloganStyle = await slogan.evaluate((element) => {
       const style = window.getComputedStyle(element);
       const beforeStyle = window.getComputedStyle(element, '::before');
