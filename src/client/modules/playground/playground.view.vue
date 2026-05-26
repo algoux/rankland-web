@@ -365,7 +365,7 @@ export default routeView(PlaygroundPage, '/playground');
 }
 
 .playground-state {
-  margin-top: 48px;
+  margin-top: 64px;
   text-align: center;
 
   h3 {
