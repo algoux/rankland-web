@@ -280,7 +280,7 @@
             <div
               v-if="activeUserTeamMembers.length > 0"
               data-id="rankland-user-modal-team-members"
-              class="rankland-user-modal-team-members user-modal-info-team-members"
+              class="rankland-user-modal-team-members user-modal-info-team-members mt-2"
             >
               <template v-for="(member, memberIndex) in activeUserTeamMembers" :key="memberIndex">
                 <span

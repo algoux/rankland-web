@@ -572,17 +572,20 @@ test.describe('/ranklist/:id full-chain route', () => {
     const teamMembers = userModal.locator('[data-id="rankland-user-modal-team-members"]');
     await expect(teamMembers.locator('[data-id="rankland-user-modal-team-member"]')).toContainText(['Alice', 'Bob']);
     await expect(teamMembers.locator('[data-id="rankland-user-modal-team-separator"]')).toHaveText('/');
+    await expect(teamMembers).toHaveClass(/(^|\s)mt-2(\s|$)/);
     const teamMemberStyle = await teamMembers.evaluate((element) => {
       const style = window.getComputedStyle(element);
       return {
         display: style.display,
         opacity: style.opacity,
+        marginTop: style.marginTop,
         paddingTop: style.paddingTop,
       };
     });
     expect(teamMemberStyle).toMatchObject({
       display: 'block',
       opacity: '0.8',
+      marginTop: '8px',
       paddingTop: '6px',
     });
     const separatorStyle = await teamMembers
