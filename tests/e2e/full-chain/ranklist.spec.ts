@@ -116,6 +116,17 @@ async function getProgressToControlsGap(page: Page) {
   });
 }
 
+async function getTimeToProgressGap(page: Page) {
+  return page.evaluate(() => {
+    const time = document.querySelector<HTMLElement>('[data-id="rankland-ranklist-time"]');
+    const progress = document.querySelector<HTMLElement>('[data-id="rankland-ranklist-progress"]');
+    if (!time || !progress) {
+      throw new Error('Missing ranklist time or progress');
+    }
+    return Math.round(progress.getBoundingClientRect().top - time.getBoundingClientRect().bottom);
+  });
+}
+
 async function getFooterParagraphSpacing(page: Page) {
   return page.evaluate(() => {
     const paragraphs = Array.from(
@@ -223,6 +234,7 @@ test.describe('/ranklist/:id full-chain route', () => {
     await expect(page.locator('[data-id="rankland-ranklist-progress"]')).toBeVisible();
     await expect(page.locator('[data-id="rankland-ranklist-filters"]')).toBeVisible();
     expect(await getTableWrapperMarginLeft(page)).toBe('16px');
+    expect(await getTimeToProgressGap(page)).toBe(5);
     expect(await getProgressToControlsGap(page)).toBe(12);
     expect(await getControlsToTableGap(page)).toBe(24);
     const remarks = page.locator('[data-id="rankland-ranklist-table-wrapper"] .srk-remarks');

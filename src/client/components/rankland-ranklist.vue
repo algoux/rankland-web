@@ -922,7 +922,7 @@ export default defineComponent({
 }
 
 .rankland-ranklist-header {
-  margin-bottom: 12px;
+  margin-bottom: 0;
   text-align: center;
 }
 
