@@ -92,6 +92,12 @@ test.describe('/playground full-chain route', () => {
     await expect(page.locator('[data-id="playground-welcome-modal"]')).toBeVisible();
     await expect(page.locator('[data-id="playground-welcome-modal"]')).toContainText('欢迎来到演练场！');
     await expect(page.locator('[data-id="playground-welcome-modal"]')).toContainText('调试标准榜单格式');
+    await expect(page.locator('[data-id="playground-welcome-modal"]')).toContainText(
+      '需要参考 srk 文档？请点击右上角的',
+    );
+    await expect(page.locator('[data-id="playground-welcome-modal"] .anticon-question-circle')).toBeVisible();
+    await expect(page.locator('[data-id="playground-welcome-modal"]')).toContainText('图标。');
+    await expect(page.locator('[data-id="playground-welcome-modal"]')).not.toContainText('页面中的 srk 文档入口');
 
     await page.locator('[data-id="playground-welcome-ok"]').click();
 

@@ -93,7 +93,9 @@
         <h2>欢迎来到演练场！</h2>
         <p>你可以调试标准榜单格式（srk）数据并实时预览效果，推荐使用桌面端设备。</p>
         <p>如果你是 OJ 开发者、Ranklist 贡献者或对此感兴趣，演练场可以帮助你直观地了解 srk 的字段及其作用。</p>
-        <p>需要参考 srk 文档？请点击页面中的 srk 文档入口。</p>
+        <p>
+          需要参考 srk 文档？请点击右上角的 <QuestionCircleOutlined /> 图标。
+        </p>
       </div>
       <template #footer>
         <a-button data-id="playground-welcome-ok" type="primary" @click="confirmWelcome">
