@@ -16,12 +16,9 @@
         class="search-input"
         placeholder="输入关键词搜索"
         allow-clear
+        enter-button
         @search="submitSearch"
-      >
-        <template #enterButton>
-          <a-button data-id="search-submit" type="primary">搜索</a-button>
-        </template>
-      </a-input-search>
+      />
 
       <a-spin v-if="loading" data-id="search-loading" class="search-state" />
 

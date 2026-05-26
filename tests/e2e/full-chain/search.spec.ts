@@ -66,7 +66,9 @@ test.describe('/search full-chain route', () => {
     await expect(page.locator('h3.mb-6', { hasText: '在榜单数据库中探索' })).toBeVisible();
     await expect(page.locator('.ant-input-search:has([data-id="search-input"])')).toBeVisible();
     await expect(page.locator('[data-id="search-input"].ant-input')).toBeVisible();
-    await expect(page.locator('[data-id="search-submit"].ant-btn-primary')).toBeVisible();
+    await expect(page.locator('.ant-input-search-button.ant-btn-primary')).toBeVisible();
+    await expect(page.locator('.ant-input-search-button .anticon-search')).toBeVisible();
+    await expect(page.locator('.ant-input-search-button')).toHaveText('');
     await expect(page.locator('[data-id="search-recent-section"]')).toBeVisible();
     await expect(page.locator('[data-id="search-recent-section"] .ant-list.ant-list-sm')).toBeVisible();
     await expect(page.locator('[data-id="search-recent-section"] .search-list')).toHaveCSS('margin-top', '8px');
@@ -254,7 +256,7 @@ test.describe('/search full-chain route', () => {
     await expect(page.locator('[data-id="search-page"]')).toHaveCSS('padding-right', '50px');
     await expectNoHorizontalDocumentOverflow(page);
     await expectElementWithinViewport(page.locator('[data-id="search-input"]'), page);
-    await expectElementWithinViewport(page.locator('[data-id="search-submit"]'), page);
+    await expectElementWithinViewport(page.locator('.ant-input-search-button'), page);
     await expectElementWithinViewport(page.locator('[data-id="search-ranklist-item"]').first(), page);
     await page.screenshot({ path: testInfo.outputPath('search-desktop.png'), fullPage: true });
 
@@ -269,7 +271,7 @@ test.describe('/search full-chain route', () => {
     await expect(page.locator('[data-id="search-page"]')).toHaveCSS('padding-right', '20px');
     await expectNoHorizontalDocumentOverflow(page);
     await expectElementWithinViewport(page.locator('[data-id="search-input"]'), page);
-    await expectElementWithinViewport(page.locator('[data-id="search-submit"]'), page);
+    await expectElementWithinViewport(page.locator('.ant-input-search-button'), page);
     await expectElementWithinViewport(page.locator('[data-id="search-ranklist-item"]').first(), page);
     await page.screenshot({ path: testInfo.outputPath('search-mobile.png'), fullPage: true });
   });
