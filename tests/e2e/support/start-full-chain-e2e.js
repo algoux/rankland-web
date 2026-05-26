@@ -16,6 +16,7 @@ const collection = require(path.join(fixturesRoot, 'collection.json'));
 const liveInfo = require(path.join(fixturesRoot, 'live-info.json'));
 
 const requests = [];
+const failedCollectionPaths = new Set();
 const failedRanklistPaths = new Set();
 let appProcess;
 let cleanupWatcherProcess;
@@ -62,7 +63,15 @@ function routeRequest(req, res) {
 
   if (method === 'POST' && url.pathname === '/__reset') {
     requests.length = 0;
+    failedCollectionPaths.clear();
     failedRanklistPaths.clear();
+    sendJson(res, 200, { ok: true });
+    return;
+  }
+
+  if (method === 'POST' && /^\/__fail-collection\/[^/]+$/.test(url.pathname)) {
+    const uniqueKey = url.pathname.replace('/__fail-collection/', '');
+    failedCollectionPaths.add(`/rank/group/${uniqueKey}`);
     sendJson(res, 200, { ok: true });
     return;
   }
@@ -87,6 +96,11 @@ function routeRequest(req, res) {
   }
 
   if (method === 'GET' && /^\/rank\/group\/[^/]+$/.test(url.pathname)) {
+    if (failedCollectionPaths.has(url.pathname)) {
+      sendJson(res, 500, { code: 500, message: 'Forced collection failure' });
+      return;
+    }
+
     if (url.pathname === '/rank/group/missing-collection') {
       sendJson(res, 200, { code: 11, message: 'Collection not found' });
       return;

@@ -16,7 +16,9 @@
 
     <section v-else-if="hasCollectionError" data-id="collection-error" class="collection-state">
       <p>{{ collectionLoadError?.message }}</p>
-      <button type="button" @click="refresh">Refresh</button>
+      <a-button data-id="collection-refresh" type="primary" size="small" @click="refresh">
+        Refresh
+      </a-button>
     </section>
 
     <section v-else-if="!collection" data-id="collection-loading" class="collection-state">
