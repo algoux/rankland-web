@@ -410,16 +410,27 @@ import {
 } from './rankland-rank-time';
 import { formatSrkAssetUrl } from '@client/utils/srk-asset.util';
 
-function formatDateTime(timestamp: number): string {
-  return new Date(timestamp).toLocaleString('zh-CN', {
-    hour12: false,
-    year: 'numeric',
-    month: '2-digit',
-    day: '2-digit',
-    hour: '2-digit',
-    minute: '2-digit',
-    second: '2-digit',
-  });
+function padDatePart(value: number): string {
+  return String(value).padStart(2, '0');
+}
+
+function formatDateTime(timestamp: number, includeOffset = false): string {
+  const date = new Date(timestamp);
+  const offsetMinutes = -date.getTimezoneOffset();
+  const offsetSign = offsetMinutes >= 0 ? '+' : '-';
+  const absoluteOffsetMinutes = Math.abs(offsetMinutes);
+  const offsetHours = Math.floor(absoluteOffsetMinutes / 60);
+  const offsetRemainderMinutes = absoluteOffsetMinutes % 60;
+  const formattedTime = [
+    `${date.getFullYear()}-${padDatePart(date.getMonth() + 1)}-${padDatePart(date.getDate())}`,
+    `${padDatePart(date.getHours())}:${padDatePart(date.getMinutes())}:${padDatePart(date.getSeconds())}`,
+  ].join(' ');
+
+  if (!includeOffset) {
+    return formattedTime;
+  }
+
+  return `${formattedTime} ${offsetSign}${padDatePart(offsetHours)}:${padDatePart(offsetRemainderMinutes)}`;
 }
 
 interface RanklandRanklistMeta {
@@ -547,7 +558,7 @@ export default defineComponent({
     contestTimeRange(): string {
       const startAt = new Date(this.ranklist.contest.startAt).getTime();
       const endAt = startAt + formatTimeDuration(this.ranklist.contest.duration, 'ms');
-      return `${formatDateTime(startAt)} ~ ${formatDateTime(endAt)}`;
+      return `${formatDateTime(startAt)} ~ ${formatDateTime(endAt, true)}`;
     },
     hasExtraAction(): boolean {
       return !!this.$slots['extra-action'];

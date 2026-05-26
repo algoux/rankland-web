@@ -131,6 +131,12 @@ test.describe('/playground full-chain route', () => {
     );
     await expect(page.locator('[data-id="playground-preview"]')).toBeVisible();
     await expect(page.locator('[data-id="playground-row-count"]')).toHaveText('3');
+    await expect(page.locator('[data-id="rankland-ranklist-title"]')).toHaveText(
+      'ACM-ICPC World Finals 2018 (Excerpt Demo)',
+    );
+    await expect(page.locator('[data-id="rankland-ranklist-time"]')).toHaveText(
+      '2018-04-19 17:00:00 ~ 2018-04-19 22:00:00 +08:00',
+    );
     await expect(page.locator('[data-id="rankland-ranklist-filters"]')).toBeVisible();
     await expect(page.locator('[data-id="rankland-ranklist-progress"]')).toBeVisible();
     await expect(page.locator('[data-id="rankland-ranklist-organization-filter"]')).toHaveClass(/ant-select/);
