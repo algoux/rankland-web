@@ -335,25 +335,7 @@
               data-id="rankland-rank-time-panel"
               class="rankland-rank-time-panel"
             >
-              <div class="rankland-rank-time-header">
-                <h4>排名时间</h4>
-                <span data-id="rankland-rank-time-unit">单位：{{ activeUserRankTimeData.unit }}</span>
-              </div>
               <RanklandRankTimeChart :rank-time-data="activeUserRankTimeData" />
-              <p data-id="rankland-rank-time-summary" class="rankland-rank-time-summary">
-                当前主排名：{{ activeUserRankTimeLatestPoint?.rank }}，解题数：{{ activeUserRankTimeLatestPoint?.solved }}
-              </p>
-              <div class="rankland-rank-time-events">
-                <span
-                  v-for="eventPoint in activeUserRankTimeData.solvedEventPoints"
-                  :key="`${eventPoint.problemAlias}-${eventPoint.time}`"
-                  data-id="rankland-rank-time-event"
-                  class="rankland-rank-time-event"
-                >
-                  {{ eventPoint.problemAlias }} · {{ eventPoint.fb ? 'FB' : 'AC' }} ·
-                  {{ formatSolvedTime(eventPoint.solvedTime) }}
-                </span>
-              </div>
             </div>
           </div>
         </Modal>
@@ -383,7 +365,6 @@ import {
   resolveStyle,
   resolveText,
   resolveUserMarkers,
-  secToTimeStr,
 } from '@algoux/standard-ranklist-utils';
 import {
   DefaultSolutionModal,
@@ -414,7 +395,6 @@ import {
   getProperRankTimeChunkUnit,
   selectUserMainRankTimeData,
   type RankTimeDataSet,
-  type RankTimePoint,
   type SelectedUserMainRankTimeData,
 } from './rankland-rank-time';
 import { formatSrkAssetUrl } from '@client/utils/srk-asset.util';
@@ -719,10 +699,6 @@ export default defineComponent({
         fixedMarker: this.filter.marker,
       });
     },
-    activeUserRankTimeLatestPoint(): RankTimePoint | null {
-      const points = this.activeUserRankTimeData?.points || [];
-      return points[points.length - 1] || null;
-    },
     userModalWidth(): number {
       return this.viewportWidth >= 980 ? 960 : Math.max(this.viewportWidth - 20, 0);
     },
@@ -849,9 +825,6 @@ export default defineComponent({
         getSortedCalculatedRawSolutions(this.ranklist.rows),
         getProperRankTimeChunkUnit(this.ranklist.contest),
       );
-    },
-    formatSolvedTime(time: srk.TimeDuration): string {
-      return secToTimeStr(formatTimeDuration(time, 's'));
     },
     downloadSrkJson() {
       const file = createSrkExportFile(this.ranklist, this.actionName);
@@ -1185,13 +1158,6 @@ export default defineComponent({
   margin: 16px 0 0;
 }
 
-.rankland-rank-time-events {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-  margin-top: 10px;
-}
-
 .rankland-user-modal-team-members {
   display: block;
   margin-top: 8px;
@@ -1203,17 +1169,6 @@ export default defineComponent({
   color: inherit;
   font-size: 80%;
   opacity: 0.5;
-}
-
-.rankland-rank-time-event {
-  display: inline-flex;
-  align-items: center;
-  min-height: 24px;
-  padding: 2px 8px;
-  border-radius: 4px;
-  background: #f1f5f9;
-  color: #334155;
-  font-size: 12px;
 }
 
 .rankland-user-modal-markers {
@@ -1311,38 +1266,12 @@ export default defineComponent({
 }
 
 .rankland-rank-time-panel {
-  margin-top: 20px;
-  padding-top: 16px;
-  border-top: 1px solid #e5e7eb;
-}
-
-.rankland-rank-time-header {
-  display: flex;
-  align-items: baseline;
-  justify-content: space-between;
-  gap: 12px;
-  margin-bottom: 8px;
-
-  h4 {
-    margin: 0;
-    font-size: 16px;
-  }
-
-  span {
-    color: #64748b;
-    font-size: 13px;
-  }
+  margin-top: 16px;
 }
 
 .rankland-rank-time-curve {
   display: block;
   width: 100%;
-}
-
-.rankland-rank-time-summary {
-  margin: 8px 0 0;
-  color: #334155;
-  font-size: 13px;
 }
 
 .rankland-ranklist-error {

@@ -224,8 +224,23 @@ test.describe('/live/:id full-chain route', () => {
       `${mockBaseURL}/srk-assets/live-test-key/team-alpha.png`,
     );
     await expect(userModal.locator('[data-id="rankland-rank-time-panel"]')).toBeVisible();
-    await expect(userModal.locator('[data-id="rankland-rank-time-unit"]')).toHaveText('单位：min');
-    await expect(userModal.locator('[data-id="rankland-rank-time-event"]')).toContainText(['A', 'B']);
+    await expect(userModal.locator('[data-id="rankland-rank-time-unit"]')).toHaveCount(0);
+    await expect(userModal.locator('[data-id="rankland-rank-time-summary"]')).toHaveCount(0);
+    await expect(userModal.locator('[data-id="rankland-rank-time-event"]')).toHaveCount(0);
+    expect(
+      await userModal.locator('[data-id="rankland-rank-time-panel"]').evaluate((element) => {
+        const style = getComputedStyle(element);
+        return {
+          marginTop: style.marginTop,
+          paddingTop: style.paddingTop,
+          borderTopWidth: style.borderTopWidth,
+        };
+      }),
+    ).toEqual({
+      marginTop: '16px',
+      paddingTop: '0px',
+      borderTopWidth: '0px',
+    });
     const rankTimeChart = userModal.locator('[data-id="rankland-rank-time-g2-chart"]');
     await expect(rankTimeChart).toBeVisible();
     await expect(rankTimeChart).toHaveAttribute('data-chart-library', '@antv/g2');
