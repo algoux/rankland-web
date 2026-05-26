@@ -242,6 +242,15 @@ test.describe('/ranklist/:id full-chain route', () => {
       `<iframe src="http://127.0.0.1:${process.env.FULL_CHAIN_APP_PORT || '3100'}/ranklist/test-key?focus=yes" border="0" frameborder="no" framespacing="0" allowfullscreen="true" style="width: 100%; height: 600px"></iframe>`,
     );
 
+    await page.locator('.srk-user-cell', { hasText: 'Team Alpha' }).click();
+    const userModal = page.locator('[data-id="rankland-ranklist-user-modal"]');
+    await expect(userModal.locator('.srk-modal')).toBeVisible();
+    await expect(userModal.locator('[data-id="rankland-user-modal-segment"]')).toContainText('所在奖区（Rank）：');
+    await expect(userModal.locator('[data-id="rankland-user-modal-segment-label"]')).toHaveText('Gold');
+    await expect(userModal.locator('[data-id="rankland-user-modal-segment-label"]')).toHaveClass(/bg-segment-gold/);
+    await userModal.getByRole('button', { name: 'Close' }).click();
+    await expect(userModal.locator('.srk-modal')).toBeHidden();
+
     const requestsResponse = await request.get(`${mockBaseURL}/__requests`);
     const requests = (await requestsResponse.json()) as Array<{ path: string; search: string }>;
     const rankRequests = requests.filter((requestRecord) => requestRecord.path === '/rank/test-key');

@@ -246,6 +246,20 @@
                 {{ resolveTextValue(marker.label) }}
               </span>
             </div>
+            <p
+              v-if="activeUserSegment"
+              data-id="rankland-user-modal-segment"
+              class="rankland-user-modal-line rankland-user-modal-segment"
+            >
+              所在奖区（{{ activeUserSegment.seriesTitle }}）：
+              <span
+                data-id="rankland-user-modal-segment-label"
+                class="rankland-user-modal-segment-label"
+                :class="`bg-segment-${activeUserSegment.segmentStyle}`"
+              >
+                {{ activeUserSegment.segmentTitle }}
+              </span>
+            </p>
             <div v-if="activeUserPhotoSrc" class="rankland-user-modal-photo">
               <img data-id="rankland-user-modal-photo" :src="activeUserPhotoSrc" alt="选手照片">
             </div>
@@ -363,6 +377,12 @@ interface HeaderRefLink {
   label: string;
   href: string;
   dataId: string;
+}
+
+interface ActiveUserSegment {
+  seriesTitle: string;
+  segmentTitle: string;
+  segmentStyle: string;
 }
 
 function normalizeHeaderDataId(value: string): string {
@@ -527,6 +547,38 @@ export default defineComponent({
       }
       return resolveUserMarkers(this.activeUserPayload.user, this.baseRanklistState.staticRanklist.markers);
     },
+    activeUserSegment(): ActiveUserSegment | null {
+      if (!this.activeUserPayload) {
+        return null;
+      }
+
+      const userMarkers = resolveUserMarkers(this.activeUserPayload.user, this.activeUserPayload.ranklist.markers);
+      const matchedSeries = this.findUserMatchedMainICPCSeries(
+        this.activeUserPayload.ranklist.series,
+        userMarkers,
+        this.filter.marker,
+      );
+      if (!matchedSeries) {
+        return null;
+      }
+
+      const matchedSeriesIndex = this.activeUserPayload.ranklist.series.findIndex((series) => series === matchedSeries);
+      const matchedSegmentIndex = this.activeUserPayload.row.rankValues[matchedSeriesIndex]?.segmentIndex;
+      if (matchedSegmentIndex === undefined || matchedSegmentIndex === null) {
+        return null;
+      }
+
+      const matchedSegment = matchedSeries.segments?.[matchedSegmentIndex];
+      if (!matchedSegment) {
+        return null;
+      }
+
+      return {
+        seriesTitle: resolveText(matchedSeries.title),
+        segmentTitle: resolveText(matchedSegment.title),
+        segmentStyle: typeof matchedSegment.style === 'string' ? matchedSegment.style : 'custom',
+      };
+    },
     activeUserPhotoSrc(): string {
       return this.resolveSrkImageUrl(this.activeUserPayload?.user.photo);
     },
@@ -581,6 +633,37 @@ export default defineComponent({
   methods: {
     syncRanklistTheme() {
       this.ranklistTheme = document.documentElement.classList.contains('dark') ? 'dark' : 'light';
+    },
+    findUserMatchedMainICPCSeries(
+      seriesList: srk.RankSeries[],
+      userMarkers: srk.Marker[],
+      fixedMarker?: string,
+    ): srk.RankSeries | undefined {
+      const icpcSeries = seriesList.filter((series) => series.rule?.preset === 'ICPC');
+      if (icpcSeries.length === 0) {
+        return undefined;
+      }
+
+      if (fixedMarker) {
+        if (!userMarkers.find((userMarker) => userMarker.id === fixedMarker)) {
+          return undefined;
+        }
+        return icpcSeries.find(
+          (series) => (series.rule as srk.RankSeriesRulePresetICPC).options?.filter?.byMarker === fixedMarker,
+        );
+      }
+
+      const markerScopedSeries = icpcSeries.find((series) => {
+        const seriesFilterMarker = (series.rule as srk.RankSeriesRulePresetICPC).options?.filter?.byMarker;
+        return !!(seriesFilterMarker && userMarkers.find((userMarker) => userMarker.id === seriesFilterMarker));
+      });
+      if (markerScopedSeries) {
+        return markerScopedSeries;
+      }
+
+      return icpcSeries.find(
+        (series) => !(series.rule as srk.RankSeriesRulePresetICPC).options?.filter?.byMarker,
+      );
     },
     handleTimeTravel(time: number | null) {
       this.timeTravelTime = time;
@@ -921,6 +1004,33 @@ export default defineComponent({
   background: #f1f5f9;
   color: #334155;
   font-size: 12px;
+}
+
+.rankland-user-modal-segment {
+  margin-top: 16px;
+}
+
+.rankland-user-modal-segment-label {
+  display: inline-block;
+  padding: 4px;
+  border-radius: 4px;
+  color: #fff;
+}
+
+.bg-segment-gold {
+  background-color: var(--srk-color-gold);
+}
+
+.bg-segment-silver {
+  background-color: var(--srk-color-silver);
+}
+
+.bg-segment-bronze {
+  background-color: var(--srk-color-bronze);
+}
+
+.bg-segment-iron {
+  background-color: var(--srk-color-iron);
 }
 
 .rankland-user-modal-photo {
