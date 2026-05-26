@@ -28,14 +28,23 @@
           spellcheck="false"
           @keydown="handleEditorKeydown"
         />
-        <button data-id="playground-preview-action" class="playground-preview-action" type="button" @click="previewSource">
+        <a-button
+          data-id="playground-preview-action"
+          class="playground-preview-action"
+          type="primary"
+          @click="previewSource"
+        >
           Preview
-        </button>
+        </a-button>
       </div>
 
       <div class="playground-preview-pane">
         <div v-if="parseState.kind === 'invalid'" data-id="playground-invalid-json" class="playground-state">
-          <h3>Input valid srk JSON and press Ctrl/Cmd + S to preview</h3>
+          <h3>
+            Input valid srk JSON and press
+            <a-tag color="blue" class="playground-shortcut-tag">Ctrl/Cmd + S</a-tag>
+            to preview
+          </h3>
           <pre>{{ parseState.message }}</pre>
         </div>
 
@@ -47,6 +56,28 @@
         </section>
       </div>
     </section>
+
+    <a-modal
+      v-if="welcomeVisible"
+      v-model:open="welcomeVisible"
+      :closable="false"
+      :keyboard="false"
+      :mask-closable="false"
+      :destroy-on-close="true"
+      width="600px"
+    >
+      <div data-id="playground-welcome-modal" class="playground-welcome-modal">
+        <h2>欢迎来到演练场！</h2>
+        <p>你可以调试标准榜单格式（srk）数据并实时预览效果，推荐使用桌面端设备。</p>
+        <p>如果你是 OJ 开发者、Ranklist 贡献者或对此感兴趣，演练场可以帮助你直观地了解 srk 的字段及其作用。</p>
+        <p>需要参考 srk 文档？请点击页面中的 srk 文档入口。</p>
+      </div>
+      <template #footer>
+        <a-button data-id="playground-welcome-ok" type="primary" @click="confirmWelcome">
+          OK
+        </a-button>
+      </template>
+    </a-modal>
   </main>
 </template>
 
@@ -59,6 +90,7 @@ import { formatTitle } from '@client/utils/title-format.util';
 import { parsePlaygroundSrkSource, type PlaygroundSrkParseState } from './playground-srk';
 
 const defaultSource = `${JSON.stringify(demoRanklist, null, 2)}\n`;
+const playgroundWelcomeStorageKey = 'PlaygroundWelcomeMessageRead';
 
 const PlaygroundPage = defineComponent({
   name: 'Playground',
@@ -68,6 +100,7 @@ const PlaygroundPage = defineComponent({
   data() {
     return {
       hydrated: false,
+      welcomeVisible: false,
       draftSource: defaultSource,
       parseState: parsePlaygroundSrkSource(defaultSource) as PlaygroundSrkParseState,
     };
@@ -86,10 +119,20 @@ const PlaygroundPage = defineComponent({
   },
   mounted() {
     this.hydrated = true;
+    this.restoreWelcomeModalState();
   },
   methods: {
     previewSource() {
       this.parseState = parsePlaygroundSrkSource(this.draftSource);
+    },
+    restoreWelcomeModalState() {
+      if (window.localStorage.getItem(playgroundWelcomeStorageKey) !== 'true') {
+        this.welcomeVisible = true;
+      }
+    },
+    confirmWelcome() {
+      window.localStorage.setItem(playgroundWelcomeStorageKey, 'true');
+      this.welcomeVisible = false;
     },
     handleEditorKeydown(event: KeyboardEvent) {
       if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === 's') {
@@ -158,12 +201,6 @@ export default routeView(PlaygroundPage, '/playground');
 
 .playground-preview-action {
   align-self: flex-start;
-  padding: 8px 16px;
-  border: 1px solid #2368bf;
-  border-radius: 4px;
-  color: #fff;
-  background: #2368bf;
-  cursor: pointer;
 }
 
 .playground-preview-pane {
@@ -174,6 +211,10 @@ export default routeView(PlaygroundPage, '/playground');
 .playground-state {
   margin-top: 48px;
   text-align: center;
+
+  h3 {
+    line-height: 1.8;
+  }
 
   pre {
     display: inline-block;
@@ -189,10 +230,29 @@ export default routeView(PlaygroundPage, '/playground');
   }
 }
 
+.playground-shortcut-tag {
+  margin: 0 4px;
+}
+
 .playground-preview-meta {
   margin-bottom: 8px;
   color: #64748b;
   font-size: 13px;
+}
+
+.playground-welcome-modal {
+  h2 {
+    margin: 0 0 24px;
+    color: #17202a;
+    font-size: 20px;
+    line-height: 1.4;
+  }
+
+  p {
+    margin: 0 0 12px;
+    color: #344256;
+    line-height: 1.7;
+  }
 }
 
 @media (max-width: 900px) {

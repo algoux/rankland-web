@@ -31,10 +31,51 @@ async function expectNoHorizontalDocumentOverflow(page: Page) {
   expect(overflow.documentScrollWidth).toBeLessThanOrEqual(overflow.viewportWidth + 1);
 }
 
+async function markPlaygroundWelcomeRead(page: Page) {
+  await page.addInitScript(() => window.localStorage.setItem('PlaygroundWelcomeMessageRead', 'true'));
+}
+
 test.describe('/playground full-chain route', () => {
+  test('shows the one-time welcome modal and persists the read marker', async ({ page, request }) => {
+    await denyExternalCalls(page);
+    await request.post(`${mockBaseURL}/__reset`);
+    await page.addInitScript(() => {
+      if (window.sessionStorage.getItem('PlaygroundWelcomeStorageSeeded') === 'true') {
+        return;
+      }
+
+      window.localStorage.removeItem('PlaygroundWelcomeMessageRead');
+      window.sessionStorage.setItem('PlaygroundWelcomeStorageSeeded', 'true');
+    });
+
+    const response = await page.goto('/playground');
+
+    expect(response).not.toBeNull();
+    expect(response?.ok()).toBe(true);
+    await expect(page.locator('[data-id="playground-welcome-modal"]')).toBeVisible();
+    await expect(page.locator('[data-id="playground-welcome-modal"]')).toContainText('欢迎来到演练场！');
+    await expect(page.locator('[data-id="playground-welcome-modal"]')).toContainText('调试标准榜单格式');
+
+    await page.locator('[data-id="playground-welcome-ok"]').click();
+
+    await expect(page.locator('[data-id="playground-welcome-modal"]')).toBeHidden();
+    await expect
+      .poll(() => page.evaluate(() => window.localStorage.getItem('PlaygroundWelcomeMessageRead')))
+      .toBe('true');
+
+    await page.reload();
+
+    await expect(page.locator('[data-id="playground-hydrated"]')).toHaveText('hydrated');
+    await expect(page.locator('[data-id="playground-welcome-modal"]')).toHaveCount(0);
+
+    const requests = await readRequests(request);
+    expect(requests).toHaveLength(0);
+  });
+
   test('hydrates the CSR playground and previews bundled SRK without upstream calls', async ({ page, request }) => {
     await denyExternalCalls(page);
     await request.post(`${mockBaseURL}/__reset`);
+    await markPlaygroundWelcomeRead(page);
 
     const response = await page.goto('/playground');
 
@@ -59,6 +100,7 @@ test.describe('/playground full-chain route', () => {
   test('shows invalid JSON state after previewing malformed source', async ({ page, request }) => {
     await denyExternalCalls(page);
     await request.post(`${mockBaseURL}/__reset`);
+    await markPlaygroundWelcomeRead(page);
     await page.goto('/playground');
 
     await page.locator('[data-id="playground-editor"]').fill('{');
@@ -76,6 +118,7 @@ test.describe('/playground full-chain route', () => {
   test('contains renderer conversion errors for object JSON that is not renderable SRK', async ({ page, request }) => {
     await denyExternalCalls(page);
     await request.post(`${mockBaseURL}/__reset`);
+    await markPlaygroundWelcomeRead(page);
     await page.goto('/playground');
 
     await page.locator('[data-id="playground-editor"]').fill('{"type":"general"}');
@@ -96,6 +139,7 @@ test.describe('/playground full-chain route', () => {
   }, testInfo) => {
     await denyExternalCalls(page);
     await request.post(`${mockBaseURL}/__reset`);
+    await markPlaygroundWelcomeRead(page);
 
     await page.setViewportSize({ width: 1280, height: 800 });
     const desktopResponse = await page.goto('/playground');
