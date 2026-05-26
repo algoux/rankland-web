@@ -87,7 +87,9 @@
 
         <div v-if="ranklistLoadError" data-id="collection-ranklist-error" class="collection-state">
           <p>{{ ranklistLoadError.message }}</p>
-          <button type="button" @click="refresh">Refresh</button>
+          <a-button data-id="collection-ranklist-refresh" type="primary" size="small" @click="refresh">
+            Refresh
+          </a-button>
         </div>
 
         <div

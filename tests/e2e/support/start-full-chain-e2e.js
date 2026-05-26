@@ -16,6 +16,7 @@ const collection = require(path.join(fixturesRoot, 'collection.json'));
 const liveInfo = require(path.join(fixturesRoot, 'live-info.json'));
 
 const requests = [];
+const failedRanklistPaths = new Set();
 let appProcess;
 let cleanupWatcherProcess;
 let shuttingDown = false;
@@ -61,6 +62,14 @@ function routeRequest(req, res) {
 
   if (method === 'POST' && url.pathname === '/__reset') {
     requests.length = 0;
+    failedRanklistPaths.clear();
+    sendJson(res, 200, { ok: true });
+    return;
+  }
+
+  if (method === 'POST' && /^\/__fail-ranklist\/[^/]+$/.test(url.pathname)) {
+    const uniqueKey = url.pathname.replace('/__fail-ranklist/', '');
+    failedRanklistPaths.add(`/rank/${uniqueKey}`);
     sendJson(res, 200, { ok: true });
     return;
   }
@@ -88,6 +97,11 @@ function routeRequest(req, res) {
   }
 
   if (method === 'GET' && /^\/rank\/[^/]+$/.test(url.pathname)) {
+    if (failedRanklistPaths.has(url.pathname)) {
+      sendJson(res, 500, { code: 500, message: 'Forced ranklist failure' });
+      return;
+    }
+
     if (url.pathname === '/rank/missing-key') {
       sendJson(res, 200, { code: 11, message: 'Ranklist not found' });
       return;

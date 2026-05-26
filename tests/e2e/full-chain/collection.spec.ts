@@ -145,6 +145,38 @@ test.describe('/collection/:id full-chain route', () => {
     expect(srkFileRequests).toHaveLength(1);
   });
 
+  test('renders the legacy selected ranklist error state with Ant Design refresh action', async ({
+    page,
+    request,
+  }) => {
+    await denyExternalCalls(page);
+    await request.post(`${mockBaseURL}/__reset`);
+    await request.post(`${mockBaseURL}/__fail-ranklist/test-key`);
+
+    const response = await page.goto('/collection/official?rankId=test-key');
+
+    expect(response).not.toBeNull();
+    expect(response?.ok()).toBe(true);
+    await expect(page.locator('[data-id="collection-nav"]')).toBeVisible();
+    await expect(page.locator('[data-id="collection-ranklist-error"]')).toBeVisible();
+    await expect(page.locator('[data-id="collection-ranklist-error"] p')).toHaveText(
+      'An error occurred while loading data',
+    );
+    await expect(page.locator('[data-id="collection-ranklist-error"]')).toHaveCSS('padding-top', '64px');
+    await expect(page.locator('[data-id="collection-ranklist-error"]')).toHaveCSS('text-align', 'center');
+    await expect(page.locator('[data-id="collection-ranklist-refresh"]')).toHaveText('Refresh');
+    await expect(page.locator('[data-id="collection-ranklist-refresh"]')).toHaveClass(/ant-btn-primary/);
+    await expect(page.locator('[data-id="collection-ranklist-refresh"]')).toHaveClass(/ant-btn-sm/);
+
+    const requestsResponse = await request.get(`${mockBaseURL}/__requests`);
+    const requests = (await requestsResponse.json()) as Array<{ path: string }>;
+    const collectionRequests = requests.filter((requestRecord) => requestRecord.path === '/rank/group/official');
+    const rankRequests = requests.filter((requestRecord) => requestRecord.path === '/rank/test-key');
+
+    expect(collectionRequests).toHaveLength(1);
+    expect(rankRequests).toHaveLength(1);
+  });
+
   test('renders the legacy Ant Design collection menu with category icons', async ({ page, request }) => {
     await denyExternalCalls(page);
     await request.post(`${mockBaseURL}/__reset`);
