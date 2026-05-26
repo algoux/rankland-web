@@ -23,7 +23,10 @@
             <a-dropdown data-id="rankland-ranklist-export-menu" :trigger="['hover']" placement="bottom">
               <a-button
                 data-id="rankland-ranklist-export-menu-button"
-                class="rankland-ranklist-header-action-trigger"
+                :class="[
+                  'rankland-ranklist-header-action-trigger',
+                  { 'rankland-ranklist-header-action-separated': hasViewCount },
+                ]"
                 size="small"
                 title="导出"
                 aria-label="导出"
@@ -65,7 +68,7 @@
             <a-dropdown data-id="rankland-ranklist-share-menu" :trigger="['hover']" placement="bottom">
               <a-button
                 data-id="rankland-ranklist-share-menu-button"
-                class="rankland-ranklist-header-action-trigger"
+                class="rankland-ranklist-header-action-trigger rankland-ranklist-header-action-separated"
                 size="small"
                 title="分享"
                 aria-label="分享"
@@ -984,14 +987,16 @@ export default defineComponent({
 
 .rankland-ranklist-header-actions .rankland-ranklist-header-action-trigger {
   width: auto;
-  padding: 0 0 0 8px;
-  border-top: 0;
-  border-right: 0;
-  border-bottom: 0;
-  border-left: 1px solid #9ca3af;
+  padding: 0;
+  border: 0;
   border-radius: 0;
   background: transparent;
   box-shadow: none;
+}
+
+.rankland-ranklist-header-actions .rankland-ranklist-header-action-separated {
+  padding-left: 8px;
+  border-left: 1px solid #9ca3af;
 }
 
 .rankland-ranklist-action-status {

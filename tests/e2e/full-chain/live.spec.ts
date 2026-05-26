@@ -88,6 +88,17 @@ async function expectNotificationMessage(page: Page, message: string) {
   await expect(page.locator('.ant-notification-notice-message', { hasText: message })).toBeVisible();
 }
 
+async function getHeaderActionTriggerStyle(page: Page, selector: string) {
+  return page.locator(selector).evaluate((element) => {
+    const style = window.getComputedStyle(element);
+    return {
+      paddingLeft: style.paddingLeft,
+      borderLeftWidth: style.borderLeftWidth,
+      borderRadius: style.borderRadius,
+    };
+  });
+}
+
 async function getTableWrapperMarginLeft(page: Page) {
   return page.evaluate(() => {
     const wrapper = document.querySelector<HTMLElement>('[data-id="rankland-ranklist-table-wrapper"]');
@@ -155,6 +166,16 @@ test.describe('/live/:id full-chain route', () => {
     await expect(page.locator('[data-id="rankland-ranklist-footer"]')).toContainText('Powered by Standard Ranklist');
     await expect(page.locator('[data-id="rankland-ranklist-export-menu-button"]')).toBeVisible();
     await expect(page.locator('[data-id="rankland-ranklist-share-menu-button"]')).toBeVisible();
+    expect(await getHeaderActionTriggerStyle(page, '[data-id="rankland-ranklist-export-menu-button"]')).toMatchObject({
+      paddingLeft: '0px',
+      borderLeftWidth: '0px',
+      borderRadius: '0px',
+    });
+    expect(await getHeaderActionTriggerStyle(page, '[data-id="rankland-ranklist-share-menu-button"]')).toMatchObject({
+      paddingLeft: '8px',
+      borderLeftWidth: '1px',
+      borderRadius: '0px',
+    });
     await expect(page.locator('.srk-user-cell', { hasText: 'Team Alpha' })).toBeVisible();
     await expect(page.locator('.srk-user-cell', { hasText: 'Team Beta' })).toBeVisible();
 
