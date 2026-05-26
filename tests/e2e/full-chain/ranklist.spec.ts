@@ -185,6 +185,15 @@ async function getRouteContentSpacing(page: Page, selector: string) {
   }, selector);
 }
 
+async function hasLoadedZcoolXiaoWeiFont(page: Page) {
+  return page.evaluate(async () => {
+    await document.fonts.ready;
+    return Array.from(document.fonts).some(
+      (fontFace) => fontFace.family === 'ZCOOL XiaoWei' && fontFace.status === 'loaded',
+    );
+  });
+}
+
 async function selectRanklistOrganization(page: Page, organization: string) {
   await page.locator('[data-id="rankland-ranklist-organization-filter"] .ant-select-selector').click();
   await page.locator('.ant-select-dropdown .ant-select-item-option', { hasText: organization }).click();
@@ -495,6 +504,7 @@ test.describe('/ranklist/:id full-chain route', () => {
       beforeFontSize: '14px',
     });
     expect(sloganStyle.fontFamily).toContain('ZCOOL XiaoWei');
+    expect(await hasLoadedZcoolXiaoWeiFont(page)).toBe(true);
     await userModal.getByRole('button', { name: 'Close' }).click();
     await expect(userModal.locator('.srk-modal')).toBeHidden();
 

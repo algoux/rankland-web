@@ -916,6 +916,13 @@ export default defineComponent({
 </script>
 
 <style lang="less" scoped>
+@font-face {
+  font-family: 'ZCOOL XiaoWei';
+  font-style: normal;
+  font-weight: normal;
+  src: url('../assets/fonts/ZCOOL_XiaoWei/ZCOOLXiaoWei-Regular.woff2') format('woff2');
+}
+
 .rankland-ranklist {
   width: 100%;
   overflow-x: auto;
