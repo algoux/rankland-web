@@ -116,6 +116,24 @@ async function getProgressToControlsGap(page: Page) {
   });
 }
 
+async function getFooterParagraphSpacing(page: Page) {
+  return page.evaluate(() => {
+    const paragraphs = Array.from(
+      document.querySelectorAll<HTMLElement>('[data-id="rankland-ranklist-footer"] p'),
+    );
+    if (paragraphs.length < 2) {
+      throw new Error('Missing ranklist footer paragraphs');
+    }
+    return paragraphs.slice(0, 2).map((paragraph) => {
+      const style = window.getComputedStyle(paragraph);
+      return {
+        marginTop: style.marginTop,
+        marginBottom: style.marginBottom,
+      };
+    });
+  });
+}
+
 async function getRouteContentSpacing(page: Page, selector: string) {
   return page.evaluate((selector) => {
     const element = document.querySelector<HTMLElement>(selector);
@@ -209,6 +227,10 @@ test.describe('/ranklist/:id full-chain route', () => {
     });
     await expect(page.locator('[data-id="rankland-ranklist-footer"]')).toContainText('Powered by Standard Ranklist');
     await expect(page.locator('[data-id="rankland-ranklist-footer"]')).toContainText('需要专业的赛事外榜托管？');
+    expect(await getFooterParagraphSpacing(page)).toEqual([
+      { marginTop: '0px', marginBottom: '0px' },
+      { marginTop: '4px', marginBottom: '0px' },
+    ]);
     await expect(page.locator('[data-id="rankland-ranklist-beian"]')).toHaveCount(0);
     await page.locator('[data-id="rankland-ranklist-footer"] [data-id="contact-us-trigger"]').click();
     await expect(page.locator('[data-id="contact-us-dialog"]')).toBeVisible();

@@ -1087,7 +1087,11 @@ export default defineComponent({
 }
 
 .rankland-ranklist-footer p {
-  margin: 4px 0;
+  margin: 0;
+}
+
+.rankland-ranklist-footer p + p {
+  margin-top: 4px;
 }
 
 .rankland-user-modal-body {
