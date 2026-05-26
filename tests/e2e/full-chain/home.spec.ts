@@ -49,7 +49,7 @@ async function getHomeContentSpacing(page: Page) {
   return page.evaluate(() => {
     const content = document.querySelector<HTMLElement>('[data-id="home-content"]');
     const section = document.querySelector<HTMLElement>('[data-id="home-recommendations"]');
-    const heading = document.querySelector<HTMLElement>('[data-id="home-recommendations"] h2');
+    const heading = document.querySelector<HTMLElement>('[data-id="home-recommendations"] > :first-child');
     if (!content || !section || !heading) {
       throw new Error('Missing home content spacing probe elements');
     }
@@ -66,6 +66,25 @@ async function getHomeContentSpacing(page: Page) {
       paddingLeft: contentStyle.paddingLeft,
       sectionMarginTop: sectionStyle.marginTop,
       headingMarginBottom: headingStyle.marginBottom,
+    };
+  });
+}
+
+async function getHomeRecommendationTitlePresentation(page: Page) {
+  return page.evaluate(() => {
+    const heading = document.querySelector<HTMLElement>('[data-id="home-recommendations"] > :first-child');
+    if (!heading) {
+      throw new Error('Missing home recommendations heading');
+    }
+
+    const style = getComputedStyle(heading);
+    return {
+      tagName: heading.tagName,
+      className: heading.className,
+      fontSize: style.fontSize,
+      fontWeight: style.fontWeight,
+      marginBottom: style.marginBottom,
+      text: heading.textContent?.trim(),
     };
   });
 }
@@ -107,6 +126,14 @@ test.describe('/ full-chain route', () => {
     await expect(page.locator('[data-id="home-recommendations"] .ant-row')).toBeVisible();
     await expect(page.locator('[data-id="home-recommendations"] .ant-col')).toHaveCount(2);
     await expect(page.locator('[data-id="home-recommendations"] .ant-card-hoverable')).toHaveCount(2);
+    expect(await getHomeRecommendationTitlePresentation(page)).toMatchObject({
+      tagName: 'H1',
+      className: 'block-title',
+      fontSize: '32px',
+      fontWeight: '500',
+      marginBottom: '20px',
+      text: '为你推荐',
+    });
     const recommendationCard = page.locator('[data-id="home-recommendation-search"] .home-card.ant-card');
     await expect(recommendationCard).toHaveCSS('background-color', 'rgb(20, 20, 20)');
     await expect(recommendationCard).toHaveCSS('border-top-color', 'rgb(48, 48, 48)');

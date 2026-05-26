@@ -10,7 +10,7 @@
     </section>
 
     <section data-id="home-recommendations" class="home-section">
-      <h2>为你推荐</h2>
+      <h1 class="block-title">为你推荐</h1>
       <a-row :gutter="[16, 16]" style="margin-left: 0; margin-right: 0;">
         <a-col :xs="24" :sm="12">
           <router-link
@@ -48,7 +48,7 @@
     </section>
 
     <section data-id="home-tools" class="home-section">
-      <h2>算竞周边工具</h2>
+      <h1 class="block-title">算竞周边工具</h1>
       <a-row :gutter="[16, 16]" style="margin-left: 0; margin-right: 0;">
         <a-col :xs="24" :sm="12">
           <a
@@ -88,7 +88,7 @@
     </section>
 
     <section data-id="home-resources" class="home-section">
-      <h2>资源和生态</h2>
+      <h1 class="block-title">资源和生态</h1>
       <ul>
         <li>
           <a href="https://srk.algoux.org/?utm_source=rankland" target="_blank" rel="noreferrer">Standard Ranklist</a>
@@ -116,7 +116,7 @@
     </section>
 
     <section data-id="home-contact" class="home-section">
-      <h2>联系我们</h2>
+      <h1 class="block-title">联系我们</h1>
       <p>
         如要为赛事寻求专业的实时外榜托管服务或希望补全/纠正本站数据，欢迎
         <ContactUs>与我们联系</ContactUs>。
@@ -124,7 +124,7 @@
     </section>
 
     <section data-id="home-about" class="home-section">
-      <h2>关于我们</h2>
+      <h1 class="block-title">关于我们</h1>
       <p>algoUX: Give your algorithm better UX</p>
       <p>
         Find us on <a href="https://github.com/algoux" target="_blank" rel="noreferrer">GitHub</a>
@@ -298,10 +298,11 @@ export default routeView(HomePage, '/', undefined, undefined, {
   margin-top: 40px;
 }
 
-.home-section h2 {
+.home-section .block-title {
   margin: 0 0 20px;
-  font-size: 22px;
-  line-height: 1.35;
+  color: var(--rankland-legacy-text-color);
+  font-size: 32px;
+  font-weight: 500;
 }
 
 .home-section p,
