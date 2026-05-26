@@ -297,6 +297,30 @@ async function getFilterControlSpacing(page: Page) {
   });
 }
 
+async function getControlsUtilityClasses(page: Page) {
+  return page.evaluate(() => {
+    const controls = document.querySelector<HTMLElement>('[data-id="rankland-ranklist-controls"]');
+    const organizationFilter = document.querySelector<HTMLElement>('[data-id="rankland-ranklist-organization-filter"]');
+    const officialFilter = document.querySelector<HTMLElement>('[data-id="rankland-ranklist-official-filter"]');
+    const markerFilter = document.querySelector<HTMLElement>('[data-id="rankland-ranklist-marker-filter"]');
+    const officialWrapper = officialFilter?.closest<HTMLElement>('.rankland-ranklist-checkbox');
+    const officialText = Array.from(officialWrapper?.children || []).find(
+      (element): element is HTMLElement =>
+        element instanceof HTMLElement && element.textContent?.trim() === '仅正式参赛',
+    );
+    if (!controls || !organizationFilter || !officialWrapper || !officialText || !markerFilter) {
+      throw new Error('Missing ranklist controls utility class targets');
+    }
+    return {
+      controlsClasses: Array.from(controls.classList),
+      organizationFilterClasses: Array.from(organizationFilter.classList),
+      officialWrapperClasses: Array.from(officialWrapper.classList),
+      officialTextClasses: Array.from(officialText.classList),
+      markerFilterClasses: Array.from(markerFilter.classList),
+    };
+  });
+}
+
 async function getRouteContentSpacing(page: Page, selector: string) {
   return page.evaluate((selector) => {
     const element = document.querySelector<HTMLElement>(selector);
@@ -904,6 +928,31 @@ test.describe('/ranklist/:id full-chain route', () => {
       checkboxMarginLeft: '20px',
       checkboxColumnGap: '4px',
       markerMarginLeft: '20px',
+    });
+    expect(await getControlsUtilityClasses(page)).toMatchObject({
+      controlsClasses: expect.arrayContaining([
+        'rankland-ranklist-controls',
+        'mt-3',
+        'mx-4',
+        'flex',
+        'justify-between',
+        'items-center',
+      ]),
+      organizationFilterClasses: expect.arrayContaining(['rankland-ranklist-select', 'ml-2']),
+      officialWrapperClasses: expect.arrayContaining([
+        'rankland-ranklist-filter',
+        'rankland-ranklist-checkbox',
+        'ml-5',
+        'inline-flex',
+        'items-center',
+      ]),
+      officialTextClasses: expect.arrayContaining(['mr-1']),
+      markerFilterClasses: expect.arrayContaining([
+        'rankland-ranklist-marker-filter',
+        'ml-5',
+        'inline-flex',
+        'items-center',
+      ]),
     });
 
     await expect(page.locator('.srk-user-cell', { hasText: 'Team Alpha' })).toBeVisible();

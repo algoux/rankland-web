@@ -157,7 +157,7 @@
       <div
         v-if="showFilter || hasExtraAction"
         data-id="rankland-ranklist-controls"
-        class="rankland-ranklist-controls"
+        class="rankland-ranklist-controls mt-3 mx-4 flex justify-between items-center"
       >
         <div v-if="showFilter" data-id="rankland-ranklist-filters" class="rankland-ranklist-filters">
           <label class="rankland-ranklist-filter">
@@ -168,7 +168,7 @@
               mode="multiple"
               allow-clear
               placeholder="选择组织/单位"
-              class="rankland-ranklist-select"
+              class="rankland-ranklist-select ml-2"
               :max-tag-count="0"
               :max-tag-placeholder="formatOrganizationSelectionPlaceholder"
             >
@@ -178,8 +178,8 @@
             </a-select>
           </label>
 
-          <label class="rankland-ranklist-filter rankland-ranklist-checkbox">
-            <span>仅正式参赛</span>
+          <label class="rankland-ranklist-filter rankland-ranklist-checkbox ml-5 inline-flex items-center">
+            <span class="mr-1">仅正式参赛</span>
             <a-switch
               v-model:checked="filter.officialOnly"
               data-id="rankland-ranklist-official-filter"
@@ -191,7 +191,7 @@
             v-if="ranklistState.markers.length > 0"
             v-model:value="filter.marker"
             data-id="rankland-ranklist-marker-filter"
-            class="rankland-ranklist-marker-filter"
+            class="rankland-ranklist-marker-filter ml-5 inline-flex items-center"
             button-style="solid"
           >
             <a-radio-button value="">全部</a-radio-button>
