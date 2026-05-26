@@ -601,6 +601,19 @@ test.describe('/ranklist/:id full-chain route', () => {
       opacity: '0.5',
       fontSize: '11.2px',
     });
+    const markerRow = userModal.locator('.user-modal-info-markers');
+    await expect(markerRow).toHaveClass(/(^|\s)mt-2(\s|$)/);
+    const markerRowStyle = await markerRow.evaluate((element) => {
+      const style = window.getComputedStyle(element);
+      return {
+        display: style.display,
+        marginTop: style.marginTop,
+      };
+    });
+    expect(markerRowStyle).toMatchObject({
+      display: 'block',
+      marginTop: '8px',
+    });
     const marker = userModal.locator('[data-id="rankland-user-modal-marker"]').first();
     await expect(marker).toHaveText('Gold Group');
     await expect(marker).toHaveClass(/user-modal-info-marker/);

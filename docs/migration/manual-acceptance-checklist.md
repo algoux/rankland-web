@@ -203,6 +203,7 @@ App shell Ant Design Vue Layout/Menu/Dropdown/Button、旧版全局 body light/d
 - `[x]` 用户弹窗内容根节点保留旧版 `.user-modal` 类
 - `[x]` 用户弹窗组织行保留旧版 `mb-0` 类和 0px/0px 间距
 - `[x]` 用户弹窗团队成员行保留旧版 `mt-2` 类和 8px 顶部间距
+- `[x]` 用户弹窗标记行保留旧版 `mt-2` 类和 8px 顶部间距
 - `[x]` 用户弹窗非正式提示保留旧版 `mt-4 mb-0` 类和 16px/0px 间距
 - `[x]` 用户弹窗奖区行保留旧版 `mt-4 mb-0` 类和 16px/0px 间距
 - `[x]` 用户弹窗奖区标签保留旧版 `.user-modal-segment-label` 类和 `bg-segment-*` 样式类
@@ -481,7 +482,7 @@ URL:
 - `[x]` 接受路由兼容迁移完成，但保留列出的后续 slice
 - `[ ]` 暂不收口，先修复阻塞项
 
-无当前已复现阻塞；SRK header title typography parity、header text size parity、user modal root class parity、user modal organization line class parity、user modal team members class parity、user modal unofficial line class parity、user modal segment line class parity、user modal segment label class parity 和 user modal slogan class parity 已补充，保留 product-review-driven SRK lower-level table pixel parity / route polish 作为后续 review-driven slice。
+无当前已复现阻塞；SRK header title typography parity、header text size parity、user modal root class parity、user modal organization line class parity、user modal team members class parity、user modal markers class parity、user modal unofficial line class parity、user modal segment line class parity、user modal segment label class parity 和 user modal slogan class parity 已补充，保留 product-review-driven SRK lower-level table pixel parity / route polish 作为后续 review-driven slice。
 
 最终收口前必须完成：
 
