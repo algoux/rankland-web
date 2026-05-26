@@ -692,6 +692,17 @@ test.describe('/ranklist/:id full-chain route', () => {
     await expect(segmentLabel).toHaveClass(/(^|\s)user-modal-segment-label(\s|$)/);
     const slogan = userModal.locator('[data-id="rankland-user-modal-slogan"]');
     await expect(slogan).toHaveText('Keep moving forward');
+    await expect(photoWrapper.locator('[data-id="rankland-user-modal-slogan"]')).toHaveText('Keep moving forward');
+    expect(
+      await userModal.evaluate((modal) => {
+        const photoElement = modal.querySelector('[data-id="rankland-user-modal-photo"]');
+        const sloganElement = modal.querySelector('[data-id="rankland-user-modal-slogan"]');
+        return (
+          photoElement?.parentElement === sloganElement?.parentElement &&
+          !!sloganElement?.parentElement?.classList.contains('rankland-user-modal-photo')
+        );
+      }),
+    ).toBe(true);
     await expect(slogan).toHaveClass(/(^|\s)slogan(\s|$)/);
     await expect(slogan).toHaveClass(/(^|\s)mt-4(\s|$)/);
     await expect(slogan).toHaveClass(/(^|\s)mb-2(\s|$)/);

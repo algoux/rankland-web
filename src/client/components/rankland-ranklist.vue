@@ -319,16 +319,21 @@
                 {{ activeUserSegment.segmentTitle }}
               </span>
             </p>
-            <div v-if="activeUserPhotoSrc" class="rankland-user-modal-photo mt-4">
-              <img data-id="rankland-user-modal-photo" :src="activeUserPhotoSrc" alt="选手照片">
+            <div v-if="activeUserPhotoSrc || activeUserSlogan" class="rankland-user-modal-photo mt-4">
+              <img
+                v-if="activeUserPhotoSrc"
+                data-id="rankland-user-modal-photo"
+                :src="activeUserPhotoSrc"
+                alt="选手照片"
+              >
+              <p
+                v-if="activeUserSlogan"
+                data-id="rankland-user-modal-slogan"
+                class="rankland-user-modal-slogan slogan mt-4 mb-2"
+              >
+                {{ activeUserSlogan }}
+              </p>
             </div>
-            <p
-              v-if="activeUserSlogan"
-              data-id="rankland-user-modal-slogan"
-              class="rankland-user-modal-slogan slogan mt-4 mb-2"
-            >
-              {{ activeUserSlogan }}
-            </p>
 
             <div
               v-if="activeUserRankTimeData"
