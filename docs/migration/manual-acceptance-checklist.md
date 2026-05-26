@@ -81,7 +81,7 @@ git status --short --branch
 - `[x]` macOS Blink 优化 class 没有引入视觉问题
 - `[x]` 迁移后的公开路由桌面端没有横向溢出
 - `[x]` 迁移后的公开路由移动端没有横向溢出
-- `[ ]` 直达页面和前端跳转后的页面标题可接受
+- `[x]` 直达页面和前端跳转后的页面标题可接受
 - `[x]` 直接刷新公开路由 URL 可正常工作
 - `[x]` 公开资源缺失时的 Not Found 行为可接受
 
@@ -94,8 +94,8 @@ git status --short --branch
 
 ```text
 macOS Blink 优化 class 已由 `tests/e2e/full-chain/app-shell.spec.ts` 和 `tests/unit/app-shell-srk-style.spec.ts` 覆盖。
-直达页面和前端跳转后的页面标题可接受 没看懂
-App shell Ant Design Vue Layout/Menu/Dropdown/Button、站点切换 ArrowRight icon、focus mode、theme bootstrap/sync、analytics pageview、fallback 404 和桌面/移动端 bounds 已有 full-chain 覆盖。
+直达页面标题由各 route full-chain 覆盖；前端跳转后的标题由 app-shell CSR navigation full-chain 覆盖。标题分隔符已还原旧 React `Title | RankLand`。
+App shell Ant Design Vue Layout/Menu/Dropdown/Button、站点切换 ArrowRight icon、focus mode、theme bootstrap/sync、analytics pageview、legacy title separator、fallback 404 和桌面/移动端 bounds 已有 full-chain 覆盖。
 ```
 
 ## 首页 `/`

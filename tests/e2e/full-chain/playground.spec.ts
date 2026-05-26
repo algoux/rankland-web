@@ -118,7 +118,7 @@ test.describe('/playground full-chain route', () => {
 
     expect(response).not.toBeNull();
     expect(response?.ok()).toBe(true);
-    await expect(page).toHaveTitle('Playground - RankLand', { timeout: 15_000 });
+    await expect(page).toHaveTitle('Playground | RankLand', { timeout: 15_000 });
     await expect(page.locator('[data-id="playground-page"]')).toBeVisible();
     await expect(page.locator('[data-id="playground-hydrated"]')).toHaveText('hydrated');
     await expectMonacoReady(page);

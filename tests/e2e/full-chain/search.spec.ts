@@ -40,7 +40,7 @@ test.describe('/search full-chain route', () => {
 
     expect(response).not.toBeNull();
     expect(response?.ok()).toBe(true);
-    await expect(page).toHaveTitle('探索 - RankLand');
+    await expect(page).toHaveTitle('探索 | RankLand');
     await expect(page.locator('[data-id="search-page"]')).toBeVisible();
     await expect(page.locator('[data-id="search-page"]')).toHaveClass(/normal-content/);
     await expect(page.locator('[data-id="search-hydrated"]')).toHaveText('hydrated');

@@ -146,7 +146,7 @@ test.describe('/live/:id full-chain route', () => {
 
     expect(response).not.toBeNull();
     expect(response?.ok()).toBe(true);
-    await expect(page).toHaveTitle('Live: Test Contest 2024 - RankLand');
+    await expect(page).toHaveTitle('Live: Test Contest 2024 | RankLand');
     await expect(
       page.locator(
         '[data-id="live-ranklist-content"][data-ranklist-id="live-test-key"][data-live-id="live-rid-1"][data-row-count="2"][data-focus="yes"]',
@@ -542,7 +542,7 @@ test.describe('/live/:id full-chain route', () => {
 
     expect(response).not.toBeNull();
     expect(response?.ok()).toBe(true);
-    await expect(page).toHaveTitle('Not Found - RankLand');
+    await expect(page).toHaveTitle('Not Found | RankLand');
     await expect(page.locator('[data-id="live-not-found"]')).toBeVisible();
     await expect(page.locator('[data-id="live-not-found"] h3')).toHaveText('Ranklist Not Found');
     await expect(page.locator('[data-id="live-not-found-home-link"][href="/"]')).toBeVisible();
@@ -566,7 +566,7 @@ test.describe('/live/:id full-chain route', () => {
 
     expect(response).not.toBeNull();
     expect(response?.ok()).toBe(true);
-    await expect(page).toHaveTitle('Live - RankLand');
+    await expect(page).toHaveTitle('Live | RankLand');
     await expect(page.locator('[data-id="live-error"]')).toBeVisible();
     await expect(page.locator('[data-id="live-error"] p')).toHaveText('An error occurred while loading data');
     await expect(page.locator('[data-id="live-error"]')).toHaveCSS('text-align', 'center');

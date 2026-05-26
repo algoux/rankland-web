@@ -258,6 +258,7 @@ test.describe('app shell full-chain behavior', () => {
       );
 
     await page.locator('[data-id="app-nav-link"][href="/playground"]').click();
+    await expect(page).toHaveTitle('Playground | RankLand');
 
     await expect
       .poll(async () => readAnalyticsEvents(page))

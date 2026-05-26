@@ -214,7 +214,7 @@ test.describe('/ranklist/:id full-chain route', () => {
     expect(response).not.toBeNull();
     expect(response?.ok()).toBe(true);
     expect(await response!.text()).toContain('Test Contest 2024');
-    await expect(page).toHaveTitle('Test Contest 2024 - RankLand');
+    await expect(page).toHaveTitle('Test Contest 2024 | RankLand');
     await expect(
       page.locator('[data-id="ranklist-content"][data-ranklist-id="test-key"][data-row-count="2"]'),
     ).toBeVisible();
@@ -577,7 +577,7 @@ test.describe('/ranklist/:id full-chain route', () => {
 
     expect(response).not.toBeNull();
     expect(response?.ok()).toBe(true);
-    await expect(page).toHaveTitle('Not Found - RankLand');
+    await expect(page).toHaveTitle('Not Found | RankLand');
     await expect(page.locator('[data-id="ranklist-not-found"]')).toBeVisible();
     await expect(page.locator('[data-id="ranklist-not-found"] h3')).toHaveText('Ranklist Not Found');
     await expect(page.locator('[data-id="ranklist-not-found-home-link"][href="/"]')).toBeVisible();

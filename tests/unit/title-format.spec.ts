@@ -15,6 +15,6 @@ describe('formatTitle', () => {
   });
 
   it('appends the site name to a title', () => {
-    expect(formatTitle('Test Contest 2024')).toBe('Test Contest 2024 - RankLand');
+    expect(formatTitle('Test Contest 2024')).toBe('Test Contest 2024 | RankLand');
   });
 });

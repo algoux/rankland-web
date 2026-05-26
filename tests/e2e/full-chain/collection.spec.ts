@@ -105,7 +105,7 @@ test.describe('/collection/:id full-chain route', () => {
     expect(response).not.toBeNull();
     expect(response?.ok()).toBe(true);
     expect(await response!.text()).toContain('Test Contest 2024');
-    await expect(page).toHaveTitle('Test Contest 2024 - 榜单合集 - RankLand');
+    await expect(page).toHaveTitle('Test Contest 2024 - 榜单合集 | RankLand');
     await expect(page.locator('[data-id="collection-nav"]')).toBeVisible();
     await expect(
       page.locator('[data-id="collection-ranklist-content"][data-ranklist-id="test-key"][data-row-count="2"]'),
@@ -282,7 +282,7 @@ test.describe('/collection/:id full-chain route', () => {
 
     expect(response).not.toBeNull();
     expect(response?.ok()).toBe(true);
-    await expect(page).toHaveTitle('榜单合集 - RankLand');
+    await expect(page).toHaveTitle('榜单合集 | RankLand');
     await expect(page.locator('[data-id="collection-nav"]')).toBeVisible();
     await expect(page.locator('[data-id="collection-empty-state"]')).toBeVisible();
     await expect(page.locator('[data-id="collection-empty-state"] h3')).toHaveText('请展开左侧边栏并选择一个榜单');
@@ -308,7 +308,7 @@ test.describe('/collection/:id full-chain route', () => {
 
     expect(response).not.toBeNull();
     expect(response?.ok()).toBe(true);
-    await expect(page).toHaveTitle('Not Found - RankLand');
+    await expect(page).toHaveTitle('Not Found | RankLand');
     await expect(page.locator('[data-id="collection-not-found"]')).toBeVisible();
     await expect(page.locator('[data-id="collection-not-found"] h3')).toHaveText('Collection Not Found');
     await expect(page.locator('[data-id="collection-not-found-home-link"][href="/"]')).toBeVisible();
