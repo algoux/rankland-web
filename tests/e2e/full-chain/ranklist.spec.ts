@@ -34,6 +34,21 @@ async function forceSystemDarkMode(page: Page) {
   });
 }
 
+async function forceSystemLightMode(page: Page) {
+  await page.addInitScript(() => {
+    window.matchMedia = ((query: string) => ({
+      media: query,
+      matches: false,
+      onchange: null,
+      addEventListener: () => undefined,
+      removeEventListener: () => undefined,
+      addListener: () => undefined,
+      removeListener: () => undefined,
+      dispatchEvent: () => true,
+    })) as typeof window.matchMedia;
+  });
+}
+
 async function expectElementWithinViewport(locator: Locator, page: Page) {
   const box = await locator.boundingBox();
   expect(box).not.toBeNull();
@@ -229,6 +244,7 @@ test.describe('/ranklist/:id full-chain route', () => {
     request,
   }) => {
     await denyExternalCalls(page);
+    await forceSystemLightMode(page);
     await stubClipboard(page);
     await request.post(`${mockBaseURL}/__reset`);
 
@@ -286,6 +302,7 @@ test.describe('/ranklist/:id full-chain route', () => {
         fontSize: style.fontSize,
         borderTopWidth: style.borderTopWidth,
         borderTopStyle: style.borderTopStyle,
+        borderTopColor: style.borderTopColor,
         borderRadius: style.borderRadius,
         paddingLeft: style.paddingLeft,
         paddingTop: style.paddingTop,
@@ -296,6 +313,7 @@ test.describe('/ranklist/:id full-chain route', () => {
       fontSize: '12px',
       borderTopWidth: '1px',
       borderTopStyle: 'solid',
+      borderTopColor: 'rgba(255, 129, 4, 0.8)',
       borderRadius: '4px',
       paddingLeft: '8px',
       paddingTop: '4px',
@@ -717,6 +735,9 @@ test.describe('/ranklist/:id full-chain route', () => {
     expect(response?.ok()).toBe(true);
     await expect(page.locator('html')).toHaveClass('dark');
     await expect(page.locator('[data-id="rankland-ranklist-title"]')).toHaveText('Test Contest 2024');
+    await expect(
+      page.locator('[data-id="rankland-ranklist-table-wrapper"] .srk-remarks'),
+    ).toHaveCSS('border-top-color', 'rgba(246, 172, 6, 0.8)');
 
     await expect.poll(async () => {
       return page.locator('.srk-problem-header').first().evaluate((element) => {

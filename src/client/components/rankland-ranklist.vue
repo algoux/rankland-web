@@ -1116,7 +1116,7 @@ export default defineComponent({
 .srk-remarks {
   display: inline-block;
   padding: 4px 8px;
-  border: 1px solid rgba(22, 119, 255, 0.8);
+  border: 1px solid rgba(var(--rankland-primary-color-rgb), 0.8);
   border-radius: 4px;
   font-size: 12px;
   opacity: 0.75;

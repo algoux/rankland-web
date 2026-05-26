@@ -181,6 +181,7 @@ App shell Ant Design Vue Layout/Menu/Dropdown/Button、主导航旧版 46px line
 - `[x]` SSR 首屏可以看到榜单内容
 - `[x]` Hydration 后榜单内容保持正常
 - `[x]` 有效榜单的 SRK 表格渲染达到验收标准
+- `[x]` SRK 备注 pill 使用旧版 light/dark primary rgba 边框
 - `[x]` 缺失榜单展示 Not Found
 - `[x]` 筛选和进度控制可用
 - `[x]` 点击行或成员可以打开用户弹窗
@@ -204,7 +205,7 @@ App shell Ant Design Vue Layout/Menu/Dropdown/Button、主导航旧版 46px line
 备注：
 
 ```text
-2026-05-26 复核：ranklist full-chain 覆盖 SSR/hydration、Not Found、Gym Ghost/VJudge/XLSX 下载、iframe 嵌入代码、hover 打开/关闭导出和分享 dropdown、SRK wrapper header/filter/progress/table/footer/user-modal/rank-time 多项旧版视觉行为；其中 header meta 到 contributors 的旧版 0px 额外间距已有 computed layout 断言。
+2026-05-26 复核：ranklist full-chain 覆盖 SSR/hydration、Not Found、Gym Ghost/VJudge/XLSX 下载、iframe 嵌入代码、hover 打开/关闭导出和分享 dropdown、SRK wrapper header/filter/progress/table/footer/user-modal/rank-time 多项旧版视觉行为；其中 header meta 到 contributors 的旧版 0px 额外间距、SRK 备注 pill light `rgba(255, 129, 4, 0.8)` 与 dark `rgba(246, 172, 6, 0.8)` 边框已有 computed layout/style 断言。
 ```
 
 ## 合集页 `/collection/:id`

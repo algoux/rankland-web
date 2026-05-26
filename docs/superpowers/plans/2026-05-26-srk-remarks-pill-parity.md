@@ -6,6 +6,8 @@
 
 **Architecture:** Keep the behavior inside the shared `RanklandRanklist` component so ranklist, collection, live, and playground inherit the same renderer parity. Use the existing full-chain ranklist fixture to expose `remarks` and assert rendered DOM plus computed styles through Playwright.
 
+**2026-05-26 follow-up:** Restore the old theme-scoped remarks border color. The original pill slice restored placement/shape but left the border hard-coded to Ant Design Vue blue; old React uses `rgba(var(--primary-color-r), 0.8)`.
+
 **Tech Stack:** Vue 3 SFC, Ant Design Vue app shell, `@algoux/standard-ranklist-renderer-component-vue`, Playwright full-chain tests, pnpm.
 
 ---
@@ -39,6 +41,7 @@ expect(await remarks.evaluate((element) => {
     fontSize: style.fontSize,
     borderTopWidth: style.borderTopWidth,
     borderTopStyle: style.borderTopStyle,
+    borderTopColor: style.borderTopColor,
     borderRadius: style.borderRadius,
     paddingLeft: style.paddingLeft,
     paddingTop: style.paddingTop,
@@ -49,6 +52,7 @@ expect(await remarks.evaluate((element) => {
   fontSize: '12px',
   borderTopWidth: '1px',
   borderTopStyle: 'solid',
+  borderTopColor: 'rgba(255, 129, 4, 0.8)',
   borderRadius: '4px',
   paddingLeft: '8px',
   paddingTop: '4px',
@@ -65,6 +69,14 @@ corepack pnpm exec playwright test -c playwright.full-chain.config.ts tests/e2e/
 ```
 
 Expected: fails because `.srk-remarks` is missing from the table wrapper.
+
+2026-05-26 primary-color follow-up RED:
+
+```bash
+corepack pnpm exec playwright test -c playwright.full-chain.config.ts tests/e2e/full-chain/ranklist.spec.ts --grep "renders the ranklist detail|passes the RankLand dark theme"
+```
+
+Expected: fails because light receives `rgba(22, 119, 255, 0.8)` instead of `rgba(255, 129, 4, 0.8)`, and dark receives `rgba(22, 119, 255, 0.8)` instead of `rgba(246, 172, 6, 0.8)`.
 
 ### Task 2: Implement the Vue Remarks Pill
 
@@ -97,10 +109,22 @@ Update scoped CSS:
 .srk-remarks {
   display: inline-block;
   padding: 4px 8px;
-  border: 1px solid rgba(22, 119, 255, 0.8);
+  border: 1px solid rgba(var(--rankland-primary-color-rgb), 0.8);
   border-radius: 4px;
   font-size: 12px;
   opacity: 0.75;
+}
+```
+
+For the primary-color follow-up, define `--rankland-primary-color-rgb` beside `--rankland-primary-color` in `src/client/index.less`:
+
+```less
+html.light body {
+  --rankland-primary-color-rgb: 255, 129, 4;
+}
+
+html.dark body {
+  --rankland-primary-color-rgb: 246, 172, 6;
 }
 ```
 
@@ -113,6 +137,15 @@ corepack pnpm exec playwright test -c playwright.full-chain.config.ts tests/e2e/
 ```
 
 Expected: ranklist full-chain tests pass.
+
+2026-05-26 primary-color follow-up GREEN:
+
+```bash
+corepack pnpm exec playwright test -c playwright.full-chain.config.ts tests/e2e/full-chain/ranklist.spec.ts --grep "renders the ranklist detail|passes the RankLand dark theme"
+corepack pnpm exec playwright test -c playwright.full-chain.config.ts tests/e2e/full-chain/ranklist.spec.ts
+```
+
+Expected: focused light/dark border checks pass, then all ranklist full-chain tests pass.
 
 ### Task 3: Verify, Document, Commit
 
