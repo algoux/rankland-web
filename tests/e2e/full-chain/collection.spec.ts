@@ -66,6 +66,53 @@ test.describe('/collection/:id full-chain route', () => {
     expect(srkFileRequests).toHaveLength(1);
   });
 
+  test('renders the legacy Ant Design collection menu with category icons', async ({ page, request }) => {
+    await denyExternalCalls(page);
+    await request.post(`${mockBaseURL}/__reset`);
+
+    const response = await page.goto('/collection/official?rankId=test-key');
+
+    expect(response).not.toBeNull();
+    expect(response?.ok()).toBe(true);
+    await expect(page.locator('[data-id="collection-nav-menu"]')).toHaveClass(/ant-menu-inline/);
+    await expect(page.locator('[data-id="collection-collapse-button"]')).toHaveClass(/ant-btn/);
+    await expect(page.locator('[data-id="collection-collapse-button"] .anticon-menu-fold')).toBeVisible();
+    await expect(page.locator('[data-id="collection-category-icon-dir-icpc"] img')).toHaveAttribute('alt', 'ICPC');
+    await expect(page.locator('[data-id="collection-category-icon-dir-ccpc"] img')).toHaveAttribute('alt', 'CCPC');
+    await expect(
+      page.locator('[data-id="collection-menu-item-test-key"][data-collection-key="test-key"]'),
+    ).toBeVisible();
+    await expect(page.locator('[data-id="collection-nav-menu"] .ant-menu-item-selected')).toContainText(
+      'Test Contest 2024',
+    );
+  });
+
+  test('uses the legacy mobile nav collapse behavior', async ({ page, request }) => {
+    await denyExternalCalls(page);
+    await page.addInitScript(() => window.localStorage.removeItem('CollectionNavCollapsed'));
+    await request.post(`${mockBaseURL}/__reset`);
+    await page.setViewportSize({ width: 390, height: 844 });
+
+    const response = await page.goto('/collection/official?rankId=test-key');
+
+    expect(response).not.toBeNull();
+    expect(response?.ok()).toBe(true);
+    await expect(page.locator('[data-id="collection-content"]')).toHaveClass(/is-nav-collapsed/);
+    await expect(page.locator('[data-id="collection-collapse-button"] .anticon-menu-unfold')).toBeVisible();
+    await expect(page.locator('[data-id="collection-ranklist-content"]')).toBeVisible();
+
+    await page.locator('[data-id="collection-collapse-button"]').click();
+
+    await expect(page.locator('[data-id="collection-content"]')).not.toHaveClass(/is-nav-collapsed/);
+    await expect(page.locator('[data-id="collection-ranklist-panel"]')).toBeHidden();
+
+    await page.locator('[data-id="collection-menu-item-another-key"]').click();
+
+    await expect(page).toHaveURL('/collection/official?rankId=another-key');
+    await expect(page.locator('[data-id="collection-content"]')).toHaveClass(/is-nav-collapsed/);
+    await expect(page.locator('[data-id="collection-ranklist-panel"]')).toBeVisible();
+  });
+
   test('renders collection empty state when no rankId is selected', async ({ page, request }) => {
     await denyExternalCalls(page);
     await request.post(`${mockBaseURL}/__reset`);

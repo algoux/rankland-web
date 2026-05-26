@@ -25,25 +25,53 @@
       v-else
       data-id="collection-content"
       class="collection-page"
-      :class="{ 'is-nav-collapsed': collapsed }"
+      :class="{ 'is-nav-collapsed': collapsed, 'is-mobile-layout': isMobileLayout }"
     >
-      <aside data-id="collection-nav" class="collection-nav">
-        <button type="button" class="collection-collapse-button" @click="toggleCollapsed">
-          {{ collapsed ? '展开' : '折叠' }}
-        </button>
-        <ul class="collection-tree">
-          <CollectionTreeItem
-            v-for="item in collection.root.children"
-            :key="item.uniqueKey"
-            :item="item"
-            :collection-id="id"
-            :current-rank-id="rankId"
-            :open-keys="openKeys"
+      <aside data-id="collection-nav" class="collection-nav" :style="{ width: `${navWidth}px` }">
+        <a-button
+          data-id="collection-collapse-button"
+          class="collection-collapse-button"
+          size="large"
+          @click="toggleCollapsed"
+        >
+          <span v-if="collapsed" class="anticon anticon-menu-unfold" aria-hidden="true">
+            <svg viewBox="0 0 1024 1024" focusable="false" aria-hidden="true">
+              <path d="M112 192h800v96H112zM112 468h480v88H112zM112 736h800v96H112zM704 384l192 128-192 128z" />
+            </svg>
+          </span>
+          <template v-else>
+            <span class="anticon anticon-menu-fold" aria-hidden="true">
+              <svg viewBox="0 0 1024 1024" focusable="false" aria-hidden="true">
+                <path d="M112 192h800v96H112zM432 468h480v88H432zM112 736h800v96H112zM320 384 128 512l192 128z" />
+              </svg>
+            </span>
+            <span>折叠</span>
+          </template>
+        </a-button>
+
+        <ClientOnly>
+          <a-menu
+            data-id="collection-nav-menu"
+            class="srk-collection-nav-menu"
+            mode="inline"
+            :items="menuItems"
+            :inline-collapsed="collapsed"
+            :open-keys="collapsed ? [] : openKeys"
+            :selected-keys="selectedMenuKeys"
+            @click="handleMenuClick"
           />
-        </ul>
+        </ClientOnly>
       </aside>
 
-      <section class="collection-ranklist-panel">
+      <div class="collection-hidden-header" :style="{ width: `${navWidth}px` }">
+        <img :src="logo" alt="RankLand" width="32" height="32">
+        <h2>榜单合集</h2>
+      </div>
+
+      <section
+        data-id="collection-ranklist-panel"
+        class="collection-ranklist-panel"
+      >
         <div data-id="collection-hydrated">{{ hydrated ? 'hydrated' : 'ssr' }}</div>
 
         <div v-if="ranklistLoadError" data-id="collection-ranklist-error" class="collection-state">
@@ -58,7 +86,7 @@
           :data-row-count="rowCount"
         >
           <h1>{{ ranklist.info.name }}</h1>
-          <RanklandRanklist :ranklist="ranklist.srk" />
+          <RanklandRanklist v-if="!renderSwitchLock" :ranklist="ranklist.srk" />
         </div>
 
         <div v-else data-id="collection-empty-state" class="collection-empty-state">
@@ -70,20 +98,23 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, type PropType } from 'vue';
+import { defineComponent, h, type PropType } from 'vue';
 import { routeView, RenderMethodKind } from 'bwcx-client-vue3';
+import type { ItemType } from 'ant-design-vue/es/menu';
 import type { IApiCollection, IApiRanklist } from '@common/rankland-api';
+import { CollectionItemType, type IApiCollectionItem } from '@common/rankland-api';
 import { CollectionRPO } from '@common/modules/collection/collection.rpo';
 import { ranklandRoutes } from '@common/rankland-router';
 import type { AsyncDataOptions } from '@client/typings';
 import { formatTitle } from '@client/utils/title-format.util';
 import RanklandRanklist from '@client/components/rankland-ranklist.vue';
-import CollectionTreeItem from './collection-tree-item.vue';
+import logo from '@client/assets/logo.png';
 import {
   getAncestorDirectoryKeys,
   isRanklistInCollection,
   normalizeCollectionId,
 } from './collection-tree';
+import { getCollectionCategoryIcon } from './collection-category-icons';
 import {
   classifyCollectionLoadError,
   classifySelectedRanklistLoadError,
@@ -92,6 +123,9 @@ import {
 } from './collection-error';
 
 const COLLAPSED_STORAGE_KEY = 'CollectionNavCollapsed';
+const MOBILE_LAYOUT_WIDTH = 640;
+const DESKTOP_NAV_WIDTH = 300;
+const COLLAPSED_NAV_WIDTH = 80;
 
 interface CollectionAsyncDataState {
   collection?: IApiCollection;
@@ -104,7 +138,6 @@ interface CollectionAsyncDataState {
 const CollectionPage = defineComponent({
   name: 'Collection',
   components: {
-    CollectionTreeItem,
     RanklandRanklist,
   },
   props: {
@@ -135,8 +168,13 @@ const CollectionPage = defineComponent({
   },
   data() {
     return {
+      logo,
       collapsed: false,
       hydrated: false,
+      isMobileLayout: false,
+      renderSwitchLock: false,
+      theme: 'light' as 'light' | 'dark',
+      themeObserver: undefined as MutationObserver | undefined,
     };
   },
   computed: {
@@ -150,6 +188,23 @@ const CollectionPage = defineComponent({
       }
 
       return getAncestorDirectoryKeys(this.collection, this.rankId);
+    },
+    selectedMenuKeys(): string[] {
+      return this.rankId && !this.ranklistIdInvalid ? [this.rankId] : [];
+    },
+    navWidth(): number {
+      if (this.collapsed) {
+        return COLLAPSED_NAV_WIDTH;
+      }
+
+      return this.isMobileLayout ? window.innerWidth : DESKTOP_NAV_WIDTH;
+    },
+    menuItems(): ItemType[] {
+      if (!this.collection) {
+        return [];
+      }
+
+      return this.collection.root.children.map((item) => this.createMenuItem(item));
     },
     rowCount(): number {
       return this.ranklist?.srk?.rows?.length || 0;
@@ -184,8 +239,14 @@ const CollectionPage = defineComponent({
   },
   mounted() {
     this.hydrated = true;
-    this.collapsed = window.localStorage.getItem(COLLAPSED_STORAGE_KEY) === 'true';
+    this.setupThemeTracking();
+    this.updateViewportState();
+    window.addEventListener('resize', this.updateViewportState, { passive: true });
     this.cleanupInvalidRankId();
+  },
+  beforeUnmount() {
+    window.removeEventListener('resize', this.updateViewportState);
+    this.themeObserver?.disconnect();
   },
   watch: {
     ranklistIdInvalid() {
@@ -206,9 +267,96 @@ const CollectionPage = defineComponent({
     refresh() {
       window.location.reload();
     },
+    updateViewportState() {
+      this.isMobileLayout = window.innerWidth < MOBILE_LAYOUT_WIDTH;
+      const stored = window.localStorage.getItem(COLLAPSED_STORAGE_KEY);
+
+      if (stored === 'true' || stored === 'false') {
+        this.collapsed = stored === 'true';
+        return;
+      }
+
+      this.collapsed = Boolean(this.isMobileLayout && this.rankId && !this.ranklistIdInvalid);
+    },
+    setupThemeTracking() {
+      this.syncThemeFromDocument();
+      this.themeObserver = new MutationObserver(this.syncThemeFromDocument);
+      this.themeObserver.observe(document.documentElement, {
+        attributes: true,
+        attributeFilter: ['class'],
+      });
+    },
+    syncThemeFromDocument() {
+      this.theme = document.documentElement.classList.contains('dark') ? 'dark' : 'light';
+    },
     toggleCollapsed() {
       this.collapsed = !this.collapsed;
       window.localStorage.setItem(COLLAPSED_STORAGE_KEY, String(this.collapsed));
+    },
+    handleMenuClick(info: { key: string | number }) {
+      const key = String(info.key);
+      if (key === this.rankId) {
+        if (this.isMobileLayout) {
+          this.collapsed = true;
+          window.localStorage.setItem(COLLAPSED_STORAGE_KEY, 'true');
+        }
+        return;
+      }
+
+      this.renderSwitchLock = true;
+      requestAnimationFrame(() => {
+        this.renderSwitchLock = false;
+        this.$router.push(ranklandRoutes.collection.build({ id: this.id, rankId: key }));
+      });
+
+      if (this.isMobileLayout) {
+        this.collapsed = true;
+        window.localStorage.setItem(COLLAPSED_STORAGE_KEY, 'true');
+      }
+    },
+    createMenuItem(item: IApiCollectionItem): ItemType {
+      const labelAttrs = {
+        'data-id': `collection-menu-item-${item.uniqueKey}`,
+        'data-collection-key': item.uniqueKey,
+      };
+
+      if (item.type === CollectionItemType.Directory) {
+        const categoryIcon = getCollectionCategoryIcon(item.uniqueKey);
+        return {
+          key: item.uniqueKey,
+          icon: categoryIcon
+            ? () =>
+                h(
+                  'span',
+                  {
+                    class: 'srk-collection-menu-icon',
+                    'data-id': `collection-category-icon-${item.uniqueKey}`,
+                  },
+                  [
+                    h('img', {
+                      src: this.theme === 'dark' ? categoryIcon.dark : categoryIcon.light,
+                      alt: categoryIcon.alt,
+                    }),
+                  ],
+                )
+            : undefined,
+          label: h('span', labelAttrs, item.name),
+          children: (item.children || []).map((child) => this.createMenuItem(child)),
+        };
+      }
+
+      return {
+        key: item.uniqueKey,
+        label: h(
+          'span',
+          {
+            ...labelAttrs,
+            role: 'link',
+            'aria-current': this.rankId === item.uniqueKey ? 'page' : undefined,
+          },
+          item.name,
+        ),
+      };
     },
   },
   async asyncData({ ranklandApiService, to, from }: AsyncDataOptions) {
@@ -272,38 +420,116 @@ export default routeView(CollectionPage, '/collection/:id', CollectionRPO, undef
 
 <style lang="less" scoped>
 .collection-page {
-  display: grid;
-  grid-template-columns: minmax(220px, 300px) minmax(0, 1fr);
+  position: relative;
   min-height: 70vh;
 }
 
-.collection-page.is-nav-collapsed {
-  grid-template-columns: 72px minmax(0, 1fr);
-}
-
 .collection-nav {
-  overflow-x: hidden;
-  border-right: 1px solid #d9d9d9;
+  position: fixed;
+  top: 64px;
+  left: 0;
+  z-index: 10;
+  display: flex;
+  flex-direction: column;
+  height: calc(100vh - 64px);
+  overflow: hidden;
   background: #f7f7f7;
+  border-right: 1px solid #d9d9d9;
+  transition: width 0.3s cubic-bezier(0.2, 0, 0, 1);
 }
 
 .collection-collapse-button {
   width: 100%;
-  padding: 8px;
-  border: 0;
-  border-bottom: 1px solid #d9d9d9;
-  background: #ffffff;
-  cursor: pointer;
+  border-right: 0;
+  border-left: 0;
+  border-radius: 0;
 }
 
-.collection-tree {
-  margin: 0;
-  padding: 8px;
+.collection-collapse-button .anticon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1em;
+  height: 1em;
+}
+
+.collection-collapse-button .anticon svg {
+  width: 1em;
+  height: 1em;
+  fill: currentColor;
+}
+
+.srk-collection-nav-menu {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-x: clip;
+  overflow-y: auto;
+  border-inline-end: 0;
+}
+
+.srk-collection-menu-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.srk-collection-menu-icon img {
+  width: 32px;
+  height: 32px;
+}
+
+:deep(.ant-menu-inline-collapsed .srk-collection-menu-icon) {
+  width: 100%;
+}
+
+.collection-hidden-header {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 64px;
+  transition: width 0.3s cubic-bezier(0.2, 0, 0, 1);
+}
+
+.collection-hidden-header img {
+  width: 32px;
+  height: 32px;
+}
+
+.collection-hidden-header h2 {
+  margin: 0 0 0 8px;
+  font-size: 18px;
+  line-height: 1;
+}
+
+.collection-page.is-nav-collapsed .collection-hidden-header {
+  flex-direction: column;
+}
+
+.collection-page.is-nav-collapsed .collection-hidden-header img {
+  width: 24px;
+  height: 24px;
+}
+
+.collection-page.is-nav-collapsed .collection-hidden-header h2 {
+  margin: 4px 0 0;
+  font-size: 14px;
 }
 
 .collection-ranklist-panel {
+  box-sizing: border-box;
   min-width: 0;
+  max-width: 100vw;
+  margin-left: 300px;
+  overflow-x: auto;
   padding: 16px;
+  transition: margin-left 0.3s cubic-bezier(0.2, 0, 0, 1);
+}
+
+.collection-page.is-nav-collapsed .collection-ranklist-panel {
+  margin-left: 80px;
 }
 
 .collection-state,
@@ -313,13 +539,20 @@ export default routeView(CollectionPage, '/collection/:id', CollectionRPO, undef
 }
 
 @media (max-width: 640px) {
-  .collection-page {
-    grid-template-columns: 1fr;
-  }
-
   .collection-nav {
+    top: 56px;
+    height: calc(100vh - 56px);
     border-right: 0;
     border-bottom: 1px solid #d9d9d9;
+  }
+
+  .collection-ranklist-panel {
+    margin-left: 0;
+    padding: 12px;
+  }
+
+  .collection-page:not(.is-nav-collapsed) .collection-ranklist-panel {
+    display: none;
   }
 }
 </style>
