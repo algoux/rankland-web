@@ -60,6 +60,10 @@
         "organization": "Org A",
         "official": true,
         "markers": ["gold"],
+        "teamMembers": [
+          { "name": "Alice" },
+          { "name": "Bob" }
+        ],
         "photo": "/team-alpha.png",
         "x_slogan": "Keep moving forward"
       },

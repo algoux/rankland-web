@@ -231,10 +231,20 @@
             <p v-if="activeUserPayload.user.official === false" class="rankland-user-modal-line">
               ＊ 非正式参加者
             </p>
-            <div v-if="activeUserTeamMembers.length > 0" class="rankland-user-modal-team-members">
+            <div
+              v-if="activeUserTeamMembers.length > 0"
+              data-id="rankland-user-modal-team-members"
+              class="rankland-user-modal-team-members user-modal-info-team-members"
+            >
               <template v-for="(member, memberIndex) in activeUserTeamMembers" :key="memberIndex">
-                <span v-if="memberIndex > 0" class="rankland-user-modal-team-separator"> / </span>
-                <span>{{ resolveTextValue(member.name) }}</span>
+                <span
+                  v-if="memberIndex > 0"
+                  data-id="rankland-user-modal-team-separator"
+                  class="rankland-user-modal-team-separator user-modal-info-team-members-slash"
+                >
+                  /
+                </span>
+                <span data-id="rankland-user-modal-team-member">{{ resolveTextValue(member.name) }}</span>
               </template>
             </div>
             <div v-if="activeUserMarkerLabels.length > 0" class="rankland-user-modal-markers user-modal-info-markers">
@@ -1020,7 +1030,6 @@ export default defineComponent({
   margin: 4px 0;
 }
 
-.rankland-user-modal-team-members,
 .rankland-rank-time-events {
   display: flex;
   flex-wrap: wrap;
@@ -1028,8 +1037,17 @@ export default defineComponent({
   margin-top: 10px;
 }
 
+.rankland-user-modal-team-members {
+  display: block;
+  margin-top: 8px;
+  padding-top: 6px;
+  opacity: 0.8;
+}
+
 .rankland-user-modal-team-separator {
-  color: #94a3b8;
+  color: inherit;
+  font-size: 80%;
+  opacity: 0.5;
 }
 
 .rankland-rank-time-event {

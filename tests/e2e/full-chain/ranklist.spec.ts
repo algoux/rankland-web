@@ -245,6 +245,35 @@ test.describe('/ranklist/:id full-chain route', () => {
     await page.locator('.srk-user-cell', { hasText: 'Team Alpha' }).click();
     const userModal = page.locator('[data-id="rankland-ranklist-user-modal"]');
     await expect(userModal.locator('.srk-modal')).toBeVisible();
+    const teamMembers = userModal.locator('[data-id="rankland-user-modal-team-members"]');
+    await expect(teamMembers.locator('[data-id="rankland-user-modal-team-member"]')).toContainText(['Alice', 'Bob']);
+    await expect(teamMembers.locator('[data-id="rankland-user-modal-team-separator"]')).toHaveText('/');
+    const teamMemberStyle = await teamMembers.evaluate((element) => {
+      const style = window.getComputedStyle(element);
+      return {
+        display: style.display,
+        opacity: style.opacity,
+        paddingTop: style.paddingTop,
+      };
+    });
+    expect(teamMemberStyle).toMatchObject({
+      display: 'block',
+      opacity: '0.8',
+      paddingTop: '6px',
+    });
+    const separatorStyle = await teamMembers
+      .locator('[data-id="rankland-user-modal-team-separator"]')
+      .evaluate((element) => {
+        const style = window.getComputedStyle(element);
+        return {
+          opacity: style.opacity,
+          fontSize: style.fontSize,
+        };
+      });
+    expect(separatorStyle).toMatchObject({
+      opacity: '0.5',
+      fontSize: '12.8px',
+    });
     const marker = userModal.locator('[data-id="rankland-user-modal-marker"]').first();
     await expect(marker).toHaveText('Gold Group');
     await expect(marker).toHaveClass(/user-modal-info-marker/);
