@@ -348,7 +348,19 @@ test.describe('/ranklist/:id full-chain route', () => {
       width: photoModalBodyWidth,
       maxWidth: '100%',
     });
-    await expect(userModal.locator('[data-id="rankland-user-modal-segment"]')).toContainText('所在奖区（Rank）：');
+    const segmentLine = userModal.locator('[data-id="rankland-user-modal-segment"]');
+    await expect(segmentLine).toContainText('所在奖区（Rank）：');
+    const segmentLineStyle = await segmentLine.evaluate((element) => {
+      const style = window.getComputedStyle(element);
+      return {
+        marginTop: style.marginTop,
+        marginBottom: style.marginBottom,
+      };
+    });
+    expect(segmentLineStyle).toMatchObject({
+      marginTop: '16px',
+      marginBottom: '0px',
+    });
     await expect(userModal.locator('[data-id="rankland-user-modal-segment-label"]')).toHaveText('Gold');
     await expect(userModal.locator('[data-id="rankland-user-modal-segment-label"]')).toHaveClass(/bg-segment-gold/);
     const slogan = userModal.locator('[data-id="rankland-user-modal-slogan"]');

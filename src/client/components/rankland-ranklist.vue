@@ -1122,7 +1122,7 @@ export default defineComponent({
 }
 
 .rankland-user-modal-segment {
-  margin-top: 16px;
+  margin: 16px 0 0;
 }
 
 .rankland-user-modal-segment-label {
