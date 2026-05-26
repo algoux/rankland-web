@@ -70,6 +70,20 @@ async function expectNotificationMessage(page: Page, message: string) {
   await expect(page.locator('.ant-notification-notice-message', { hasText: message })).toBeVisible();
 }
 
+async function getHeaderActionTriggerStyle(page: Page, selector: string) {
+  return page.locator(selector).evaluate((element) => {
+    const style = window.getComputedStyle(element);
+    return {
+      paddingLeft: style.paddingLeft,
+      borderLeftWidth: style.borderLeftWidth,
+      borderTopWidth: style.borderTopWidth,
+      borderRightWidth: style.borderRightWidth,
+      borderBottomWidth: style.borderBottomWidth,
+      borderRadius: style.borderRadius,
+    };
+  });
+}
+
 async function getTableWrapperMarginLeft(page: Page) {
   return page.evaluate(() => {
     const wrapper = document.querySelector<HTMLElement>('[data-id="rankland-ranklist-table-wrapper"]');
@@ -196,6 +210,19 @@ test.describe('/ranklist/:id full-chain route', () => {
     await expect(page.locator('[data-id="rankland-ranklist-share-menu-button"]')).toBeVisible();
     await expect(page.locator('[data-id="rankland-ranklist-export-menu-button"] .anticon-download')).toBeVisible();
     await expect(page.locator('[data-id="rankland-ranklist-share-menu-button"] .anticon-share-alt')).toBeVisible();
+    for (const selector of [
+      '[data-id="rankland-ranklist-export-menu-button"]',
+      '[data-id="rankland-ranklist-share-menu-button"]',
+    ]) {
+      expect(await getHeaderActionTriggerStyle(page, selector)).toMatchObject({
+        paddingLeft: '8px',
+        borderLeftWidth: '1px',
+        borderTopWidth: '0px',
+        borderRightWidth: '0px',
+        borderBottomWidth: '0px',
+        borderRadius: '0px',
+      });
+    }
     await page.locator('[data-id="rankland-ranklist-export-menu-button"]').hover();
     await expect(page.locator('[data-id="rankland-ranklist-export-menu-group"]')).toContainText('导出为');
     await page.mouse.move(10, 10);

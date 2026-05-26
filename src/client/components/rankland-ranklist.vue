@@ -21,7 +21,13 @@
           </span>
           <div data-id="rankland-ranklist-header-actions" class="rankland-ranklist-header-actions">
             <a-dropdown data-id="rankland-ranklist-export-menu" :trigger="['hover']" placement="bottom">
-              <a-button data-id="rankland-ranklist-export-menu-button" size="small" title="导出" aria-label="导出">
+              <a-button
+                data-id="rankland-ranklist-export-menu-button"
+                class="rankland-ranklist-header-action-trigger"
+                size="small"
+                title="导出"
+                aria-label="导出"
+              >
                 <DownloadOutlined />
               </a-button>
               <template #overlay>
@@ -57,7 +63,13 @@
             </a-dropdown>
 
             <a-dropdown data-id="rankland-ranklist-share-menu" :trigger="['hover']" placement="bottom">
-              <a-button data-id="rankland-ranklist-share-menu-button" size="small" title="分享" aria-label="分享">
+              <a-button
+                data-id="rankland-ranklist-share-menu-button"
+                class="rankland-ranklist-header-action-trigger"
+                size="small"
+                title="分享"
+                aria-label="分享"
+              >
                 <ShareAltOutlined />
               </a-button>
               <template #overlay>
@@ -968,6 +980,18 @@ export default defineComponent({
   cursor: pointer;
   font: inherit;
   text-align: left;
+}
+
+.rankland-ranklist-header-actions .rankland-ranklist-header-action-trigger {
+  width: auto;
+  padding: 0 0 0 8px;
+  border-top: 0;
+  border-right: 0;
+  border-bottom: 0;
+  border-left: 1px solid #9ca3af;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
 }
 
 .rankland-ranklist-action-status {
