@@ -103,7 +103,7 @@
             placement="bottom"
           >
             <span data-id="rankland-ranklist-ref-link-extra-action" class="rankland-ranklist-ref-link-extra-action">
-              and {{ extraRefLinks.length }} more
+              and {{ extraRefLinks.length }} more <CaretDownOutlined />
             </span>
             <template #overlay>
               <a-menu data-id="rankland-ranklist-ref-link-extra-overlay">
@@ -362,7 +362,7 @@ import {
   type SolutionClickPayload,
   type UserClickPayload,
 } from '@algoux/standard-ranklist-renderer-component-vue';
-import { DownloadOutlined, ShareAltOutlined } from '@ant-design/icons-vue';
+import { CaretDownOutlined, DownloadOutlined, ShareAltOutlined } from '@ant-design/icons-vue';
 import '@algoux/standard-ranklist-renderer-component-styles';
 import ContactUs from './contact-us.vue';
 import RanklandRankTimeChart from './rankland-rank-time-chart.vue';
@@ -436,6 +436,7 @@ function normalizeHeaderDataId(value: string): string {
 export default defineComponent({
   name: 'RanklandRanklist',
   components: {
+    CaretDownOutlined,
     ContactUs,
     DefaultSolutionModal,
     DownloadOutlined,

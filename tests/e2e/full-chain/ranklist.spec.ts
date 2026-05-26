@@ -131,6 +131,7 @@ test.describe('/ranklist/:id full-chain route', () => {
       '相关链接：Official Site, Mirror, Statements',
     );
     await expect(page.locator('[data-id="rankland-ranklist-ref-link-extra-action"]')).toHaveText('and 1 more');
+    await expect(page.locator('[data-id="rankland-ranklist-ref-link-extra-action"] .anticon-caret-down')).toBeVisible();
     await expect(page.locator('[data-id="rankland-ranklist-banner"]')).toHaveAttribute(
       'src',
       `${mockBaseURL}/srk-assets/test-key/banner.png`,
