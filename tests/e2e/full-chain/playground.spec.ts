@@ -130,7 +130,10 @@ test.describe('/playground full-chain route', () => {
       'https://srk.algoux.org/zh/',
     );
     await expect(page.locator('[data-id="playground-preview"]')).toBeVisible();
-    await expect(page.locator('[data-id="playground-row-count"]')).toHaveText('3');
+    await expect(page.locator('[data-id="playground-preview-meta"]')).toHaveCount(0);
+    await expect(page.locator('[data-id="playground-row-count"]')).toHaveCount(0);
+    await expect(page.locator('[data-id="playground-preview"]')).toHaveCSS('margin-top', '32px');
+    await expect(page.locator('[data-id="playground-preview"]')).toHaveCSS('margin-bottom', '32px');
     await expect(page.locator('[data-id="rankland-ranklist-title"]')).toHaveText(
       'ACM-ICPC World Finals 2018 (Excerpt Demo)',
     );

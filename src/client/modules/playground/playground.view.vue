@@ -84,9 +84,6 @@
         </div>
 
         <section v-else data-id="playground-preview" class="playground-preview">
-          <div class="playground-preview-meta">
-            Rows: <span data-id="playground-row-count">{{ rowCount }}</span>
-          </div>
           <RanklandRanklist :ranklist="parseState.data" name="playground" show-header show-filter />
         </section>
       </div>
@@ -165,13 +162,6 @@ const PlaygroundPage = defineComponent({
   computed: {
     pageTitle(): string {
       return formatTitle('Playground');
-    },
-    rowCount(): number {
-      if (this.parseState.kind !== 'valid') {
-        return 0;
-      }
-
-      return Array.isArray(this.parseState.data.rows) ? this.parseState.data.rows.length : 0;
     },
     monacoEditorOptions(): Record<string, unknown> {
       return {
@@ -400,10 +390,8 @@ export default routeView(PlaygroundPage, '/playground');
   margin: 0 4px;
 }
 
-.playground-preview-meta {
-  margin-bottom: 8px;
-  color: #64748b;
-  font-size: 13px;
+.playground-preview {
+  margin: 32px 0;
 }
 
 .playground-welcome-modal {
