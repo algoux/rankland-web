@@ -594,7 +594,7 @@ test.describe('/ranklist/:id full-chain route', () => {
       });
     expect(separatorStyle).toMatchObject({
       opacity: '0.5',
-      fontSize: '12.8px',
+      fontSize: '11.2px',
     });
     const marker = userModal.locator('[data-id="rankland-user-modal-marker"]').first();
     await expect(marker).toHaveText('Gold Group');

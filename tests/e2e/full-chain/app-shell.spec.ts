@@ -60,6 +60,18 @@ async function getSelectedNavStyle(page: Page) {
   });
 }
 
+async function getBodyTypography(page: Page) {
+  return page.evaluate(() => {
+    const style = window.getComputedStyle(document.body);
+    return {
+      fontSize: style.fontSize,
+      fontFamily: style.fontFamily,
+      fontVariantNumeric: style.fontVariantNumeric,
+      lineHeight: style.lineHeight,
+    };
+  });
+}
+
 async function getMobileShellMetrics(page: Page) {
   return page.evaluate(() => {
     const header = document.querySelector<HTMLElement>('[data-id="app-header"]');
@@ -258,6 +270,13 @@ test.describe('app shell full-chain behavior', () => {
     await expect(page.locator('html')).toHaveClass('dark');
     await expect(page.locator('body')).toHaveClass(/optimize-decrease-effects/);
     await expect(page.locator('body')).toHaveCSS('color', 'rgba(255, 255, 255, 0.85)');
+    const bodyTypography = await getBodyTypography(page);
+    expect(bodyTypography.fontSize).toBe('14px');
+    expect(bodyTypography.fontFamily).toContain('system-ui');
+    expect(bodyTypography.fontFamily).not.toContain('Avenir');
+    expect(bodyTypography.fontVariantNumeric).toBe('tabular-nums');
+    expect(Number.parseFloat(bodyTypography.lineHeight)).toBeGreaterThan(21.9);
+    expect(Number.parseFloat(bodyTypography.lineHeight)).toBeLessThan(22.1);
 
     await page.evaluate(() => {
       (window as unknown as { __ranklandSetDarkMode: (matches: boolean) => void }).__ranklandSetDarkMode(false);
