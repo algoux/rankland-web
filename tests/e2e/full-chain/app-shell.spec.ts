@@ -5,6 +5,12 @@ import { denyExternalCalls } from '../helpers/mock-api';
 const mockPort = process.env.FULL_CHAIN_MOCK_PORT || '3101';
 const mockBaseURL = `http://127.0.0.1:${mockPort}`;
 
+type AnalyticsProbeEvent = {
+  type: string;
+  tag?: string;
+  page?: string;
+};
+
 async function expectElementWithinViewport(locator: Locator, page: Page) {
   const box = await locator.boundingBox();
   expect(box).not.toBeNull();
@@ -26,6 +32,12 @@ async function expectNoHorizontalDocumentOverflow(page: Page) {
 
   expect(overflow.bodyScrollWidth).toBeLessThanOrEqual(overflow.viewportWidth + 1);
   expect(overflow.documentScrollWidth).toBeLessThanOrEqual(overflow.viewportWidth + 1);
+}
+
+async function readAnalyticsEvents(page: Page) {
+  return page.evaluate(
+    () => ((window as unknown as { __ranklandAnalyticsEvents?: AnalyticsProbeEvent[] }).__ranklandAnalyticsEvents || []),
+  );
 }
 
 test.describe('app shell full-chain behavior', () => {
@@ -203,5 +215,43 @@ test.describe('app shell full-chain behavior', () => {
     expect(response?.ok()).toBe(true);
     await expect(page.locator('[data-id="app-shell"]')).toHaveCount(0);
     await expect(page.locator('[data-id="search-page"]')).toBeVisible();
+  });
+
+  test('initializes analytics once and sends pageviews for initial and CSR navigation routes', async ({
+    page,
+    request,
+  }) => {
+    await denyExternalCalls(page);
+    await request.post(`${mockBaseURL}/__reset`);
+
+    const response = await page.goto('/search?kw=Analytics%202024');
+
+    expect(response).not.toBeNull();
+    expect(response?.ok()).toBe(true);
+    await expect
+      .poll(async () => readAnalyticsEvents(page))
+      .toEqual(
+        expect.arrayContaining([
+          expect.objectContaining({ type: 'initialize', tag: 'G-D6CVTJBDZT' }),
+          expect.objectContaining({
+            type: 'pageview',
+            page: 'http://127.0.0.1:3100/search?kw=Analytics%202024',
+          }),
+        ]),
+      );
+
+    await page.locator('[data-id="app-nav-link"][href="/playground"]').click();
+
+    await expect
+      .poll(async () => readAnalyticsEvents(page))
+      .toEqual(
+        expect.arrayContaining([
+          expect.objectContaining({ type: 'pageview', page: 'http://127.0.0.1:3100/playground' }),
+        ]),
+      );
+
+    const events = await readAnalyticsEvents(page);
+    expect(events.filter((event) => event.type === 'initialize')).toHaveLength(1);
+    expect(events.filter((event) => event.type === 'pageview')).toHaveLength(2);
   });
 });

@@ -83,6 +83,12 @@
 <script lang="ts">
 import { defineComponent } from 'vue';
 import { ranklandRoutes } from '@common/rankland-router';
+import {
+  buildRanklandAnalyticsPage,
+  getRanklandGaTag,
+  initializeRanklandAnalytics,
+  sendRanklandPageview,
+} from './app-analytics';
 import logo from './assets/logo.png';
 
 type ThemeMediaQuery = MediaQueryList & {
@@ -103,6 +109,8 @@ export default defineComponent({
       logo,
       navItems,
       themeMediaQuery: undefined as ThemeMediaQuery | undefined,
+      analyticsPageviewTimer: undefined as ReturnType<typeof setTimeout> | undefined,
+      lastAnalyticsPage: '',
     };
   },
   computed: {
@@ -130,6 +138,8 @@ export default defineComponent({
   mounted() {
     this.setupThemeSync();
     this.setupPlatformOptimizations();
+    this.setupAnalytics();
+    this.queueAnalyticsPageview();
   },
   beforeUnmount() {
     if (this.themeMediaQuery) {
@@ -139,6 +149,14 @@ export default defineComponent({
         this.themeMediaQuery.removeListener(this.applySystemTheme);
       }
     }
+    if (this.analyticsPageviewTimer) {
+      clearTimeout(this.analyticsPageviewTimer);
+    }
+  },
+  watch: {
+    '$route.fullPath'() {
+      this.queueAnalyticsPageview();
+    },
   },
   methods: {
     isNavActive(path: string): boolean {
@@ -169,6 +187,28 @@ export default defineComponent({
       if (isMacOS && isBlink) {
         document.body.classList.add('optimize-decrease-effects');
       }
+    },
+    setupAnalytics() {
+      initializeRanklandAnalytics(getRanklandGaTag());
+    },
+    queueAnalyticsPageview() {
+      if (typeof window === 'undefined') {
+        return;
+      }
+
+      const page = buildRanklandAnalyticsPage(window.location.origin, this.$route.fullPath);
+      if (page === this.lastAnalyticsPage) {
+        return;
+      }
+
+      this.lastAnalyticsPage = page;
+      if (this.analyticsPageviewTimer) {
+        clearTimeout(this.analyticsPageviewTimer);
+      }
+
+      this.analyticsPageviewTimer = setTimeout(() => {
+        sendRanklandPageview(page);
+      }, 500);
     },
   },
 });

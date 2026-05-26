@@ -26,18 +26,27 @@ const ranklandAssetEnv = {
   RANKLAND_SRK_STORAGE_BASE: 'https://assets.example/srk',
   SRK_STORAGE_BASE: 'https://legacy-assets.example/srk',
 };
+const ranklandAnalyticsEnv = {
+  RANKLAND_GTAG: 'G-RANKLAND',
+  GTAG: 'G-LEGACY',
+};
 
 const originalEnv = Object.fromEntries(
-  Object.keys({ ...ranklandEnv, ...e2eProbeEnv, ...ranklandSiteEnv, ...ranklandLiveEnv, ...ranklandAssetEnv }).map((key) => [
-    key,
-    process.env[key],
-  ]),
+  Object.keys({
+    ...ranklandEnv,
+    ...e2eProbeEnv,
+    ...ranklandSiteEnv,
+    ...ranklandLiveEnv,
+    ...ranklandAssetEnv,
+    ...ranklandAnalyticsEnv,
+  }).map((key) => [key, process.env[key]]),
 ) as Record<
   | keyof typeof ranklandEnv
   | keyof typeof e2eProbeEnv
   | keyof typeof ranklandSiteEnv
   | keyof typeof ranklandLiveEnv
-  | keyof typeof ranklandAssetEnv,
+  | keyof typeof ranklandAssetEnv
+  | keyof typeof ranklandAnalyticsEnv,
   string | undefined
 >;
 
@@ -58,7 +67,15 @@ describe('vite config', () => {
   });
 
   it('injects RankLand API and site env values into bundled process.env', () => {
-    Object.assign(process.env, ranklandEnv, e2eProbeEnv, ranklandSiteEnv, ranklandLiveEnv, ranklandAssetEnv);
+    Object.assign(
+      process.env,
+      ranklandEnv,
+      e2eProbeEnv,
+      ranklandSiteEnv,
+      ranklandLiveEnv,
+      ranklandAssetEnv,
+      ranklandAnalyticsEnv,
+    );
     delete require.cache[require.resolve(VITE_CONFIG_PATH)];
 
     // eslint-disable-next-line @typescript-eslint/no-var-requires
@@ -68,6 +85,7 @@ describe('vite config', () => {
     expect(viteConfig.define['process.env']).toMatchObject(ranklandSiteEnv);
     expect(viteConfig.define['process.env']).toMatchObject(ranklandLiveEnv);
     expect(viteConfig.define['process.env']).toMatchObject(ranklandAssetEnv);
+    expect(viteConfig.define['process.env']).toMatchObject(ranklandAnalyticsEnv);
     expect(viteConfig.define['process.env']).toHaveProperty('RANKLAND_E2E_PROBE', '1');
     expect(viteConfig.define['process.env.RANKLAND_E2E_PROBE']).toBe('"1"');
   });

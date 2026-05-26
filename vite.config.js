@@ -22,6 +22,8 @@ const clientProcessEnv = {
   RANKLAND_WS_BASE: process.env.RANKLAND_WS_BASE,
   RANKLAND_SRK_STORAGE_BASE: process.env.RANKLAND_SRK_STORAGE_BASE,
   SRK_STORAGE_BASE: process.env.SRK_STORAGE_BASE,
+  RANKLAND_GTAG: process.env.RANKLAND_GTAG,
+  GTAG: process.env.GTAG,
 };
 
 if (process.env.RANKLAND_E2E_PROBE === '1') {
