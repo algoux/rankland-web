@@ -15,16 +15,16 @@
     </div>
     <template v-else>
       <header v-if="showHeader" class="rankland-ranklist-header">
-        <div v-if="contestBannerSrc" class="rankland-ranklist-banner-wrap">
+        <div v-if="contestBannerSrc" class="rankland-ranklist-banner-wrap flex items-center justify-center">
           <img
             data-id="rankland-ranklist-banner"
             :src="contestBannerSrc"
             alt="Contest Banner"
-            class="rankland-ranklist-banner"
+            class="rankland-ranklist-banner mb-2"
           >
         </div>
-        <h1 data-id="rankland-ranklist-title">{{ ranklistTitle }}</h1>
-        <div data-id="rankland-ranklist-header-meta" class="rankland-ranklist-header-meta">
+        <h1 data-id="rankland-ranklist-title" class="text-center mb-1">{{ ranklistTitle }}</h1>
+        <div data-id="rankland-ranklist-header-meta" class="rankland-ranklist-header-meta text-center mt-1">
           <span v-if="hasViewCount" data-id="rankland-ranklist-view-count" class="rankland-ranklist-view-count">
             <EyeOutlined /> {{ meta.viewCnt || '-' }}
           </span>
@@ -108,7 +108,7 @@
         <p
           v-if="headerContributors.length > 0"
           data-id="rankland-ranklist-contributors"
-          class="rankland-ranklist-contributors"
+          class="rankland-ranklist-contributors mb-0"
         >
           贡献者：<template v-for="(contributor, contributorIndex) in headerContributors" :key="contributor.key">
             <span v-if="contributorIndex > 0">, </span>
@@ -147,7 +147,7 @@
             </template>
           </a-dropdown>
         </p>
-        <p data-id="rankland-ranklist-time" class="rankland-ranklist-time">{{ contestTimeRange }}</p>
+        <p data-id="rankland-ranklist-time" class="rankland-ranklist-time text-center mb-0">{{ contestTimeRange }}</p>
       </header>
 
       <div v-if="showProgress" data-id="rankland-ranklist-progress" class="rankland-ranklist-progress">

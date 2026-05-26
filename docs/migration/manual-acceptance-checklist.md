@@ -197,6 +197,7 @@ App shell Ant Design Vue Layout/Menu/Dropdown/Button、旧版全局 body light/d
 - `[x]` 测试用 hydration marker 不作为可见产品文本展示
 - `[x]` 有效榜单的 SRK 表格渲染达到验收标准
 - `[x]` SRK header title 使用旧版 `h1.text-center.mb-1` 的 32px/500/4px 标题排版
+- `[x]` SRK header banner、title、meta、contributors 和 time 保留旧版 `flex items-center justify-center` / `mb-2` / `text-center mb-1` / `text-center mt-1` / `mb-0` / `text-center mb-0` 工具类
 - `[x]` SRK header meta、贡献者、相关链接和时间使用旧版 Ant Design body 14px 字号
 - `[x]` SRK header 在 metadata 缺失 `viewCnt` 时仍保留旧版 Eye icon 和 `-` 占位
 - `[x]` SRK header 导出/分享操作图标使用旧版 light/dark 链接主色和 hover 色
@@ -238,7 +239,7 @@ App shell Ant Design Vue Layout/Menu/Dropdown/Button、旧版全局 body light/d
 备注：
 
 ```text
-2026-05-27 复核：ranklist full-chain 覆盖 SSR/hydration、hydration marker 视觉隐藏、Not Found、Gym Ghost/VJudge/XLSX 下载、iframe 嵌入代码、hover 打开/关闭导出和分享 dropdown、SRK wrapper header/filter/progress/table/footer/user-modal/rank-time 多项旧版视觉行为；其中 header title 旧版 32px/500/4px 排版、header meta/贡献者、相关链接和时间旧版 14px 字号、header meta 到 contributors 的旧版 0px 额外间距、header 导出/分享操作图标 light `#ff8104` 与 dark `#f6ac06` 主色及 light `#ff9d2e` 与 dark `#a7770b` hover 色、SRK 备注 pill light `rgba(255, 129, 4, 0.8)` 与 dark `rgba(246, 172, 6, 0.8)` 边框、header ref-link/footer contact trigger light `#ff8104` 与 dark `#f6ac06` 链接色、SRK controls 旧版 `mt-3 mx-4 flex justify-between items-center` 根类、Select `ml-2`、正式筛选 `ml-5 inline-flex items-center`、正式筛选文字 `mr-1` 和分组筛选 `ml-5 inline-flex items-center` 类、SRK footer 旧版 `text-center mt-8` 根类和 `mb-0` / `mt-1 mb-0` 段落类、用户弹窗旧版 `.user-modal` 内容根类、用户弹窗组织行旧版 `mb-0` 类、用户弹窗团队成员行旧版 `mt-2` 类、用户弹窗团队成员分隔符旧版 raw ` / ` 文本和样式、用户弹窗标记行旧版 `mt-2` 类、用户弹窗非正式提示旧版 `mt-4 mb-0` 类、用户弹窗奖区行旧版 `mt-4 mb-0` 类、用户弹窗奖区标签旧版 `.user-modal-segment-label` 类、用户弹窗标语旧版 `.slogan mt-4 mb-2` 类、用户弹窗照片/标语共享旧版 `div.mt-4` 外壳结构、用户弹窗照片外壳旧版 `mt-4` 类和 full-width 图片、用户弹窗 rank-time 旧版 chart-only `mt-4` 外壳类名和无额外单位/摘要/chip chrome 已有 computed layout/style 断言。
+2026-05-27 复核：ranklist full-chain 覆盖 SSR/hydration、hydration marker 视觉隐藏、Not Found、Gym Ghost/VJudge/XLSX 下载、iframe 嵌入代码、hover 打开/关闭导出和分享 dropdown、SRK wrapper header/filter/progress/table/footer/user-modal/rank-time 多项旧版视觉行为；其中 header banner wrapper 旧版 `flex items-center justify-center`、banner image `mb-2`、title `text-center mb-1`、meta `text-center mt-1`、contributors `mb-0`、time `text-center mb-0` 工具类，header title 旧版 32px/500/4px 排版、header meta/贡献者、相关链接和时间旧版 14px 字号、header meta 到 contributors 的旧版 0px 额外间距、header 导出/分享操作图标 light `#ff8104` 与 dark `#f6ac06` 主色及 light `#ff9d2e` 与 dark `#a7770b` hover 色、SRK 备注 pill light `rgba(255, 129, 4, 0.8)` 与 dark `rgba(246, 172, 6, 0.8)` 边框、header ref-link/footer contact trigger light `#ff8104` 与 dark `#f6ac06` 链接色、SRK controls 旧版 `mt-3 mx-4 flex justify-between items-center` 根类、Select `ml-2`、正式筛选 `ml-5 inline-flex items-center`、正式筛选文字 `mr-1` 和分组筛选 `ml-5 inline-flex items-center` 类、SRK footer 旧版 `text-center mt-8` 根类和 `mb-0` / `mt-1 mb-0` 段落类、用户弹窗旧版 `.user-modal` 内容根类、用户弹窗组织行旧版 `mb-0` 类、用户弹窗团队成员行旧版 `mt-2` 类、用户弹窗团队成员分隔符旧版 raw ` / ` 文本和样式、用户弹窗标记行旧版 `mt-2` 类、用户弹窗非正式提示旧版 `mt-4 mb-0` 类、用户弹窗奖区行旧版 `mt-4 mb-0` 类、用户弹窗奖区标签旧版 `.user-modal-segment-label` 类、用户弹窗标语旧版 `.slogan mt-4 mb-2` 类、用户弹窗照片/标语共享旧版 `div.mt-4` 外壳结构、用户弹窗照片外壳旧版 `mt-4` 类和 full-width 图片、用户弹窗 rank-time 旧版 chart-only `mt-4` 外壳类名和无额外单位/摘要/chip chrome 已有 computed layout/style 断言。
 ```
 
 ## 合集页 `/collection/:id`
@@ -492,7 +493,7 @@ URL:
 - `[x]` 接受路由兼容迁移完成，但保留列出的后续 slice
 - `[ ]` 暂不收口，先修复阻塞项
 
-无当前已复现阻塞；SRK header title typography parity、header text size parity、header view-count fallback parity、SRK controls utility class parity、SRK footer utility class parity、SSR hydration marker visual parity、search state utility class parity、search list utility class parity、user modal root class parity、user modal organization line class parity、user modal team members class parity、user modal team separator raw text coverage、user modal markers class parity、user modal unofficial line class parity、user modal segment line class parity、user modal segment label class parity、user modal slogan spacing class parity、user modal photo wrapper class parity 和 user modal photo/slogan shared wrapper DOM parity 已补充，保留 product-review-driven SRK lower-level table pixel parity / route polish 作为后续 review-driven slice。
+无当前已复现阻塞；SRK header utility class parity、SRK header title typography parity、header text size parity、header view-count fallback parity、SRK controls utility class parity、SRK footer utility class parity、SSR hydration marker visual parity、search state utility class parity、search list utility class parity、user modal root class parity、user modal organization line class parity、user modal team members class parity、user modal team separator raw text coverage、user modal markers class parity、user modal unofficial line class parity、user modal segment line class parity、user modal segment label class parity、user modal slogan spacing class parity、user modal photo wrapper class parity 和 user modal photo/slogan shared wrapper DOM parity 已补充，保留 product-review-driven SRK lower-level table pixel parity / route polish 作为后续 review-driven slice。
 
 最终收口前必须完成：
 

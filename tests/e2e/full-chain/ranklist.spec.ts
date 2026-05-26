@@ -138,6 +138,28 @@ async function getRanklistHeaderTitlePresentation(page: Page) {
   });
 }
 
+async function getHeaderUtilityClasses(page: Page) {
+  return page.evaluate(() => {
+    const banner = document.querySelector<HTMLElement>('[data-id="rankland-ranklist-banner"]');
+    const bannerWrap = banner?.parentElement;
+    const title = document.querySelector<HTMLElement>('[data-id="rankland-ranklist-title"]');
+    const meta = document.querySelector<HTMLElement>('[data-id="rankland-ranklist-header-meta"]');
+    const contributors = document.querySelector<HTMLElement>('[data-id="rankland-ranklist-contributors"]');
+    const time = document.querySelector<HTMLElement>('[data-id="rankland-ranklist-time"]');
+    if (!banner || !bannerWrap || !title || !meta || !contributors || !time) {
+      throw new Error('Missing ranklist header utility class targets');
+    }
+    return {
+      bannerWrapClasses: Array.from(bannerWrap.classList),
+      bannerClasses: Array.from(banner.classList),
+      titleClasses: Array.from(title.classList),
+      metaClasses: Array.from(meta.classList),
+      contributorsClasses: Array.from(contributors.classList),
+      timeClasses: Array.from(time.classList),
+    };
+  });
+}
+
 async function getRanklistHeaderTextSizes(page: Page) {
   return page.evaluate(() => {
     const viewCount = document.querySelector<HTMLElement>('[data-id="rankland-ranklist-view-count"]');
@@ -407,6 +429,19 @@ test.describe('/ranklist/:id full-chain route', () => {
       fontSize: '32px',
       fontWeight: '500',
       marginBottom: '4px',
+    });
+    expect(await getHeaderUtilityClasses(page)).toMatchObject({
+      bannerWrapClasses: expect.arrayContaining([
+        'rankland-ranklist-banner-wrap',
+        'flex',
+        'items-center',
+        'justify-center',
+      ]),
+      bannerClasses: expect.arrayContaining(['rankland-ranklist-banner', 'mb-2']),
+      titleClasses: expect.arrayContaining(['text-center', 'mb-1']),
+      metaClasses: expect.arrayContaining(['rankland-ranklist-header-meta', 'text-center', 'mt-1']),
+      contributorsClasses: expect.arrayContaining(['rankland-ranklist-contributors', 'mb-0']),
+      timeClasses: expect.arrayContaining(['rankland-ranklist-time', 'text-center', 'mb-0']),
     });
     expect(await getRanklistHeaderTextSizes(page)).toMatchObject({
       viewCountFontSize: '14px',
