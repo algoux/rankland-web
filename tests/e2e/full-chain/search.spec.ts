@@ -50,6 +50,7 @@ test.describe('/search full-chain route', () => {
     await expect(page.locator('[data-id="search-submit"].ant-btn-primary')).toBeVisible();
     await expect(page.locator('[data-id="search-recent-section"]')).toBeVisible();
     await expect(page.locator('[data-id="search-recent-section"] .ant-list.ant-list-sm')).toBeVisible();
+    await expect(page.locator('[data-id="search-recent-section"] .search-list')).toHaveCSS('margin-top', '8px');
     await expect(page.locator('[data-id="search-ranklist-item"]')).toHaveCount(3);
     await expect(page.locator('[data-id="search-ranklist-item"].ant-list-item')).toHaveCount(3);
     await expect(page.locator('[data-id="search-ranklist-link"][data-ranklist-key="test-key"]')).toHaveAttribute(
@@ -96,6 +97,7 @@ test.describe('/search full-chain route', () => {
     await expect(page.locator('[data-id="search-result-section"]')).toHaveAttribute('data-result-count', '1');
     await expect(page.locator('[data-id="search-result-count"]')).toHaveText('1');
     await expect(page.locator('[data-id="search-result-section"] .ant-list.ant-list-sm')).toBeVisible();
+    await expect(page.locator('[data-id="search-result-section"] .search-list')).toHaveCSS('margin-top', '8px');
     await expect(page.locator('[data-id="search-ranklist-item"]')).toHaveCount(1);
     await expect(page.locator('[data-id="search-ranklist-item"].ant-list-item')).toHaveCount(1);
     await expect(page.locator('[data-id="search-ranklist-link"][data-ranklist-key="test-key"]')).toHaveAttribute(

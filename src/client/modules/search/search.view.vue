@@ -232,7 +232,7 @@ export default routeView(SearchPage, '/search');
 }
 
 .search-list {
-  margin: 12px 0 0;
+  margin: 8px 0 0;
 }
 
 .search-list-item {
