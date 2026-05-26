@@ -88,7 +88,7 @@
           <div class="playground-preview-meta">
             Rows: <span data-id="playground-row-count">{{ rowCount }}</span>
           </div>
-          <RanklandRanklist :ranklist="parseState.data" />
+          <RanklandRanklist :ranklist="parseState.data" name="playground" show-filter />
         </section>
       </div>
     </section>

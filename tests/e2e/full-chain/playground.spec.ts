@@ -131,6 +131,9 @@ test.describe('/playground full-chain route', () => {
     );
     await expect(page.locator('[data-id="playground-preview"]')).toBeVisible();
     await expect(page.locator('[data-id="playground-row-count"]')).toHaveText('3');
+    await expect(page.locator('[data-id="rankland-ranklist-filters"]')).toBeVisible();
+    await expect(page.locator('[data-id="rankland-ranklist-organization-filter"]')).toHaveClass(/ant-select/);
+    await expect(page.locator('[data-id="rankland-ranklist-official-filter"]')).toHaveClass(/ant-switch/);
     await expect(page.getByText('Seoul National University')).toBeVisible();
 
     const requests = await readRequests(request);
