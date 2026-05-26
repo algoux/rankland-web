@@ -248,7 +248,7 @@
         <Modal
           :open="!!activeUserPayload"
           :title="activeUserTitle"
-          :width="960"
+          :width="userModalWidth"
           root-class-name="srk-general-modal-root"
           wrap-class-name="rankland-user-modal"
           @close="handleUserModalClose"
@@ -536,7 +536,9 @@ export default defineComponent({
       actionStatus: '',
       rankTimeDataSet: null as RankTimeDataSet | null,
       ranklistTheme: 'light' as 'light' | 'dark',
+      viewportWidth: 1280,
       themeObserver: undefined as MutationObserver | undefined,
+      viewportResizeHandler: undefined as (() => void) | undefined,
     };
   },
   computed: {
@@ -712,6 +714,9 @@ export default defineComponent({
       const points = this.activeUserRankTimeData?.points || [];
       return points[points.length - 1] || null;
     },
+    userModalWidth(): number {
+      return this.viewportWidth >= 980 ? 960 : Math.max(this.viewportWidth - 20, 0);
+    },
   },
   watch: {
     id() {
@@ -725,6 +730,11 @@ export default defineComponent({
     },
   },
   mounted() {
+    this.updateViewportWidth();
+    this.viewportResizeHandler = () => {
+      this.updateViewportWidth();
+    };
+    window.addEventListener('resize', this.viewportResizeHandler, { passive: true });
     this.syncRanklistTheme();
     this.themeObserver = new MutationObserver(() => {
       this.syncRanklistTheme();
@@ -736,8 +746,14 @@ export default defineComponent({
   },
   beforeUnmount() {
     this.themeObserver?.disconnect();
+    if (this.viewportResizeHandler) {
+      window.removeEventListener('resize', this.viewportResizeHandler);
+    }
   },
   methods: {
+    updateViewportWidth() {
+      this.viewportWidth = window.innerWidth;
+    },
     syncRanklistTheme() {
       this.ranklistTheme = document.documentElement.classList.contains('dark') ? 'dark' : 'light';
     },

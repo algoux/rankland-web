@@ -539,6 +539,36 @@ test.describe('/ranklist/:id full-chain route', () => {
     expect(srkFileRequests).toHaveLength(1);
   });
 
+  test('uses the legacy responsive width for the user info modal on mobile', async ({ page, request }) => {
+    await denyExternalCalls(page);
+    await request.post(`${mockBaseURL}/__reset`);
+    await page.setViewportSize({ width: 390, height: 844 });
+
+    const response = await page.goto('/ranklist/test-key?focus=yes');
+
+    expect(response).not.toBeNull();
+    expect(response?.ok()).toBe(true);
+    await expect(page.locator('[data-id="ranklist-hydrated"]')).toHaveText('hydrated');
+    const teamAlphaRow = page.locator('tr', { hasText: 'Team Alpha' });
+    await expect(teamAlphaRow).toBeVisible();
+
+    await teamAlphaRow.locator('.srk-user-cell', { hasText: 'Team Alpha' }).click({ force: true });
+    const userModal = page.locator('[data-id="rankland-ranklist-user-modal"] [data-srk-modal-panel="true"]');
+    await expect(userModal).toBeVisible();
+
+    const modalLayout = await userModal.evaluate((element) => {
+      const box = element.getBoundingClientRect();
+      return {
+        style: element.getAttribute('style') || '',
+        width: Math.round(box.width),
+        viewportWidth: window.innerWidth,
+      };
+    });
+
+    expect(modalLayout.width).toBeLessThanOrEqual(modalLayout.viewportWidth);
+    expect(modalLayout.style).toContain(`width: ${modalLayout.viewportWidth - 20}px`);
+  });
+
   test('renders the Not Found page when the backend returns missing ranklist', async ({ page, request }) => {
     await denyExternalCalls(page);
     await request.post(`${mockBaseURL}/__reset`);
