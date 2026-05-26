@@ -8,11 +8,13 @@ body {
 }
 
 html.light body {
+  --rankland-primary-color: #ff8104;
   color: #17202a;
   background: #f2f2f2;
 }
 
 html.dark body {
+  --rankland-primary-color: #f6ac06;
   color: #e6edf5;
   background: #14171c;
 }
@@ -112,6 +114,18 @@ html.dark .app-header {
 html.dark .nav-menu.ant-menu {
   color: #d8e0ea;
   background: transparent;
+}
+
+.app-header .nav-menu.ant-menu-horizontal:not(.ant-menu-dark) > .ant-menu-item:hover,
+.app-header .nav-menu.ant-menu-horizontal:not(.ant-menu-dark) > .ant-menu-item-active,
+.app-header .nav-menu.ant-menu-horizontal:not(.ant-menu-dark) > .ant-menu-item-selected {
+  color: var(--rankland-primary-color);
+}
+
+.app-header .nav-menu.ant-menu-horizontal:not(.ant-menu-dark) > .ant-menu-item:hover::after,
+.app-header .nav-menu.ant-menu-horizontal:not(.ant-menu-dark) > .ant-menu-item-active::after,
+.app-header .nav-menu.ant-menu-horizontal:not(.ant-menu-dark) > .ant-menu-item-selected::after {
+  border-bottom-color: var(--rankland-primary-color);
 }
 
 .app-site-switch {

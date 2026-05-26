@@ -40,6 +40,26 @@ async function readAnalyticsEvents(page: Page) {
   );
 }
 
+async function getSelectedNavStyle(page: Page) {
+  return page.evaluate(() => {
+    const selectedItem = document.querySelector<HTMLElement>('[data-id="app-nav"] .ant-menu-item-selected');
+    const selectedLink = selectedItem?.querySelector<HTMLElement>('[data-id="app-nav-link"]');
+    if (!selectedItem || !selectedLink) {
+      throw new Error('Missing selected app nav item');
+    }
+
+    const selectedItemStyle = window.getComputedStyle(selectedItem);
+    const selectedLinkStyle = window.getComputedStyle(selectedLink);
+    const selectedItemAfterStyle = window.getComputedStyle(selectedItem, '::after');
+    return {
+      itemColor: selectedItemStyle.color,
+      linkColor: selectedLinkStyle.color,
+      afterBorderBottomColor: selectedItemAfterStyle.borderBottomColor,
+      afterBorderBottomWidth: selectedItemAfterStyle.borderBottomWidth,
+    };
+  });
+}
+
 async function getMobileShellMetrics(page: Page) {
   return page.evaluate(() => {
     const header = document.querySelector<HTMLElement>('[data-id="app-header"]');
@@ -198,6 +218,12 @@ test.describe('app shell full-chain behavior', () => {
     await expect(page.locator('[data-id="app-nav-link"][href="/playground"]')).toHaveText('演练场');
     await expect(page.locator('[data-id="app-nav-link"][aria-current="page"]')).toHaveAttribute('href', '/search');
     await expect(page.locator('[data-id="app-nav"] .ant-menu-item-selected')).toContainText('探索');
+    expect(await getSelectedNavStyle(page)).toMatchObject({
+      itemColor: 'rgb(246, 172, 6)',
+      linkColor: 'rgb(246, 172, 6)',
+      afterBorderBottomColor: 'rgb(246, 172, 6)',
+      afterBorderBottomWidth: '2px',
+    });
     await expect(page.locator('[data-id="app-site-switch"]')).toHaveClass(/ant-btn/);
     await expect(page.locator('[data-id="app-site-switch"]')).toHaveClass(/ant-dropdown-trigger/);
     await page.locator('[data-id="app-site-switch"]').hover();
