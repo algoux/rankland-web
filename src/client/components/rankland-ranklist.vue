@@ -262,7 +262,7 @@
           wrap-class-name="rankland-user-modal"
           @close="handleUserModalClose"
         >
-          <div v-if="activeUserPayload" class="rankland-user-modal-body">
+          <div v-if="activeUserPayload" class="rankland-user-modal-body user-modal">
             <p
               v-if="activeUserOrganization"
               data-id="rankland-user-modal-organization"
