@@ -186,6 +186,11 @@ test.describe('/collection/:id full-chain route', () => {
     expect(response).not.toBeNull();
     expect(response?.ok()).toBe(true);
     const nav = page.locator('[data-id="collection-nav"]');
+    await expect(page.locator('[data-id="collection-content"]')).toHaveClass(/srk-collection-container/);
+    await expect(nav).toHaveClass(/srk-collection-nav/);
+    await expect(page.locator('[data-id="collection-ranklist-panel"]')).toHaveClass(/srk-collection-ranklist/);
+    await expect(nav).toHaveCSS('z-index', '1');
+    await expect(page.locator('.srk-collection-hidden-header')).toHaveCSS('z-index', 'auto');
     await expect(nav).toHaveCSS('background-color', 'rgb(244, 244, 244)');
     await expect(page.locator('[data-id="collection-nav-menu"]')).toHaveClass(/ant-menu-inline/);
     await expect(page.locator('[data-id="collection-collapse-button"]')).toHaveClass(/ant-btn/);

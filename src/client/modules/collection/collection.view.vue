@@ -26,12 +26,12 @@
     <section
       v-else
       data-id="collection-content"
-      class="collection-page"
+      class="srk-collection-container collection-page"
       :class="{ 'is-nav-collapsed': collapsed, 'is-mobile-layout': isMobileLayout }"
     >
       <aside
         data-id="collection-nav"
-        class="collection-nav"
+        class="srk-collection-nav collection-nav"
         :data-nav-width="navWidth"
         :data-remaining-height="remainingHeight"
         :style="navStyle"
@@ -72,7 +72,7 @@
 
       <section
         data-id="collection-ranklist-panel"
-        class="collection-ranklist-panel"
+        class="srk-collection-ranklist collection-ranklist-panel"
         :style="ranklistPanelStyle"
       >
         <div data-id="collection-hydrated">{{ hydrated ? 'hydrated' : 'ssr' }}</div>
@@ -503,7 +503,7 @@ export default routeView(CollectionPage, '/collection/:id', CollectionRPO, undef
   position: fixed;
   top: 64px;
   left: 0;
-  z-index: 10;
+  z-index: 1;
   display: flex;
   flex-direction: column;
   height: calc(100vh - 64px);
@@ -563,7 +563,6 @@ html.dark .collection-nav {
 .collection-hidden-header {
   position: sticky;
   top: 0;
-  z-index: 1;
   display: flex;
   align-items: center;
   justify-content: center;
