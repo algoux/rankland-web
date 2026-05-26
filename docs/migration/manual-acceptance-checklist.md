@@ -201,6 +201,7 @@ App shell Ant Design Vue Layout/Menu/Dropdown/Button、旧版全局 body light/d
 - `[x]` 筛选和进度控制可用
 - `[x]` 点击行或成员可以打开用户弹窗
 - `[x]` 用户弹窗内容根节点保留旧版 `.user-modal` 类
+- `[x]` 用户弹窗非正式提示保留旧版 `mt-4 mb-0` 类和 16px/0px 间距
 - `[x]` 用户弹窗奖区行保留旧版 `mt-4 mb-0` 类和 16px/0px 间距
 - `[x]` 用户弹窗奖区标签保留旧版 `.user-modal-segment-label` 类和 `bg-segment-*` 样式类
 - `[x]` 用户弹窗标语节点保留旧版 `.slogan` 类，并继续展示 `SLOGAN` 伪标签和旧版字体样式
@@ -225,7 +226,7 @@ App shell Ant Design Vue Layout/Menu/Dropdown/Button、旧版全局 body light/d
 备注：
 
 ```text
-2026-05-27 复核：ranklist full-chain 覆盖 SSR/hydration、Not Found、Gym Ghost/VJudge/XLSX 下载、iframe 嵌入代码、hover 打开/关闭导出和分享 dropdown、SRK wrapper header/filter/progress/table/footer/user-modal/rank-time 多项旧版视觉行为；其中 header title 旧版 32px/500/4px 排版、header meta/贡献者/相关链接/时间旧版 14px 字号、header meta 到 contributors 的旧版 0px 额外间距、header 导出/分享操作图标 light `#ff8104` 与 dark `#f6ac06` 主色及 light `#ff9d2e` 与 dark `#a7770b` hover 色、SRK 备注 pill light `rgba(255, 129, 4, 0.8)` 与 dark `rgba(246, 172, 6, 0.8)` 边框、header ref-link/footer contact trigger light `#ff8104` 与 dark `#f6ac06` 链接色、用户弹窗旧版 `.user-modal` 内容根类、用户弹窗奖区行旧版 `mt-4 mb-0` 类、用户弹窗奖区标签旧版 `.user-modal-segment-label` 类、用户弹窗标语旧版 `.slogan` 类、用户弹窗 rank-time 旧版 chart-only `mt-4` 外壳和无额外单位/摘要/chip chrome 已有 computed layout/style 断言。
+2026-05-27 复核：ranklist full-chain 覆盖 SSR/hydration、Not Found、Gym Ghost/VJudge/XLSX 下载、iframe 嵌入代码、hover 打开/关闭导出和分享 dropdown、SRK wrapper header/filter/progress/table/footer/user-modal/rank-time 多项旧版视觉行为；其中 header title 旧版 32px/500/4px 排版、header meta/贡献者/相关链接/时间旧版 14px 字号、header meta 到 contributors 的旧版 0px 额外间距、header 导出/分享操作图标 light `#ff8104` 与 dark `#f6ac06` 主色及 light `#ff9d2e` 与 dark `#a7770b` hover 色、SRK 备注 pill light `rgba(255, 129, 4, 0.8)` 与 dark `rgba(246, 172, 6, 0.8)` 边框、header ref-link/footer contact trigger light `#ff8104` 与 dark `#f6ac06` 链接色、用户弹窗旧版 `.user-modal` 内容根类、用户弹窗非正式提示旧版 `mt-4 mb-0` 类、用户弹窗奖区行旧版 `mt-4 mb-0` 类、用户弹窗奖区标签旧版 `.user-modal-segment-label` 类、用户弹窗标语旧版 `.slogan` 类、用户弹窗 rank-time 旧版 chart-only `mt-4` 外壳和无额外单位/摘要/chip chrome 已有 computed layout/style 断言。
 ```
 
 ## 合集页 `/collection/:id`
@@ -478,7 +479,7 @@ URL:
 - `[x]` 接受路由兼容迁移完成，但保留列出的后续 slice
 - `[ ]` 暂不收口，先修复阻塞项
 
-无当前已复现阻塞；SRK header title typography parity、header text size parity、user modal root class parity、user modal segment line class parity、user modal segment label class parity 和 user modal slogan class parity 已补充，保留 product-review-driven SRK lower-level table pixel parity / route polish 作为后续 review-driven slice。
+无当前已复现阻塞；SRK header title typography parity、header text size parity、user modal root class parity、user modal unofficial line class parity、user modal segment line class parity、user modal segment label class parity 和 user modal slogan class parity 已补充，保留 product-review-driven SRK lower-level table pixel parity / route polish 作为后续 review-driven slice。
 
 最终收口前必须完成：
 

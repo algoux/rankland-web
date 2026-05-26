@@ -693,6 +693,8 @@ test.describe('/ranklist/:id full-chain route', () => {
     await expect(userModal.locator('.srk-modal')).toBeVisible();
     const unofficialLine = userModal.locator('[data-id="rankland-user-modal-unofficial"]');
     await expect(unofficialLine).toHaveText('＊ 非正式参加者');
+    await expect(unofficialLine).toHaveClass(/(^|\s)mt-4(\s|$)/);
+    await expect(unofficialLine).toHaveClass(/(^|\s)mb-0(\s|$)/);
     const unofficialLineStyle = await unofficialLine.evaluate((element) => {
       const style = window.getComputedStyle(element);
       return {
