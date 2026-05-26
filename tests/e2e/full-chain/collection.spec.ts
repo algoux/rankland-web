@@ -206,6 +206,14 @@ test.describe('/collection/:id full-chain route', () => {
       'Test Contest 2024',
     );
 
+    await page.locator('[data-id="collection-collapse-button"]').click();
+    await expect(page.locator('[data-id="collection-content"]')).toHaveClass(/is-nav-collapsed/);
+    const collapsedSubmenuTitle = page
+      .locator('[data-id="collection-nav-menu"].ant-menu-inline-collapsed > .ant-menu-submenu > .ant-menu-submenu-title')
+      .first();
+    await expect(collapsedSubmenuTitle).toHaveCSS('padding-left', '0px');
+    await expect(collapsedSubmenuTitle).toHaveCSS('padding-right', '0px');
+
     await page.emulateMedia({ colorScheme: 'dark' });
     await expect(page.locator('html')).toHaveClass('dark');
     await expect(nav).toHaveCSS('background-color', 'rgb(17, 17, 17)');

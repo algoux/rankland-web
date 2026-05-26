@@ -560,6 +560,10 @@ html.dark .collection-nav {
   width: 100%;
 }
 
+:deep(.ant-menu-inline-collapsed > .ant-menu-submenu > .ant-menu-submenu-title) {
+  padding: 0;
+}
+
 .collection-hidden-header {
   position: sticky;
   top: 0;
