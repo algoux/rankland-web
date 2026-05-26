@@ -8,7 +8,7 @@
 
     <section class="search-panel">
       <div data-id="search-hydrated" class="search-hydrated">{{ hydrated ? 'hydrated' : 'csr' }}</div>
-      <h1>在榜单数据库中探索</h1>
+      <h3 class="search-heading mb-6">在榜单数据库中探索</h3>
 
       <a-input-search
         v-model:value="inputKeyword"
@@ -201,8 +201,16 @@ export default routeView(SearchPage, '/search');
   font-size: 12px;
 }
 
+.search-heading {
+  margin-top: 0;
+}
+
+.mb-6 {
+  margin-bottom: 24px;
+}
+
 .search-input {
-  margin-top: 24px;
+  margin-top: 0;
 }
 
 .search-section,

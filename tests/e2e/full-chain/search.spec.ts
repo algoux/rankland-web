@@ -43,6 +43,7 @@ test.describe('/search full-chain route', () => {
     await expect(page).toHaveTitle('探索 - RankLand');
     await expect(page.locator('[data-id="search-page"]')).toBeVisible();
     await expect(page.locator('[data-id="search-hydrated"]')).toHaveText('hydrated');
+    await expect(page.locator('h3.mb-6', { hasText: '在榜单数据库中探索' })).toBeVisible();
     await expect(page.locator('.ant-input-search:has([data-id="search-input"])')).toBeVisible();
     await expect(page.locator('[data-id="search-input"].ant-input')).toBeVisible();
     await expect(page.locator('[data-id="search-submit"].ant-btn-primary')).toBeVisible();
