@@ -1011,7 +1011,7 @@ export default defineComponent({
 }
 
 .rankland-ranklist-progress {
-  margin: 12px 16px;
+  margin: 0 16px;
 }
 
 @media (max-width: 767px) {
@@ -1032,7 +1032,7 @@ export default defineComponent({
   align-items: center;
   justify-content: space-between;
   gap: 16px;
-  margin: 16px;
+  margin: 12px 16px 0;
 }
 
 .rankland-ranklist-filters {
