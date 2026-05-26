@@ -239,4 +239,28 @@ test.describe('/ full-chain route', () => {
     await expectElementWithinViewport(page.locator('[data-id="home-recommendation-collection"]'), page);
     await page.screenshot({ path: testInfo.outputPath('home-mobile.png'), fullPage: true });
   });
+
+  test('renders legacy statistics fallback for a partial upstream response without hydration drift', async ({
+    page,
+    request,
+  }) => {
+    await denyExternalCalls(page);
+    await request.post(`${mockBaseURL}/__reset`);
+    await request.post(`${mockBaseURL}/__use-partial-statistics`);
+
+    const response = await page.goto('/');
+
+    expect(response).not.toBeNull();
+    expect(response?.ok()).toBe(true);
+    const html = await response!.text();
+    expect(html).toMatch(/<em data-id="home-total-srk-count"[^>]*>-<\/em>/);
+    expect(html).toMatch(/<span data-id="home-total-view-count"[^>]*>-<\/span>/);
+    await expect(page.locator('[data-id="home-total-srk-count"]')).toHaveText('-');
+    await expect(page.locator('[data-id="home-total-view-count"]')).toHaveText('-');
+    await expect(page.locator('[data-id="home-hydrated"]')).toHaveText('hydrated');
+
+    const requestsResponse = await request.get(`${mockBaseURL}/__requests`);
+    const requests = (await requestsResponse.json()) as Array<{ path: string }>;
+    expect(requests.filter((requestRecord) => requestRecord.path === '/statistics')).toHaveLength(1);
+  });
 });

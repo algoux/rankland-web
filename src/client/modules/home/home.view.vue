@@ -240,10 +240,10 @@ const HomePage = defineComponent({
   },
   computed: {
     totalSrkCountText(): string {
-      return this.statistics ? String(this.statistics.totalSrkCount) : '-';
+      return String(this.statistics?.totalSrkCount ?? '-');
     },
     totalViewCountText(): string {
-      return this.statistics ? String(this.statistics.totalViewCount) : '-';
+      return String(this.statistics?.totalViewCount ?? '-');
     },
   },
   mounted() {

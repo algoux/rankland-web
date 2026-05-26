@@ -20,6 +20,7 @@ const failedCollectionPaths = new Set();
 const failedRanklistPaths = new Set();
 const failedLiveInfoPaths = new Set();
 const delayedLiveInfoPaths = new Map();
+let usePartialStatistics = false;
 let appProcess;
 let cleanupWatcherProcess;
 let shuttingDown = false;
@@ -69,6 +70,13 @@ function routeRequest(req, res) {
     failedRanklistPaths.clear();
     failedLiveInfoPaths.clear();
     delayedLiveInfoPaths.clear();
+    usePartialStatistics = false;
+    sendJson(res, 200, { ok: true });
+    return;
+  }
+
+  if (method === 'POST' && url.pathname === '/__use-partial-statistics') {
+    usePartialStatistics = true;
     sendJson(res, 200, { ok: true });
     return;
   }
@@ -150,7 +158,7 @@ function routeRequest(req, res) {
   }
 
   if (method === 'GET' && url.pathname === '/statistics') {
-    sendJson(res, 200, ok(statistics));
+    sendJson(res, 200, ok(usePartialStatistics ? { totalViewCount: null } : statistics));
     return;
   }
 
