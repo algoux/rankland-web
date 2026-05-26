@@ -239,7 +239,6 @@
           @close="handleUserModalClose"
         >
           <div v-if="activeUserPayload" class="rankland-user-modal-body">
-            <h3 data-id="rankland-user-modal-name" class="rankland-user-modal-name">{{ activeUserTitle }}</h3>
             <p v-if="activeUserOrganization" data-id="rankland-user-modal-organization" class="rankland-user-modal-line">
               {{ activeUserOrganization }}
             </p>
@@ -1056,12 +1055,6 @@ export default defineComponent({
 
 .rankland-user-modal-body {
   color: #1f2937;
-}
-
-.rankland-user-modal-name {
-  margin: 0 0 8px;
-  font-size: 20px;
-  font-weight: 600;
 }
 
 .rankland-user-modal-line {

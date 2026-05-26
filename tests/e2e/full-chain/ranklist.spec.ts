@@ -258,6 +258,8 @@ test.describe('/ranklist/:id full-chain route', () => {
     await page.locator('.srk-user-cell', { hasText: 'Team Alpha' }).click();
     const userModal = page.locator('[data-id="rankland-ranklist-user-modal"]');
     await expect(userModal.locator('.srk-modal')).toBeVisible();
+    await expect(userModal.locator('.srk-modal-title')).toHaveText('Team Alpha');
+    await expect(userModal.locator('[data-id="rankland-user-modal-name"]')).toHaveCount(0);
     const teamMembers = userModal.locator('[data-id="rankland-user-modal-team-members"]');
     await expect(teamMembers.locator('[data-id="rankland-user-modal-team-member"]')).toContainText(['Alice', 'Bob']);
     await expect(teamMembers.locator('[data-id="rankland-user-modal-team-separator"]')).toHaveText('/');
