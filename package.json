@@ -41,12 +41,12 @@
     "url": "git+https://github.com/algoux/rankland-web.git"
   },
   "dependencies": {
-    "@algoux/standard-ranklist": "^0.3.11",
+    "@algoux/standard-ranklist": "^0.3.12",
     "@algoux/standard-ranklist-convert-to": "0.2.2",
     "@algoux/standard-ranklist-renderer-component-core": "0.5.1",
     "@algoux/standard-ranklist-renderer-component-styles": "0.5.1",
     "@algoux/standard-ranklist-renderer-component-vue": "0.5.1",
-    "@algoux/standard-ranklist-utils": "^0.2.9",
+    "@algoux/standard-ranklist-utils": "^0.2.13",
     "@ant-design/icons-vue": "7.0.1",
     "@antv/g2": "5.0.13",
     "@guolao/vue-monaco-editor": "1.6.0",
