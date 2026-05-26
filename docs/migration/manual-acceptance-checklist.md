@@ -62,7 +62,7 @@ git status --short --branch
 备注：
 
 ```text
-2026-05-26 最新记录：ranklist extra ref-link trigger color parity 已通过 focused RED/GREEN、ranklist full-chain 7/7、完整 `test:migration` build + 35 unit files / 151 unit tests + 1 SSR smoke test + 1 shallow Playwright test + 52 full-chain Playwright tests，以及 `git diff --check`。
+2026-05-26 最新记录：ranklist header meta text color parity 已通过 focused RED/GREEN、ranklist full-chain 7/7、完整 `test:migration`（build、35 unit files / 151 unit tests、1 SSR smoke test、1 shallow Playwright test、52 full-chain Playwright tests）和 `git diff --check`。
 ```
 
 ## 全局外壳与跨路由行为

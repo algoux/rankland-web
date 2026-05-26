@@ -124,21 +124,25 @@ async function getHeaderMetaBlockSpacing(page: Page) {
 
 async function getRanklistLinkColors(page: Page) {
   return page.evaluate(() => {
+    const viewCount = document.querySelector<HTMLElement>('[data-id="rankland-ranklist-view-count"]');
     const refLink = document.querySelector<HTMLElement>('[data-id="rankland-ranklist-ref-links"] a');
     const refLinkLine = document.querySelector<HTMLElement>('[data-id="rankland-ranklist-ref-links"]');
     const extraRefLinkTrigger = document.querySelector<HTMLElement>(
       '[data-id="rankland-ranklist-ref-link-extra-action"]',
     );
+    const time = document.querySelector<HTMLElement>('[data-id="rankland-ranklist-time"]');
     const footerContactTrigger = document.querySelector<HTMLElement>(
       '[data-id="rankland-ranklist-footer"] [data-id="contact-us-trigger"]',
     );
-    if (!refLink || !refLinkLine || !extraRefLinkTrigger || !footerContactTrigger) {
+    if (!viewCount || !refLink || !refLinkLine || !extraRefLinkTrigger || !time || !footerContactTrigger) {
       throw new Error('Missing ranklist link color target');
     }
     return {
+      viewCountColor: window.getComputedStyle(viewCount).color,
       refLinkColor: window.getComputedStyle(refLink).color,
       refLinkLineColor: window.getComputedStyle(refLinkLine).color,
       extraRefLinkTriggerColor: window.getComputedStyle(extraRefLinkTrigger).color,
+      timeColor: window.getComputedStyle(time).color,
       footerContactTriggerColor: window.getComputedStyle(footerContactTrigger).color,
     };
   });
@@ -254,10 +258,11 @@ async function hasLoadedZcoolXiaoWeiFont(page: Page) {
   });
 }
 
-async function selectRanklistOrganization(page: Page, organization: string) {
+async function selectRanklistOrganization(page: Page, organization: string, expectedSelectedCount: number) {
   const filter = page.locator('[data-id="rankland-ranklist-organization-filter"]');
   const visibleDropdown = page.locator('.ant-select-dropdown:not(.ant-select-dropdown-hidden)').last();
   const option = visibleDropdown.locator('.ant-select-item-option', { hasText: organization }).first();
+  const selectedTag = filter.locator('.ant-select-selection-item');
 
   await filter.click();
   try {
@@ -271,6 +276,7 @@ async function selectRanklistOrganization(page: Page, organization: string) {
   }
   await option.click();
   await page.keyboard.press('Escape');
+  await expect(selectedTag).toHaveText(`已选择 ${expectedSelectedCount} 个`);
 }
 
 test.describe('/ranklist/:id full-chain route', () => {
@@ -318,9 +324,11 @@ test.describe('/ranklist/:id full-chain route', () => {
     await expect(page.locator('[data-id="rankland-ranklist-ref-link-extra-action"]')).toHaveText('and 1 more');
     await expect(page.locator('[data-id="rankland-ranklist-ref-link-extra-action"] .anticon-caret-down')).toBeVisible();
     await expect.poll(() => getRanklistLinkColors(page)).toMatchObject({
+      viewCountColor: 'rgba(0, 0, 0, 0.85)',
       refLinkColor: 'rgb(255, 129, 4)',
-      extraRefLinkTriggerColor: 'rgb(71, 85, 105)',
-      refLinkLineColor: 'rgb(71, 85, 105)',
+      extraRefLinkTriggerColor: 'rgba(0, 0, 0, 0.85)',
+      refLinkLineColor: 'rgba(0, 0, 0, 0.85)',
+      timeColor: 'rgba(0, 0, 0, 0.85)',
       footerContactTriggerColor: 'rgb(255, 129, 4)',
     });
     expect((await getRanklistLinkColors(page)).extraRefLinkTriggerColor).not.toBe(
@@ -745,32 +753,32 @@ test.describe('/ranklist/:id full-chain route', () => {
     await expect(page.locator('.srk-user-cell', { hasText: 'Team Alpha' })).toBeVisible();
     await expect(page.locator('.srk-user-cell', { hasText: 'Team Beta' })).toBeVisible();
 
-    await selectRanklistOrganization(page, 'Org A');
-    await selectRanklistOrganization(page, 'Org B');
+    await selectRanklistOrganization(page, 'Org A', 1);
+    await selectRanklistOrganization(page, 'Org B', 2);
 
     const organizationFilter = page.locator('[data-id="rankland-ranklist-organization-filter"]');
     await expect(organizationFilter.locator('.ant-select-selection-item')).toHaveText('已选择 2 个');
 
     await page.reload();
 
-    await selectRanklistOrganization(page, 'Org A');
+    await selectRanklistOrganization(page, 'Org A', 1);
 
     await expect(page.locator('.srk-user-cell', { hasText: 'Team Alpha' })).toBeVisible();
-    await expect(page.locator('.srk-user-cell', { hasText: 'Team Beta' })).toBeHidden();
+    await expect(page.locator('.srk-user-cell', { hasText: 'Team Beta' })).toHaveCount(0);
 
     await page.reload();
     await expect(page.locator('[data-id="rankland-ranklist-official-filter"]')).toBeVisible();
     await page.locator('[data-id="rankland-ranklist-official-filter"]').click();
 
     await expect(page.locator('.srk-user-cell', { hasText: 'Team Alpha' })).toBeVisible();
-    await expect(page.locator('.srk-user-cell', { hasText: 'Team Beta' })).toBeHidden();
+    await expect(page.locator('.srk-user-cell', { hasText: 'Team Beta' })).toHaveCount(0);
 
     await page.reload();
     await expect(page.locator('[data-id="rankland-ranklist-marker-filter"]')).toBeVisible();
     await page.locator('[data-id="rankland-ranklist-marker-filter"] .ant-radio-button-wrapper', { hasText: 'Gold Group' }).click();
 
     await expect(page.locator('.srk-user-cell', { hasText: 'Team Alpha' })).toBeVisible();
-    await expect(page.locator('.srk-user-cell', { hasText: 'Team Beta' })).toBeHidden();
+    await expect(page.locator('.srk-user-cell', { hasText: 'Team Beta' })).toHaveCount(0);
   });
 
   test('passes the RankLand dark theme into the low-level SRK table renderer', async ({ page, request }) => {
@@ -786,6 +794,8 @@ test.describe('/ranklist/:id full-chain route', () => {
     await expect(page.locator('[data-id="rankland-ranklist-title"]')).toHaveText('Test Contest 2024');
     await expect.poll(() => getRanklistLinkColors(page)).toMatchObject({
       refLinkColor: 'rgb(246, 172, 6)',
+      extraRefLinkTriggerColor: 'rgba(255, 255, 255, 0.85)',
+      refLinkLineColor: 'rgba(255, 255, 255, 0.85)',
       footerContactTriggerColor: 'rgb(246, 172, 6)',
     });
     await page.locator('[data-id="rankland-ranklist-ref-links"] a').first().hover();

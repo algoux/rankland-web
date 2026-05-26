@@ -1011,13 +1011,13 @@ export default defineComponent({
 }
 
 .rankland-ranklist-view-count {
-  color: #475569;
+  color: var(--rankland-legacy-text-color);
 }
 
 .rankland-ranklist-contributors,
 .rankland-ranklist-ref-links {
   margin: 0;
-  color: #475569;
+  color: var(--rankland-legacy-text-color);
   font-size: 13px;
 }
 
@@ -1058,7 +1058,7 @@ export default defineComponent({
 
 .rankland-ranklist-time {
   margin: 0;
-  color: #64748b;
+  color: var(--rankland-legacy-text-color);
   font-size: 13px;
 }
 
