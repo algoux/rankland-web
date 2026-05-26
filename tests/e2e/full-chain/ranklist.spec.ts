@@ -255,6 +255,23 @@ async function getFooterParagraphSpacing(page: Page) {
   });
 }
 
+async function getFooterUtilityClasses(page: Page) {
+  return page.evaluate(() => {
+    const footer = document.querySelector<HTMLElement>('[data-id="rankland-ranklist-footer"]');
+    const paragraphs = Array.from(
+      document.querySelectorAll<HTMLElement>('[data-id="rankland-ranklist-footer"] p'),
+    );
+    if (!footer || paragraphs.length < 5) {
+      throw new Error('Missing ranklist footer or footer paragraphs');
+    }
+
+    return {
+      footerClasses: Array.from(footer.classList),
+      paragraphClasses: paragraphs.slice(0, 5).map((paragraph) => Array.from(paragraph.classList)),
+    };
+  });
+}
+
 async function getFilterControlSpacing(page: Page) {
   return page.evaluate(() => {
     const filters = document.querySelector<HTMLElement>('[data-id="rankland-ranklist-filters"]');
@@ -449,6 +466,16 @@ test.describe('/ranklist/:id full-chain route', () => {
       { marginTop: '0px', marginBottom: '0px' },
       { marginTop: '4px', marginBottom: '0px' },
     ]);
+    expect(await getFooterUtilityClasses(page)).toMatchObject({
+      footerClasses: expect.arrayContaining(['rankland-ranklist-footer', 'text-center', 'mt-8']),
+      paragraphClasses: [
+        expect.arrayContaining(['mb-0']),
+        expect.arrayContaining(['mt-1', 'mb-0']),
+        expect.arrayContaining(['mt-1', 'mb-0']),
+        expect.arrayContaining(['mt-1', 'mb-0']),
+        expect.arrayContaining(['mt-1', 'mb-0']),
+      ],
+    });
     await expect(page.locator('[data-id="rankland-ranklist-beian"]')).toHaveCount(0);
     await page.locator('[data-id="rankland-ranklist-footer"] [data-id="contact-us-trigger"]').click();
     await expect(page.locator('[data-id="contact-us-dialog"]')).toBeVisible();

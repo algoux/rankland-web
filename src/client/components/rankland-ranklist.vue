@@ -221,26 +221,26 @@
         />
       </div>
 
-      <footer v-if="showFooter" data-id="rankland-ranklist-footer" class="rankland-ranklist-footer">
-        <p>© 2022-present algoUX. All Rights Reserved.</p>
-        <p>
+      <footer v-if="showFooter" data-id="rankland-ranklist-footer" class="rankland-ranklist-footer text-center mt-8">
+        <p class="mb-0">© 2022-present algoUX. All Rights Reserved.</p>
+        <p class="mt-1 mb-0">
           Find us on <a href="https://github.com/algoux" target="_blank" rel="noreferrer">GitHub</a>
         </p>
-        <p>
+        <p class="mt-1 mb-0">
           Powered by
           <a href="https://github.com/algoux/standard-ranklist" target="_blank" rel="noreferrer">
             Standard Ranklist
           </a>
         </p>
-        <p>
+        <p class="mt-1 mb-0">
           欢迎补充榜单数据至
           <a href="https://github.com/algoux/srk-collection" target="_blank" rel="noreferrer">榜单合集</a>
         </p>
-        <p>
+        <p class="mt-1 mb-0">
           需要专业的赛事外榜托管？
           <ContactUs>联系我们</ContactUs>
         </p>
-        <p v-if="footerSiteState.showBeian" data-id="rankland-ranklist-beian">
+        <p v-if="footerSiteState.showBeian" data-id="rankland-ranklist-beian" class="mt-1 mb-0">
           备案号：
           <a
             data-id="rankland-ranklist-beian-link"
