@@ -1119,6 +1119,7 @@ export default defineComponent({
   margin-top: 16px;
 
   img {
+    width: 100%;
     max-width: 100%;
   }
 }

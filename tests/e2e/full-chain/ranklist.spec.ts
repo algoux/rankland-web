@@ -274,6 +274,23 @@ test.describe('/ranklist/:id full-chain route', () => {
       paddingLeft: '2px',
       marginRight: '0px',
     });
+    const photo = userModal.locator('[data-id="rankland-user-modal-photo"]');
+    await expect(photo).toHaveAttribute('alt', '选手照片');
+    const photoStyle = await photo.evaluate((element) => {
+      const style = window.getComputedStyle(element);
+      return {
+        width: style.width,
+        maxWidth: style.maxWidth,
+      };
+    });
+    const photoModalBodyWidth = await photo.evaluate((element) => {
+      const modalBody = element.closest('.rankland-user-modal-body');
+      return modalBody ? window.getComputedStyle(modalBody).width : '';
+    });
+    expect(photoStyle).toMatchObject({
+      width: photoModalBodyWidth,
+      maxWidth: '100%',
+    });
     await expect(userModal.locator('[data-id="rankland-user-modal-segment"]')).toContainText('所在奖区（Rank）：');
     await expect(userModal.locator('[data-id="rankland-user-modal-segment-label"]')).toHaveText('Gold');
     await expect(userModal.locator('[data-id="rankland-user-modal-segment-label"]')).toHaveClass(/bg-segment-gold/);
