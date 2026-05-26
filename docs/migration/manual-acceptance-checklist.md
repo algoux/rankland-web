@@ -208,7 +208,7 @@ App shell Ant Design Vue Layout/Menu/Dropdown/Button、旧版全局 body light/d
 - `[x]` 用户弹窗奖区行保留旧版 `mt-4 mb-0` 类和 16px/0px 间距
 - `[x]` 用户弹窗奖区标签保留旧版 `.user-modal-segment-label` 类和 `bg-segment-*` 样式类
 - `[x]` 用户弹窗标语节点保留旧版 `.slogan mt-4 mb-2` 类，并继续展示 `SLOGAN` 伪标签、旧版字体样式和 16px/8px 间距
-- `[x]` rank-time 面板使用旧版 chart-only `mt-4` 外壳，不展示额外单位、摘要或过题事件 chip，G2 曲线可接受
+- `[x]` rank-time 面板使用旧版 chart-only `mt-4` 外壳类名，不展示额外单位、摘要或过题事件 chip，G2 曲线可接受
 - `[x]` 导出 SRK 可用
 - `[x]` 导出 Gym Ghost 可用
 - `[x]` 导出 VJudge replay 可用
@@ -229,7 +229,7 @@ App shell Ant Design Vue Layout/Menu/Dropdown/Button、旧版全局 body light/d
 备注：
 
 ```text
-2026-05-27 复核：ranklist full-chain 覆盖 SSR/hydration、Not Found、Gym Ghost/VJudge/XLSX 下载、iframe 嵌入代码、hover 打开/关闭导出和分享 dropdown、SRK wrapper header/filter/progress/table/footer/user-modal/rank-time 多项旧版视觉行为；其中 header title 旧版 32px/500/4px 排版、header meta/贡献者、相关链接和时间旧版 14px 字号、header meta 到 contributors 的旧版 0px 额外间距、header 导出/分享操作图标 light `#ff8104` 与 dark `#f6ac06` 主色及 light `#ff9d2e` 与 dark `#a7770b` hover 色、SRK 备注 pill light `rgba(255, 129, 4, 0.8)` 与 dark `rgba(246, 172, 6, 0.8)` 边框、header ref-link/footer contact trigger light `#ff8104` 与 dark `#f6ac06` 链接色、用户弹窗旧版 `.user-modal` 内容根类、用户弹窗组织行旧版 `mb-0` 类、用户弹窗团队成员行旧版 `mt-2` 类、用户弹窗标记行旧版 `mt-2` 类、用户弹窗非正式提示旧版 `mt-4 mb-0` 类、用户弹窗奖区行旧版 `mt-4 mb-0` 类、用户弹窗奖区标签旧版 `.user-modal-segment-label` 类、用户弹窗标语旧版 `.slogan mt-4 mb-2` 类、用户弹窗 rank-time 旧版 chart-only `mt-4` 外壳和无额外单位/摘要/chip chrome 已有 computed layout/style 断言。
+2026-05-27 复核：ranklist full-chain 覆盖 SSR/hydration、Not Found、Gym Ghost/VJudge/XLSX 下载、iframe 嵌入代码、hover 打开/关闭导出和分享 dropdown、SRK wrapper header/filter/progress/table/footer/user-modal/rank-time 多项旧版视觉行为；其中 header title 旧版 32px/500/4px 排版、header meta/贡献者、相关链接和时间旧版 14px 字号、header meta 到 contributors 的旧版 0px 额外间距、header 导出/分享操作图标 light `#ff8104` 与 dark `#f6ac06` 主色及 light `#ff9d2e` 与 dark `#a7770b` hover 色、SRK 备注 pill light `rgba(255, 129, 4, 0.8)` 与 dark `rgba(246, 172, 6, 0.8)` 边框、header ref-link/footer contact trigger light `#ff8104` 与 dark `#f6ac06` 链接色、用户弹窗旧版 `.user-modal` 内容根类、用户弹窗组织行旧版 `mb-0` 类、用户弹窗团队成员行旧版 `mt-2` 类、用户弹窗标记行旧版 `mt-2` 类、用户弹窗非正式提示旧版 `mt-4 mb-0` 类、用户弹窗奖区行旧版 `mt-4 mb-0` 类、用户弹窗奖区标签旧版 `.user-modal-segment-label` 类、用户弹窗标语旧版 `.slogan mt-4 mb-2` 类、用户弹窗 rank-time 旧版 chart-only `mt-4` 外壳类名和无额外单位/摘要/chip chrome 已有 computed layout/style 断言。
 ```
 
 ## 合集页 `/collection/:id`
@@ -351,7 +351,7 @@ App shell Ant Design Vue Layout/Menu/Dropdown/Button、旧版全局 body light/d
 备注：
 
 ```text
-2026-05-27 复核：live full-chain 使用 mock backend 和 stub WebSocket 覆盖 CSR hydration、hydration marker 视觉隐藏、query 保留、polling、WebSocket setup/reconnect/close、Toastify/scroll-solution、scroll-solution 开关旧版 4px 间距、旧版 14px 和 light `rgba(0, 0, 0, 0.85)` 文字样式、用户弹窗 rank-time 旧版 chart-only `mt-4` 外壳和 G2 图表、Not Found、普通/实时桌面移动端截图和 bounds。
+2026-05-27 复核：live full-chain 使用 mock backend 和 stub WebSocket 覆盖 CSR hydration、hydration marker 视觉隐藏、query 保留、polling、WebSocket setup/reconnect/close、Toastify/scroll-solution、scroll-solution 开关旧版 4px 间距、旧版 14px 和 light `rgba(0, 0, 0, 0.85)` 文字样式、用户弹窗 rank-time 旧版 chart-only `mt-4` 外壳类名和 G2 图表、Not Found、普通/实时桌面移动端截图和 bounds。
 ```
 
 ## API 与数据行为
@@ -425,7 +425,7 @@ App shell Ant Design Vue Layout/Menu/Dropdown/Button、旧版全局 body light/d
 | Live WebSocket reconnect/backoff | `[ ]` | `[ ]` | `[ ]` | 已处理，full-chain 覆盖错误关闭/异常关闭后的 reconnect |
 | Live Toastify 动画和像素级一致 | `[ ]` | `[ ]` | `[ ]` | 已处理，full-chain 覆盖 Toastify 容器、toast 行、Zoom 动画和像素覆盖 |
 | SRK renderer 精确 `StyledRanklistRenderer` 视觉 parity | `[x]` | `[ ]` | `[ ]` | 已处理多个 wrapper/低层视觉切片，包括 header title 32px/500/4px、header 非标题文字 14px、用户弹窗旧版 `.user-modal` 根类、组织行 `mb-0` 类、团队成员行 `mt-2` 类、标记行 `mt-2` 类、非正式提示 `mt-4 mb-0` 类、奖区行 `mt-4 mb-0` 类、奖区标签 `.user-modal-segment-label` 类和标语 `.slogan mt-4 mb-2` 类；若后续产品 review 发现具体差异，再开独立 slice |
-| Rank-time 旧版 `@antv/g2` tooltip、动画和弹窗外壳 parity | `[ ]` | `[ ]` | `[ ]` | 已处理，full-chain 覆盖 G2 图表容器/canvas、tooltip/动画模型，以及旧版 chart-only `mt-4` 外壳 |
+| Rank-time 旧版 `@antv/g2` tooltip、动画和弹窗外壳 parity | `[ ]` | `[ ]` | `[ ]` | 已处理，full-chain 覆盖 G2 图表容器/canvas、tooltip/动画模型，以及旧版 chart-only `mt-4` 外壳类名 |
 
 其他延期决策：
 

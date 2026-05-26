@@ -223,12 +223,14 @@ test.describe('/live/:id full-chain route', () => {
       'src',
       `${mockBaseURL}/srk-assets/live-test-key/team-alpha.png`,
     );
-    await expect(userModal.locator('[data-id="rankland-rank-time-panel"]')).toBeVisible();
+    const rankTimePanel = userModal.locator('[data-id="rankland-rank-time-panel"]');
+    await expect(rankTimePanel).toBeVisible();
+    await expect(rankTimePanel).toHaveClass(/(^|\s)mt-4(\s|$)/);
     await expect(userModal.locator('[data-id="rankland-rank-time-unit"]')).toHaveCount(0);
     await expect(userModal.locator('[data-id="rankland-rank-time-summary"]')).toHaveCount(0);
     await expect(userModal.locator('[data-id="rankland-rank-time-event"]')).toHaveCount(0);
     expect(
-      await userModal.locator('[data-id="rankland-rank-time-panel"]').evaluate((element) => {
+      await rankTimePanel.evaluate((element) => {
         const style = getComputedStyle(element);
         return {
           marginTop: style.marginTop,

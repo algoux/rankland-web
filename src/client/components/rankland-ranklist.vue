@@ -333,7 +333,7 @@
             <div
               v-if="activeUserRankTimeData"
               data-id="rankland-rank-time-panel"
-              class="rankland-rank-time-panel"
+              class="rankland-rank-time-panel mt-4"
             >
               <RanklandRankTimeChart :rank-time-data="activeUserRankTimeData" />
             </div>
