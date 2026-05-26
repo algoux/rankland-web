@@ -33,8 +33,8 @@
               <a-button
                 data-id="rankland-ranklist-export-menu-button"
                 :class="[
-                  'rankland-ranklist-header-action-trigger',
-                  { 'rankland-ranklist-header-action-separated': hasViewCount },
+                  'rankland-ranklist-header-action-trigger border-0 border-solid border-gray-400 mr-2',
+                  { 'rankland-ranklist-header-action-separated pl-2 border-l': hasViewCount },
                 ]"
                 size="small"
                 title="导出"
@@ -77,7 +77,7 @@
             <a-dropdown data-id="rankland-ranklist-share-menu" :trigger="['hover']" placement="bottom">
               <a-button
                 data-id="rankland-ranklist-share-menu-button"
-                class="rankland-ranklist-header-action-trigger rankland-ranklist-header-action-separated"
+                class="rankland-ranklist-header-action-trigger rankland-ranklist-header-action-separated pl-2 border-0 border-l border-solid border-gray-400"
                 size="small"
                 title="分享"
                 aria-label="分享"

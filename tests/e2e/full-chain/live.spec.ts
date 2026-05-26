@@ -177,6 +177,17 @@ test.describe('/live/:id full-chain route', () => {
     await expect(page.locator('[data-id="rankland-ranklist-footer"]')).toContainText('Powered by Standard Ranklist');
     await expect(page.locator('[data-id="rankland-ranklist-export-menu-button"]')).toBeVisible();
     await expect(page.locator('[data-id="rankland-ranklist-share-menu-button"]')).toBeVisible();
+    await expect(page.locator('[data-id="rankland-ranklist-export-menu-button"]')).toHaveClass(/(^|\s)border-0(\s|$)/);
+    await expect(page.locator('[data-id="rankland-ranklist-export-menu-button"]')).toHaveClass(/(^|\s)border-solid(\s|$)/);
+    await expect(page.locator('[data-id="rankland-ranklist-export-menu-button"]')).toHaveClass(/(^|\s)border-gray-400(\s|$)/);
+    await expect(page.locator('[data-id="rankland-ranklist-export-menu-button"]')).toHaveClass(/(^|\s)mr-2(\s|$)/);
+    await expect(page.locator('[data-id="rankland-ranklist-export-menu-button"]')).not.toHaveClass(/(^|\s)pl-2(\s|$)/);
+    await expect(page.locator('[data-id="rankland-ranklist-export-menu-button"]')).not.toHaveClass(/(^|\s)border-l(\s|$)/);
+    await expect(page.locator('[data-id="rankland-ranklist-share-menu-button"]')).toHaveClass(/(^|\s)pl-2(\s|$)/);
+    await expect(page.locator('[data-id="rankland-ranklist-share-menu-button"]')).toHaveClass(/(^|\s)border-0(\s|$)/);
+    await expect(page.locator('[data-id="rankland-ranklist-share-menu-button"]')).toHaveClass(/(^|\s)border-l(\s|$)/);
+    await expect(page.locator('[data-id="rankland-ranklist-share-menu-button"]')).toHaveClass(/(^|\s)border-solid(\s|$)/);
+    await expect(page.locator('[data-id="rankland-ranklist-share-menu-button"]')).toHaveClass(/(^|\s)border-gray-400(\s|$)/);
     expect(await getHeaderActionTriggerStyle(page, '[data-id="rankland-ranklist-export-menu-button"]')).toMatchObject({
       paddingLeft: '0px',
       borderLeftWidth: '0px',
