@@ -80,6 +80,17 @@ async function getTableWrapperMarginLeft(page: Page) {
   });
 }
 
+async function getControlsToTableGap(page: Page) {
+  return page.evaluate(() => {
+    const controls = document.querySelector<HTMLElement>('[data-id="rankland-ranklist-controls"]');
+    const tableWrapper = document.querySelector<HTMLElement>('[data-id="rankland-ranklist-table-wrapper"]');
+    if (!controls || !tableWrapper) {
+      throw new Error('Missing ranklist controls or table wrapper');
+    }
+    return Math.round(tableWrapper.getBoundingClientRect().top - controls.getBoundingClientRect().bottom);
+  });
+}
+
 async function getRouteContentSpacing(page: Page, selector: string) {
   return page.evaluate((selector) => {
     const element = document.querySelector<HTMLElement>(selector);
@@ -144,6 +155,7 @@ test.describe('/ranklist/:id full-chain route', () => {
     await expect(page.locator('[data-id="rankland-ranklist-progress"]')).toBeVisible();
     await expect(page.locator('[data-id="rankland-ranklist-filters"]')).toBeVisible();
     expect(await getTableWrapperMarginLeft(page)).toBe('16px');
+    expect(await getControlsToTableGap(page)).toBe(24);
     const remarks = page.locator('[data-id="rankland-ranklist-table-wrapper"] .srk-remarks');
     await expect(remarks).toHaveText('备注：赛后补题榜单，仅供展示');
     await expect(remarks).toBeVisible();

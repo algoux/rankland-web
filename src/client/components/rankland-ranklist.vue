@@ -182,7 +182,7 @@
         </div>
       </div>
 
-      <div data-id="rankland-ranklist-table-wrapper" :class="tableClass">
+      <div data-id="rankland-ranklist-table-wrapper" :class="['rankland-ranklist-table-wrapper', tableClass]">
         <div v-if="ranklistState.staticRanklist.remarks" class="rankland-ranklist-remarks">
           <span class="srk-remarks">备注：{{ resolveTextValue(ranklistState.staticRanklist.remarks) }}</span>
         </div>
@@ -1042,6 +1042,10 @@ export default defineComponent({
   border-radius: 4px;
   font-size: 12px;
   opacity: 0.75;
+}
+
+.rankland-ranklist-table-wrapper {
+  margin-top: 24px;
 }
 
 .ml-4 {
