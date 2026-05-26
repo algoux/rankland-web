@@ -43,8 +43,13 @@ test.describe('/search full-chain route', () => {
     await expect(page).toHaveTitle('探索 - RankLand');
     await expect(page.locator('[data-id="search-page"]')).toBeVisible();
     await expect(page.locator('[data-id="search-hydrated"]')).toHaveText('hydrated');
+    await expect(page.locator('.ant-input-search:has([data-id="search-input"])')).toBeVisible();
+    await expect(page.locator('[data-id="search-input"].ant-input')).toBeVisible();
+    await expect(page.locator('[data-id="search-submit"].ant-btn-primary')).toBeVisible();
     await expect(page.locator('[data-id="search-recent-section"]')).toBeVisible();
+    await expect(page.locator('[data-id="search-recent-section"] .ant-list.ant-list-sm')).toBeVisible();
     await expect(page.locator('[data-id="search-ranklist-item"]')).toHaveCount(3);
+    await expect(page.locator('[data-id="search-ranklist-item"].ant-list-item')).toHaveCount(3);
     await expect(page.locator('[data-id="search-ranklist-link"][data-ranklist-key="test-key"]')).toHaveAttribute(
       'href',
       '/ranklist/test-key',
@@ -58,6 +63,22 @@ test.describe('/search full-chain route', () => {
     expect(requests.some((requestRecord) => requestRecord.path === '/rank/search')).toBe(false);
   });
 
+  test('renders the legacy Ant Design loading spinner while ranklists are loading', async ({ page, request }) => {
+    await denyExternalCalls(page);
+    await request.post(`${mockBaseURL}/__reset`);
+    await page.route('**/rank/listall', async (route) => {
+      await page.waitForTimeout(250);
+      await route.continue();
+    });
+
+    const response = await page.goto('/search');
+
+    expect(response).not.toBeNull();
+    expect(response?.ok()).toBe(true);
+    await expect(page.locator('[data-id="search-loading"].ant-spin')).toBeVisible();
+    await expect(page.locator('[data-id="search-recent-section"]')).toBeVisible();
+  });
+
   test('shows Fuse results for kw query and preserves result count selector', async ({ page, request }) => {
     await denyExternalCalls(page);
     await request.post(`${mockBaseURL}/__reset`);
@@ -66,10 +87,15 @@ test.describe('/search full-chain route', () => {
 
     expect(response).not.toBeNull();
     expect(response?.ok()).toBe(true);
+    await expect(page.locator('.ant-input-search:has([data-id="search-input"])')).toBeVisible();
+    await expect(page.locator('[data-id="search-input"].ant-input')).toHaveValue('Test 2024');
+    await expect(page.locator('.ant-input-search:has([data-id="search-input"]) .ant-input-clear-icon')).toBeVisible();
     await expect(page.locator('[data-id="search-result-section"]')).toBeVisible();
     await expect(page.locator('[data-id="search-result-section"]')).toHaveAttribute('data-result-count', '1');
     await expect(page.locator('[data-id="search-result-count"]')).toHaveText('1');
+    await expect(page.locator('[data-id="search-result-section"] .ant-list.ant-list-sm')).toBeVisible();
     await expect(page.locator('[data-id="search-ranklist-item"]')).toHaveCount(1);
+    await expect(page.locator('[data-id="search-ranklist-item"].ant-list-item')).toHaveCount(1);
     await expect(page.locator('[data-id="search-ranklist-link"][data-ranklist-key="test-key"]')).toHaveAttribute(
       'href',
       '/ranklist/test-key',

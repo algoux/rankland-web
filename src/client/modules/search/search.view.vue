@@ -10,18 +10,20 @@
       <div data-id="search-hydrated" class="search-hydrated">{{ hydrated ? 'hydrated' : 'csr' }}</div>
       <h1>在榜单数据库中探索</h1>
 
-      <form class="search-form" @submit.prevent="submitSearch">
-        <input
-          v-model="inputKeyword"
-          data-id="search-input"
-          class="search-input"
-          type="search"
-          placeholder="输入关键词搜索"
-        >
-        <button data-id="search-submit" class="search-submit" type="submit">搜索</button>
-      </form>
+      <a-input-search
+        v-model:value="inputKeyword"
+        data-id="search-input"
+        class="search-input"
+        placeholder="输入关键词搜索"
+        allow-clear
+        @search="submitSearch"
+      >
+        <template #enterButton>
+          <a-button data-id="search-submit" type="primary">搜索</a-button>
+        </template>
+      </a-input-search>
 
-      <div v-if="loading" data-id="search-loading" class="search-state">Loading</div>
+      <a-spin v-if="loading" data-id="search-loading" class="search-state" />
 
       <div v-else-if="loadError" data-id="search-error" class="search-state search-error">
         初始化榜单数据库失败，请刷新再试。
@@ -35,49 +37,53 @@
       >
         <div class="search-section-title">搜索到 <span data-id="search-result-count">{{ searchRows.length }}</span> 个结果</div>
         <div v-if="searchRows.length === 0" data-id="search-empty-state" class="search-empty-state">暂无匹配的榜单</div>
-        <ul v-else class="search-list">
-          <li
-            v-for="item in searchRows"
-            :key="item.uniqueKey"
-            data-id="search-ranklist-item"
-            class="search-list-item"
-            :data-ranklist-key="item.uniqueKey"
-          >
-            <router-link
-              data-id="search-ranklist-link"
+        <a-list v-else class="search-list" size="small" :data-source="searchRows">
+          <template #renderItem="{ item }">
+            <a-list-item
+              data-id="search-ranklist-item"
+              class="search-list-item"
               :data-ranklist-key="item.uniqueKey"
-              :to="buildRanklistPath(item.uniqueKey)"
             >
-              {{ item.name }}
-            </router-link>
-            <span class="search-view-count"><EyeOutlined /> {{ item.viewCnt }}</span>
-            <p class="search-created-at">创建于 {{ formatCreatedAt(item.createdAt) }}</p>
-          </li>
-        </ul>
+              <p class="search-row-title">
+                <router-link
+                  data-id="search-ranklist-link"
+                  :data-ranklist-key="item.uniqueKey"
+                  :to="buildRanklistPath(item.uniqueKey)"
+                >
+                  {{ item.name }}
+                </router-link>
+                <span class="search-view-count"><EyeOutlined /> {{ item.viewCnt }}</span>
+              </p>
+              <p class="search-created-at">创建于 {{ formatCreatedAt(item.createdAt) }}</p>
+            </a-list-item>
+          </template>
+        </a-list>
       </section>
 
       <section v-else data-id="search-recent-section" class="search-section">
         <div class="search-section-title">最近更新</div>
         <div v-if="recentRows.length === 0" class="search-empty-state">暂无最近更新的榜单</div>
-        <ul v-else class="search-list">
-          <li
-            v-for="item in recentRows"
-            :key="item.uniqueKey"
-            data-id="search-ranklist-item"
-            class="search-list-item"
-            :data-ranklist-key="item.uniqueKey"
-          >
-            <router-link
-              data-id="search-ranklist-link"
+        <a-list v-else class="search-list" size="small" :data-source="recentRows">
+          <template #renderItem="{ item }">
+            <a-list-item
+              data-id="search-ranklist-item"
+              class="search-list-item"
               :data-ranklist-key="item.uniqueKey"
-              :to="buildRanklistPath(item.uniqueKey)"
             >
-              {{ item.name }}
-            </router-link>
-            <span class="search-view-count"><EyeOutlined /> {{ item.viewCnt }}</span>
-            <p class="search-created-at">创建于 {{ formatCreatedAt(item.createdAt) }}</p>
-          </li>
-        </ul>
+              <p class="search-row-title">
+                <router-link
+                  data-id="search-ranklist-link"
+                  :data-ranklist-key="item.uniqueKey"
+                  :to="buildRanklistPath(item.uniqueKey)"
+                >
+                  {{ item.name }}
+                </router-link>
+                <span class="search-view-count"><EyeOutlined /> {{ item.viewCnt }}</span>
+              </p>
+              <p class="search-created-at">创建于 {{ formatCreatedAt(item.createdAt) }}</p>
+            </a-list-item>
+          </template>
+        </a-list>
       </section>
     </section>
   </main>
@@ -161,8 +167,9 @@ const SearchPage = defineComponent({
         this.loading = false;
       }
     },
-    submitSearch() {
-      const target = ranklandRoutes.search.build({ kw: this.inputKeyword.trim() || undefined });
+    submitSearch(value?: string) {
+      const keyword = typeof value === 'string' ? value : this.inputKeyword;
+      const target = ranklandRoutes.search.build({ kw: keyword.trim() || undefined });
       if (target !== this.$route.fullPath) {
         this.$router.push(target);
       }
@@ -195,28 +202,8 @@ export default routeView(SearchPage, '/search');
   font-size: 12px;
 }
 
-.search-form {
-  display: flex;
-  gap: 8px;
-  margin-top: 24px;
-}
-
 .search-input {
-  flex: 1;
-  min-width: 0;
-  padding: 10px 12px;
-  border: 1px solid #cbd5e1;
-  border-radius: 4px;
-  font-size: 16px;
-}
-
-.search-submit {
-  padding: 10px 18px;
-  border: 1px solid #2368bf;
-  border-radius: 4px;
-  color: #fff;
-  background: #2368bf;
-  cursor: pointer;
+  margin-top: 24px;
 }
 
 .search-section,
@@ -234,13 +221,14 @@ export default routeView(SearchPage, '/search');
 
 .search-list {
   margin: 12px 0 0;
-  padding: 0;
-  list-style: none;
 }
 
 .search-list-item {
-  padding: 12px 0;
-  border-bottom: 1px solid #e2e8f0;
+  display: block;
+}
+
+.search-row-title {
+  margin: 0;
 }
 
 .search-view-count {

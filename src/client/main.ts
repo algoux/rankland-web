@@ -1,6 +1,23 @@
 import './index.less';
 import 'ant-design-vue/dist/reset.css';
-import { Button, Card, Col, Dropdown, FloatButton, Layout, Menu, Modal, Radio, Row, Select, Switch, Tag } from 'ant-design-vue';
+import {
+  Button,
+  Card,
+  Col,
+  Dropdown,
+  FloatButton,
+  Input,
+  Layout,
+  List,
+  Menu,
+  Modal,
+  Radio,
+  Row,
+  Select,
+  Spin,
+  Switch,
+  Tag,
+} from 'ant-design-vue';
 import { ClientOnly } from 'vite-ssr';
 import { createHead, Head } from '@vueuse/head';
 import type { HookParams } from 'vite-ssr/vue/types';
@@ -14,7 +31,24 @@ import type { RanklandApiService } from '@common/rankland-api';
 
 Vue.registerHooks(['setup', 'beforeRouteEnter', 'beforeRouteUpdate', 'beforeRouteLeave', 'asyncData']);
 
-const antDesignComponents = [Button, Card, Col, Dropdown, FloatButton, Layout, Menu, Modal, Radio, Row, Select, Switch, Tag];
+const antDesignComponents = [
+  Button,
+  Card,
+  Col,
+  Dropdown,
+  FloatButton,
+  Input,
+  Layout,
+  List,
+  Menu,
+  Modal,
+  Radio,
+  Row,
+  Select,
+  Spin,
+  Switch,
+  Tag,
+];
 
 export function mainEntry({
   app,
