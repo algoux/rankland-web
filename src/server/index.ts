@@ -87,6 +87,16 @@ export default class OurApp extends App {
         }),
       ),
     );
+    this.instance.use(
+      mount(
+        '/monaco-editor',
+        koaStatic(`${process.cwd()}/node_modules/monaco-editor/min/`, {
+          index: false,
+          maxage: 2592000000,
+          extensions: false,
+        }),
+      ),
+    );
     if (process.env.RANKLAND_E2E_HEALTH === '1') {
       this.instance.use(async (ctx, next) => {
         if (ctx.path === '/__e2e/health') {

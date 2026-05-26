@@ -27,6 +27,9 @@ dependencies:
   '@algoux/standard-ranklist-utils':
     specifier: ^0.2.9
     version: 0.2.9(@algoux/standard-ranklist@0.3.11)
+  '@guolao/vue-monaco-editor':
+    specifier: 1.6.0
+    version: 1.6.0(monaco-editor@0.43.0)(vue@3.5.34)
   '@koa/cors':
     specifier: ^5.0.0
     version: 5.0.0
@@ -99,6 +102,9 @@ dependencies:
   module-alias:
     specifier: ^2.2.2
     version: 2.2.3
+  monaco-editor:
+    specifier: 0.43.0
+    version: 0.43.0
   mongoose:
     specifier: ^8.3.4
     version: 8.3.4
@@ -828,6 +834,22 @@ packages:
     engines: {node: ^12.22.0 || ^14.17.0 || >=16.0.0}
     dev: true
 
+  /@guolao/vue-monaco-editor@1.6.0(monaco-editor@0.43.0)(vue@3.5.34):
+    resolution: {integrity: sha512-w2IiJ6eJGGeuIgCK6EKZOAfhHTTUB5aZwslzwGbZ5e89Hb4avx6++GkLTW8p84Sng/arFMjLPPxSBI56cFudyQ==}
+    peerDependencies:
+      '@vue/composition-api': ^1.7.2
+      monaco-editor: '>=0.43.0'
+      vue: ^2.6.14 || >=3.0.0
+    peerDependenciesMeta:
+      '@vue/composition-api':
+        optional: true
+    dependencies:
+      '@monaco-editor/loader': 1.7.0
+      monaco-editor: 0.43.0
+      vue: 3.5.34(typescript@4.6.4)
+      vue-demi: 0.14.10(vue@3.5.34)
+    dev: false
+
   /@humanwhocodes/config-array@0.11.13:
     resolution: {integrity: sha512-JSBDMiDKSzQVngfRjOdFXgFfklaXI4K9nLF49Auh21lmBWRLIK3+xTErTWD4KU54pb6coM6ESE7Awz/FNU3zgQ==}
     engines: {node: '>=10.10.0'}
@@ -912,6 +934,12 @@ packages:
       multer: 1.4.4
     transitivePeerDependencies:
       - supports-color
+    dev: false
+
+  /@monaco-editor/loader@1.7.0:
+    resolution: {integrity: sha512-gIwR1HrJrrx+vfyOhYmCZ0/JcWqG5kbfG7+d3f/C1LXk2EvzAbHSg3MQ5lO2sMlo9izoAZ04shohfKLVT6crVA==}
+    dependencies:
+      state-local: 1.0.7
     dev: false
 
   /@mongodb-js/saslprep@1.1.6:
@@ -4988,6 +5016,10 @@ packages:
     resolution: {integrity: sha1-EUyUlnPiqKNenTV4hSeqN7Z52is=}
     dev: false
 
+  /monaco-editor@0.43.0:
+    resolution: {integrity: sha512-cnoqwQi/9fml2Szamv1XbSJieGJ1Dc8tENVMD26Kcfl7xGQWp7OBKMjlwKVGYFJ3/AXJjSOGvcqK7Ry/j9BM1Q==}
+    dev: false
+
   /mongodb-connection-string-url@3.0.0:
     resolution: {integrity: sha512-t1Vf+m1I5hC2M5RJx/7AtxgABy1cZmIPQRMXw+gEIPn/cZNF3Oiy+l0UIypUwVB5trcWHq3crg2g3uAR9aAwsQ==}
     dependencies:
@@ -6265,6 +6297,10 @@ packages:
     resolution: {integrity: sha512-1XMJE5fQo1jGH6Y/7ebnwPOBEkIEnT4QF32d5R1+VXdXveM0IBMJt8zfaxX1P3QhVwrYe+576+jkANtSS2mBbw==}
     dev: true
 
+  /state-local@1.0.7:
+    resolution: {integrity: sha512-HTEHMNieakEnoe33shBYcZ7NX83ACUjCu8c40iOGEZsngj9zRnkqS9j1pqQPXwobB0ZcVTk27REb7COQ0UR59w==}
+    dev: false
+
   /static-extend@0.1.2:
     resolution: {integrity: sha512-72E9+uLc27Mt718pMHt9VMNiAL4LMsmDbBva8mxWUCkT07fSzEGMYUCk0XWY6lp0j6RBAG4cJ3mWuZv2OE3s0g==}
     engines: {node: '>=0.10.0'}
@@ -7023,6 +7059,21 @@ packages:
     resolution: {integrity: sha512-w1nMzsT/UdbDAXKqhwTmSoyuJzUXKrxLE77PCFVuC6syr8acdFDAq116xgvZh9UCuV0h+rlCtxXolr3Hi3HyPQ==}
     peerDependencies:
       vue: ^3.0.0
+    dependencies:
+      vue: 3.5.34(typescript@4.6.4)
+    dev: false
+
+  /vue-demi@0.14.10(vue@3.5.34):
+    resolution: {integrity: sha512-nMZBOwuzabUO0nLgIcc6rycZEebF6eeUfaiQx9+WSk8e29IbLvPU9feI6tqW4kTo3hvoYAJkMh8n8D0fuISphg==}
+    engines: {node: '>=12'}
+    hasBin: true
+    requiresBuild: true
+    peerDependencies:
+      '@vue/composition-api': ^1.0.0-rc.1
+      vue: ^3.0.0-0 || ^2.6.0
+    peerDependenciesMeta:
+      '@vue/composition-api':
+        optional: true
     dependencies:
       vue: 3.5.34(typescript@4.6.4)
     dev: false

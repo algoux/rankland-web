@@ -92,4 +92,13 @@ describe('vite config', () => {
 
     expect(viteConfig.build.rollupOptions.output.sourcemapExcludeSources).toBe(true);
   });
+
+  it('pre-bundles Monaco editor for the playground editor route', () => {
+    delete require.cache[require.resolve(VITE_CONFIG_PATH)];
+
+    // eslint-disable-next-line @typescript-eslint/no-var-requires
+    const viteConfig = require(VITE_CONFIG_PATH);
+
+    expect(viteConfig.optimizeDeps.include).toContain('monaco-editor');
+  });
 });

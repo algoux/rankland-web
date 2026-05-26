@@ -56,6 +56,9 @@ module.exports = defineConfig({
       },
     },
   },
+  optimizeDeps: {
+    include: ['monaco-editor'],
+  },
   plugins: [
     vue(),
     viteSSR({
