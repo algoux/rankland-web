@@ -180,6 +180,10 @@ test.describe('/ranklist/:id full-chain route', () => {
     await expect(page.locator('[data-id="rankland-ranklist-share-menu-button"]')).toBeVisible();
     await expect(page.locator('[data-id="rankland-ranklist-export-menu-button"] .anticon-download')).toBeVisible();
     await expect(page.locator('[data-id="rankland-ranklist-share-menu-button"] .anticon-share-alt')).toBeVisible();
+    await page.locator('[data-id="rankland-ranklist-export-menu-button"]').hover();
+    await expect(page.locator('[data-id="rankland-ranklist-export-menu-group"]')).toContainText('导出为');
+    await page.mouse.move(10, 10);
+    await expect(page.locator('[data-id="rankland-ranklist-export-menu-group"]')).toBeHidden();
     await expectHoverDropdownOpensAndCloses(
       page,
       'rankland-ranklist-export-menu-button',

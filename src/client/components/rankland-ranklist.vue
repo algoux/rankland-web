@@ -26,30 +26,32 @@
               </a-button>
               <template #overlay>
                 <a-menu data-id="rankland-ranklist-export-menu-overlay">
-                  <a-menu-item key="export-srk">
-                    <button data-id="rankland-ranklist-export-srk-action" type="button" @click="downloadSrkJson">
-                      标准榜单格式 (srk)
-                    </button>
-                  </a-menu-item>
-                  <a-menu-item key="export-gym-ghost">
-                    <button
-                      data-id="rankland-ranklist-export-gym-ghost-action"
-                      type="button"
-                      @click="downloadGymGhostDat"
-                    >
-                      Codeforces Gym Ghost (dat)
-                    </button>
-                  </a-menu-item>
-                  <a-menu-item key="export-vjudge">
-                    <button data-id="rankland-ranklist-export-vjudge-action" type="button" @click="downloadVJudgeReplay">
-                      Virtual Judge Replay (xlsx)
-                    </button>
-                  </a-menu-item>
-                  <a-menu-item key="export-xlsx">
-                    <button data-id="rankland-ranklist-export-xlsx-action" type="button" @click="downloadGeneralExcel">
-                      Excel 表格 (xlsx)
-                    </button>
-                  </a-menu-item>
+                  <a-menu-item-group key="export-group" data-id="rankland-ranklist-export-menu-group" title="导出为">
+                    <a-menu-item key="export-srk">
+                      <button data-id="rankland-ranklist-export-srk-action" type="button" @click="downloadSrkJson">
+                        标准榜单格式 (srk)
+                      </button>
+                    </a-menu-item>
+                    <a-menu-item key="export-gym-ghost">
+                      <button
+                        data-id="rankland-ranklist-export-gym-ghost-action"
+                        type="button"
+                        @click="downloadGymGhostDat"
+                      >
+                        Codeforces Gym Ghost (dat)
+                      </button>
+                    </a-menu-item>
+                    <a-menu-item key="export-vjudge">
+                      <button data-id="rankland-ranklist-export-vjudge-action" type="button" @click="downloadVJudgeReplay">
+                        Virtual Judge Replay (xlsx)
+                      </button>
+                    </a-menu-item>
+                    <a-menu-item key="export-xlsx">
+                      <button data-id="rankland-ranklist-export-xlsx-action" type="button" @click="downloadGeneralExcel">
+                        Excel 表格 (xlsx)
+                      </button>
+                    </a-menu-item>
+                  </a-menu-item-group>
                 </a-menu>
               </template>
             </a-dropdown>
