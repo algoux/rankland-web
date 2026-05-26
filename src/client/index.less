@@ -8,6 +8,9 @@ body {
 }
 
 html.light body {
+  --rankland-link-active-color: #d96500;
+  --rankland-link-color: #ff8104;
+  --rankland-link-hover-color: #ff9d2e;
   --rankland-primary-color: #ff8104;
   --rankland-primary-color-rgb: 255, 129, 4;
   color: #17202a;
@@ -15,6 +18,9 @@ html.light body {
 }
 
 html.dark body {
+  --rankland-link-active-color: #e8b52b;
+  --rankland-link-color: #f6ac06;
+  --rankland-link-hover-color: #a7770b;
   --rankland-primary-color: #f6ac06;
   --rankland-primary-color-rgb: 246, 172, 6;
   color: #e6edf5;
@@ -43,11 +49,24 @@ html.dark body.optimize-decrease-effects .srk-main {
 }
 
 a {
-  color: #2368bf;
+  color: var(--rankland-link-color);
+  text-decoration: none;
+  background-color: transparent;
+  outline: none;
+  cursor: pointer;
+  transition: color 0.3s;
 }
 
 a:hover {
-  color: #174f94;
+  color: var(--rankland-link-hover-color);
+  text-decoration: none;
+  outline: 0;
+}
+
+a:active {
+  color: var(--rankland-link-active-color);
+  text-decoration: none;
+  outline: 0;
 }
 
 .app-shell {

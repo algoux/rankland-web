@@ -964,6 +964,16 @@ export default defineComponent({
   overflow-x: auto;
 }
 
+.rankland-ranklist a,
+.rankland-ranklist-footer :deep(.contact-us-trigger) {
+  color: var(--rankland-link-color);
+}
+
+.rankland-ranklist a:hover,
+.rankland-ranklist-footer :deep(.contact-us-trigger:hover) {
+  color: var(--rankland-link-hover-color);
+}
+
 .rankland-ranklist-header {
   margin-bottom: 0;
   text-align: center;

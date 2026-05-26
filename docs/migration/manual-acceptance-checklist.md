@@ -193,6 +193,7 @@ App shell Ant Design Vue Layout/Menu/Dropdown/Button、主导航旧版 46px line
 - `[x]` 分享链接正确
 - `[x]` iframe 嵌入代码正确
 - `[x]` 相关 SRK 资源的 asset URL 重写可用
+- `[x]` 榜单相关链接与 footer 联系入口使用旧版 light/dark primary 链接色
 - `[x]` 页脚联系入口可用
 - `[x]` 桌面端布局可接受
 - `[x]` 移动端布局可接受
@@ -205,7 +206,7 @@ App shell Ant Design Vue Layout/Menu/Dropdown/Button、主导航旧版 46px line
 备注：
 
 ```text
-2026-05-26 复核：ranklist full-chain 覆盖 SSR/hydration、Not Found、Gym Ghost/VJudge/XLSX 下载、iframe 嵌入代码、hover 打开/关闭导出和分享 dropdown、SRK wrapper header/filter/progress/table/footer/user-modal/rank-time 多项旧版视觉行为；其中 header meta 到 contributors 的旧版 0px 额外间距、SRK 备注 pill light `rgba(255, 129, 4, 0.8)` 与 dark `rgba(246, 172, 6, 0.8)` 边框已有 computed layout/style 断言。
+2026-05-26 复核：ranklist full-chain 覆盖 SSR/hydration、Not Found、Gym Ghost/VJudge/XLSX 下载、iframe 嵌入代码、hover 打开/关闭导出和分享 dropdown、SRK wrapper header/filter/progress/table/footer/user-modal/rank-time 多项旧版视觉行为；其中 header meta 到 contributors 的旧版 0px 额外间距、SRK 备注 pill light `rgba(255, 129, 4, 0.8)` 与 dark `rgba(246, 172, 6, 0.8)` 边框、header ref-link/footer contact trigger light `#ff8104` 与 dark `#f6ac06` 链接色已有 computed layout/style 断言。
 ```
 
 ## 合集页 `/collection/:id`

@@ -76,7 +76,7 @@ export default defineComponent({
 .contact-us-trigger {
   display: inline;
   padding: 0;
-  color: #2368bf;
+  color: var(--rankland-link-color);
   font: inherit;
   text-align: inherit;
   text-decoration: none;
@@ -86,7 +86,7 @@ export default defineComponent({
 }
 
 .contact-us-trigger:hover {
-  color: #174f94;
+  color: var(--rankland-link-hover-color);
 }
 
 .contact-us-overlay {

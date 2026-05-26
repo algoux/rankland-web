@@ -122,6 +122,22 @@ async function getHeaderMetaBlockSpacing(page: Page) {
   });
 }
 
+async function getRanklistLinkColors(page: Page) {
+  return page.evaluate(() => {
+    const refLink = document.querySelector<HTMLElement>('[data-id="rankland-ranklist-ref-links"] a');
+    const footerContactTrigger = document.querySelector<HTMLElement>(
+      '[data-id="rankland-ranklist-footer"] [data-id="contact-us-trigger"]',
+    );
+    if (!refLink || !footerContactTrigger) {
+      throw new Error('Missing ranklist link color target');
+    }
+    return {
+      refLinkColor: window.getComputedStyle(refLink).color,
+      footerContactTriggerColor: window.getComputedStyle(footerContactTrigger).color,
+    };
+  });
+}
+
 async function getTableWrapperMarginLeft(page: Page) {
   return page.evaluate(() => {
     const wrapper = document.querySelector<HTMLElement>('[data-id="rankland-ranklist-table-wrapper"]');
@@ -233,8 +249,21 @@ async function hasLoadedZcoolXiaoWeiFont(page: Page) {
 }
 
 async function selectRanklistOrganization(page: Page, organization: string) {
-  await page.locator('[data-id="rankland-ranklist-organization-filter"] .ant-select-selector').click();
-  await page.locator('.ant-select-dropdown .ant-select-item-option', { hasText: organization }).click();
+  const filter = page.locator('[data-id="rankland-ranklist-organization-filter"]');
+  const visibleDropdown = page.locator('.ant-select-dropdown:not(.ant-select-dropdown-hidden)').last();
+  const option = visibleDropdown.locator('.ant-select-item-option', { hasText: organization }).first();
+
+  await filter.click();
+  try {
+    await visibleDropdown.waitFor({ state: 'visible', timeout: 1000 });
+    await option.waitFor({ state: 'visible', timeout: 1000 });
+  } catch (error) {
+    await filter.click({ force: true });
+    await page.keyboard.press('ArrowDown');
+    await visibleDropdown.waitFor({ state: 'visible', timeout: 5000 });
+    await option.waitFor({ state: 'visible', timeout: 5000 });
+  }
+  await option.click();
   await page.keyboard.press('Escape');
 }
 
@@ -282,6 +311,15 @@ test.describe('/ranklist/:id full-chain route', () => {
     );
     await expect(page.locator('[data-id="rankland-ranklist-ref-link-extra-action"]')).toHaveText('and 1 more');
     await expect(page.locator('[data-id="rankland-ranklist-ref-link-extra-action"] .anticon-caret-down')).toBeVisible();
+    await expect.poll(() => getRanklistLinkColors(page)).toMatchObject({
+      refLinkColor: 'rgb(255, 129, 4)',
+      footerContactTriggerColor: 'rgb(255, 129, 4)',
+    });
+    await page.locator('[data-id="rankland-ranklist-ref-links"] a').first().hover();
+    await expect(page.locator('[data-id="rankland-ranklist-ref-links"] a').first()).toHaveCSS(
+      'color',
+      'rgb(255, 157, 46)',
+    );
     await expect(page.locator('[data-id="rankland-ranklist-banner"]')).toHaveAttribute(
       'src',
       `${mockBaseURL}/srk-assets/test-key/banner.png`,
@@ -735,6 +773,15 @@ test.describe('/ranklist/:id full-chain route', () => {
     expect(response?.ok()).toBe(true);
     await expect(page.locator('html')).toHaveClass('dark');
     await expect(page.locator('[data-id="rankland-ranklist-title"]')).toHaveText('Test Contest 2024');
+    await expect.poll(() => getRanklistLinkColors(page)).toMatchObject({
+      refLinkColor: 'rgb(246, 172, 6)',
+      footerContactTriggerColor: 'rgb(246, 172, 6)',
+    });
+    await page.locator('[data-id="rankland-ranklist-ref-links"] a').first().hover();
+    await expect(page.locator('[data-id="rankland-ranklist-ref-links"] a').first()).toHaveCSS(
+      'color',
+      'rgb(167, 119, 11)',
+    );
     await expect(
       page.locator('[data-id="rankland-ranklist-table-wrapper"] .srk-remarks'),
     ).toHaveCSS('border-top-color', 'rgba(246, 172, 6, 0.8)');
