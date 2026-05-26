@@ -59,6 +59,10 @@ test.describe('/search full-chain route', () => {
     await expect(page.locator('[data-id="search-page"]')).toBeVisible();
     await expect(page.locator('[data-id="search-page"]')).toHaveClass(/normal-content/);
     await expect(page.locator('[data-id="search-hydrated"]')).toHaveText('hydrated');
+    await expect(page.locator('[data-id="search-hydrated"]')).toHaveCSS('width', '1px');
+    await expect(page.locator('[data-id="search-hydrated"]')).toHaveCSS('height', '1px');
+    await expect(page.locator('[data-id="search-hydrated"]')).toHaveCSS('overflow', 'hidden');
+    await expect(page.locator('[data-id="search-hydrated"]')).toHaveCSS('color', 'rgba(0, 0, 0, 0)');
     await expect(page.locator('h3.mb-6', { hasText: '在榜单数据库中探索' })).toBeVisible();
     await expect(page.locator('.ant-input-search:has([data-id="search-input"])')).toBeVisible();
     await expect(page.locator('[data-id="search-input"].ant-input')).toBeVisible();

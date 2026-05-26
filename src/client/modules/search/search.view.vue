@@ -202,8 +202,10 @@ export default routeView(SearchPage, '/search');
 }
 
 .search-hydrated {
-  color: #64748b;
-  font-size: 12px;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  color: transparent;
 }
 
 .search-heading {
