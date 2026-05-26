@@ -479,7 +479,7 @@ export default routeView(LivePage, '/live/:id', LiveRPO);
   display: inline-flex;
   flex-shrink: 0;
   align-items: center;
-  gap: 8px;
+  gap: 4px;
   color: #334155;
   font-size: 13px;
 }

@@ -62,7 +62,7 @@ git status --short --branch
 备注：
 
 ```text
-2026-05-27 最新记录：collection ranklist panel layout parity 已通过 focused RED/GREEN、完整 `test:migration`（build、35 unit files / 151 unit tests、1 SSR smoke test、1 shallow Playwright test、54 full-chain Playwright tests）和 `git diff --check`。
+2026-05-27 最新记录：live scroll toggle spacing parity 已通过 focused RED/GREEN、完整 `test:migration`（build、35 unit files / 151 unit tests、1 SSR smoke test、1 shallow Playwright test、54 full-chain Playwright tests）和 `git diff --check`。
 ```
 
 ## 全局外壳与跨路由行为
@@ -318,6 +318,7 @@ App shell Ant Design Vue Layout/Menu/Dropdown/Button、旧版全局 body light/d
 - `[x]` 关闭 scroll-solution 时保留其他 query 参数
 - `[x]` 关闭 scroll-solution 时 WebSocket 会关闭
 - `[x]` WebSocket 异常关闭时展示实时错误，同时保留榜单可见
+- `[x]` scroll-solution 开关文本与 Switch 间距使用旧版 `4px`
 - `[x]` 移动端隐藏 scroll-solution 开关，同时保留榜单渲染
 - `[x]` 缺失 live contest 展示 Not Found
 - `[x]` 桌面端普通 live 布局可接受
@@ -333,7 +334,7 @@ App shell Ant Design Vue Layout/Menu/Dropdown/Button、旧版全局 body light/d
 备注：
 
 ```text
-2026-05-27 复核：live full-chain 使用 mock backend 和 stub WebSocket 覆盖 CSR hydration、hydration marker 视觉隐藏、query 保留、polling、WebSocket setup/reconnect/close、Toastify/scroll-solution、Not Found、普通/实时桌面移动端截图和 bounds。
+2026-05-27 复核：live full-chain 使用 mock backend 和 stub WebSocket 覆盖 CSR hydration、hydration marker 视觉隐藏、query 保留、polling、WebSocket setup/reconnect/close、Toastify/scroll-solution、scroll-solution 开关旧版 4px 间距、Not Found、普通/实时桌面移动端截图和 bounds。
 ```
 
 ## API 与数据行为
