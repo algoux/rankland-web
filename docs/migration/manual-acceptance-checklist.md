@@ -62,7 +62,7 @@ git status --short --branch
 备注：
 
 ```text
-2026-05-27 最新记录：collection collapsed submenu padding parity 已通过 focused RED/GREEN、完整 `test:migration`（build、35 unit files / 151 unit tests、1 SSR smoke test、1 shallow Playwright test、54 full-chain Playwright tests）和 `git diff --check`。
+2026-05-27 最新记录：collection ranklist panel layout parity 已通过 focused RED/GREEN、完整 `test:migration`（build、35 unit files / 151 unit tests、1 SSR smoke test、1 shallow Playwright test、54 full-chain Playwright tests）和 `git diff --check`。
 ```
 
 ## 全局外壳与跨路由行为
@@ -250,6 +250,7 @@ App shell Ant Design Vue Layout/Menu/Dropdown/Button、旧版全局 body light/d
 - `[x]` 合集导航层级使用旧版 `z-index: 1`
 - `[x]` 合集隐藏标题不设置额外层级，保持旧版 `z-index: auto`
 - `[x]` 合集折叠态子菜单标题左右内边距使用旧版 `0px`
+- `[x]` 合集榜单面板使用旧版 `position: relative` 和 `flex: 1`
 - `[x]` 桌面端布局可接受
 - `[x]` 移动端布局可接受
 
@@ -263,7 +264,7 @@ App shell Ant Design Vue Layout/Menu/Dropdown/Button、旧版全局 body light/d
 备注：
 
 ```text
-2026-05-27 复核：collection full-chain 覆盖 SSR/hydration、invalid rankId cleanup、Ant Design Vue menu/category icons/mobile collapse、旧版 `MenuFoldOutlined` / `MenuUnfoldOutlined` collapse icon、remaining-height/nav animation contract、selected-ranklist wrapper/filter/progress/footer/action、空选择/加载/错误/Not Found 状态；已补充旧版 collapsed submenu-title 0px 左右内边距、nav light `#f4f4f4`、dark `#111111`、dark border `#434343`、`.srk-collection-hidden-header h3.mb-0` DOM、`.srk-collection-container` / `.srk-collection-nav` / `.srk-collection-ranklist` 外壳类名、nav `z-index: 1` 和 hidden-header `z-index: auto` 断言。
+2026-05-27 复核：collection full-chain 覆盖 SSR/hydration、invalid rankId cleanup、Ant Design Vue menu/category icons/mobile collapse、旧版 `MenuFoldOutlined` / `MenuUnfoldOutlined` collapse icon、remaining-height/nav animation contract、selected-ranklist wrapper/filter/progress/footer/action、空选择/加载/错误/Not Found 状态；已补充旧版 `.srk-collection-ranklist` `position: relative` / `flex: 1`、collapsed submenu-title 0px 左右内边距、nav light `#f4f4f4`、dark `#111111`、dark border `#434343`、`.srk-collection-hidden-header h3.mb-0` DOM、`.srk-collection-container` / `.srk-collection-nav` / `.srk-collection-ranklist` 外壳类名、nav `z-index: 1` 和 hidden-header `z-index: auto` 断言。
 ```
 
 ## 演练场 `/playground`

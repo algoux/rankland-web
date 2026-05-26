@@ -186,9 +186,14 @@ test.describe('/collection/:id full-chain route', () => {
     expect(response).not.toBeNull();
     expect(response?.ok()).toBe(true);
     const nav = page.locator('[data-id="collection-nav"]');
+    const ranklistPanel = page.locator('[data-id="collection-ranklist-panel"]');
     await expect(page.locator('[data-id="collection-content"]')).toHaveClass(/srk-collection-container/);
     await expect(nav).toHaveClass(/srk-collection-nav/);
-    await expect(page.locator('[data-id="collection-ranklist-panel"]')).toHaveClass(/srk-collection-ranklist/);
+    await expect(ranklistPanel).toHaveClass(/srk-collection-ranklist/);
+    await expect(ranklistPanel).toHaveCSS('position', 'relative');
+    await expect(ranklistPanel).toHaveCSS('flex-grow', '1');
+    await expect(ranklistPanel).toHaveCSS('flex-shrink', '1');
+    await expect(ranklistPanel).toHaveCSS('flex-basis', '0%');
     await expect(nav).toHaveCSS('z-index', '1');
     await expect(page.locator('.srk-collection-hidden-header')).toHaveCSS('z-index', 'auto');
     await expect(nav).toHaveCSS('background-color', 'rgb(244, 244, 244)');

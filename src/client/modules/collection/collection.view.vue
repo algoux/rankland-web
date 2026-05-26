@@ -599,6 +599,8 @@ html.dark .collection-nav {
 }
 
 .collection-ranklist-panel {
+  flex: 1;
+  position: relative;
   box-sizing: border-box;
   min-width: 0;
   max-width: 100vw;
