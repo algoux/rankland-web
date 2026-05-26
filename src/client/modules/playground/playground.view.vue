@@ -331,6 +331,7 @@ export default routeView(PlaygroundPage, '/playground');
 }
 
 .playground-editor-pane {
+  position: relative;
   display: flex;
   min-width: 0;
   flex-direction: column;
@@ -338,8 +339,11 @@ export default routeView(PlaygroundPage, '/playground');
 }
 
 .playground-editor-ready {
-  color: #64748b;
-  font-size: 12px;
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  color: transparent;
 }
 
 .playground-editor {

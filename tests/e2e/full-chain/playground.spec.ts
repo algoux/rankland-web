@@ -126,6 +126,13 @@ test.describe('/playground full-chain route', () => {
     await expect(page.locator('[data-id="playground-hydrated"]')).toHaveCSS('overflow', 'hidden');
     await expect(page.locator('[data-id="playground-hydrated"]')).toHaveCSS('color', 'rgba(0, 0, 0, 0)');
     await expectMonacoReady(page);
+    const editorReadyMarker = page.locator('[data-id="playground-editor-ready"]');
+    await expect(editorReadyMarker).toHaveText('ready');
+    await expect(editorReadyMarker).toHaveCSS('position', 'absolute');
+    await expect(editorReadyMarker).toHaveCSS('width', '1px');
+    await expect(editorReadyMarker).toHaveCSS('height', '1px');
+    await expect(editorReadyMarker).toHaveCSS('overflow', 'hidden');
+    await expect(editorReadyMarker).toHaveCSS('color', 'rgba(0, 0, 0, 0)');
     await expect(page.locator('[data-id="playground-editor"] .monaco-editor')).toBeVisible();
     await expect(page.locator('[data-id="playground-editor"]')).toHaveAttribute('data-editor-language', 'json');
     await expect(page.locator('[data-id="playground-editor"]')).toHaveAttribute('data-editor-diagnostics', 'srk-schema');
