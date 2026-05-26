@@ -436,6 +436,14 @@ test.describe('/ranklist/:id full-chain route', () => {
     await expect(page.locator('.srk-user-cell', { hasText: 'Team Beta' })).toBeVisible();
 
     await selectRanklistOrganization(page, 'Org A');
+    await selectRanklistOrganization(page, 'Org B');
+
+    const organizationFilter = page.locator('[data-id="rankland-ranklist-organization-filter"]');
+    await expect(organizationFilter.locator('.ant-select-selection-item')).toHaveText('已选择 2 个');
+
+    await page.reload();
+
+    await selectRanklistOrganization(page, 'Org A');
 
     await expect(page.locator('.srk-user-cell', { hasText: 'Team Alpha' })).toBeVisible();
     await expect(page.locator('.srk-user-cell', { hasText: 'Team Beta' })).toBeHidden();

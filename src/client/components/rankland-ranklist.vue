@@ -145,6 +145,8 @@
               allow-clear
               placeholder="选择组织/单位"
               class="rankland-ranklist-select"
+              :max-tag-count="0"
+              :max-tag-placeholder="formatOrganizationSelectionPlaceholder"
             >
               <a-select-option v-for="organization in ranklistState.organizations" :key="organization" :value="organization">
                 {{ organization }}
@@ -758,6 +760,9 @@ export default defineComponent({
     },
     resolveTextValue(value: srk.Text | undefined): string {
       return resolveText(value);
+    },
+    formatOrganizationSelectionPlaceholder(omittedValues: unknown[]): string {
+      return `已选择 ${omittedValues.length} 个`;
     },
     resolveSrkImageUrl(image: srk.Image | srk.ImageWithLink | undefined): string {
       if (!image) {
