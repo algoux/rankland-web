@@ -84,6 +84,29 @@ async function getHeaderActionTriggerStyle(page: Page, selector: string) {
   });
 }
 
+async function getHeaderMetaBlockSpacing(page: Page) {
+  return page.evaluate(() => {
+    const meta = document.querySelector<HTMLElement>('[data-id="rankland-ranklist-header-meta"]');
+    const contributors = document.querySelector<HTMLElement>('[data-id="rankland-ranklist-contributors"]');
+    const refLinks = document.querySelector<HTMLElement>('[data-id="rankland-ranklist-ref-links"]');
+    if (!meta || !contributors || !refLinks) {
+      throw new Error('Missing ranklist header meta block');
+    }
+    const metaStyle = window.getComputedStyle(meta);
+    const contributorsStyle = window.getComputedStyle(contributors);
+    const refLinksStyle = window.getComputedStyle(refLinks);
+    return {
+      metaMarginBottom: metaStyle.marginBottom,
+      contributorsMarginTop: contributorsStyle.marginTop,
+      contributorsMarginBottom: contributorsStyle.marginBottom,
+      refLinksMarginTop: refLinksStyle.marginTop,
+      metaToContributorsGap: Math.round(
+        contributors.getBoundingClientRect().top - meta.getBoundingClientRect().bottom,
+      ),
+    };
+  });
+}
+
 async function getTableWrapperMarginLeft(page: Page) {
   return page.evaluate(() => {
     const wrapper = document.querySelector<HTMLElement>('[data-id="rankland-ranklist-table-wrapper"]');
@@ -231,6 +254,13 @@ test.describe('/ranklist/:id full-chain route', () => {
     await expect(page.locator('[data-id="rankland-ranklist-contributors"]')).toContainText(
       '贡献者：https://github.com/rankland-alpha, Team Beta',
     );
+    expect(await getHeaderMetaBlockSpacing(page)).toMatchObject({
+      metaMarginBottom: '0px',
+      contributorsMarginTop: '0px',
+      contributorsMarginBottom: '0px',
+      refLinksMarginTop: '0px',
+      metaToContributorsGap: 0,
+    });
     await expect(page.locator('[data-id="rankland-ranklist-ref-links"]')).toContainText(
       '相关链接：Official Site, Mirror, Statements',
     );

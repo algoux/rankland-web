@@ -18,7 +18,7 @@
 - 总体结论：`[ ]` 接受迁移 / `[x]` 带后续事项接受 / `[ ]` 暂不接受，需先修复阻塞项
 - 是否接受“路由兼容完成”，不要求旧 React/Ant Design 像素级一致：`[ ]` 是 / `[x]` 否。要求进行像素级别还原，使用antd vue。
 - 剩余产品 polish 是否可以放到迁移收口之后处理：`[ ]` 是 / `[x]` 否
-- 最高优先级后续 slice：product-review-driven SRK lower-level table pixel parity, if a new concrete visual difference is found.
+- 最高优先级后续 slice：product-review-driven SRK lower-level table pixel parity / route polish, if a new concrete visual difference is found.
 - 发布、合并或收口阻塞项摘要：2026-05-26 自动化复核未保留已知阻塞；剩余项为 review-driven polish / release process，而不是当前工作区的已复现失败。
 
 验收备注：
@@ -201,7 +201,7 @@ App shell Ant Design Vue Layout/Menu/Dropdown/Button、站点切换 ArrowRight i
 备注：
 
 ```text
-2026-05-26 复核：ranklist full-chain 覆盖 SSR/hydration、Not Found、Gym Ghost/VJudge/XLSX 下载、iframe 嵌入代码、hover 打开/关闭导出和分享 dropdown、SRK wrapper header/filter/progress/table/footer/user-modal/rank-time 多项旧版视觉行为。
+2026-05-26 复核：ranklist full-chain 覆盖 SSR/hydration、Not Found、Gym Ghost/VJudge/XLSX 下载、iframe 嵌入代码、hover 打开/关闭导出和分享 dropdown、SRK wrapper header/filter/progress/table/footer/user-modal/rank-time 多项旧版视觉行为；其中 header meta 到 contributors 的旧版 0px 额外间距已有 computed layout 断言。
 ```
 
 ## 合集页 `/collection/:id`

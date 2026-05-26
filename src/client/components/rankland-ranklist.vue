@@ -992,7 +992,7 @@ export default defineComponent({
   align-items: center;
   justify-content: center;
   gap: 8px;
-  margin: 4px 0 8px;
+  margin: 4px 0 0;
   font-size: 13px;
 }
 
