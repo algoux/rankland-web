@@ -67,6 +67,16 @@ async function getCollectionLayoutMetrics(page: Page) {
   });
 }
 
+async function getTableWrapperMarginLeft(page: Page) {
+  return page.evaluate(() => {
+    const wrapper = document.querySelector<HTMLElement>('[data-id="rankland-ranklist-table-wrapper"]');
+    if (!wrapper) {
+      throw new Error('Missing rankland-ranklist-table-wrapper');
+    }
+    return window.getComputedStyle(wrapper).marginLeft;
+  });
+}
+
 test.describe('/collection/:id full-chain route', () => {
   test('renders selected ranklist through SSR, hydration, RanklandApiService, and the mock backend', async ({
     page,
@@ -95,6 +105,7 @@ test.describe('/collection/:id full-chain route', () => {
     await expect(page.locator('[data-id="rankland-ranklist-view-count"]')).toHaveText('浏览 42');
     await expect(page.locator('[data-id="rankland-ranklist-progress"]')).toBeVisible();
     await expect(page.locator('[data-id="rankland-ranklist-filters"]')).toBeVisible();
+    expect(await getTableWrapperMarginLeft(page)).toBe('0px');
     await expect(page.locator('[data-id="rankland-ranklist-footer"]')).toContainText('Powered by Standard Ranklist');
     await expect(page.locator('[data-id="rankland-ranklist-export-menu-button"]')).toBeVisible();
     await page.locator('[data-id="rankland-ranklist-export-menu-button"]').hover();

@@ -51,6 +51,16 @@ async function expectHoverDropdownOpensAndCloses(page: Page, triggerTestId: stri
   await expect(item).toBeHidden();
 }
 
+async function getTableWrapperMarginLeft(page: Page) {
+  return page.evaluate(() => {
+    const wrapper = document.querySelector<HTMLElement>('[data-id="rankland-ranklist-table-wrapper"]');
+    if (!wrapper) {
+      throw new Error('Missing rankland-ranklist-table-wrapper');
+    }
+    return window.getComputedStyle(wrapper).marginLeft;
+  });
+}
+
 async function selectRanklistOrganization(page: Page, organization: string) {
   await page.locator('[data-id="rankland-ranklist-organization-filter"] .ant-select-selector').click();
   await page.locator('.ant-select-dropdown .ant-select-item-option', { hasText: organization }).click();
@@ -93,6 +103,7 @@ test.describe('/ranklist/:id full-chain route', () => {
     );
     await expect(page.locator('[data-id="rankland-ranklist-progress"]')).toBeVisible();
     await expect(page.locator('[data-id="rankland-ranklist-filters"]')).toBeVisible();
+    expect(await getTableWrapperMarginLeft(page)).toBe('16px');
     await expect(page.locator('[data-id="rankland-ranklist-footer"]')).toContainText('Powered by Standard Ranklist');
     await expect(page.locator('[data-id="rankland-ranklist-footer"]')).toContainText('需要专业的赛事外榜托管？');
     await page.locator('[data-id="rankland-ranklist-footer"] [data-id="contact-us-trigger"]').click();

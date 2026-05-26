@@ -47,7 +47,7 @@
         show-progress
         show-footer
         is-live
-        table-class="live-ranklist-table"
+        table-class="ml-4"
       >
         <template #extra-action>
           <label class="live-scroll-toggle">

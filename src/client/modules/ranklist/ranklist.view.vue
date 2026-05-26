@@ -35,7 +35,7 @@
         show-filter
         show-progress
         show-footer
-        table-class="ranklist-detail-table"
+        table-class="ml-4"
       />
     </section>
   </main>

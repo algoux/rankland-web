@@ -182,7 +182,7 @@
         备注：{{ resolveTextValue(ranklistState.staticRanklist.remarks) }}
       </div>
 
-      <div :class="tableClass">
+      <div data-id="rankland-ranklist-table-wrapper" :class="tableClass">
         <Ranklist
           :data="ranklistState.staticRanklist"
           striped-rows
@@ -841,6 +841,10 @@ export default defineComponent({
 .rankland-ranklist-remarks {
   margin: 16px;
   text-align: center;
+}
+
+.ml-4 {
+  margin-left: 16px;
 }
 
 .rankland-ranklist-footer {
