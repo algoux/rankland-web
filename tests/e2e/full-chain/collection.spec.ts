@@ -185,9 +185,13 @@ test.describe('/collection/:id full-chain route', () => {
 
     expect(response).not.toBeNull();
     expect(response?.ok()).toBe(true);
+    const nav = page.locator('[data-id="collection-nav"]');
+    await expect(nav).toHaveCSS('background-color', 'rgb(244, 244, 244)');
     await expect(page.locator('[data-id="collection-nav-menu"]')).toHaveClass(/ant-menu-inline/);
     await expect(page.locator('[data-id="collection-collapse-button"]')).toHaveClass(/ant-btn/);
     await expect(page.locator('[data-id="collection-collapse-button"] .anticon-menu-fold')).toBeVisible();
+    await expect(page.locator('.srk-collection-hidden-header')).toBeVisible();
+    await expect(page.locator('.srk-collection-hidden-header h3.mb-0')).toHaveText('榜单合集');
     await expect(page.locator('[data-id="collection-category-icon-dir-icpc"] img')).toHaveAttribute('alt', 'ICPC');
     await expect(page.locator('[data-id="collection-category-icon-dir-ccpc"] img')).toHaveAttribute('alt', 'CCPC');
     await expect(
@@ -196,6 +200,11 @@ test.describe('/collection/:id full-chain route', () => {
     await expect(page.locator('[data-id="collection-nav-menu"] .ant-menu-item-selected')).toContainText(
       'Test Contest 2024',
     );
+
+    await page.emulateMedia({ colorScheme: 'dark' });
+    await expect(page.locator('html')).toHaveClass('dark');
+    await expect(nav).toHaveCSS('background-color', 'rgb(17, 17, 17)');
+    await expect(nav).toHaveCSS('border-right-color', 'rgb(67, 67, 67)');
   });
 
   test('uses the legacy mobile nav collapse behavior', async ({ page, request }) => {

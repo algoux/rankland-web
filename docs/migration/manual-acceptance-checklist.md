@@ -62,7 +62,7 @@ git status --short --branch
 备注：
 
 ```text
-2026-05-27 最新记录：search enter-button icon parity 已通过 focused RED/GREEN、完整 `test:migration`（build、35 unit files / 151 unit tests、1 SSR smoke test、1 shallow Playwright test、54 full-chain Playwright tests）和 `git diff --check`。
+2026-05-27 最新记录：collection nav legacy chrome parity 已通过 focused RED/GREEN、完整 `test:migration`（build、35 unit files / 151 unit tests、1 SSR smoke test、1 shallow Playwright test、54 full-chain Playwright tests）和 `git diff --check`。
 ```
 
 ## 全局外壳与跨路由行为
@@ -243,6 +243,9 @@ App shell Ant Design Vue Layout/Menu/Dropdown/Button、旧版全局 body light/d
 - `[x]` 缺失合集展示 Not Found
 - `[x]` 合集树或菜单可用
 - `[x]` 分类或分组展示可接受
+- `[x]` 合集导航浅色背景使用旧版 `#f4f4f4`
+- `[x]` 合集导航深色背景和右边框使用旧版 `#111111` / `#434343`
+- `[x]` 合集隐藏标题使用旧版 `.srk-collection-hidden-header h3.mb-0` DOM
 - `[x]` 桌面端布局可接受
 - `[x]` 移动端布局可接受
 
@@ -256,7 +259,7 @@ App shell Ant Design Vue Layout/Menu/Dropdown/Button、旧版全局 body light/d
 备注：
 
 ```text
-
+2026-05-27 复核：collection full-chain 覆盖 SSR/hydration、invalid rankId cleanup、Ant Design Vue menu/category icons/mobile collapse、旧版 `MenuFoldOutlined` / `MenuUnfoldOutlined` collapse icon、remaining-height/nav animation contract、selected-ranklist wrapper/filter/progress/footer/action、空选择/加载/错误/Not Found 状态；本轮补充旧版 nav light `#f4f4f4`、dark `#111111`、dark border `#434343` 和 `.srk-collection-hidden-header h3.mb-0` DOM 断言。
 ```
 
 ## 演练场 `/playground`
@@ -394,7 +397,7 @@ App shell Ant Design Vue Layout/Menu/Dropdown/Button、旧版全局 body light/d
 | App shell Ant Design 菜单/dropdown 样式 | `[ ]` | `[ ]` | `[ ]` | 已处理，full-chain 覆盖 Ant Design Vue shell/menu/dropdown/button 结构 |
 | App shell GA/pageview dispatch parity | `[ ]` | `[ ]` | `[ ]` | 已处理，full-chain 覆盖 analytics init/pageview dispatch |
 | 首页更完整 SEO/content polish | `[x]` | `[ ]` | `[ ]` | |
-| 合集页菜单、移动端、分类 icon 精确行为 | `[ ]` | `[ ]` | `[ ]` | 已处理，full-chain 覆盖 Ant Design Vue menu/category icon/mobile collapse/remaining-height |
+| 合集页菜单、移动端、分类 icon 精确行为 | `[ ]` | `[ ]` | `[ ]` | 已处理，full-chain 覆盖 Ant Design Vue menu/category icon/mobile collapse/remaining-height/nav chrome hidden header |
 | 演练场 Monaco/editor parity | `[x]` | `[ ]` | `[ ]` | Monaco 0.43 保留为已验证 Vue wrapper 依赖；旧 0.34 包版本不再精确保留 |
 | Live WebSocket reconnect/backoff | `[ ]` | `[ ]` | `[ ]` | 已处理，full-chain 覆盖错误关闭/异常关闭后的 reconnect |
 | Live Toastify 动画和像素级一致 | `[ ]` | `[ ]` | `[ ]` | 已处理，full-chain 覆盖 Toastify 容器、toast 行、Zoom 动画和像素覆盖 |

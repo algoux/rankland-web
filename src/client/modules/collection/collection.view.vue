@@ -65,9 +65,9 @@
         </ClientOnly>
       </aside>
 
-      <div class="collection-hidden-header" :style="hiddenHeaderStyle">
+      <div class="srk-collection-hidden-header collection-hidden-header" :style="hiddenHeaderStyle">
         <img :src="logo" alt="RankLand" width="32" height="32">
-        <h2>榜单合集</h2>
+        <h3 class="mb-0">榜单合集</h3>
       </div>
 
       <section
@@ -508,8 +508,13 @@ export default routeView(CollectionPage, '/collection/:id', CollectionRPO, undef
   flex-direction: column;
   height: calc(100vh - 64px);
   overflow: hidden;
-  background: #f7f7f7;
+  background: #f4f4f4;
   border-right: 1px solid #d9d9d9;
+}
+
+html.dark .collection-nav {
+  background: #111111;
+  border-right-color: #434343;
 }
 
 .collection-collapse-button {
@@ -570,7 +575,7 @@ export default routeView(CollectionPage, '/collection/:id', CollectionRPO, undef
   height: 32px;
 }
 
-.collection-hidden-header h2 {
+.collection-hidden-header h3 {
   margin: 0 0 0 8px;
   font-size: 18px;
   line-height: 1;
@@ -585,7 +590,7 @@ export default routeView(CollectionPage, '/collection/:id', CollectionRPO, undef
   height: 24px;
 }
 
-.collection-page.is-nav-collapsed .collection-hidden-header h2 {
+.collection-page.is-nav-collapsed .collection-hidden-header h3 {
   margin: 4px 0 0;
   font-size: 14px;
 }
