@@ -109,6 +109,28 @@ test.describe('/search full-chain route', () => {
     expect(requests.some((requestRecord) => requestRecord.path === '/rank/search')).toBe(false);
   });
 
+  test('renders zero search results without an extra empty-state message like the legacy page', async ({
+    page,
+    request,
+  }) => {
+    await denyExternalCalls(page);
+    await request.post(`${mockBaseURL}/__reset`);
+
+    const response = await page.goto('/search?kw=NoSuchContest999');
+
+    expect(response).not.toBeNull();
+    expect(response?.ok()).toBe(true);
+    await expect(page.locator('[data-id="search-result-section"]')).toBeVisible();
+    await expect(page.locator('[data-id="search-result-section"]')).toHaveAttribute('data-result-count', '0');
+    await expect(page.locator('[data-id="search-result-count"]')).toHaveText('0');
+    await expect(page.locator('[data-id="search-ranklist-item"]')).toHaveCount(0);
+    await expect(page.locator('[data-id="search-empty-state"]')).toHaveCount(0);
+
+    const requests = await readRequests(request);
+    expect(requests.filter((requestRecord) => requestRecord.path === '/rank/listall')).toHaveLength(1);
+    expect(requests.some((requestRecord) => requestRecord.path === '/rank/search')).toBe(false);
+  });
+
   test('treats an empty kw query as the recent-list state', async ({ page, request }) => {
     await denyExternalCalls(page);
     await request.post(`${mockBaseURL}/__reset`);

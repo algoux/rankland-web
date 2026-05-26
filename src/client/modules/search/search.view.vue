@@ -36,8 +36,7 @@
         :data-result-count="searchRows.length"
       >
         <div class="search-section-title">搜索到 <span data-id="search-result-count">{{ searchRows.length }}</span> 个结果</div>
-        <div v-if="searchRows.length === 0" data-id="search-empty-state" class="search-empty-state">暂无匹配的榜单</div>
-        <a-list v-else class="search-list" size="small" :data-source="searchRows">
+        <a-list v-if="searchRows.length > 0" class="search-list" size="small" :data-source="searchRows">
           <template #renderItem="{ item }">
             <a-list-item
               data-id="search-ranklist-item"
