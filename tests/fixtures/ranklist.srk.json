@@ -17,7 +17,7 @@
   "contributors": ["https://github.com/rankland-alpha", "Team Beta"],
   "remarks": "赛后补题榜单，仅供展示",
   "markers": [
-    { "id": "gold", "label": "Gold Group", "style": "gold" },
+    { "id": "gold", "label": "Gold Group", "style": "yellow" },
     { "id": "silver", "label": "Silver Group", "style": "silver" }
   ],
   "problems": [

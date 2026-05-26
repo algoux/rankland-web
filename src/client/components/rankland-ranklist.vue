@@ -237,13 +237,16 @@
                 <span>{{ resolveTextValue(member.name) }}</span>
               </template>
             </div>
-            <div v-if="activeUserMarkers.length > 0" class="rankland-user-modal-markers">
+            <div v-if="activeUserMarkerLabels.length > 0" class="rankland-user-modal-markers user-modal-info-markers">
               <span
-                v-for="marker in activeUserMarkers"
+                v-for="marker in activeUserMarkerLabels"
                 :key="marker.id"
-                class="rankland-user-modal-marker"
+                data-id="rankland-user-modal-marker"
+                class="rankland-user-modal-marker user-modal-info-marker"
+                :class="marker.className"
+                :style="marker.style"
               >
-                {{ resolveTextValue(marker.label) }}
+                {{ marker.label }}
               </span>
             </div>
             <p
@@ -321,6 +324,7 @@ import {
   formatTimeDuration,
   getSortedCalculatedRawSolutions,
   resolveContributor,
+  resolveStyle,
   resolveText,
   resolveUserMarkers,
   secToTimeStr,
@@ -389,6 +393,13 @@ interface ActiveUserSegment {
   seriesTitle: string;
   segmentTitle: string;
   segmentStyle: string;
+}
+
+interface ActiveUserMarkerLabel {
+  id: string;
+  label: string;
+  className: string;
+  style: Record<string, string>;
 }
 
 function normalizeHeaderDataId(value: string): string {
@@ -547,11 +558,33 @@ export default defineComponent({
     activeUserTeamMembers(): srk.ExternalUser[] {
       return this.activeUserPayload?.user.teamMembers || [];
     },
-    activeUserMarkers(): srk.Marker[] {
+    activeUserMarkerLabels(): ActiveUserMarkerLabel[] {
       if (!this.activeUserPayload || this.baseRanklistState.kind !== 'ready') {
         return [];
       }
-      return resolveUserMarkers(this.activeUserPayload.user, this.baseRanklistState.staticRanklist.markers);
+      return resolveUserMarkers(this.activeUserPayload.user, this.baseRanklistState.staticRanklist.markers)
+        .map((marker) => {
+          const style = marker.style;
+          if (typeof style === 'string') {
+            return {
+              id: marker.id,
+              label: resolveText(marker.label),
+              className: `srk-preset-marker-${style}`,
+              style: {},
+            };
+          }
+
+          const resolvedStyle = resolveStyle(style);
+          return {
+            id: marker.id,
+            label: resolveText(marker.label),
+            className: '',
+            style: {
+              color: resolvedStyle.textColor[this.ranklistTheme] || '',
+              backgroundColor: resolvedStyle.backgroundColor[this.ranklistTheme] || '',
+            },
+          };
+        });
     },
     activeUserSegment(): ActiveUserSegment | null {
       if (!this.activeUserPayload) {
@@ -988,7 +1021,6 @@ export default defineComponent({
 }
 
 .rankland-user-modal-team-members,
-.rankland-user-modal-markers,
 .rankland-rank-time-events {
   display: flex;
   flex-wrap: wrap;
@@ -1000,7 +1032,6 @@ export default defineComponent({
   color: #94a3b8;
 }
 
-.rankland-user-modal-marker,
 .rankland-rank-time-event {
   display: inline-flex;
   align-items: center;
@@ -1010,6 +1041,23 @@ export default defineComponent({
   background: #f1f5f9;
   color: #334155;
   font-size: 12px;
+}
+
+.rankland-user-modal-markers {
+  display: block;
+  margin-top: 8px;
+}
+
+.rankland-user-modal-marker {
+  display: inline-block;
+  padding: 2px;
+  border: 1px solid transparent;
+  border-radius: 4px;
+  font-size: 12px;
+}
+
+.rankland-user-modal-marker:not(:last-of-type) {
+  margin-right: 4px;
 }
 
 .rankland-user-modal-segment {
@@ -1033,6 +1081,34 @@ export default defineComponent({
 
 .bg-segment-bronze {
   background-color: var(--srk-color-bronze);
+}
+
+.srk-preset-marker-red {
+  background-color: var(--srk-color-marker-red);
+}
+
+.srk-preset-marker-orange {
+  background-color: var(--srk-color-marker-orange);
+}
+
+.srk-preset-marker-yellow {
+  background-color: var(--srk-color-marker-yellow);
+}
+
+.srk-preset-marker-green {
+  background-color: var(--srk-color-marker-green);
+}
+
+.srk-preset-marker-blue {
+  background-color: var(--srk-color-marker-blue);
+}
+
+.srk-preset-marker-purple {
+  background-color: var(--srk-color-marker-purple);
+}
+
+.srk-preset-marker-pink {
+  background-color: var(--srk-color-marker-pink);
 }
 
 .bg-segment-iron {

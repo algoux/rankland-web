@@ -245,6 +245,35 @@ test.describe('/ranklist/:id full-chain route', () => {
     await page.locator('.srk-user-cell', { hasText: 'Team Alpha' }).click();
     const userModal = page.locator('[data-id="rankland-ranklist-user-modal"]');
     await expect(userModal.locator('.srk-modal')).toBeVisible();
+    const marker = userModal.locator('[data-id="rankland-user-modal-marker"]').first();
+    await expect(marker).toHaveText('Gold Group');
+    await expect(marker).toHaveClass(/user-modal-info-marker/);
+    await expect(marker).toHaveClass(/srk-preset-marker-yellow/);
+    const markerStyle = await marker.evaluate((element) => {
+      const style = window.getComputedStyle(element);
+      return {
+        display: style.display,
+        fontSize: style.fontSize,
+        borderRadius: style.borderRadius,
+        borderTopWidth: style.borderTopWidth,
+        paddingTop: style.paddingTop,
+        paddingRight: style.paddingRight,
+        paddingBottom: style.paddingBottom,
+        paddingLeft: style.paddingLeft,
+        marginRight: style.marginRight,
+      };
+    });
+    expect(markerStyle).toMatchObject({
+      display: 'inline-block',
+      fontSize: '12px',
+      borderRadius: '4px',
+      borderTopWidth: '1px',
+      paddingTop: '2px',
+      paddingRight: '2px',
+      paddingBottom: '2px',
+      paddingLeft: '2px',
+      marginRight: '0px',
+    });
     await expect(userModal.locator('[data-id="rankland-user-modal-segment"]')).toContainText('所在奖区（Rank）：');
     await expect(userModal.locator('[data-id="rankland-user-modal-segment-label"]')).toHaveText('Gold');
     await expect(userModal.locator('[data-id="rankland-user-modal-segment-label"]')).toHaveClass(/bg-segment-gold/);
