@@ -82,7 +82,7 @@ function filterStaticRanklist(staticRanklist: StaticRanklist, filter: RanklandRa
       if (filter.organizations.length > 0 && !filter.organizations.includes(resolveText(row.user?.organization))) {
         return false;
       }
-      if (filter.officialOnly && row.user?.official === false) {
+      if (filter.officialOnly && row.user?.official !== true) {
         return false;
       }
       if (

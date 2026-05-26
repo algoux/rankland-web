@@ -84,6 +84,21 @@ describe('createRanklandRanklistState', () => {
     }
   });
 
+  it('filters out rows with missing official flag when officialOnly is enabled', () => {
+    const result = createRanklandRanklistState(fixture as srk.Ranklist, {
+      filter: {
+        organizations: [],
+        officialOnly: true,
+        marker: '',
+      },
+    });
+
+    expect(result.kind).toBe('ready');
+    if (result.kind === 'ready') {
+      expect(result.staticRanklist.rows.map((row) => row.user.id)).toEqual(['team-alpha']);
+    }
+  });
+
   it('filters rows and marker-scoped ICPC series by marker', () => {
     const result = createRanklandRanklistState(createFilterFixture(), {
       filter: {

@@ -84,6 +84,12 @@ async function expectNoHorizontalDocumentOverflow(page: Page) {
   expect(overflow.documentScrollWidth).toBeLessThanOrEqual(overflow.viewportWidth + 1);
 }
 
+async function selectRanklistOrganization(page: Page, organization: string) {
+  await page.locator('[data-id="rankland-ranklist-organization-filter"] .ant-select-selector').click();
+  await page.locator('.ant-select-dropdown .ant-select-item-option', { hasText: organization }).click();
+  await page.keyboard.press('Escape');
+}
+
 test.describe('/live/:id full-chain route', () => {
   test('hydrates the CSR live page, preserves queries, polls live ranklist, and guards WebSocket setup', async ({
     page,
@@ -138,7 +144,7 @@ test.describe('/live/:id full-chain route', () => {
       `<iframe src="http://127.0.0.1:${process.env.FULL_CHAIN_APP_PORT || '3100'}/live/live-test-key?focus=yes" border="0" frameborder="no" framespacing="0" allowfullscreen="true" style="width: 100%; height: 600px"></iframe>`,
     );
 
-    await page.selectOption('[data-id="rankland-ranklist-organization-filter"]', ['Org A']);
+    await selectRanklistOrganization(page, 'Org A');
     await expect(page.locator('.srk-user-cell', { hasText: 'Team Alpha' })).toBeVisible();
     await expect(page.locator('.srk-user-cell', { hasText: 'Team Beta' })).toBeHidden();
 

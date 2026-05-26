@@ -136,41 +136,41 @@
         <div v-if="showFilter" data-id="rankland-ranklist-filters" class="rankland-ranklist-filters">
           <label class="rankland-ranklist-filter">
             <span>筛选</span>
-            <select
-              v-model="filter.organizations"
+            <a-select
+              v-model:value="filter.organizations"
               data-id="rankland-ranklist-organization-filter"
-              multiple
+              mode="multiple"
+              allow-clear
+              placeholder="选择组织/单位"
               class="rankland-ranklist-select"
             >
-              <option v-for="organization in ranklistState.organizations" :key="organization" :value="organization">
+              <a-select-option v-for="organization in ranklistState.organizations" :key="organization" :value="organization">
                 {{ organization }}
-              </option>
-            </select>
+              </a-select-option>
+            </a-select>
           </label>
 
           <label class="rankland-ranklist-filter rankland-ranklist-checkbox">
-            <input
-              v-model="filter.officialOnly"
-              data-id="rankland-ranklist-official-filter"
-              type="checkbox"
-            >
             <span>仅正式参赛</span>
+            <a-switch
+              v-model:checked="filter.officialOnly"
+              data-id="rankland-ranklist-official-filter"
+              size="small"
+            />
           </label>
 
-          <fieldset
+          <a-radio-group
             v-if="ranklistState.markers.length > 0"
+            v-model:value="filter.marker"
             data-id="rankland-ranklist-marker-filter"
             class="rankland-ranklist-marker-filter"
+            button-style="solid"
           >
-            <label>
-              <input v-model="filter.marker" type="radio" value="">
-              <span>全部</span>
-            </label>
-            <label v-for="marker in ranklistState.markers" :key="marker.id">
-              <input v-model="filter.marker" type="radio" :value="marker.id">
-              <span>{{ resolveTextValue(marker.label) }}</span>
-            </label>
-          </fieldset>
+            <a-radio-button value="">全部</a-radio-button>
+            <a-radio-button v-for="marker in ranklistState.markers" :key="marker.id" :value="marker.id">
+              {{ resolveTextValue(marker.label) }}
+            </a-radio-button>
+          </a-radio-group>
         </div>
 
         <div v-if="hasExtraAction" data-id="rankland-ranklist-extra-action" class="rankland-ranklist-extra-action">
@@ -832,19 +832,10 @@ export default defineComponent({
 
 .rankland-ranklist-select {
   width: 160px;
-  min-height: 32px;
 }
 
 .rankland-ranklist-marker-filter {
-  margin: 0;
-  padding: 0;
-  border: 0;
-}
-
-.rankland-ranklist-marker-filter label {
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
+  white-space: nowrap;
 }
 
 .rankland-ranklist-remarks {

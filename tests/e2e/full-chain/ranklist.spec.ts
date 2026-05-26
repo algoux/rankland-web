@@ -51,6 +51,12 @@ async function expectHoverDropdownOpensAndCloses(page: Page, triggerTestId: stri
   await expect(item).toBeHidden();
 }
 
+async function selectRanklistOrganization(page: Page, organization: string) {
+  await page.locator('[data-id="rankland-ranklist-organization-filter"] .ant-select-selector').click();
+  await page.locator('.ant-select-dropdown .ant-select-item-option', { hasText: organization }).click();
+  await page.keyboard.press('Escape');
+}
+
 test.describe('/ranklist/:id full-chain route', () => {
   test('renders the ranklist detail page through SSR, hydration, RanklandApiService, and the mock backend', async ({
     page,
@@ -196,6 +202,47 @@ test.describe('/ranklist/:id full-chain route', () => {
     const rankRequests = requests.filter((requestRecord) => requestRecord.path === '/rank/missing-key');
 
     expect(rankRequests).toHaveLength(1);
+  });
+
+  test('renders legacy Ant Design filter controls and preserves filtering behavior', async ({ page, request }) => {
+    await denyExternalCalls(page);
+    await request.post(`${mockBaseURL}/__reset`);
+
+    const response = await page.goto('/ranklist/test-key?focus=yes');
+
+    expect(response).not.toBeNull();
+    expect(response?.ok()).toBe(true);
+    await expect(page.locator('[data-id="rankland-ranklist-filters"]')).toBeVisible();
+    await expect(page.locator('[data-id="rankland-ranklist-organization-filter"]')).toHaveClass(/ant-select/);
+    await expect(page.locator('[data-id="rankland-ranklist-official-filter"]')).toHaveClass(/ant-switch/);
+    await expect(page.locator('[data-id="rankland-ranklist-marker-filter"]')).toHaveClass(/ant-radio-group/);
+    await expect(page.locator('[data-id="rankland-ranklist-marker-filter"] .ant-radio-button-wrapper')).toContainText([
+      '全部',
+      'Gold Group',
+      'Silver Group',
+    ]);
+
+    await expect(page.locator('.srk-user-cell', { hasText: 'Team Alpha' })).toBeVisible();
+    await expect(page.locator('.srk-user-cell', { hasText: 'Team Beta' })).toBeVisible();
+
+    await selectRanklistOrganization(page, 'Org A');
+
+    await expect(page.locator('.srk-user-cell', { hasText: 'Team Alpha' })).toBeVisible();
+    await expect(page.locator('.srk-user-cell', { hasText: 'Team Beta' })).toBeHidden();
+
+    await page.reload();
+    await expect(page.locator('[data-id="rankland-ranklist-official-filter"]')).toBeVisible();
+    await page.locator('[data-id="rankland-ranklist-official-filter"]').click();
+
+    await expect(page.locator('.srk-user-cell', { hasText: 'Team Alpha' })).toBeVisible();
+    await expect(page.locator('.srk-user-cell', { hasText: 'Team Beta' })).toBeHidden();
+
+    await page.reload();
+    await expect(page.locator('[data-id="rankland-ranklist-marker-filter"]')).toBeVisible();
+    await page.locator('[data-id="rankland-ranklist-marker-filter"] .ant-radio-button-wrapper', { hasText: 'Gold Group' }).click();
+
+    await expect(page.locator('.srk-user-cell', { hasText: 'Team Alpha' })).toBeVisible();
+    await expect(page.locator('.srk-user-cell', { hasText: 'Team Beta' })).toBeHidden();
   });
 
   test('keeps the ranklist page wrappers within desktop and mobile viewport bounds', async ({

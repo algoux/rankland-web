@@ -15,6 +15,10 @@
     ]
   },
   "contributors": ["https://github.com/rankland-alpha", "Team Beta"],
+  "markers": [
+    { "id": "gold", "label": "Gold Group", "style": "gold" },
+    { "id": "silver", "label": "Silver Group", "style": "silver" }
+  ],
   "problems": [
     {
       "title": "Problem A",
@@ -49,6 +53,7 @@
         "name": "Team Alpha",
         "organization": "Org A",
         "official": true,
+        "markers": ["gold"],
         "photo": "/team-alpha.png"
       },
       "score": { "value": 2, "time": [100, "min"] },
@@ -74,7 +79,8 @@
       "user": {
         "id": "team-beta",
         "name": "Team Beta",
-        "organization": "Org B"
+        "organization": "Org B",
+        "markers": ["silver"]
       },
       "score": { "value": 1, "time": [55, "min"] },
       "statuses": [
