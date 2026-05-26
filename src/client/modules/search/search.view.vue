@@ -256,7 +256,7 @@ export default routeView(SearchPage, '/search');
 
 .search-empty-state {
   margin-top: 8px;
-  color: #64748b;
+  color: var(--rankland-legacy-text-color);
 }
 
 @media (max-width: 640px) {

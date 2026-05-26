@@ -10,6 +10,21 @@ async function readRequests(request: APIRequestContext) {
   return (await response.json()) as Array<{ path: string; search: string }>;
 }
 
+async function forceSystemDarkMode(page: Page) {
+  await page.addInitScript(() => {
+    window.matchMedia = ((query: string) => ({
+      media: query,
+      matches: query === '(prefers-color-scheme: dark)',
+      onchange: null,
+      addEventListener: () => undefined,
+      removeEventListener: () => undefined,
+      addListener: () => undefined,
+      removeListener: () => undefined,
+      dispatchEvent: () => true,
+    })) as typeof window.matchMedia;
+  });
+}
+
 async function expectElementWithinViewport(locator: Locator, page: Page) {
   const box = await locator.boundingBox();
   expect(box).not.toBeNull();
@@ -85,6 +100,7 @@ test.describe('/search full-chain route', () => {
   test('renders the recent empty state with the legacy mt-2 spacing', async ({ page, request }) => {
     await denyExternalCalls(page);
     await request.post(`${mockBaseURL}/__reset`);
+    await forceSystemDarkMode(page);
     await page.route('**/rank/listall', async (route) => {
       await route.fulfill({
         status: 200,
@@ -105,6 +121,10 @@ test.describe('/search full-chain route', () => {
     await expect(page.locator('[data-id="search-recent-section"] .search-empty-state')).toHaveCSS(
       'margin-top',
       '8px',
+    );
+    await expect(page.locator('[data-id="search-recent-section"] .search-empty-state')).toHaveCSS(
+      'color',
+      'rgba(255, 255, 255, 0.85)',
     );
   });
 
