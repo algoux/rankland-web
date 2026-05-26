@@ -178,11 +178,11 @@
         </div>
       </div>
 
-      <div v-if="ranklistState.staticRanklist.remarks" class="rankland-ranklist-remarks">
-        备注：{{ resolveTextValue(ranklistState.staticRanklist.remarks) }}
-      </div>
-
       <div data-id="rankland-ranklist-table-wrapper" :class="tableClass">
+        <div v-if="ranklistState.staticRanklist.remarks" class="rankland-ranklist-remarks">
+          <span class="srk-remarks">备注：{{ resolveTextValue(ranklistState.staticRanklist.remarks) }}</span>
+        </div>
+
         <Ranklist
           :data="ranklistState.staticRanklist"
           striped-rows
@@ -839,8 +839,17 @@ export default defineComponent({
 }
 
 .rankland-ranklist-remarks {
-  margin: 16px;
+  margin-bottom: 16px;
   text-align: center;
+}
+
+.srk-remarks {
+  display: inline-block;
+  padding: 4px 8px;
+  border: 1px solid rgba(22, 119, 255, 0.8);
+  border-radius: 4px;
+  font-size: 12px;
+  opacity: 0.75;
 }
 
 .ml-4 {

@@ -123,6 +123,31 @@ test.describe('/ranklist/:id full-chain route', () => {
     await expect(page.locator('[data-id="rankland-ranklist-progress"]')).toBeVisible();
     await expect(page.locator('[data-id="rankland-ranklist-filters"]')).toBeVisible();
     expect(await getTableWrapperMarginLeft(page)).toBe('16px');
+    const remarks = page.locator('[data-id="rankland-ranklist-table-wrapper"] .srk-remarks');
+    await expect(remarks).toHaveText('备注：赛后补题榜单，仅供展示');
+    await expect(remarks).toBeVisible();
+    expect(await remarks.evaluate((element) => {
+      const style = window.getComputedStyle(element);
+      return {
+        display: style.display,
+        fontSize: style.fontSize,
+        borderTopWidth: style.borderTopWidth,
+        borderTopStyle: style.borderTopStyle,
+        borderRadius: style.borderRadius,
+        paddingLeft: style.paddingLeft,
+        paddingTop: style.paddingTop,
+        opacity: style.opacity,
+      };
+    })).toMatchObject({
+      display: 'inline-block',
+      fontSize: '12px',
+      borderTopWidth: '1px',
+      borderTopStyle: 'solid',
+      borderRadius: '4px',
+      paddingLeft: '8px',
+      paddingTop: '4px',
+      opacity: '0.75',
+    });
     await expect(page.locator('[data-id="rankland-ranklist-footer"]')).toContainText('Powered by Standard Ranklist');
     await expect(page.locator('[data-id="rankland-ranklist-footer"]')).toContainText('需要专业的赛事外榜托管？');
     await page.locator('[data-id="rankland-ranklist-footer"] [data-id="contact-us-trigger"]').click();
