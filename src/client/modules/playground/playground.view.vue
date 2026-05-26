@@ -8,7 +8,7 @@
 
     <div data-id="playground-hydrated" class="playground-hydrated">{{ hydrated ? 'hydrated' : 'csr' }}</div>
 
-    <section class="playground-layout">
+    <section class="playground-layout" :style="{ height: `${remainingHeight}px` }">
       <div class="playground-editor-pane">
         <div data-id="playground-editor-ready" class="playground-editor-ready">
           {{ editorReady ? 'ready' : editorLoadingStage }}
@@ -288,7 +288,6 @@ export default routeView(PlaygroundPage, '/playground');
 .playground-page {
   box-sizing: border-box;
   min-height: 70vh;
-  padding: 24px 16px;
 }
 
 .playground-hydrated {
@@ -300,19 +299,16 @@ export default routeView(PlaygroundPage, '/playground');
 }
 
 .playground-layout {
-  display: grid;
-  grid-template-columns: minmax(320px, 500px) minmax(0, 1fr);
-  gap: 16px;
-  max-width: 1280px;
-  margin: 0 auto;
+  display: flex;
 }
 
 .playground-editor-pane {
   position: relative;
   display: flex;
+  flex: 0 0 500px;
+  width: 500px;
   min-width: 0;
   flex-direction: column;
-  gap: 8px;
 }
 
 .playground-editor-ready {
@@ -344,6 +340,7 @@ export default routeView(PlaygroundPage, '/playground');
 
 .playground-preview-pane {
   position: relative;
+  flex: 1;
   min-width: 0;
   overflow-x: auto;
 }
@@ -406,7 +403,13 @@ export default routeView(PlaygroundPage, '/playground');
 
 @media (max-width: 900px) {
   .playground-layout {
-    grid-template-columns: 1fr;
+    height: auto !important;
+    flex-direction: column;
+  }
+
+  .playground-editor-pane {
+    flex: 0 0 auto;
+    width: 100%;
   }
 
   .playground-editor {

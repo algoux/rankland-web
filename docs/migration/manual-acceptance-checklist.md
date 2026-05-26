@@ -62,7 +62,7 @@ git status --short --branch
 备注：
 
 ```text
-2026-05-27 最新记录：playground preview action chrome parity 已通过 focused Playground RED/GREEN、viewport GREEN、完整 `test:migration`（build、35 unit files / 151 unit tests、1 SSR smoke test、1 shallow Playwright test、54 full-chain Playwright tests）和 `git diff --check`。
+2026-05-27 最新记录：playground flex layout parity 已通过 focused Playground RED/GREEN、viewport GREEN、完整 `test:migration`（build、35 unit files / 151 unit tests、1 SSR smoke test、1 shallow Playwright test、54 full-chain Playwright tests）和 `git diff --check`。
 ```
 
 ## 全局外壳与跨路由行为
@@ -288,6 +288,7 @@ App shell Ant Design Vue Layout/Menu/Dropdown/Button、旧版全局 body light/d
 - `[x]` 编辑区控件可用
 - `[x]` 预览区可用
 - `[x]` 预览区右上角 `srk 文档` 入口位置、问号图标、外链地址与旧版一致
+- `[x]` 桌面端使用旧版 flex 布局、500px 编辑器和自适应预览区
 - `[x]` 桌面端编辑区和预览区布局可接受
 - `[x]` 移动端编辑区和预览区布局可接受
 
@@ -299,7 +300,7 @@ App shell Ant Design Vue Layout/Menu/Dropdown/Button、旧版全局 body light/d
 备注：
 
 ```text
-2026-05-27 复核：`tests/e2e/full-chain/playground.spec.ts` 覆盖旧 React 不存在的 `Playground` 顶部标题栏和可见 `Preview` 按钮已移除、hydration marker 和 editor-ready marker 视觉隐藏、旧 React 预览区右上角 `QuestionCircleOutlined` srk 文档入口位置、图标和地址。
+2026-05-27 复核：`tests/e2e/full-chain/playground.spec.ts` 覆盖旧 React 桌面 flex 布局、500px 编辑器、自适应预览区、旧 React 不存在的 `Playground` 顶部标题栏和可见 `Preview` 按钮已移除、hydration marker 和 editor-ready marker 视觉隐藏、旧 React 预览区右上角 `QuestionCircleOutlined` srk 文档入口位置、图标和地址。
 ```
 
 ## 实时榜单页 `/live/:id`
