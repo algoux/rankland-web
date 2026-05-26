@@ -379,7 +379,8 @@ export default routeView(PlaygroundPage, '/playground');
 }
 
 .playground-shortcut-tag {
-  margin: 0 4px;
+  margin-left: 0;
+  margin-right: 0;
 }
 
 .playground-preview {

@@ -189,6 +189,14 @@ test.describe('/playground full-chain route', () => {
     );
     await expect(page.locator('[data-id="playground-invalid-json"]')).toHaveCSS('margin-top', '64px');
     await expect(page.locator('[data-id="playground-invalid-json"]')).toHaveCSS('text-align', 'center');
+    await expect(page.locator('[data-id="playground-invalid-json"] .playground-shortcut-tag')).toHaveCSS(
+      'margin-right',
+      '0px',
+    );
+    await expect(page.locator('[data-id="playground-invalid-json"] .playground-shortcut-tag')).toHaveCSS(
+      'margin-left',
+      '0px',
+    );
     await expect(page.locator('[data-id="playground-invalid-json"] pre')).toHaveCount(0);
 
     const requests = await readRequests(request);

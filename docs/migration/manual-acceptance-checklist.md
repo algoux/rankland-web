@@ -62,7 +62,7 @@ git status --short --branch
 备注：
 
 ```text
-2026-05-27 最新记录：playground flex layout parity 已通过 focused Playground RED/GREEN、viewport GREEN、完整 `test:migration`（build、35 unit files / 151 unit tests、1 SSR smoke test、1 shallow Playwright test、54 full-chain Playwright tests）和 `git diff --check`。
+2026-05-27 最新记录：playground shortcut tag spacing parity 已通过 focused Playground invalid JSON RED/GREEN、完整 `test:migration`（build、35 unit files / 151 unit tests、1 SSR smoke test、1 shallow Playwright test、54 full-chain Playwright tests）和 `git diff --check`。
 ```
 
 ## 全局外壳与跨路由行为
@@ -284,6 +284,7 @@ App shell Ant Design Vue Layout/Menu/Dropdown/Button、旧版全局 body light/d
 - `[x]` 内置 demo SRK 可以预览
 - `[x]` 粘贴合法 SRK JSON 后可以预览
 - `[x]` 粘贴格式错误 JSON 后展示可理解的 invalid JSON 状态
+- `[x]` invalid JSON 快捷键标签使用旧版 `mr-0` 间距
 - `[x]` 粘贴对象 JSON 但不是可渲染 SRK 时展示可理解的转换错误
 - `[x]` 编辑区控件可用
 - `[x]` 预览区可用
@@ -300,7 +301,7 @@ App shell Ant Design Vue Layout/Menu/Dropdown/Button、旧版全局 body light/d
 备注：
 
 ```text
-2026-05-27 复核：`tests/e2e/full-chain/playground.spec.ts` 覆盖旧 React 桌面 flex 布局、500px 编辑器、自适应预览区、旧 React 不存在的 `Playground` 顶部标题栏和可见 `Preview` 按钮已移除、hydration marker 和 editor-ready marker 视觉隐藏、旧 React 预览区右上角 `QuestionCircleOutlined` srk 文档入口位置、图标和地址。
+2026-05-27 复核：`tests/e2e/full-chain/playground.spec.ts` 覆盖旧 React 桌面 flex 布局、500px 编辑器、自适应预览区、旧 React 不存在的 `Playground` 顶部标题栏和可见 `Preview` 按钮已移除、hydration marker 和 editor-ready marker 视觉隐藏、invalid JSON 快捷键 Tag 旧版 `mr-0` 间距、旧 React 预览区右上角 `QuestionCircleOutlined` srk 文档入口位置、图标和地址。
 ```
 
 ## 实时榜单页 `/live/:id`
