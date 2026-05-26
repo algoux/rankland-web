@@ -19,7 +19,10 @@
             :to="searchPath"
           >
             <a-card hoverable class="home-card">
-              <h3>探索</h3>
+              <h2 class="home-card-title">
+                <UnorderedListOutlined class="home-card-icon" />
+                <span>探索</span>
+              </h2>
               <p>
                 在 <em data-id="home-total-srk-count">{{ totalSrkCountText }}</em> 个高质量程序设计竞赛榜单中自由浏览和搜索
               </p>
@@ -33,7 +36,10 @@
             :to="collectionPath"
           >
             <a-card hoverable class="home-card">
-              <h3>榜单合集</h3>
+              <h2 class="home-card-title">
+                <TrophyOutlined class="home-card-icon" />
+                <span>榜单合集</span>
+              </h2>
               <p>查阅由 SDUTACM 和 algoUX 团队精心整理的历年赛事榜单合集</p>
             </a-card>
           </router-link>
@@ -53,10 +59,10 @@
             rel="noreferrer"
           >
             <a-card hoverable class="home-card">
-              <h3 class="home-card-title">
+              <h2 class="home-card-title">
                 <img :src="pasteThenACLogo" alt="paste.then.ac logo">
                 <span>paste.then.ac</span>
-              </h3>
+              </h2>
               <p>免注册、更适合算竞宝宝体质的的代码剪贴板</p>
             </a-card>
           </a>
@@ -70,10 +76,10 @@
             rel="noreferrer"
           >
             <a-card hoverable class="home-card">
-              <h3 class="home-card-title">
+              <h2 class="home-card-title">
                 <img :src="algoBootstrapLogo" alt="Algo Bootstrap logo">
                 <span>Algo Bootstrap</span>
-              </h3>
+              </h2>
               <p>一键配置 C++、Python 和 VS Code 编程环境</p>
             </a-card>
           </a>
@@ -145,6 +151,7 @@
 import { defineComponent, type PropType } from 'vue';
 import { useHead } from '@vueuse/head';
 import { routeView, RenderMethodKind } from 'bwcx-client-vue3';
+import { TrophyOutlined, UnorderedListOutlined } from '@ant-design/icons-vue';
 import { ranklandRoutes } from '@common/rankland-router';
 import type { IApiStatistics } from '@common/rankland-api';
 import type { AsyncDataOptions } from '@client/typings';
@@ -192,6 +199,8 @@ const HomePage = defineComponent({
   name: 'Home',
   components: {
     ContactUs,
+    TrophyOutlined,
+    UnorderedListOutlined,
   },
   props: {
     statistics: {
@@ -327,7 +336,7 @@ export default routeView(HomePage, '/', undefined, undefined, {
   min-height: 128px;
 }
 
-.home-card h3 {
+.home-card h2 {
   margin: 0 0 14px;
   color: #17202a;
   font-size: 20px;
@@ -356,6 +365,10 @@ export default routeView(HomePage, '/', undefined, undefined, {
   width: 24px;
   height: 24px;
   object-fit: contain;
+}
+
+.home-card-icon {
+  font-size: 24px;
 }
 
 .home-separator {
