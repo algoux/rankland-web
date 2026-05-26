@@ -11,4 +11,12 @@ describe('app shell SRK style parity', () => {
       /body\.optimize-decrease-effects \.srk-main table\s+thead > tr > th\s*{\s*box-sizing: content-box;\s*}/,
     );
   });
+
+  it('restores the legacy score-details spacing override in SRK status blocks', () => {
+    const source = readFileSync(path.join(process.cwd(), 'src/client/index.less'), 'utf8');
+
+    expect(source).toMatch(
+      /\.srk-main \.srk-prest-status-block \.srk-prest-status-block-score-details\s*{\s*margin-top: 0;\s*}/,
+    );
+  });
 });
