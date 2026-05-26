@@ -308,7 +308,7 @@
             <p
               v-if="activeUserSegment"
               data-id="rankland-user-modal-segment"
-              class="rankland-user-modal-line rankland-user-modal-segment"
+              class="rankland-user-modal-line rankland-user-modal-segment mt-4 mb-0"
             >
               所在奖区（{{ activeUserSegment.seriesTitle }}）：
               <span
