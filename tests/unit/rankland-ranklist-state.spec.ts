@@ -69,6 +69,25 @@ describe('createRanklandRanklistState', () => {
     }
   });
 
+  it('lists each organization once for the filter options', () => {
+    const ranklist = createFilterFixture();
+    ranklist.rows.push({
+      ...JSON.parse(JSON.stringify(ranklist.rows[0])),
+      user: {
+        ...JSON.parse(JSON.stringify(ranklist.rows[0].user)),
+        id: 'team-alpha-duplicate-org',
+        name: 'Team Alpha Duplicate Organization',
+      },
+    });
+
+    const result = createRanklandRanklistState(ranklist);
+
+    expect(result.kind).toBe('ready');
+    if (result.kind === 'ready') {
+      expect(result.organizations).toEqual(['Org A', 'Org B']);
+    }
+  });
+
   it('filters out unofficial rows when officialOnly is enabled', () => {
     const result = createRanklandRanklistState(createFilterFixture(), {
       filter: {

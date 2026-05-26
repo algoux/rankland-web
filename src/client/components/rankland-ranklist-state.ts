@@ -51,10 +51,9 @@ function deriveTimeTravelRanklist(ranklist: srk.Ranklist, timeTravelTime?: numbe
 }
 
 function getOrganizations(staticRanklist: StaticRanklist): string[] {
-  return staticRanklist.rows
-    .map((row) => resolveText(row.user?.organization))
-    .filter(Boolean)
-    .sort((a, b) => a.localeCompare(b));
+  return Array.from(
+    new Set(staticRanklist.rows.map((row) => resolveText(row.user?.organization)).filter(Boolean)),
+  ).sort((a, b) => a.localeCompare(b));
 }
 
 function getFilteredSeriesIndexes(staticRanklist: StaticRanklist, marker: string): number[] {
