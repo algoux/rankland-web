@@ -260,6 +260,19 @@ test.describe('/ranklist/:id full-chain route', () => {
     await expect(userModal.locator('.srk-modal')).toBeVisible();
     await expect(userModal.locator('.srk-modal-title')).toHaveText('Team Alpha');
     await expect(userModal.locator('[data-id="rankland-user-modal-name"]')).toHaveCount(0);
+    const organizationLine = userModal.locator('[data-id="rankland-user-modal-organization"]');
+    await expect(organizationLine).toHaveText('Org A');
+    const organizationLineStyle = await organizationLine.evaluate((element) => {
+      const style = window.getComputedStyle(element);
+      return {
+        marginTop: style.marginTop,
+        marginBottom: style.marginBottom,
+      };
+    });
+    expect(organizationLineStyle).toMatchObject({
+      marginTop: '0px',
+      marginBottom: '0px',
+    });
     const teamMembers = userModal.locator('[data-id="rankland-user-modal-team-members"]');
     await expect(teamMembers.locator('[data-id="rankland-user-modal-team-member"]')).toContainText(['Alice', 'Bob']);
     await expect(teamMembers.locator('[data-id="rankland-user-modal-team-separator"]')).toHaveText('/');

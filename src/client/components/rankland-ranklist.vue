@@ -239,7 +239,11 @@
           @close="handleUserModalClose"
         >
           <div v-if="activeUserPayload" class="rankland-user-modal-body">
-            <p v-if="activeUserOrganization" data-id="rankland-user-modal-organization" class="rankland-user-modal-line">
+            <p
+              v-if="activeUserOrganization"
+              data-id="rankland-user-modal-organization"
+              class="rankland-user-modal-line rankland-user-modal-organization"
+            >
               {{ activeUserOrganization }}
             </p>
             <p
@@ -1059,6 +1063,10 @@ export default defineComponent({
 
 .rankland-user-modal-line {
   margin: 4px 0;
+}
+
+.rankland-user-modal-organization {
+  margin: 0;
 }
 
 .rankland-user-modal-unofficial {
