@@ -92,6 +92,8 @@
           </a-button>
         </div>
 
+        <a-spin v-else-if="isRanklistSwitching" data-id="collection-ranklist-loading" class="collection-state" />
+
         <div
           v-else-if="ranklist"
           data-id="collection-ranklist-content"
@@ -273,6 +275,10 @@ const CollectionPage = defineComponent({
     },
     rowCount(): number {
       return this.ranklist?.srk?.rows?.length || 0;
+    },
+    isRanklistSwitching(): boolean {
+      const loadedRankId = this.ranklist?.info?.uniqueKey;
+      return Boolean(this.renderSwitchLock || (loadedRankId && this.rankId && loadedRankId !== this.rankId));
     },
     isNotFound(): boolean {
       return this.collectionLoadError?.kind === 'not-found';
