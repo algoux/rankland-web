@@ -58,20 +58,52 @@ async function getMobileShellMetrics(page: Page) {
     const logoImageStyle = window.getComputedStyle(logoImage);
     const navItemStyle = window.getComputedStyle(navItem);
     const siteSwitchStyle = window.getComputedStyle(siteSwitch);
+    const logoBox = logoLink.getBoundingClientRect();
 
     return {
       headerHeight: headerStyle.height,
       headerLineHeight: headerStyle.lineHeight,
+      headerPaddingLeft: headerStyle.paddingLeft,
+      headerPaddingRight: headerStyle.paddingRight,
       headerInnerPaddingLeft: headerInnerStyle.paddingLeft,
       headerInnerPaddingRight: headerInnerStyle.paddingRight,
+      headerInnerColumnGap: headerInnerStyle.columnGap,
       logoWidth: logoLinkStyle.width,
       logoHeight: logoLinkStyle.height,
+      logoLeft: `${Math.round(logoBox.left)}px`,
       logoImageWidth: logoImageStyle.width,
       logoImageHeight: logoImageStyle.height,
       navItemPaddingLeft: navItemStyle.paddingLeft,
       navItemPaddingRight: navItemStyle.paddingRight,
       siteSwitchPaddingLeft: siteSwitchStyle.paddingLeft,
       siteSwitchPaddingRight: siteSwitchStyle.paddingRight,
+    };
+  });
+}
+
+async function getDesktopShellMetrics(page: Page) {
+  return page.evaluate(() => {
+    const header = document.querySelector<HTMLElement>('[data-id="app-header"]');
+    const headerInner = document.querySelector<HTMLElement>('.app-header-inner');
+    const logoLink = document.querySelector<HTMLElement>('[data-id="app-logo-link"]');
+    if (!header || !headerInner || !logoLink) {
+      throw new Error('Missing app shell desktop metrics target');
+    }
+
+    const headerStyle = window.getComputedStyle(header);
+    const headerInnerStyle = window.getComputedStyle(headerInner);
+    const logoBox = logoLink.getBoundingClientRect();
+
+    return {
+      headerPaddingLeft: headerStyle.paddingLeft,
+      headerPaddingRight: headerStyle.paddingRight,
+      headerInnerMaxWidth: headerInnerStyle.maxWidth,
+      headerInnerPaddingLeft: headerInnerStyle.paddingLeft,
+      headerInnerPaddingRight: headerInnerStyle.paddingRight,
+      headerInnerColumnGap: headerInnerStyle.columnGap,
+      headerInnerMarginLeft: headerInnerStyle.marginLeft,
+      headerInnerMarginRight: headerInnerStyle.marginRight,
+      logoLeft: `${Math.round(logoBox.left)}px`,
     };
   });
 }
@@ -211,6 +243,17 @@ test.describe('app shell full-chain behavior', () => {
     await expectNoHorizontalDocumentOverflow(page);
     await expectElementWithinViewport(page.locator('[data-id="app-logo-link"]'), page);
     await expectElementWithinViewport(page.locator('[data-id="app-site-switch"]'), page);
+    expect(await getDesktopShellMetrics(page)).toMatchObject({
+      headerPaddingLeft: '50px',
+      headerPaddingRight: '50px',
+      headerInnerMaxWidth: 'none',
+      headerInnerPaddingLeft: '0px',
+      headerInnerPaddingRight: '0px',
+      headerInnerColumnGap: '0px',
+      headerInnerMarginLeft: '0px',
+      headerInnerMarginRight: '0px',
+      logoLeft: '50px',
+    });
     await page.screenshot({ path: testInfo.outputPath('app-shell-desktop.png'), fullPage: true });
 
     await page.setViewportSize({ width: 390, height: 844 });
@@ -226,10 +269,14 @@ test.describe('app shell full-chain behavior', () => {
     expect(await getMobileShellMetrics(page)).toMatchObject({
       headerHeight: '64px',
       headerLineHeight: '64px',
-      headerInnerPaddingLeft: '20px',
-      headerInnerPaddingRight: '20px',
+      headerPaddingLeft: '20px',
+      headerPaddingRight: '20px',
+      headerInnerPaddingLeft: '0px',
+      headerInnerPaddingRight: '0px',
+      headerInnerColumnGap: '0px',
       logoWidth: '64px',
       logoHeight: '64px',
+      logoLeft: '20px',
       logoImageWidth: '40px',
       logoImageHeight: '40px',
       navItemPaddingLeft: '16px',

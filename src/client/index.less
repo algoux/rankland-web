@@ -50,9 +50,9 @@ a:hover {
   min-height: 100vh;
 }
 
-.app-header {
+.app-header.ant-layout-header {
   height: 64px;
-  padding: 0;
+  padding: 0 50px;
   line-height: 64px;
   background: #fff;
   border-bottom: 1px solid #e6e9ee;
@@ -66,11 +66,11 @@ html.dark .app-header {
 .app-header-inner {
   display: flex;
   align-items: center;
-  gap: 16px;
-  max-width: 1180px;
+  gap: 0;
+  max-width: none;
   min-height: 64px;
-  margin: 0 auto;
-  padding: 0 24px;
+  margin: 0;
+  padding: 0;
 }
 
 .app-logo {
@@ -163,8 +163,7 @@ html.dark .app-site-switch-subtitle {
 }
 
 @media screen and (max-width: 768px) {
-  .app-header-inner {
-    gap: 8px;
+  .app-header.ant-layout-header {
     padding: 0 20px;
   }
 
