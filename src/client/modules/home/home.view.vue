@@ -265,9 +265,8 @@ export default routeView(HomePage, '/', undefined, undefined, {
 
 <style lang="less" scoped>
 .home-page {
-  max-width: 960px;
-  margin: 0 auto;
-  padding: 48px 20px 64px;
+  margin: 0;
+  padding: 32px 50px;
 }
 
 .home-hero {
@@ -296,11 +295,11 @@ export default routeView(HomePage, '/', undefined, undefined, {
 }
 
 .home-section {
-  margin-top: 36px;
+  margin-top: 40px;
 }
 
 .home-section h2 {
-  margin: 0 0 16px;
+  margin: 0 0 20px;
   font-size: 22px;
   line-height: 1.35;
 }
@@ -382,9 +381,10 @@ export default routeView(HomePage, '/', undefined, undefined, {
   color: inherit;
 }
 
-@media (max-width: 720px) {
+@media (max-width: 768px) {
   .home-page {
-    padding-top: 32px;
+    padding-right: 20px;
+    padding-left: 20px;
   }
 }
 </style>

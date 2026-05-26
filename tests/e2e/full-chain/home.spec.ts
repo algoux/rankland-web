@@ -45,6 +45,31 @@ async function expectNoHorizontalDocumentOverflow(page: Page) {
   ).toBeLessThanOrEqual(1);
 }
 
+async function getHomeContentSpacing(page: Page) {
+  return page.evaluate(() => {
+    const content = document.querySelector<HTMLElement>('[data-id="home-content"]');
+    const section = document.querySelector<HTMLElement>('[data-id="home-recommendations"]');
+    const heading = document.querySelector<HTMLElement>('[data-id="home-recommendations"] h2');
+    if (!content || !section || !heading) {
+      throw new Error('Missing home content spacing probe elements');
+    }
+
+    const contentStyle = getComputedStyle(content);
+    const sectionStyle = getComputedStyle(section);
+    const headingStyle = getComputedStyle(heading);
+
+    return {
+      maxWidth: contentStyle.maxWidth,
+      paddingTop: contentStyle.paddingTop,
+      paddingRight: contentStyle.paddingRight,
+      paddingBottom: contentStyle.paddingBottom,
+      paddingLeft: contentStyle.paddingLeft,
+      sectionMarginTop: sectionStyle.marginTop,
+      headingMarginBottom: headingStyle.marginBottom,
+    };
+  });
+}
+
 test.describe('/ full-chain route', () => {
   test('renders the RankLand home page through SSR, hydration, RanklandApiService, and the mock backend', async ({
     page,
@@ -152,6 +177,15 @@ test.describe('/ full-chain route', () => {
     await expect(page.locator('[data-id="home-content"]')).toBeVisible();
     await expect(page.locator('[data-id="home-hero"]')).toBeVisible();
     await expect(page.locator('[data-id="home-recommendations"]')).toBeVisible();
+    expect(await getHomeContentSpacing(page)).toMatchObject({
+      maxWidth: 'none',
+      paddingTop: '32px',
+      paddingRight: '50px',
+      paddingBottom: '32px',
+      paddingLeft: '50px',
+      sectionMarginTop: '40px',
+      headingMarginBottom: '20px',
+    });
     await expectNoHorizontalDocumentOverflow(page);
     await expectElementWithinViewport(page.locator('[data-id="home-recommendation-search"]'), page);
     await expectElementWithinViewport(page.locator('[data-id="home-recommendation-collection"]'), page);
@@ -163,6 +197,15 @@ test.describe('/ full-chain route', () => {
     expect(mobileResponse).not.toBeNull();
     expect(mobileResponse?.ok()).toBe(true);
     await expect(page.locator('[data-id="home-content"]')).toBeVisible();
+    expect(await getHomeContentSpacing(page)).toMatchObject({
+      maxWidth: 'none',
+      paddingTop: '32px',
+      paddingRight: '20px',
+      paddingBottom: '32px',
+      paddingLeft: '20px',
+      sectionMarginTop: '40px',
+      headingMarginBottom: '20px',
+    });
     await expectNoHorizontalDocumentOverflow(page);
     await expectElementWithinViewport(page.locator('[data-id="home-hero"]'), page);
     await expectElementWithinViewport(page.locator('[data-id="home-recommendation-search"]'), page);
