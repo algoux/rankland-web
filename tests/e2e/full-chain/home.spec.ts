@@ -5,6 +5,21 @@ import { denyExternalCalls } from '../helpers/mock-api';
 const mockPort = process.env.FULL_CHAIN_MOCK_PORT || '3101';
 const mockBaseURL = `http://127.0.0.1:${mockPort}`;
 
+async function forceSystemDarkMode(page: Page) {
+  await page.addInitScript(() => {
+    window.matchMedia = ((query: string) => ({
+      media: query,
+      matches: query === '(prefers-color-scheme: dark)',
+      onchange: null,
+      addEventListener: () => undefined,
+      removeEventListener: () => undefined,
+      addListener: () => undefined,
+      removeListener: () => undefined,
+      dispatchEvent: () => true,
+    })) as typeof window.matchMedia;
+  });
+}
+
 async function expectElementWithinViewport(locator: Locator, page: Page) {
   const box = await locator.boundingBox();
   expect(box).not.toBeNull();
@@ -37,6 +52,7 @@ test.describe('/ full-chain route', () => {
   }) => {
     await denyExternalCalls(page);
     await request.post(`${mockBaseURL}/__reset`);
+    await forceSystemDarkMode(page);
 
     const response = await page.goto('/');
 
@@ -76,6 +92,20 @@ test.describe('/ full-chain route', () => {
     await expect(page.locator('[data-id="home-hydrated"]')).toHaveText('hydrated');
     await page.locator('[data-id="home-contact"] [data-id="contact-us-trigger"]').click();
     await expect(page.locator('[data-id="contact-us-dialog"]')).toBeVisible();
+    await expect(page.locator('.contact-us-modal-wrap .ant-modal-content')).toHaveCSS(
+      'background-color',
+      'rgb(31, 31, 31)',
+    );
+    await expect(page.locator('.contact-us-modal-wrap .ant-modal-content')).toHaveCSS('border-radius', '2px');
+    await expect(page.locator('.contact-us-modal-wrap .ant-modal-title')).toHaveCSS(
+      'color',
+      'rgba(255, 255, 255, 0.85)',
+    );
+    await expect(page.locator('.contact-us-modal-wrap .ant-modal-close')).toHaveCSS(
+      'color',
+      'rgba(255, 255, 255, 0.45)',
+    );
+    await expect(page.locator('.contact-us-modal-wrap .ant-modal-body')).toHaveCSS('padding', '24px');
     await expect(page.locator('[data-id="contact-us-email"][href="mailto:algoux.org@gmail.com"]')).toHaveText(
       'algoux.org@gmail.com',
     );
