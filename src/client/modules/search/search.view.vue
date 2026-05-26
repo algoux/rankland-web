@@ -228,7 +228,7 @@ export default routeView(SearchPage, '/search');
 }
 
 .search-section-title {
-  color: #475569;
+  opacity: 0.7;
 }
 
 .search-list {
@@ -245,12 +245,12 @@ export default routeView(SearchPage, '/search');
 
 .search-view-count {
   margin-left: 8px;
-  color: #64748b;
+  opacity: 0.7;
 }
 
 .search-created-at {
-  margin: 6px 0 0;
-  color: #64748b;
+  margin: 0;
+  opacity: 0.5;
   font-size: 14px;
 }
 

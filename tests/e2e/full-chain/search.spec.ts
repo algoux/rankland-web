@@ -122,6 +122,7 @@ test.describe('/search full-chain route', () => {
     await expect(page.locator('[data-id="search-result-section"]')).toBeVisible();
     await expect(page.locator('[data-id="search-result-section"]')).toHaveAttribute('data-result-count', '1');
     await expect(page.locator('[data-id="search-result-count"]')).toHaveText('1');
+    await expect(page.locator('[data-id="search-result-section"] .search-section-title')).toHaveCSS('opacity', '0.7');
     await expect(page.locator('[data-id="search-result-section"] .ant-list.ant-list-sm')).toBeVisible();
     await expect(page.locator('[data-id="search-result-section"] .search-list')).toHaveCSS('margin-top', '8px');
     await expect(page.locator('[data-id="search-ranklist-item"]')).toHaveCount(1);
@@ -133,6 +134,16 @@ test.describe('/search full-chain route', () => {
     await expect(
       page.locator('[data-id="search-ranklist-item"][data-ranklist-key="test-key"] .anticon-eye'),
     ).toBeVisible();
+    await expect(page.locator('[data-id="search-ranklist-item"] .search-view-count')).toHaveCSS('opacity', '0.7');
+    await expect(page.locator('[data-id="search-ranklist-item"] .search-created-at')).toHaveCSS(
+      'margin-top',
+      '0px',
+    );
+    await expect(page.locator('[data-id="search-ranklist-item"] .search-created-at')).toHaveCSS('opacity', '0.5');
+    await expect(page.locator('[data-id="search-ranklist-item"] .search-created-at')).toHaveCSS(
+      'font-size',
+      '14px',
+    );
 
     const requests = await readRequests(request);
     expect(requests.filter((requestRecord) => requestRecord.path === '/rank/listall')).toHaveLength(1);
