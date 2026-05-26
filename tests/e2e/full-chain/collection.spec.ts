@@ -119,6 +119,10 @@ test.describe('/collection/:id full-chain route', () => {
     await expect(page.locator('.srk-user-cell', { hasText: 'Team Alpha' })).toBeVisible();
     await expect(page.locator('.srk-user-cell', { hasText: 'Team Beta' })).toBeVisible();
     await expect(page.locator('[data-id="collection-hydrated"]')).toHaveText('hydrated');
+    await expect(page.locator('[data-id="collection-hydrated"]')).toHaveCSS('width', '1px');
+    await expect(page.locator('[data-id="collection-hydrated"]')).toHaveCSS('height', '1px');
+    await expect(page.locator('[data-id="collection-hydrated"]')).toHaveCSS('overflow', 'hidden');
+    await expect(page.locator('[data-id="collection-hydrated"]')).toHaveCSS('color', 'rgba(0, 0, 0, 0)');
     await expect(page.locator('[data-id="rankland-ranklist-title"]')).toHaveText('Test Contest 2024');
     await expect(page.locator('[data-id="rankland-ranklist-view-count"]')).toHaveText('42');
     await expect(page.locator('[data-id="rankland-ranklist-view-count"] .anticon-eye')).toBeVisible();

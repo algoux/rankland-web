@@ -28,7 +28,7 @@
       :data-ranklist-id="ranklistId"
       :data-row-count="rowCount"
     >
-      <div data-id="ranklist-hydrated">{{ hydrated ? 'hydrated' : 'ssr' }}</div>
+      <div data-id="ranklist-hydrated" class="ranklist-hydrated">{{ hydrated ? 'hydrated' : 'ssr' }}</div>
       <RanklandRanklist
         :ranklist="ranklist.srk"
         :name="ranklistId"
@@ -148,5 +148,12 @@ export default routeView(RanklistPage, '/ranklist/:id', RanklistRPO, undefined, 
 
 .ranklist-content {
   margin: 32px 0;
+}
+
+.ranklist-hydrated {
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  color: transparent;
 }
 </style>
