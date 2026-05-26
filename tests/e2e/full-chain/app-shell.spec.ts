@@ -257,12 +257,14 @@ test.describe('app shell full-chain behavior', () => {
     expect(response?.ok()).toBe(true);
     await expect(page.locator('html')).toHaveClass('dark');
     await expect(page.locator('body')).toHaveClass(/optimize-decrease-effects/);
+    await expect(page.locator('body')).toHaveCSS('color', 'rgba(255, 255, 255, 0.85)');
 
     await page.evaluate(() => {
       (window as unknown as { __ranklandSetDarkMode: (matches: boolean) => void }).__ranklandSetDarkMode(false);
     });
 
     await expect(page.locator('html')).toHaveClass('light');
+    await expect(page.locator('body')).toHaveCSS('color', 'rgba(0, 0, 0, 0.85)');
     await expect(page.locator('body')).toHaveCSS('background-color', 'rgb(242, 242, 242)');
   });
 
