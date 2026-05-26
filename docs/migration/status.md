@@ -5,9 +5,9 @@ This file is the quick global dashboard for the RankLand migration. Update it at
 ## Current Focus
 
 - Active branch: `migration/live-page-foundation`
-- Current slice: SRK render-error Ant Design Alert parity
-- Latest slice commit: `fix: 还原 SRK 渲染错误提示`
-- Last recorded full gate: `corepack pnpm test:migration` passed build, 35 unit files / 151 unit tests, 1 SSR smoke test, 1 shallow Playwright test, and 52 full-chain Playwright tests across all migrated public routes during 2026-05-26 SRK render-error Ant Design Alert parity pre-commit verification
+- Current slice: migration evidence documentation refresh
+- Latest slice commit: `docs: 刷新迁移收口证据`
+- Last recorded full gate: `corepack pnpm test:migration` passed build, 35 unit files / 151 unit tests, 1 SSR smoke test, 1 shallow Playwright test, and 52 full-chain Playwright tests across all migrated public routes during 2026-05-26 SRK render-error Ant Design Alert parity pre-commit verification; documentation-only evidence refresh verified by diff inspection and `git diff --check`
 - Next recommended focus: product-review-driven SRK lower-level table pixel parity or route polish
 
 ## Route Progress
@@ -32,7 +32,7 @@ This file is the quick global dashboard for the RankLand migration. Update it at
 | SRK Vue wrapper | Foundation + live controls + modal clicks + G2 rank-time user modal + user modal responsive width + user modal title/body/organization line + user modal team members/unofficial line/segment line/segment label/slogan/font asset/marker label/photo width + asset URL rewriting + basic export/share + converter-backed exports with runtime `_now` cleanup + old export menu group + share-copy Ant Design notifications + render-error Ant Design Alert + footer contact prompt + old footer paragraph spacing + conditional China-site beian footer + header metadata + old header-to-progress spacing + old header time format + Eye icon view count + Ant Design Vue icon hover dropdowns/caret triggers + old conditional header action separators + Ant Design Vue filter controls/internal spacing + old organization-filter compact selected tag/unique options + old progress-to-controls `mt-3` spacing + collection selected-wrapper controls + playground preview header + standalone table-wrapper offset + old `mt-6` table top spacing + wrapper-local remarks pill + low-level table theme propagation + optimized table-header box model + status-block score-details spacing + old `@algoux/standard-ranklist@0.3.12` / `@algoux/standard-ranklist-utils@0.2.13` dependency baseline + default preview progress done | Remaining lower-level exact table pixel parity is product/visual review driven |
 | Full-chain E2E harness | Done | Real bwcx/Koa app plus controlled mock RankLand backend |
 | Vue app shell | Foundation + Ant Design Vue product parity + contact modal + theme sync + analytics + fallback 404 + visual review verified | Logo, primary navigation, site switch dropdown, old `ArrowRightOutlined` external-link cue via Ant Design Vue, old light-mode `#f2f2f2` body background, BackTop, legacy focus-mode shell bypass, shared contact modal, pre-hydration theme bootstrap, system theme class sync, macOS Blink optimization class, GA initialization/pageview dispatch, legacy fallback 404 copy/status/spacing, desktop/mobile viewport bounds, and screenshot review are covered by full-chain E2E. Ant Design Vue `a-menu` is mounted client-only to avoid its ResizeObserver SSR hydration mismatch. |
-| Migration process | Final review verified | Slice workflow, conversation I/O protocol, this dashboard, completion audit, and final integration review are in `docs/migration` and `docs/superpowers` |
+| Migration process | Final review evidence refreshed | Slice workflow, conversation I/O protocol, this dashboard, completion audit, manual acceptance checklist, and final integration review are in `docs/migration` and `docs/superpowers`; 2026-05-26 docs now reflect the latest 35 unit files / 151 unit tests / 52 full-chain product-parity gate instead of the older route-compatible-only review |
 
 ## Deferred Product Decisions
 

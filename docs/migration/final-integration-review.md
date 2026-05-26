@@ -1,9 +1,11 @@
 # RankLand Final Integration Review
 
-Date: 2026-05-23
+Date: 2026-05-26
 Branch: `migration/live-page-foundation`
 
-This review records the evidence used to treat `rankland-web` as the route-compatible migrated RankLand frontend. It does not claim pixel-perfect parity with the old React/Ant Design implementation. Product-polish differences that remain are explicitly deferred below.
+This review records the evidence used to treat `rankland-web` as the product-restored migrated RankLand frontend for the currently verified public surface. It supersedes the earlier 2026-05-23 route-compatible-only review: subsequent slices restored Ant Design Vue shell/content parity, analytics dispatch, collection layout behavior, Playground product behavior, Live reconnect/Toastify behavior, SRK wrapper actions/layout/modals, and multiple low-level SRK renderer visual details.
+
+The review still does not claim that every possible production SRK fixture has been pixel-reviewed against old React. Remaining lower-level table pixel parity is product-review-driven and should stay isolated in follow-up slices if new differences are found.
 
 ## Requirement Evidence
 
@@ -18,25 +20,22 @@ This review records the evidence used to treat `rankland-web` as the route-compa
 | Keep API contract docs aligned | `docs/migration/api-contract.md` lists the same normal/CDN API methods and NotFound/error mapping covered by `RanklandApiService` tests. | Verified |
 | Keep route inventory aligned | `docs/migration/inventory.md` maps each old React public route source to its Vue target module and render method. | Verified |
 | Full-chain coverage for all public routes | `tests/e2e/full-chain/home.spec.ts`, `search.spec.ts`, `ranklist.spec.ts`, `collection.spec.ts`, `playground.spec.ts`, and `live.spec.ts` cover the migrated routes against the real app server and mock RankLand backend. | Verified |
-| App shell/layout parity foundation | `tests/e2e/full-chain/app-shell.spec.ts` covers navigation, site switch, focus-mode shell bypass, theme/macOS class sync, and desktop/mobile viewport bounds. | Verified |
+| App shell/layout parity | `tests/e2e/full-chain/app-shell.spec.ts` covers Ant Design Vue Layout/Menu/Dropdown/Button shell structure, navigation, site switch with old ArrowRight icon, focus-mode shell bypass, pre-hydration theme bootstrap, theme/macOS class sync, analytics dispatch, fallback 404, and desktop/mobile viewport bounds. | Verified |
 | Contact modal parity foundation | `src/client/components/contact-us.vue` is shared by home/ranklist footer surfaces; full-chain tests cover open/close, email, and QQ image. | Verified |
-| SRK renderer wrapper migrated behavior | `src/client/components/rankland-ranklist.vue` and related helpers cover filter/progress state, modal clicks, rank-time panel, asset URL rewriting, export/share actions, embed code, footer/contact prompt, and live controls; unit and full-chain tests cover those behaviors. | Verified |
-| Live page parity foundation | `tests/e2e/full-chain/live.spec.ts` covers CSR hydration, query preservation, polling, WebSocket setup guard, realtime event display, WebSocket error/close handling, scroll-solution toggle close, mobile toggle hiding, NotFound, and desktop/mobile screenshots. | Verified |
+| SRK renderer wrapper migrated behavior | `src/client/components/rankland-ranklist.vue` and related helpers cover Ant Design Vue filter/progress/header actions, hover dropdowns, export/share actions, embed code, render-error Alert, modal clicks, user modal details, G2 rank-time panel, asset URL rewriting, footer/contact prompt, conditional beian footer, live controls, route spacing, table wrapper offset/top spacing, remarks pill styling, dark-theme propagation, macOS Blink table-header override, and SRK status score spacing; unit and full-chain tests cover those behaviors. | Verified |
+| Live page parity | `tests/e2e/full-chain/live.spec.ts` covers CSR hydration, query preservation, polling, WebSocket setup guard, realtime event display, WebSocket error/close reconnect, scroll-solution toggle close, query preservation, mobile toggle hiding, Toastify row/container/Zoom presentation, NotFound, loading/error states, normal live screenshots, realtime screenshots, and mobile progress bounds. | Verified |
 | Page-level visual review | Full-chain visual/layout tests produce screenshots and assert viewport bounds for app shell, home, search, ranklist, collection, playground, and live normal/realtime views. | Verified |
-| Final migration gate | `corepack pnpm test:migration` passed build, 24 unit files / 120 unit tests, 1 SSR smoke test, 1 shallow Playwright test, and 32 full-chain Playwright tests. | Verified |
+| Final migration gate | `corepack pnpm test:migration` passed build, 35 unit files / 151 unit tests, 1 SSR smoke test, 1 shallow Playwright test, and 52 full-chain Playwright tests during the 2026-05-26 SRK render-error Ant Design Alert parity pre-commit verification. | Verified |
 | Production deployment, remote push, branch merge, or old implementation deletion | Explicitly out of scope for this migration working branch unless requested by Cooper. | Not performed |
 
 ## Deferred Product Decisions
 
-These are not hidden blockers for route-compatible migration completion. They are product-polish decisions to handle in follow-up slices if desired.
+These are not hidden blockers for the currently verified product-restoration surface. They are explicit follow-up decisions or review-driven areas.
 
-- App shell: exact Ant Design menu/dropdown styling and GA/pageview dispatch parity.
-- Home: broader SEO/content polish beyond verified structured data and SSR smoke behavior.
-- Collection: exact legacy menu, mobile, and category icon behavior.
-- Playground: Monaco/editor parity and editor UX polish.
-- Live: automatic WebSocket reconnect/backoff and exact Toastify animation/pixel behavior.
-- SRK renderer wrapper: any remaining exact `StyledRanklistRenderer` visual parity after product review.
-- User rank-time modal: exact old React `@antv/g2` tooltip and animation parity; the migrated Vue implementation uses a lightweight SVG curve.
+- Home: broader SEO/content polish beyond verified structured data, SSR content, Ant Design content layout, and contact modal behavior remains accepted as non-blocking.
+- Playground: exact old Monaco `0.34.0` package-version parity is intentionally not preserved because the verified Vue wrapper requires Monaco `>=0.43.0`; synthetic Monaco editing remains a harness limitation, while the product editor path is verified by build/hydration and stable preview coverage.
+- SRK renderer wrapper: remaining lower-level exact table pixel parity should be handled only when product review identifies a concrete difference.
+- Production deployment, remote push, branch merge, and old implementation deletion remain out of scope unless requested.
 
 ## Final Gate Commands
 
@@ -54,9 +53,10 @@ The final review is accepted only after the fresh commands pass and generated ro
 
 ## Final Gate Result
 
-Fresh verification on 2026-05-23:
+Fresh verification on 2026-05-26:
 
 - `node -v`: `v24.11.1`
 - `corepack pnpm -v`: `8.15.9`
-- `corepack pnpm run gen:client-router`: generated 8 client routes, exited cleanly, and produced no generated route diff
-- `corepack pnpm test:migration`: passed build, 24 unit files / 120 unit tests, 1 SSR smoke test, 1 shallow Playwright test, and 32 full-chain Playwright tests
+- `corepack pnpm run gen:client-router`: generated 8 client routes, exited cleanly; warning only: `Skipped due to language "js" is not supported. Only [ts,tsx] are supported (file: src/client/modules/fallback/not-found.view.vue)`
+- `corepack pnpm test:migration`: passed build, 35 unit files / 151 unit tests, 1 SSR smoke test, 1 shallow Playwright test, and 52 full-chain Playwright tests
+- `git diff --check`: passed in the latest verified SRK render-error Ant Design Alert slice
