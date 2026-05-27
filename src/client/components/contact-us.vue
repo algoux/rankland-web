@@ -35,7 +35,7 @@
           <a data-id="contact-us-email" href="mailto:algoux.org@gmail.com">algoux.org@gmail.com</a>
         </p>
         <p>或加入讨论群：</p>
-        <img data-id="contact-us-qq-image" :src="qqGroupImg" alt="RankLand QQ group">
+        <img data-id="contact-us-qq-image" class="w-full" :src="qqGroupImg" alt="RankLand QQ group">
       </div>
     </a-modal>
   </span>

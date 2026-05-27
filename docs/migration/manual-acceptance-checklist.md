@@ -81,6 +81,7 @@ git status --short --branch
 - `[x]` 移动端外壳 header、logo、导航和站点切换尺寸与旧版一致
 - `[x]` `focus=yes` 在应兼容旧版聚焦模式的页面隐藏全局外壳
 - `[x]` 联系弹窗可以打开、关闭，并展示邮箱和 QQ 群图片，深色模式下使用旧版 Ant Design Modal surface/title/close/body padding
+- `[x]` 联系弹窗 QQ 群图片保留旧版 `w-full` 类名
 - `[x]` 全局 `body` 使用旧版 Ant Design 14px、system font、tabular-nums 和 1.5715 line-height 排版基线
 - `[x]` 长页面 BackTop 行为可接受
 - `[x]` 系统主题同步行为可接受
@@ -101,7 +102,7 @@ git status --short --branch
 ```text
 macOS Blink 优化 class 已由 `tests/e2e/full-chain/app-shell.spec.ts` 和 `tests/unit/app-shell-srk-style.spec.ts` 覆盖。
 直达页面标题由各 route full-chain 覆盖；前端跳转后的标题由 app-shell CSR navigation full-chain 覆盖。标题分隔符已还原旧 React `Title | RankLand`。
-App shell Ant Design Vue Layout/Menu/Dropdown/Button、旧版全局 body light/dark 文本色、旧版全局 body 14px/system-font/tabular-nums/1.5715 line-height 排版、旧版联系弹窗 Ant Design Modal 深色 surface/title/close/body padding、主导航旧版 46px line-height、主导航 dark primary `#f6ac06` 选中态/下划线、站点切换 ArrowRight icon、站点切换旧版 32px button height/0px min-height/2px radius/8px 水平 padding、桌面旧版 50px header padding、无居中 max-width/无内层 gap、移动端旧版 20px header padding/无内层 padding/无内层 gap、64px header/logo 容器、40px logo 图片、16px nav item padding、8px 站点切换 padding、focus mode、theme bootstrap/sync、analytics pageview、legacy title separator、fallback 404 和桌面/移动端 bounds 已有 full-chain 覆盖。
+App shell Ant Design Vue Layout/Menu/Dropdown/Button、旧版全局 body light/dark 文本色、旧版全局 body 14px/system-font/tabular-nums/1.5715 line-height 排版、旧版联系弹窗 Ant Design Modal 深色 surface/title/close/body padding、旧版联系弹窗 QQ 群图片 `w-full` 类名、主导航旧版 46px line-height、主导航 dark primary `#f6ac06` 选中态/下划线、站点切换 ArrowRight icon、站点切换旧版 32px button height/0px min-height/2px radius/8px 水平 padding、桌面旧版 50px header padding、无居中 max-width/无内层 gap、移动端旧版 20px header padding/无内层 padding/无内层 gap、64px header/logo 容器、40px logo 图片、16px nav item padding、8px 站点切换 padding、focus mode、theme bootstrap/sync、analytics pageview、legacy title separator、fallback 404 和桌面/移动端 bounds 已有 full-chain 覆盖。
 ```
 
 ## 首页 `/`
@@ -132,6 +133,7 @@ App shell Ant Design Vue Layout/Menu/Dropdown/Button、旧版全局 body light/d
 - `[x]` 桌面端布局可接受
 - `[x]` 移动端布局可接受
 - `[x]` 首页联系入口可正常打开联系弹窗
+- `[x]` 首页联系弹窗 QQ 群图片保留旧版 `w-full` 类名
 - `[x]` 上游空数据或失败状态可接受，如已测试
 
 需要决策：
@@ -142,7 +144,7 @@ App shell Ant Design Vue Layout/Menu/Dropdown/Button、旧版全局 body light/d
 备注：
 
 ```text
-2026-05-27 复核：home full-chain 断言 SSR HTML 包含首页内容、统计数据和 JSON-LD，hydration marker 正常；旧版 `main.normal-content` 和 `.home-intro` 内容容器 DOM、五个旧版 `div.block` 内容区块 DOM、旧版 `normal-content` desktop 32px/50px padding、mobile 32px/20px padding、无桌面 max-width cap、`home-intro` block 40px 顶部间距、`h1.block-title` DOM、32px/500 区块标题视觉和 block title 20px 底部间距已覆盖；Ant Design Card/Row/Col 推荐/工具区、推荐卡片旧版 dark Card 背景/边框/圆角/文字色、hero/resource/about 非卡片正文旧版暗色正文色、旧版 `h2` 标题和 `UnorderedListOutlined` / `TrophyOutlined` 图标、标题图标/logo 的旧版 `mr-3` 右间距、卡片正文旧版 `mt-4 mb-0` class 与 16px/0px margin、统计数字旧版 `strong` DOM 与加粗非斜体视觉、paste.then.ac logo 24px 尺寸和 2px 内边距、联系弹窗 Ant Design Modal 深色样式、桌面/移动端截图和 bounds、partial upstream statistics 的旧版 `-` fallback 与 SSR/hydration 一致性已覆盖。
+2026-05-27 复核：home full-chain 断言 SSR HTML 包含首页内容、统计数据和 JSON-LD，hydration marker 正常；旧版 `main.normal-content` 和 `.home-intro` 内容容器 DOM、五个旧版 `div.block` 内容区块 DOM、旧版 `normal-content` desktop 32px/50px padding、mobile 32px/20px padding、无桌面 max-width cap、`home-intro` block 40px 顶部间距、`h1.block-title` DOM、32px/500 区块标题视觉和 block title 20px 底部间距已覆盖；Ant Design Card/Row/Col 推荐/工具区、推荐卡片旧版 dark Card 背景/边框/圆角/文字色、hero/resource/about 非卡片正文旧版暗色正文色、旧版 `h2` 标题和 `UnorderedListOutlined` / `TrophyOutlined` 图标、标题图标/logo 的旧版 `mr-3` 右间距、卡片正文旧版 `mt-4 mb-0` class 与 16px/0px margin、统计数字旧版 `strong` DOM 与加粗非斜体视觉、paste.then.ac logo 24px 尺寸和 2px 内边距、联系弹窗 Ant Design Modal 深色样式、联系弹窗 QQ 群图片旧版 `w-full` 类名、桌面/移动端截图和 bounds、partial upstream statistics 的旧版 `-` fallback 与 SSR/hydration 一致性已覆盖。
 ```
 
 ## 搜索页 `/search`
@@ -497,7 +499,7 @@ URL:
 - `[x]` 接受路由兼容迁移完成，但保留列出的后续 slice
 - `[ ]` 暂不收口，先修复阻塞项
 
-无当前已复现阻塞；SRK header utility class parity、SRK header action utility class parity、SRK header title typography parity、header text size parity、header view-count fallback parity、SRK controls utility class parity、SRK remarks wrapper utility class parity、SRK footer utility class parity、SSR hydration marker visual parity、search state utility class parity、search error DOM parity、search list utility class parity、Playground legacy shell class parity、Playground invalid prompt class parity、user modal root class parity、user modal organization line class parity、user modal team members class parity、user modal team separator raw text coverage、user modal markers class parity、user modal unofficial line class parity、user modal segment line class parity、user modal segment label class parity、user modal slogan spacing class parity、user modal photo wrapper class parity 和 user modal photo/slogan shared wrapper DOM parity 已补充，保留 product-review-driven SRK lower-level table pixel parity / route polish 作为后续 review-driven slice。
+无当前已复现阻塞；Contact QQ image class parity、SRK header utility class parity、SRK header action utility class parity、SRK header title typography parity、header text size parity、header view-count fallback parity、SRK controls utility class parity、SRK remarks wrapper utility class parity、SRK footer utility class parity、SSR hydration marker visual parity、search state utility class parity、search error DOM parity、search list utility class parity、Playground legacy shell class parity、Playground invalid prompt class parity、user modal root class parity、user modal organization line class parity、user modal team members class parity、user modal team separator raw text coverage、user modal markers class parity、user modal unofficial line class parity、user modal segment line class parity、user modal segment label class parity、user modal slogan spacing class parity、user modal photo wrapper class parity 和 user modal photo/slogan shared wrapper DOM parity 已补充，保留 product-review-driven SRK lower-level table pixel parity / route polish 作为后续 review-driven slice。
 
 最终收口前必须完成：
 

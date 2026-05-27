@@ -332,6 +332,7 @@ test.describe('/ full-chain route', () => {
       'algoux.org@gmail.com',
     );
     await expect(page.locator('[data-id="contact-us-qq-image"]')).toBeVisible();
+    await expect(page.locator('[data-id="contact-us-qq-image"]')).toHaveClass(/(^|\s)w-full(\s|$)/);
     await page.locator('[data-id="contact-us-close"]').click();
     await expect(page.locator('[data-id="contact-us-dialog"]')).toHaveCount(0);
 
