@@ -269,6 +269,22 @@ async function getUserModalBodyColor(page: Page) {
   });
 }
 
+async function getUserModalTeamMemberEntryDom(page: Page) {
+  return page.evaluate(() => {
+    const row = document.querySelector<HTMLElement>('[data-id="rankland-user-modal-team-members"]');
+    if (!row) {
+      throw new Error('Missing user modal team members row');
+    }
+
+    return Array.from(row.children).map((child) => ({
+      tagName: child.tagName,
+      dataId: child.getAttribute('data-id') || '',
+      text: (child.textContent || '').replace(/\s+/g, ' ').trim(),
+      childDataIds: Array.from(child.children).map((grandchild) => grandchild.getAttribute('data-id') || ''),
+    }));
+  });
+}
+
 async function getModalRootClasses(page: Page, wrapperDataId: string) {
   return page.evaluate((dataId) => {
     const modalRoot = document.querySelector<HTMLElement>(`[data-id="${dataId}"] .srk-modal-root`);
@@ -874,6 +890,20 @@ test.describe('/ranklist/:id full-chain route', () => {
       marginTop: '8px',
       paddingTop: '6px',
     });
+    expect(await getUserModalTeamMemberEntryDom(page)).toEqual([
+      {
+        tagName: 'SPAN',
+        dataId: 'rankland-user-modal-team-member-entry',
+        text: 'Alice',
+        childDataIds: ['rankland-user-modal-team-member'],
+      },
+      {
+        tagName: 'SPAN',
+        dataId: 'rankland-user-modal-team-member-entry',
+        text: '/ Bob',
+        childDataIds: ['rankland-user-modal-team-separator', 'rankland-user-modal-team-member'],
+      },
+    ]);
     const separatorStyle = await teamMembers
       .locator('[data-id="rankland-user-modal-team-separator"]')
       .evaluate((element) => {

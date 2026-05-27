@@ -293,16 +293,20 @@
               data-id="rankland-user-modal-team-members"
               class="rankland-user-modal-team-members user-modal-info-team-members mt-2"
             >
-              <template v-for="(member, memberIndex) in activeUserTeamMembers" :key="memberIndex">
+              <span
+                v-for="(member, memberIndex) in activeUserTeamMembers"
+                :key="memberIndex"
+                data-id="rankland-user-modal-team-member-entry"
+              >
                 <span
                   v-if="memberIndex > 0"
                   data-id="rankland-user-modal-team-separator"
                   class="rankland-user-modal-team-separator user-modal-info-team-members-slash"
                 >
-                  /
+                  {{ ' / ' }}
                 </span>
                 <span data-id="rankland-user-modal-team-member">{{ resolveTextValue(member.name) }}</span>
-              </template>
+              </span>
             </div>
             <div v-if="activeUserMarkerLabels.length > 0" class="rankland-user-modal-markers user-modal-info-markers mt-2">
               <span
