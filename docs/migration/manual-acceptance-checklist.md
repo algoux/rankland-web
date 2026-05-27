@@ -62,7 +62,7 @@ git status --short --branch
 备注：
 
 ```text
-2026-05-27 最新记录：SRK header action display parity 已通过 focused RED/GREEN、完整 `test:migration`（build、35 unit files / 151 unit tests、1 SSR smoke test、1 shallow Playwright test、57 full-chain Playwright tests）和 `git diff --check`；focused RED 复现 header meta/actions `display` 为 `inline-flex` / `flex`，GREEN 验证恢复旧版 block/inline display 语义。
+2026-05-27 最新记录：SRK table spacer DOM parity 已通过 focused RED/GREEN、完整 `test:migration`（build、35 unit files / 151 unit tests、1 SSR smoke test、1 shallow Playwright test、57 full-chain Playwright tests）和 `git diff --check`；focused RED 复现缺少 `rankland-ranklist-table-spacer`，GREEN 验证恢复旧版 `div.mt-6` spacer DOM 且保留 24px controls-to-table gap。
 ```
 
 ## 全局外壳与跨路由行为
@@ -198,6 +198,7 @@ App shell Ant Design Vue Layout/Menu/Dropdown/Button、旧版全局 body light/d
 - `[x]` Hydration 后榜单内容保持正常
 - `[x]` 测试用 hydration marker 不作为可见产品文本展示
 - `[x]` 有效榜单的 SRK 表格渲染达到验收标准
+- `[x]` SRK 表格前保留旧版 `div.mt-6` spacer DOM，表格前 24px 间距不依赖 Vue-only wrapper margin
 - `[x]` SRK header title 使用旧版 `h1.text-center.mb-1` 的 32px/500/4px 标题排版
 - `[x]` SRK header banner、title、meta、contributors 和 time 保留旧版 `flex items-center justify-center` / `mb-2` / `text-center mb-1` / `text-center mt-1` / `mb-0` / `text-center mb-0` 工具类
 - `[x]` SRK header meta、贡献者、相关链接和时间使用旧版 Ant Design body 14px 字号
@@ -506,7 +507,7 @@ URL:
 - `[x]` 接受路由兼容迁移完成，但保留列出的后续 slice
 - `[ ]` 暂不收口，先修复阻塞项
 
-无当前已复现阻塞；SRK header action display parity、SRK header action gap parity、SRK extra ref-link spacing parity、SRK view-count utility-class parity、SRK progress wrapper utility-class parity、user modal empty photo wrapper parity、SRK asset image error parity、Contact QQ image class parity、SRK header utility class parity、SRK header action utility class parity、SRK header title typography parity、header text size parity、header view-count fallback parity、SRK controls utility class parity、SRK remarks wrapper utility class parity、SRK footer utility class parity、SSR hydration marker visual parity、search state utility class parity、search error DOM parity、search list utility class parity、Playground legacy shell class parity、Playground invalid prompt class parity、user modal root class parity、user modal organization line class parity、user modal team members class parity、user modal team separator raw text coverage、user modal markers class parity、user modal unofficial line class parity、user modal segment line class parity、user modal segment label class parity、user modal slogan spacing class parity、user modal photo wrapper class parity 和 user modal photo/slogan shared wrapper DOM parity 已补充，保留 product-review-driven SRK lower-level table pixel parity / route polish 作为后续 review-driven slice。
+无当前已复现阻塞；SRK table spacer DOM parity、SRK header action display parity、SRK header action gap parity、SRK extra ref-link spacing parity、SRK view-count utility-class parity、SRK progress wrapper utility-class parity、user modal empty photo wrapper parity、SRK asset image error parity、Contact QQ image class parity、SRK header utility class parity、SRK header action utility class parity、SRK header title typography parity、header text size parity、header view-count fallback parity、SRK controls utility class parity、SRK remarks wrapper utility class parity、SRK footer utility class parity、SSR hydration marker visual parity、search state utility class parity、search error DOM parity、search list utility class parity、Playground legacy shell class parity、Playground invalid prompt class parity、user modal root class parity、user modal organization line class parity、user modal team members class parity、user modal team separator raw text coverage、user modal markers class parity、user modal unofficial line class parity、user modal segment line class parity、user modal segment label class parity、user modal slogan spacing class parity、user modal photo wrapper class parity 和 user modal photo/slogan shared wrapper DOM parity 已补充，保留 product-review-driven SRK lower-level table pixel parity / route polish 作为后续 review-driven slice。
 
 最终收口前必须完成：
 

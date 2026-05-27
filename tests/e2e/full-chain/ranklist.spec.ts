@@ -271,6 +271,23 @@ async function getControlsToTableGap(page: Page) {
   });
 }
 
+async function getTableSpacerStyle(page: Page) {
+  return page.evaluate(() => {
+    const spacer = document.querySelector<HTMLElement>('[data-id="rankland-ranklist-table-spacer"]');
+    const tableWrapper = document.querySelector<HTMLElement>('[data-id="rankland-ranklist-table-wrapper"]');
+    if (!spacer || !tableWrapper) {
+      throw new Error('Missing ranklist table spacer or wrapper');
+    }
+    const spacerStyle = window.getComputedStyle(spacer);
+    const tableWrapperStyle = window.getComputedStyle(tableWrapper);
+    return {
+      spacerClasses: Array.from(spacer.classList),
+      spacerMarginTop: spacerStyle.marginTop,
+      tableWrapperMarginTop: tableWrapperStyle.marginTop,
+    };
+  });
+}
+
 async function getProgressToControlsGap(page: Page) {
   return page.evaluate(() => {
     const progress = document.querySelector<HTMLElement>('[data-id="rankland-ranklist-progress"]');
@@ -543,6 +560,11 @@ test.describe('/ranklist/:id full-chain route', () => {
     expect(await getTimeToProgressGap(page)).toBe(5);
     expect(await getProgressToControlsGap(page)).toBe(12);
     expect(await getControlsToTableGap(page)).toBe(24);
+    expect(await getTableSpacerStyle(page)).toEqual({
+      spacerClasses: expect.arrayContaining(['rankland-ranklist-table-spacer', 'mt-6']),
+      spacerMarginTop: '24px',
+      tableWrapperMarginTop: '0px',
+    });
     const remarks = page.locator('[data-id="rankland-ranklist-table-wrapper"] .srk-remarks');
     const remarksWrapper = page.locator('[data-id="rankland-ranklist-table-wrapper"] .rankland-ranklist-remarks');
     await expect(remarksWrapper).toHaveClass(/(^|\s)mb-4(\s|$)/);
