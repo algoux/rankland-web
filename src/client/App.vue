@@ -33,7 +33,7 @@
         </ClientOnly>
 
         <a-dropdown placement="bottomRight">
-          <a-button data-id="app-site-switch" class="app-site-switch" type="text">
+          <a-button data-id="app-site-switch" class="app-site-switch px-2" type="text">
             切换
           </a-button>
           <template #overlay>

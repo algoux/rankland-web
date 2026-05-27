@@ -151,6 +151,22 @@ async function getDesktopShellMetrics(page: Page) {
   });
 }
 
+async function getSiteSwitchButtonPresentation(page: Page) {
+  return page.evaluate(() => {
+    const siteSwitch = document.querySelector<HTMLElement>('[data-id="app-site-switch"]');
+    if (!siteSwitch) {
+      throw new Error('Missing app site-switch button');
+    }
+
+    const siteSwitchStyle = window.getComputedStyle(siteSwitch);
+    return {
+      classList: Array.from(siteSwitch.classList),
+      paddingLeft: siteSwitchStyle.paddingLeft,
+      paddingRight: siteSwitchStyle.paddingRight,
+    };
+  });
+}
+
 async function getSiteSwitchMenuContentPresentation(page: Page) {
   return page.evaluate(() => {
     const link = document.querySelector<HTMLElement>('[data-id="app-site-switch-link"]');
@@ -268,6 +284,11 @@ test.describe('app shell full-chain behavior', () => {
     });
     await expect(page.locator('[data-id="app-site-switch"]')).toHaveClass(/ant-btn/);
     await expect(page.locator('[data-id="app-site-switch"]')).toHaveClass(/ant-dropdown-trigger/);
+    expect(await getSiteSwitchButtonPresentation(page)).toMatchObject({
+      classList: expect.arrayContaining(['app-site-switch', 'px-2']),
+      paddingLeft: '8px',
+      paddingRight: '8px',
+    });
     await page.locator('[data-id="app-site-switch"]').hover();
     await expect(page.locator('[data-id="app-site-switch-link"]')).toHaveAttribute(
       'href',
