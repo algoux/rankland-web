@@ -150,9 +150,24 @@ async function getHeaderMetaBlockSpacing(page: Page) {
       contributorsMarginTop: contributorsStyle.marginTop,
       contributorsMarginBottom: contributorsStyle.marginBottom,
       refLinksMarginTop: refLinksStyle.marginTop,
-      metaToContributorsGap: Math.round(
-        contributors.getBoundingClientRect().top - meta.getBoundingClientRect().bottom,
-      ),
+    };
+  });
+}
+
+async function getHeaderMetaDomParity(page: Page) {
+  return page.evaluate(() => {
+    const meta = document.querySelector<HTMLElement>('[data-id="rankland-ranklist-header-meta"]');
+    const contributors = document.querySelector<HTMLElement>('[data-id="rankland-ranklist-contributors"]');
+    const refLinks = document.querySelector<HTMLElement>('[data-id="rankland-ranklist-ref-links"]');
+    const time = document.querySelector<HTMLElement>('[data-id="rankland-ranklist-time"]');
+    if (!meta || !contributors || !refLinks || !time) {
+      throw new Error('Missing ranklist header meta DOM targets');
+    }
+
+    return {
+      contributorsParentDataId: contributors.parentElement?.getAttribute('data-id') || '',
+      refLinksParentDataId: refLinks.parentElement?.getAttribute('data-id') || '',
+      timeParentDataId: time.parentElement?.getAttribute('data-id') || '',
     };
   });
 }
@@ -546,12 +561,16 @@ test.describe('/ranklist/:id full-chain route', () => {
       contributorsMarginTop: '0px',
       contributorsMarginBottom: '0px',
       refLinksMarginTop: '0px',
-      metaToContributorsGap: 0,
     });
     await expect(page.locator('[data-id="rankland-ranklist-ref-links"]')).toContainText(
       '相关链接：Official Site, Mirror, Statements',
     );
     await expect(page.locator('[data-id="rankland-ranklist-ref-links"]')).toHaveJSProperty('tagName', 'SPAN');
+    expect(await getHeaderMetaDomParity(page)).toEqual({
+      contributorsParentDataId: 'rankland-ranklist-header-meta',
+      refLinksParentDataId: 'rankland-ranklist-header-meta',
+      timeParentDataId: '',
+    });
     expect(await page.locator('[data-id="rankland-ranklist-ref-links"]').evaluate((element) => (
       Array.from(element.children)
         .filter((child) => child.tagName === 'SPAN' && child.querySelector('a'))

@@ -112,50 +112,51 @@
               {{ actionStatus }}
             </span>
           </div>
-        </div>
-        <p
-          v-if="headerContributors.length > 0"
-          data-id="rankland-ranklist-contributors"
-          class="rankland-ranklist-contributors mb-0"
-        >
-          贡献者：<template v-for="(contributor, contributorIndex) in headerContributors" :key="contributor.key">
-            <span>
-              {{ contributorIndex > 0 ? ', ' : '' }}<a v-if="contributor.href" :href="contributor.href" target="_blank" rel="noopener">
-                {{ contributor.label }}
-              </a><span v-else>{{ contributor.label }}</span>
-            </span>
-          </template>
-        </p>
-        <span v-if="mainRefLinks.length > 0" data-id="rankland-ranklist-ref-links" class="rankland-ranklist-ref-links">
-          相关链接：<template v-for="(refLink, refLinkIndex) in mainRefLinks" :key="refLink.key">
-            <span>
-              {{ refLinkIndex > 0 ? ', ' : '' }}<a :href="refLink.href" target="_blank" rel="noopener">{{ refLink.label }}</a>
-            </span>
-          </template>
-          <a-dropdown
-            v-if="extraRefLinks.length > 0"
-            :trigger="['hover']"
-            placement="bottom"
+
+          <p
+            v-if="headerContributors.length > 0"
+            data-id="rankland-ranklist-contributors"
+            class="rankland-ranklist-contributors mb-0"
           >
-            <span data-id="rankland-ranklist-ref-link-extra-action" class="rankland-ranklist-ref-link-extra-action">
-              and {{ extraRefLinks.length }} more <CaretDownOutlined />
-            </span>
-            <template #overlay>
-              <a-menu data-id="rankland-ranklist-ref-link-extra-overlay">
-                <a-menu-item v-for="refLink in extraRefLinks" :key="refLink.key">
-                  <a
-                    :data-id="`rankland-ranklist-ref-link-extra-${refLink.dataId}`"
-                    :href="refLink.href"
-                    target="_blank"
-                    rel="noopener"
-                  >
-                    {{ refLink.label }}
-                  </a>
-                </a-menu-item>
-              </a-menu>
+            贡献者：<template v-for="(contributor, contributorIndex) in headerContributors" :key="contributor.key">
+              <span>
+                {{ contributorIndex > 0 ? ', ' : '' }}<a v-if="contributor.href" :href="contributor.href" target="_blank" rel="noopener">
+                  {{ contributor.label }}
+                </a><span v-else>{{ contributor.label }}</span>
+              </span>
             </template>
-          </a-dropdown>
-        </span>
+          </p>
+          <span v-if="mainRefLinks.length > 0" data-id="rankland-ranklist-ref-links" class="rankland-ranklist-ref-links">
+            相关链接：<template v-for="(refLink, refLinkIndex) in mainRefLinks" :key="refLink.key">
+              <span>
+                {{ refLinkIndex > 0 ? ', ' : '' }}<a :href="refLink.href" target="_blank" rel="noopener">{{ refLink.label }}</a>
+              </span>
+            </template>
+            <a-dropdown
+              v-if="extraRefLinks.length > 0"
+              :trigger="['hover']"
+              placement="bottom"
+            >
+              <span data-id="rankland-ranklist-ref-link-extra-action" class="rankland-ranklist-ref-link-extra-action">
+                and {{ extraRefLinks.length }} more <CaretDownOutlined />
+              </span>
+              <template #overlay>
+                <a-menu data-id="rankland-ranklist-ref-link-extra-overlay">
+                  <a-menu-item v-for="refLink in extraRefLinks" :key="refLink.key">
+                    <a
+                      :data-id="`rankland-ranklist-ref-link-extra-${refLink.dataId}`"
+                      :href="refLink.href"
+                      target="_blank"
+                      rel="noopener"
+                    >
+                      {{ refLink.label }}
+                    </a>
+                  </a-menu-item>
+                </a-menu>
+              </template>
+            </a-dropdown>
+          </span>
+        </div>
         <p data-id="rankland-ranklist-time" class="rankland-ranklist-time text-center mb-0">{{ contestTimeRange }}</p>
       </header>
 
