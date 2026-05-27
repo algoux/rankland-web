@@ -857,6 +857,20 @@ test.describe('/ranklist/:id full-chain route', () => {
       marginTop: '16px',
       marginBottom: '0px',
     });
+    const betaPhotoWrapper = userModal.locator('.rankland-user-modal-photo');
+    await expect(betaPhotoWrapper).toHaveCount(1);
+    await expect(betaPhotoWrapper).toHaveClass(/(^|\s)mt-4(\s|$)/);
+    await expect(betaPhotoWrapper.locator('[data-id="rankland-user-modal-photo"]')).toHaveCount(0);
+    await expect(betaPhotoWrapper.locator('[data-id="rankland-user-modal-slogan"]')).toHaveCount(0);
+    const betaPhotoWrapperStyle = await betaPhotoWrapper.evaluate((element) => {
+      const style = window.getComputedStyle(element);
+      return {
+        marginTop: style.marginTop,
+      };
+    });
+    expect(betaPhotoWrapperStyle).toMatchObject({
+      marginTop: '16px',
+    });
     await userModal.getByRole('button', { name: 'Close' }).click();
     await expect(userModal.locator('.srk-modal')).toBeHidden();
 

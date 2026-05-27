@@ -319,7 +319,7 @@
                 {{ activeUserSegment.segmentTitle }}
               </span>
             </p>
-            <div v-if="activeUserPhotoSrc || activeUserSlogan" class="rankland-user-modal-photo mt-4">
+            <div class="rankland-user-modal-photo mt-4">
               <SrkAssetImage
                 v-if="activeUserPhotoSrc"
                 data-id="rankland-user-modal-photo"
