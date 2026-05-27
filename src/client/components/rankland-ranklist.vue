@@ -258,7 +258,6 @@
             data-id="rankland-ranklist-beian-link"
             href="https://beian.miit.gov.cn/"
             target="_blank"
-            rel="noreferrer"
           >
             {{ footerSiteState.beianText }}
           </a>

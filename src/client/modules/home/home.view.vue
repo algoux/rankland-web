@@ -142,7 +142,7 @@
         </p>
         <p v-if="showBeian">
           备案号：
-          <a data-id="home-beian-link" href="https://beian.miit.gov.cn/" target="_blank" rel="noreferrer">{{ beianText }}</a>
+          <a data-id="home-beian-link" href="https://beian.miit.gov.cn/" target="_blank">{{ beianText }}</a>
         </p>
       </div>
     </div>
