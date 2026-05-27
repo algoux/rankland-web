@@ -129,6 +129,9 @@ dependencies:
   statuses:
     specifier: ^2.0.1
     version: 2.0.1
+  ts-interface-checker:
+    specifier: 1.0.2
+    version: 1.0.2
   urlcat-fork:
     specifier: ^2.0.5
     version: 2.0.5
@@ -7719,6 +7722,10 @@ packages:
     dependencies:
       typescript: 4.6.4
     dev: true
+
+  /ts-interface-checker@1.0.2:
+    resolution: {integrity: sha512-4IKKvhZRXhvtYF/mtu+OCfBqJKV6LczUq4kQYcpT+iSB7++R9+giWnp2ecwWMIcnG16btVOkXFnoxLSYMN1Q1g==}
+    dev: false
 
   /ts-morph@12.2.0:
     resolution: {integrity: sha512-WHXLtFDcIRwoqaiu0elAoZ/AmI+SwwDafnPKjgJmdwJ2gRVO0jMKBt88rV2liT/c6MTsXyuWbGFiHe9MRddWJw==}

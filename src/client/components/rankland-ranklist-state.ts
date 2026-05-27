@@ -9,6 +9,7 @@ import {
   resolveText,
   resolveUserMarkers,
 } from '@algoux/standard-ranklist-utils';
+import { getLegacyRanklistCheckError } from './rankland-ranklist-checker';
 
 export interface RanklandRanklistFilterState {
   organizations: string[];
@@ -27,6 +28,10 @@ export type RanklandRanklistState =
       staticRanklist: StaticRanklist;
       organizations: string[];
       markers: srk.Marker[];
+    }
+  | {
+      kind: 'check-error';
+      message: string;
     }
   | {
       kind: 'error';
@@ -123,6 +128,14 @@ export function createRanklandRanklistState(
   options: RanklandRanklistStateOptions = {},
 ): RanklandRanklistState {
   try {
+    const checkError = getLegacyRanklistCheckError(ranklist);
+    if (checkError) {
+      return {
+        kind: 'check-error',
+        message: checkError,
+      };
+    }
+
     const renderRanklist = deriveTimeTravelRanklist(ranklist, options.timeTravelTime);
     const staticRanklist = convertToStaticRanklist(renderRanklist);
     const filter = options.filter || {

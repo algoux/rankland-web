@@ -6,8 +6,8 @@ import { createRanklandRanklistState } from '@client/components/rankland-ranklis
 function createFilterFixture(): srk.Ranklist {
   const ranklist = JSON.parse(JSON.stringify(fixture)) as srk.Ranklist;
   ranklist.markers = [
-    { id: 'gold', label: 'Gold Group', style: 'gold' },
-    { id: 'silver', label: 'Silver Group', style: 'silver' },
+    { id: 'gold', label: 'Gold Group', style: 'yellow' },
+    { id: 'silver', label: 'Silver Group', style: 'blue' },
   ];
   ranklist.series = [
     ranklist.series[0],
@@ -42,12 +42,12 @@ describe('createRanklandRanklistState', () => {
     }
   });
 
-  it('returns a render error for SRK input that cannot be converted', () => {
+  it('returns a checker error for object input that is not valid SRK', () => {
     const result = createRanklandRanklistState({ type: 'general' } as srk.Ranklist);
 
-    expect(result.kind).toBe('error');
-    if (result.kind === 'error') {
-      expect(result.message).toContain('Cannot read');
+    expect(result.kind).toBe('check-error');
+    if (result.kind === 'check-error') {
+      expect(result.message).not.toHaveLength(0);
     }
   });
 

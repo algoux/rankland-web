@@ -252,7 +252,7 @@ test.describe('/playground full-chain route', () => {
     expect(requests).toHaveLength(0);
   });
 
-  test('contains renderer conversion errors for object JSON that is not renderable SRK', async ({ page, request }) => {
+  test('preserves the legacy checker error DOM for object JSON that is not valid SRK', async ({ page, request }) => {
     await denyExternalCalls(page);
     await request.post(`${mockBaseURL}/__reset`);
     await markPlaygroundWelcomeRead(page);
@@ -261,19 +261,13 @@ test.describe('/playground full-chain route', () => {
     await expectMonacoReady(page);
     await replaceMonacoSource(page, '{"type":"general"}');
 
-    await expect(page.locator('[data-id="rankland-ranklist-render-error"]')).toBeVisible();
-    await expect(page.locator('[data-id="rankland-ranklist-render-error"]')).toHaveAttribute('role', 'alert');
-    await expect(page.locator('[data-id="rankland-ranklist-render-error"]')).toHaveCSS('max-width', '400px');
-    await expect(page.locator('[data-id="rankland-ranklist-render-error"]')).toHaveCSS('margin-top', '100px');
-    await expect(page.locator('[data-id="rankland-ranklist-render-error"] .ant-alert.ant-alert-error')).toBeVisible();
-    await expect(page.locator('[data-id="rankland-ranklist-render-error"] .ant-alert-icon')).toBeVisible();
-    await expect(page.locator('[data-id="rankland-ranklist-render-error"] .ant-alert-message')).toHaveText(
-      'Error occurred when rendering srk',
-    );
-    await expect(page.locator('[data-id="rankland-ranklist-render-error"] .ant-alert-description')).not.toBeEmpty();
-    await expect(page.locator('[data-id="rankland-ranklist-render-error"]')).toContainText(
-      'Error occurred when rendering srk',
-    );
+    const checkError = page.locator('[data-id="rankland-ranklist-check-error"]');
+    await expect(checkError).toBeVisible();
+    await expect(checkError).toHaveClass(/(^|\s)ml-8(\s|$)/);
+    await expect(checkError.locator('h3')).toHaveText('Error occurred while checking srk:');
+    await expect(checkError.locator('pre')).not.toBeEmpty();
+    await expect(checkError).toHaveCSS('margin-left', '32px');
+    await expect(page.locator('[data-id="rankland-ranklist-render-error"]')).toHaveCount(0);
 
     const requests = await readRequests(request);
     expect(requests).toHaveLength(0);

@@ -1,7 +1,15 @@
 <template>
   <div class="rankland-ranklist">
     <div
-      v-if="ranklistState.kind === 'error'"
+      v-if="ranklistState.kind === 'check-error'"
+      data-id="rankland-ranklist-check-error"
+      class="rankland-ranklist-check-error ml-8"
+    >
+      <h3>Error occurred while checking srk:</h3>
+      <pre>{{ ranklistState.message }}</pre>
+    </div>
+    <div
+      v-else-if="ranklistState.kind === 'error'"
       data-id="rankland-ranklist-render-error"
       class="rankland-ranklist-error"
       role="alert"
@@ -1133,6 +1141,10 @@ export default defineComponent({
 
 .ml-4 {
   margin-left: 16px;
+}
+
+.ml-8 {
+  margin-left: 32px;
 }
 
 .rankland-ranklist-footer {
