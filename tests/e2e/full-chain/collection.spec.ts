@@ -92,6 +92,54 @@ async function getRouteContentSpacing(page: Page, selector: string) {
   }, selector);
 }
 
+async function getCollectionLoadedWrapperDom(page: Page) {
+  return page.evaluate(() => {
+    const content = document.querySelector<HTMLElement>('[data-id="collection-content"]');
+    const nav = document.querySelector<HTMLElement>('[data-id="collection-nav"]');
+    const hiddenHeader = document.querySelector<HTMLElement>('.srk-collection-hidden-header');
+    const panel = document.querySelector<HTMLElement>('[data-id="collection-ranklist-panel"]');
+    const ranklistContent = document.querySelector<HTMLElement>('[data-id="collection-ranklist-content"]');
+
+    if (!content || !(content.parentElement instanceof HTMLElement)) {
+      throw new Error('Missing collection content wrapper');
+    }
+
+    if (!nav) {
+      throw new Error('Missing collection nav wrapper');
+    }
+
+    if (!hiddenHeader) {
+      throw new Error('Missing collection hidden header');
+    }
+
+    if (!panel) {
+      throw new Error('Missing collection ranklist panel');
+    }
+
+    if (!ranklistContent) {
+      throw new Error('Missing collection ranklist content');
+    }
+
+    const ranklistContentStyle = window.getComputedStyle(ranklistContent);
+
+    return {
+      rootTagName: content.parentElement.tagName,
+      rootClasses: Array.from(content.parentElement.classList),
+      contentTagName: content.tagName,
+      contentClasses: Array.from(content.classList),
+      navTagName: nav.tagName,
+      navClasses: Array.from(nav.classList),
+      hiddenHeaderTagName: hiddenHeader.tagName,
+      hiddenHeaderClasses: Array.from(hiddenHeader.classList),
+      panelTagName: panel.tagName,
+      panelClasses: Array.from(panel.classList),
+      ranklistContentTagName: ranklistContent.tagName,
+      ranklistContentClasses: Array.from(ranklistContent.classList),
+      ranklistContentPaddingBottom: ranklistContentStyle.paddingBottom,
+    };
+  });
+}
+
 test.describe('/collection/:id full-chain route', () => {
   test('renders selected ranklist through SSR, hydration, RanklandApiService, and the mock backend', async ({
     page,
@@ -113,6 +161,21 @@ test.describe('/collection/:id full-chain route', () => {
     await expect(page.locator('[data-id="collection-ranklist-content"]')).toHaveClass(/(^|\s)pb-8(\s|$)/);
     expect(await getRouteContentSpacing(page, '[data-id="collection-ranklist-content"]')).toMatchObject({
       paddingBottom: '32px',
+    });
+    expect(await getCollectionLoadedWrapperDom(page)).toMatchObject({
+      rootTagName: 'DIV',
+      rootClasses: [],
+      contentTagName: 'DIV',
+      contentClasses: ['srk-collection-container'],
+      navTagName: 'DIV',
+      navClasses: ['srk-collection-nav'],
+      hiddenHeaderTagName: 'DIV',
+      hiddenHeaderClasses: ['srk-collection-hidden-header'],
+      panelTagName: 'DIV',
+      panelClasses: ['srk-collection-ranklist'],
+      ranklistContentTagName: 'DIV',
+      ranklistContentClasses: ['pb-8'],
+      ranklistContentPaddingBottom: '32px',
     });
     await expect(
       page.locator('[data-id="collection-menu-item-test-key"][data-collection-key="test-key"]'),
@@ -220,7 +283,7 @@ test.describe('/collection/:id full-chain route', () => {
     );
 
     await page.locator('[data-id="collection-collapse-button"]').click();
-    await expect(page.locator('[data-id="collection-content"]')).toHaveClass(/is-nav-collapsed/);
+    await expect(page.locator('[data-id="collection-collapse-button"] .anticon-menu-unfold')).toBeVisible();
     const collapsedSubmenuTitle = page
       .locator('[data-id="collection-nav-menu"].ant-menu-inline-collapsed > .ant-menu-submenu > .ant-menu-submenu-title')
       .first();
@@ -243,19 +306,18 @@ test.describe('/collection/:id full-chain route', () => {
 
     expect(response).not.toBeNull();
     expect(response?.ok()).toBe(true);
-    await expect(page.locator('[data-id="collection-content"]')).toHaveClass(/is-nav-collapsed/);
     await expect(page.locator('[data-id="collection-collapse-button"] .anticon-menu-unfold')).toBeVisible();
     await expect(page.locator('[data-id="collection-ranklist-content"]')).toBeVisible();
 
     await page.locator('[data-id="collection-collapse-button"]').click();
 
-    await expect(page.locator('[data-id="collection-content"]')).not.toHaveClass(/is-nav-collapsed/);
+    await expect(page.locator('[data-id="collection-collapse-button"] .anticon-menu-fold')).toBeVisible();
     await expect(page.locator('[data-id="collection-ranklist-panel"]')).toBeHidden();
 
     await page.locator('[data-id="collection-menu-item-another-key"]').click();
 
     await expect(page).toHaveURL('/collection/official?rankId=another-key');
-    await expect(page.locator('[data-id="collection-content"]')).toHaveClass(/is-nav-collapsed/);
+    await expect(page.locator('[data-id="collection-collapse-button"] .anticon-menu-unfold')).toBeVisible();
     await expect(page.locator('[data-id="collection-ranklist-panel"]')).toBeVisible();
   });
 
@@ -287,7 +349,7 @@ test.describe('/collection/:id full-chain route', () => {
     expect(metrics.panelTransition).toContain('margin-left 0.3s');
 
     await page.locator('[data-id="collection-collapse-button"]').click();
-    await expect(page.locator('[data-id="collection-content"]')).toHaveClass(/is-nav-collapsed/);
+    await expect(page.locator('[data-id="collection-collapse-button"] .anticon-menu-unfold')).toBeVisible();
     await page.waitForTimeout(350);
 
     metrics = await getCollectionLayoutMetrics(page);
@@ -298,7 +360,7 @@ test.describe('/collection/:id full-chain route', () => {
 
     await page.setViewportSize({ width: 390, height: 844 });
     await page.locator('[data-id="collection-collapse-button"]').click();
-    await expect(page.locator('[data-id="collection-content"]')).not.toHaveClass(/is-nav-collapsed/);
+    await expect(page.locator('[data-id="collection-collapse-button"] .anticon-menu-fold')).toBeVisible();
     await page.waitForTimeout(350);
 
     metrics = await getCollectionLayoutMetrics(page);

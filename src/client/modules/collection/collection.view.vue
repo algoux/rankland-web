@@ -1,5 +1,5 @@
 <template>
-  <main>
+  <div>
     <Head>
       <title>{{ pageTitle }}</title>
       <meta property="og:title" :content="pageTitle">
@@ -23,15 +23,14 @@
 
     <a-spin v-else-if="!collection" data-id="collection-loading" class="collection-state pt-16 text-center" />
 
-    <section
+    <div
       v-else
       data-id="collection-content"
-      class="srk-collection-container collection-page"
-      :class="{ 'is-nav-collapsed': collapsed, 'is-mobile-layout': isMobileLayout }"
+      class="srk-collection-container"
     >
-      <aside
+      <div
         data-id="collection-nav"
-        class="srk-collection-nav collection-nav"
+        class="srk-collection-nav"
         :data-nav-width="navWidth"
         :data-remaining-height="remainingHeight"
         :style="navStyle"
@@ -63,16 +62,25 @@
             @click="handleMenuClick"
           />
         </ClientOnly>
-      </aside>
-
-      <div class="srk-collection-hidden-header collection-hidden-header" :style="hiddenHeaderStyle">
-        <img :src="logo" alt="RankLand" width="32" height="32">
-        <h3 class="mb-0">榜单合集</h3>
       </div>
 
-      <section
+      <div class="srk-collection-hidden-header" :style="hiddenHeaderStyle">
+        <img :src="logo" alt="RankLand" :width="collapsed ? 24 : 32" :height="collapsed ? 24 : 32">
+        <h3
+          class="mb-0"
+          :style="{
+            fontSize: collapsed ? '14px' : undefined,
+            marginLeft: collapsed ? '0px' : '8px',
+            marginTop: collapsed ? '4px' : '0px',
+          }"
+        >
+          榜单合集
+        </h3>
+      </div>
+
+      <div
         data-id="collection-ranklist-panel"
-        class="srk-collection-ranklist collection-ranklist-panel"
+        class="srk-collection-ranklist"
         :style="ranklistPanelStyle"
       >
         <div data-id="collection-hydrated" class="collection-hydrated">{{ hydrated ? 'hydrated' : 'ssr' }}</div>
@@ -89,7 +97,7 @@
         <div
           v-else-if="ranklist"
           data-id="collection-ranklist-content"
-          class="collection-ranklist-content pb-8"
+          class="pb-8"
           :data-ranklist-id="rankId"
           :data-row-count="rowCount"
         >
@@ -109,9 +117,9 @@
         <div v-else data-id="collection-empty-state" class="collection-empty-state">
           <h3 class="pt-16 text-center">请展开左侧边栏并选择一个榜单</h3>
         </div>
-      </section>
-    </section>
-  </main>
+      </div>
+    </div>
+  </div>
 </template>
 
 <script lang="ts">
@@ -252,6 +260,7 @@ const CollectionPage = defineComponent({
       return {
         width: `${this.navWidth}px`,
         transition: COLLECTION_WIDTH_TRANSITION,
+        flexDirection: this.collapsed ? 'column' : 'row',
       };
     },
     ranklistPanelStyle(): Record<string, string | undefined> {
@@ -494,12 +503,12 @@ export default routeView(CollectionPage, '/collection/:id', CollectionRPO, undef
 </script>
 
 <style lang="less" scoped>
-.collection-page {
+.srk-collection-container {
   position: relative;
   min-height: 70vh;
 }
 
-.collection-nav {
+.srk-collection-nav {
   position: fixed;
   top: 64px;
   left: 0;
@@ -512,7 +521,7 @@ export default routeView(CollectionPage, '/collection/:id', CollectionRPO, undef
   border-right: 1px solid #d9d9d9;
 }
 
-html.dark .collection-nav {
+html.dark .srk-collection-nav {
   background: #111111;
   border-right-color: #434343;
 }
@@ -564,7 +573,7 @@ html.dark .collection-nav {
   padding: 0;
 }
 
-.collection-hidden-header {
+.srk-collection-hidden-header {
   position: sticky;
   top: 0;
   display: flex;
@@ -573,32 +582,11 @@ html.dark .collection-nav {
   height: 64px;
 }
 
-.collection-hidden-header img {
-  width: 32px;
-  height: 32px;
-}
-
-.collection-hidden-header h3 {
-  margin: 0 0 0 8px;
-  font-size: 18px;
+.srk-collection-hidden-header h3 {
   line-height: 1;
 }
 
-.collection-page.is-nav-collapsed .collection-hidden-header {
-  flex-direction: column;
-}
-
-.collection-page.is-nav-collapsed .collection-hidden-header img {
-  width: 24px;
-  height: 24px;
-}
-
-.collection-page.is-nav-collapsed .collection-hidden-header h3 {
-  margin: 4px 0 0;
-  font-size: 14px;
-}
-
-.collection-ranklist-panel {
+.srk-collection-ranklist {
   flex: 1;
   position: relative;
   box-sizing: border-box;
@@ -651,13 +639,13 @@ html.dark .collection-nav {
 }
 
 @media (max-width: 640px) {
-  .collection-nav {
+  .srk-collection-nav {
     top: 56px;
     border-right: 0;
     border-bottom: 1px solid #d9d9d9;
   }
 
-  .collection-ranklist-panel {
+  .srk-collection-ranklist {
     padding: 12px;
   }
 }
