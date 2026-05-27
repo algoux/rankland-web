@@ -24,7 +24,7 @@
     <section
       v-else
       data-id="ranklist-content"
-      class="ranklist-content"
+      class="ranklist-content mt-8 mb-8"
       :data-ranklist-id="ranklistId"
       :data-row-count="rowCount"
     >
@@ -146,14 +146,18 @@ export default routeView(RanklistPage, '/ranklist/:id', RanklistRPO, undefined, 
   margin: 0 0 16px;
 }
 
-.ranklist-content {
-  margin: 32px 0;
-}
-
 .ranklist-hydrated {
   width: 1px;
   height: 1px;
   overflow: hidden;
   color: transparent;
+}
+
+.mt-8 {
+  margin-top: 32px;
+}
+
+.mb-8 {
+  margin-bottom: 32px;
 }
 </style>

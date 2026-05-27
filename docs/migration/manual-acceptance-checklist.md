@@ -62,7 +62,7 @@ git status --short --branch
 备注：
 
 ```text
-2026-05-27 最新记录：Live route wrapper chrome parity 已通过 focused RED/GREEN、live full-chain 全文件、完整 `test:migration`（build、35 unit files / 151 unit tests、1 SSR smoke test、1 shallow Playwright test、58 full-chain Playwright tests）和 `git diff --check`；focused RED 复现 loaded live route 仍有 Vue-only `24px`/`16px` 页面 padding、`1280px` max-width 和 `16px` scroll-solution 右外边距，GREEN 验证旧版无 padding、无宽度上限、无自动居中，并保留旧版 `250px` scroll-solution 左偏移。
+2026-05-27 最新记录：Route content utility class parity 已通过 focused RED/GREEN、完整 `test:migration`（build、35 unit files / 151 unit tests、1 SSR smoke test、1 shallow Playwright test、58 full-chain Playwright tests）和 `git diff --check`；focused RED 复现 ranklist/live loaded content wrapper 缺少旧版 `mt-8 mb-8` class token，GREEN 验证两条 route 均恢复旧版 class token，并保持 32px 顶部/底部间距与 live scroll-solution 外层布局。
 ```
 
 ## 全局外壳与跨路由行为
@@ -197,6 +197,7 @@ App shell Ant Design Vue Layout/Menu/Dropdown/Button、旧版全局 body light/d
 - `[x]` SSR 首屏可以看到榜单内容
 - `[x]` Hydration 后榜单内容保持正常
 - `[x]` 测试用 hydration marker 不作为可见产品文本展示
+- `[x]` loaded content wrapper 保留旧版 `mt-8 mb-8` class token 和 32px 顶部/底部间距
 - `[x]` 有效榜单的 SRK 表格渲染达到验收标准
 - `[x]` SRK 表格前保留旧版 `div.mt-6` spacer DOM，表格前 24px 间距不依赖 Vue-only wrapper margin
 - `[x]` SRK header title 使用旧版 `h1.text-center.mb-1` 的 32px/500/4px 标题排版
@@ -354,6 +355,7 @@ App shell Ant Design Vue Layout/Menu/Dropdown/Button、旧版全局 body light/d
 - `[x]` CSR 页面加载和 hydration 正常
 - `[x]` 测试用 hydration marker 不作为可见产品文本展示
 - `[x]` query 参数按预期保留
+- `[x]` loaded content wrapper 保留旧版 `mt-8 mb-8` class token 和 32px 顶部/底部间距
 - `[x]` 实时榜单轮询可用
 - `[x]` WebSocket 建连行为可接受
 - `[x]` 实时事件面板能清晰展示 accepted/rejected 事件
@@ -381,7 +383,7 @@ App shell Ant Design Vue Layout/Menu/Dropdown/Button、旧版全局 body light/d
 备注：
 
 ```text
-2026-05-27 复核：live full-chain 使用 mock backend 和 stub WebSocket 覆盖 CSR hydration、hydration marker 视觉隐藏、query 保留、polling、loaded live 外层无 Vue-only padding/max-width/auto-centering、scroll-solution 旧版 250px 左偏移且无额外右外边距、WebSocket setup/reconnect/close、Toastify/scroll-solution、scroll-solution 开关旧版 4px 间距、旧版 14px 和 light `rgba(0, 0, 0, 0.85)` 文字样式、未知实时结果旧版 `--` fallback 与无 `result-unknown` class、no-meta header action 旧版工具类和导出按钮不带 `pl-2 border-l`、用户弹窗 rank-time 旧版 chart-only `mt-4` 外壳类名和 G2 图表、Not Found、普通/实时桌面移动端截图和 bounds。
+2026-05-27 复核：live full-chain 使用 mock backend 和 stub WebSocket 覆盖 CSR hydration、hydration marker 视觉隐藏、query 保留、loaded content 旧版 `mt-8 mb-8` class token 和 32px 间距、polling、loaded live 外层无 Vue-only padding/max-width/auto-centering、scroll-solution 旧版 250px 左偏移且无额外右外边距、WebSocket setup/reconnect/close、Toastify/scroll-solution、scroll-solution 开关旧版 4px 间距、旧版 14px 和 light `rgba(0, 0, 0, 0.85)` 文字样式、未知实时结果旧版 `--` fallback 与无 `result-unknown` class、no-meta header action 旧版工具类和导出按钮不带 `pl-2 border-l`、用户弹窗 rank-time 旧版 chart-only `mt-4` 外壳类名和 G2 图表、Not Found、普通/实时桌面移动端截图和 bounds。
 ```
 
 ## API 与数据行为
@@ -512,7 +514,7 @@ URL:
 - `[x]` 接受路由兼容迁移完成，但保留列出的后续 slice
 - `[ ]` 暂不收口，先修复阻塞项
 
-无当前已复现阻塞；Live route wrapper chrome parity、Live scroll-solution unknown result class parity、SRK checker error DOM parity、user modal empty organization line parity、SRK modal root class parity、SRK table spacer DOM parity、SRK header action display parity、SRK header action gap parity、SRK extra ref-link spacing parity、SRK view-count utility-class parity、SRK progress wrapper utility-class parity、user modal empty photo wrapper parity、SRK asset image error parity、Contact QQ image class parity、SRK header utility class parity、SRK header action utility class parity、SRK header title typography parity、header text size parity、header view-count fallback parity、SRK controls utility class parity、SRK remarks wrapper utility class parity、SRK footer utility class parity、SSR hydration marker visual parity、search state utility class parity、search error DOM parity、search list utility class parity、Playground legacy shell class parity、Playground invalid prompt class parity、user modal root class parity、user modal organization line class parity、user modal team members class parity、user modal team separator raw text coverage、user modal markers class parity、user modal unofficial line class parity、user modal segment line class parity、user modal segment label class parity、user modal slogan spacing class parity、user modal photo wrapper class parity 和 user modal photo/slogan shared wrapper DOM parity 已补充，保留 product-review-driven SRK lower-level table pixel parity / route polish 作为后续 review-driven slice。
+无当前已复现阻塞；Route content utility class parity、Live route wrapper chrome parity、Live scroll-solution unknown result class parity、SRK checker error DOM parity、user modal empty organization line parity、SRK modal root class parity、SRK table spacer DOM parity、SRK header action display parity、SRK header action gap parity、SRK extra ref-link spacing parity、SRK view-count utility-class parity、SRK progress wrapper utility-class parity、user modal empty photo wrapper parity、SRK asset image error parity、Contact QQ image class parity、SRK header utility class parity、SRK header action utility class parity、SRK header title typography parity、header text size parity、header view-count fallback parity、SRK controls utility class parity、SRK remarks wrapper utility class parity、SRK footer utility class parity、SSR hydration marker visual parity、search state utility class parity、search error DOM parity、search list utility class parity、Playground legacy shell class parity、Playground invalid prompt class parity、user modal root class parity、user modal organization line class parity、user modal team members class parity、user modal team separator raw text coverage、user modal markers class parity、user modal unofficial line class parity、user modal segment line class parity、user modal segment label class parity、user modal slogan spacing class parity、user modal photo wrapper class parity 和 user modal photo/slogan shared wrapper DOM parity 已补充，保留 product-review-driven SRK lower-level table pixel parity / route polish 作为后续 review-driven slice。
 
 最终收口前必须完成：
 

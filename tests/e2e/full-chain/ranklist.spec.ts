@@ -474,6 +474,8 @@ test.describe('/ranklist/:id full-chain route', () => {
     await expect(
       page.locator('[data-id="ranklist-content"][data-ranklist-id="test-key"][data-row-count="2"]'),
     ).toBeVisible();
+    await expect(page.locator('[data-id="ranklist-content"]')).toHaveClass(/(^|\s)mt-8(\s|$)/);
+    await expect(page.locator('[data-id="ranklist-content"]')).toHaveClass(/(^|\s)mb-8(\s|$)/);
     expect(await getRouteContentSpacing(page, '[data-id="ranklist-content"]')).toMatchObject({
       marginTop: '32px',
       marginBottom: '32px',

@@ -25,7 +25,7 @@
     <section
       v-else
       data-id="live-ranklist-content"
-      class="live-content"
+      class="live-content mt-8 mb-8"
       :data-ranklist-id="id"
       :data-live-id="liveId"
       :data-row-count="rowCount"
@@ -452,11 +452,6 @@ export default routeView(LivePage, '/live/:id', LiveRPO);
   text-align: center;
 }
 
-.live-content {
-  margin-top: 32px;
-  margin-bottom: 32px;
-}
-
 .live-state h3 {
   margin: 0 0 16px;
 }
@@ -471,6 +466,14 @@ export default routeView(LivePage, '/live/:id', LiveRPO);
   height: 1px;
   overflow: hidden;
   color: transparent;
+}
+
+.mt-8 {
+  margin-top: 32px;
+}
+
+.mb-8 {
+  margin-bottom: 32px;
 }
 
 .live-scroll-toggle {

@@ -173,6 +173,8 @@ test.describe('/live/:id full-chain route', () => {
         '[data-id="live-ranklist-content"][data-ranklist-id="live-test-key"][data-live-id="live-rid-1"][data-row-count="2"][data-focus="yes"]',
       ),
     ).toBeVisible();
+    await expect(page.locator('[data-id="live-ranklist-content"]')).toHaveClass(/(^|\s)mt-8(\s|$)/);
+    await expect(page.locator('[data-id="live-ranklist-content"]')).toHaveClass(/(^|\s)mb-8(\s|$)/);
     expect(await getRouteContentSpacing(page, '[data-id="live-ranklist-content"]')).toMatchObject({
       marginTop: '32px',
       marginBottom: '32px',
