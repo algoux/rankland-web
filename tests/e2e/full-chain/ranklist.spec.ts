@@ -593,6 +593,7 @@ test.describe('/ranklist/:id full-chain route', () => {
       marginRight: '16px',
     });
     await expect(page.locator('[data-id="rankland-ranklist-filters"]')).toBeVisible();
+    await expect(page.locator('[data-id="rankland-ranklist-table-wrapper"]')).toHaveClass('ml-4');
     expect(await getTableWrapperMarginLeft(page)).toBe('16px');
     expect(await getTimeToProgressGap(page)).toBe(5);
     expect(await getProgressToControlsGap(page)).toBe(12);

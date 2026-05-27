@@ -205,6 +205,7 @@ test.describe('/live/:id full-chain route', () => {
     await expect(page.locator('[data-id="rankland-ranklist-progress"]')).toBeVisible();
     await expect(page.locator('[data-id="rankland-ranklist-filters"]')).toBeVisible();
     await expect(page.locator('[data-id="rankland-ranklist-extra-action"]')).toBeVisible();
+    await expect(page.locator('[data-id="rankland-ranklist-table-wrapper"]')).toHaveClass('ml-4');
     expect(await getTableWrapperMarginLeft(page)).toBe('16px');
     await expect(page.locator('[data-id="rankland-ranklist-footer"]')).toContainText('Powered by Standard Ranklist');
     await expect(page.locator('[data-id="rankland-ranklist-export-menu-button"]')).toBeVisible();

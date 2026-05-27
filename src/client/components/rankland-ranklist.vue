@@ -216,7 +216,7 @@
       </div>
 
       <div data-id="rankland-ranklist-table-spacer" class="rankland-ranklist-table-spacer mt-6" />
-      <div data-id="rankland-ranklist-table-wrapper" :class="['rankland-ranklist-table-wrapper', tableClass]">
+      <div data-id="rankland-ranklist-table-wrapper" v-bind="tableWrapperAttrs">
         <div v-if="ranklistState.staticRanklist.remarks" class="rankland-ranklist-remarks mb-4 text-center">
           <span class="srk-remarks">备注：{{ resolveTextValue(ranklistState.staticRanklist.remarks) }}</span>
         </div>
@@ -577,6 +577,9 @@ export default defineComponent({
     },
     hasViewCount(): boolean {
       return !!this.meta;
+    },
+    tableWrapperAttrs(): Record<string, string> {
+      return this.tableClass ? { class: this.tableClass } : {};
     },
     headerContributors(): HeaderContributor[] {
       if (this.ranklistState.kind !== 'ready' || !Array.isArray(this.ranklistState.staticRanklist.contributors)) {

@@ -129,6 +129,7 @@ test.describe('/collection/:id full-chain route', () => {
     await expect(page.locator('[data-id="rankland-ranklist-view-count"] .anticon-eye')).toBeVisible();
     await expect(page.locator('[data-id="rankland-ranklist-progress"]')).toBeVisible();
     await expect(page.locator('[data-id="rankland-ranklist-filters"]')).toBeVisible();
+    expect(await page.locator('[data-id="rankland-ranklist-table-wrapper"]').getAttribute('class')).toBeNull();
     expect(await getTableWrapperMarginLeft(page)).toBe('0px');
     await expect(page.locator('[data-id="rankland-ranklist-footer"]')).toContainText('Powered by Standard Ranklist');
     await expect(page.locator('[data-id="rankland-ranklist-export-menu-button"]')).toBeVisible();

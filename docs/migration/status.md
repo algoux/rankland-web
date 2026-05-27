@@ -5,9 +5,9 @@ This file is the quick global dashboard for the RankLand migration. Update it at
 ## Current Focus
 
 - Active branch: `migration/live-page-foundation`
-- Current slice: Playground preview wrapper DOM/class parity
-- Latest slice commit: `fix: 还原演练场预览外壳 DOM`
-- Last recorded full gate: passed on 2026-05-27 for Playground preview wrapper DOM/class parity with Node `v24.11.1`, pnpm `8.15.9`, generated 8 client routes, build, 35 unit files / 151 unit tests, 1 SSR smoke test, 1 shallow Playwright test, and 58 passed / 1 skipped default full-chain Playwright tests with the conditional beian spec skipped outside `cnn`; focused Playground full-chain RED failed because the valid SRK preview wrapper still rendered as `section.playground-preview`, focused GREEN passed after restoring old React `div.mt-8.mb-8` while preserving the `data-id`, 32px margins, SRK preview, filters, progress, docs link, and no-upstream-call behavior; `git diff --check` also passed.
+- Current slice: SRK table wrapper class attribute parity
+- Latest slice commit: `fix: 还原 SRK 表格外壳 class 属性`
+- Last recorded full gate: passed on 2026-05-27 for SRK table wrapper class attribute parity with Node `v24.11.1`, pnpm `8.15.9`, generated 8 client routes, build, 35 unit files / 151 unit tests, 1 SSR smoke test, 1 shallow Playwright test, and 58 passed / 1 skipped default full-chain Playwright tests with the conditional beian spec skipped outside `cnn`; focused RED reproduced the Vue-only table wrapper class on ranklist/live and collection/playground, focused GREEN verified old React class-attribute behavior with exact `class="ml-4"` for ranklist/live and no class attribute for collection/playground while preserving the stable `data-id` hook and table spacing; `git diff --check` also passed.
 - Next recommended focus: product-review-driven SRK lower-level table pixel parity or route polish
 
 ## Route Progress
@@ -51,6 +51,7 @@ This file is the quick global dashboard for the RankLand migration. Update it at
 - SRK header meta/action row no longer adds Vue-only flex gap; spacing now comes from old `mr-2`, `pl-2`, and `border-l` utility classes.
 - SRK header meta row now restores old block display while the migrated action hook behaves inline, matching old React inline action children.
 - SRK table area now renders the old React `div.mt-6` spacer DOM before the table wrapper while preserving the verified 24px controls-to-table visual gap.
+- SRK table wrapper now preserves the old React class-attribute contract: ranklist/live render exact `class="ml-4"` from `tableClass`, while collection/playground keep the stable `data-id` test hook without emitting a Vue-only class attribute.
 - User modal body now also carries the old React `.user-modal` root class while preserving the migrated `.rankland-user-modal-body` hook.
 - User modal organization line now also carries the old React `mb-0` class token while preserving the migrated `.rankland-user-modal-organization` hook and existing computed zero-margin coverage.
 - User modal team-members row now also carries the old React `mt-2` class token while preserving the migrated `.rankland-user-modal-team-members` hook and existing computed spacing coverage.
