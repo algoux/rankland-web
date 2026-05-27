@@ -128,6 +128,22 @@ async function getHomeRecommendationTitlePresentation(page: Page) {
   });
 }
 
+async function getHomeHeroTitlePresentation(page: Page) {
+  return page.evaluate(() => {
+    const title = document.querySelector<HTMLElement>('[data-id="home-hero"] h1');
+    if (!title) {
+      throw new Error('Missing home hero title');
+    }
+
+    const style = getComputedStyle(title);
+    return {
+      fontSize: style.fontSize,
+      inlineFontSize: title.style.fontSize,
+      text: title.textContent?.trim(),
+    };
+  });
+}
+
 async function getHomeTotalSrkCountPresentation(page: Page) {
   return page.evaluate(() => {
     const count = document.querySelector<HTMLElement>('[data-id="home-total-srk-count"]');
@@ -328,6 +344,11 @@ test.describe('/ full-chain route', () => {
     await expect(page.locator('[data-id="home-total-view-count"]')).toHaveText('56789');
     await expect(page.locator('[data-id="home-recommendation-search"][href="/search"]')).toBeVisible();
     await expect(page.locator('[data-id="home-recommendation-collection"][href="/collection/official"]')).toBeVisible();
+    expect(await getHomeHeroTitlePresentation(page)).toEqual({
+      fontSize: '32px',
+      inlineFontSize: '32px',
+      text: '欢迎来到 RankLand',
+    });
     await expect(page.locator('[data-id="home-hero"] p')).toHaveClass(/(^|\s)text-base(\s|$)/);
     await expect(page.locator('[data-id="home-hero"] p')).toHaveCSS('color', 'rgba(255, 255, 255, 0.85)');
     await expect(page.locator('[data-id="home-resources"] li').first()).toHaveCSS(
