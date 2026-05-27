@@ -311,6 +311,23 @@ test.describe('/ full-chain route', () => {
     await expect(page.locator('[data-id="home-tool-paste-then-ac"] img[alt="paste.then.ac logo"]')).toHaveCSS('padding', '2px');
     await expect(page.locator('[data-id="home-tool-paste-then-ac"] img[alt="paste.then.ac logo"]')).toHaveCSS('margin-right', '12px');
     await expect(page.locator('[data-id="home-tool-algo-bootstrap"][href="https://ab.algoux.cn/?utm_source=rankland"]')).toBeVisible();
+    const legacyNoRelExternalLinks = [
+      'https://paste.then.ac/?utm_source=rankland',
+      'https://ab.algoux.cn/?utm_source=rankland',
+      'https://srk.algoux.org/?utm_source=rankland',
+      'https://github.com/algoux/srk-collection',
+      'https://github.com/algoux/standard-ranklist-renderer-component',
+      'https://github.com/algoux/standard-ranklist-utils',
+      'https://github.com/algoux/standard-ranklist-convert-to',
+      'https://github.com/algoux',
+      'https://algoux.org',
+      'https://servicestatus.algoux.org',
+    ];
+    for (const href of legacyNoRelExternalLinks) {
+      const link = page.locator(`[data-id="home-content"] a[href="${href}"]`).first();
+      await expect(link).toHaveAttribute('target', '_blank');
+      expect(await link.getAttribute('rel')).toBeNull();
+    }
     await expect(page.locator('[data-id="home-hydrated"]')).toHaveText('hydrated');
     const homeContactTrigger = page.locator('[data-id="home-contact"] [data-id="contact-us-trigger"]');
     await expect(homeContactTrigger).toHaveText('与我们联系');

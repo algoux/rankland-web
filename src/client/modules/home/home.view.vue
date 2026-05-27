@@ -57,7 +57,6 @@
               class="home-card-link"
               href="https://paste.then.ac/?utm_source=rankland"
               target="_blank"
-              rel="noreferrer"
             >
               <a-card hoverable class="home-card">
                 <h2 class="home-card-title">
@@ -74,7 +73,6 @@
               class="home-card-link"
               href="https://ab.algoux.cn/?utm_source=rankland"
               target="_blank"
-              rel="noreferrer"
             >
               <a-card hoverable class="home-card">
                 <h2 class="home-card-title">
@@ -92,25 +90,25 @@
         <h1 class="block-title">资源和生态</h1>
         <ul>
           <li>
-            <a href="https://srk.algoux.org/?utm_source=rankland" target="_blank" rel="noreferrer">Standard Ranklist</a>
+            <a href="https://srk.algoux.org/?utm_source=rankland" target="_blank">Standard Ranklist</a>
             ：标准榜单格式（srk）旨在标准化榜单数据，欢迎了解和共建生态
           </li>
           <li>
-            <a href="https://github.com/algoux/srk-collection" target="_blank" rel="noreferrer">collection</a>
+            <a href="https://github.com/algoux/srk-collection" target="_blank">collection</a>
             ：长期维护的历年算竞榜单合集
           </li>
           <li>
-            <a href="https://github.com/algoux/standard-ranklist-renderer-component" target="_blank" rel="noreferrer">
+            <a href="https://github.com/algoux/standard-ranklist-renderer-component" target="_blank">
               renderer-component
             </a>
             ：在 Web 项目中使用渲染组件展示标准榜单
           </li>
           <li>
-            <a href="https://github.com/algoux/standard-ranklist-utils" target="_blank" rel="noreferrer">utils</a>
+            <a href="https://github.com/algoux/standard-ranklist-utils" target="_blank">utils</a>
             ：标准榜单开发实用工具库
           </li>
           <li>
-            <a href="https://github.com/algoux/standard-ranklist-convert-to" target="_blank" rel="noreferrer">convert-to</a>
+            <a href="https://github.com/algoux/standard-ranklist-convert-to" target="_blank">convert-to</a>
             ：转换标准榜单到 Excel、Gym Ghost、VJ 等其他格式
           </li>
         </ul>
@@ -130,7 +128,7 @@
         <h1 class="block-title">关于我们</h1>
         <p>algoUX: Give your algorithm better UX</p>
         <p>
-          Find us on <a href="https://github.com/algoux" target="_blank" rel="noreferrer">GitHub</a>
+          Find us on <a href="https://github.com/algoux" target="_blank">GitHub</a>
         </p>
         <p>© 2022-present algoUX. All Rights Reserved.</p>
         <p>
@@ -138,9 +136,9 @@
         </p>
         <p>
           其他链接：
-          <a href="https://algoux.org" target="_blank" rel="noreferrer">首页</a>
+          <a href="https://algoux.org" target="_blank">首页</a>
           <span class="home-separator">|</span>
-          <a href="https://servicestatus.algoux.org" target="_blank" rel="noreferrer">服务状态</a>
+          <a href="https://servicestatus.algoux.org" target="_blank">服务状态</a>
         </p>
         <p v-if="showBeian">
           备案号：

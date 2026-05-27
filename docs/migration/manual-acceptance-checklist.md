@@ -62,7 +62,7 @@ git status --short --branch
 备注：
 
 ```text
-2026-05-27 最新记录：ContactUs trigger anchor DOM parity 已通过 focused RED/GREEN、完整 `test:migration`（build、35 unit files / 151 unit tests、1 SSR smoke test、1 shallow Playwright test、58 full-chain Playwright tests）和 `git diff --check`；focused RED 复现首页和 SRK footer 联系入口仍渲染 Vue `<button>` 而旧 React 为点击 `span` 内的无 `href` `<a>`，GREEN 验证 Home `与我们联系` 和 footer `联系我们` 均恢复旧版 anchor DOM，同时保留 stable selector/class、弹窗打开关闭、邮箱、QQ 图片和深色 Ant Design Modal 样式。
+2026-05-27 最新记录：Home external link rel omission parity 已通过 focused RED/GREEN、完整 `test:migration`（build、35 unit files / 151 unit tests、1 SSR smoke test、1 shallow Playwright test、58 full-chain Playwright tests）和 `git diff --check`；focused RED 复现首页默认可见外链仍带 Vue-added `rel="noreferrer"`，GREEN 验证工具、资源、about/其他链接恢复旧 React `target="_blank"` 且无 `rel` 的 DOM/referrer 语义，同时保留 href、文案、卡片布局、ContactUs 和条件 beian 路径。
 ```
 
 ## 全局外壳与跨路由行为
@@ -131,6 +131,7 @@ App shell Ant Design Vue Layout/Menu/Dropdown/Button、旧版全局 body light/d
 - `[x]` 首页内容区使用旧版 `normal-content` padding、无桌面 max-width cap，并保留 `home-intro` block/title 间距
 - `[x]` 首页区块标题使用旧版 `h1.block-title` DOM 和 32px/500 heading 视觉
 - `[x]` 首页推荐卡统计数字使用旧版 `strong` DOM 和加粗非斜体视觉
+- `[x]` 首页工具、资源、about/其他默认可见外链保留旧版 `target="_blank"` 且无 `rel` 的 DOM/referrer 语义
 - `[x]` 桌面端布局可接受
 - `[x]` 移动端布局可接受
 - `[x]` 首页联系入口可正常打开联系弹窗
@@ -145,7 +146,7 @@ App shell Ant Design Vue Layout/Menu/Dropdown/Button、旧版全局 body light/d
 备注：
 
 ```text
-2026-05-27 复核：home full-chain 断言 SSR HTML 包含首页内容、统计数据和 JSON-LD，hydration marker 正常；旧版 `main.normal-content` 和 `.home-intro` 内容容器 DOM、五个旧版 `div.block` 内容区块 DOM、旧版 `normal-content` desktop 32px/50px padding、mobile 32px/20px padding、无桌面 max-width cap、`home-intro` block 40px 顶部间距、`h1.block-title` DOM、32px/500 区块标题视觉和 block title 20px 底部间距已覆盖；Ant Design Card/Row/Col 推荐/工具区、推荐卡片旧版 dark Card 背景/边框/圆角/文字色、hero/resource/about 非卡片正文旧版暗色正文色、旧版 `h2` 标题和 `UnorderedListOutlined` / `TrophyOutlined` 图标、标题图标/logo 的旧版 `mr-3` 右间距、卡片正文旧版 `mt-4 mb-0` class 与 16px/0px margin、统计数字旧版 `strong` DOM 与加粗非斜体视觉、paste.then.ac logo 24px 尺寸和 2px 内边距、联系弹窗 Ant Design Modal 深色样式、联系弹窗 QQ 群图片旧版 `w-full` 类名、桌面/移动端截图和 bounds、partial upstream statistics 的旧版 `-` fallback 与 SSR/hydration 一致性已覆盖。
+2026-05-27 复核：home full-chain 断言 SSR HTML 包含首页内容、统计数据和 JSON-LD，hydration marker 正常；旧版 `main.normal-content` 和 `.home-intro` 内容容器 DOM、五个旧版 `div.block` 内容区块 DOM、旧版 `normal-content` desktop 32px/50px padding、mobile 32px/20px padding、无桌面 max-width cap、`home-intro` block 40px 顶部间距、`h1.block-title` DOM、32px/500 区块标题视觉和 block title 20px 底部间距已覆盖；Ant Design Card/Row/Col 推荐/工具区、推荐卡片旧版 dark Card 背景/边框/圆角/文字色、hero/resource/about 非卡片正文旧版暗色正文色、旧版 `h2` 标题和 `UnorderedListOutlined` / `TrophyOutlined` 图标、标题图标/logo 的旧版 `mr-3` 右间距、卡片正文旧版 `mt-4 mb-0` class 与 16px/0px margin、统计数字旧版 `strong` DOM 与加粗非斜体视觉、paste.then.ac logo 24px 尺寸和 2px 内边距、默认可见首页外链旧版 `target="_blank"` 且无 `rel`、联系弹窗 Ant Design Modal 深色样式、联系弹窗 QQ 群图片旧版 `w-full` 类名、桌面/移动端截图和 bounds、partial upstream statistics 的旧版 `-` fallback 与 SSR/hydration 一致性已覆盖。
 ```
 
 ## 搜索页 `/search`
@@ -521,9 +522,9 @@ URL:
 - `[x]` 接受路由兼容迁移完成，但保留列出的后续 slice
 - `[ ]` 暂不收口，先修复阻塞项
 
-最新自动化结论：ContactUs trigger anchor DOM parity 已纳入收口记录。
+最新自动化结论：Home external link rel omission parity 已纳入收口记录。
 
-无当前已复现阻塞；ContactUs trigger anchor DOM parity、SRK contributor link rel parity、SRK header ref-link rel parity、SRK contributor item span DOM parity、SRK ref-link item span DOM parity、Playground shortcut tag mr-0 class parity、Collection selected-ranklist pb-8 class parity、Route content utility class parity、Live route wrapper chrome parity、Live scroll-solution unknown result class parity、SRK checker error DOM parity、user modal empty organization line parity、SRK modal root class parity、SRK table spacer DOM parity、SRK header action display parity、SRK header action gap parity、SRK extra ref-link spacing parity、SRK view-count utility-class parity、SRK progress wrapper utility-class parity、user modal empty photo wrapper parity、SRK asset image error parity、Contact QQ image class parity、SRK header utility class parity、SRK header action utility class parity、SRK header title typography parity、header text size parity、header view-count fallback parity、SRK controls utility class parity、SRK remarks wrapper utility class parity、SRK footer utility class parity、SSR hydration marker visual parity、search state utility class parity、search error DOM parity、search list utility class parity、Playground legacy shell class parity、Playground invalid prompt class parity、user modal root class parity、user modal organization line class parity、user modal team members class parity、user modal team separator raw text coverage、user modal markers class parity、user modal unofficial line class parity、user modal segment line class parity、user modal segment label class parity、user modal slogan spacing class parity、user modal photo wrapper class parity 和 user modal photo/slogan shared wrapper DOM parity 已补充，保留 product-review-driven SRK lower-level table pixel parity / route polish 作为后续 review-driven slice。
+无当前已复现阻塞；Home external link rel omission parity、ContactUs trigger anchor DOM parity、SRK contributor link rel parity、SRK header ref-link rel parity、SRK contributor item span DOM parity、SRK ref-link item span DOM parity、Playground shortcut tag mr-0 class parity、Collection selected-ranklist pb-8 class parity、Route content utility class parity、Live route wrapper chrome parity、Live scroll-solution unknown result class parity、SRK checker error DOM parity、user modal empty organization line parity、SRK modal root class parity、SRK table spacer DOM parity、SRK header action display parity、SRK header action gap parity、SRK extra ref-link spacing parity、SRK view-count utility-class parity、SRK progress wrapper utility-class parity、user modal empty photo wrapper parity、SRK asset image error parity、Contact QQ image class parity、SRK header utility class parity、SRK header action utility class parity、SRK header title typography parity、header text size parity、header view-count fallback parity、SRK controls utility class parity、SRK remarks wrapper utility class parity、SRK footer utility class parity、SSR hydration marker visual parity、search state utility class parity、search error DOM parity、search list utility class parity、Playground legacy shell class parity、Playground invalid prompt class parity、user modal root class parity、user modal organization line class parity、user modal team members class parity、user modal team separator raw text coverage、user modal markers class parity、user modal unofficial line class parity、user modal segment line class parity、user modal segment label class parity、user modal slogan spacing class parity、user modal photo wrapper class parity 和 user modal photo/slogan shared wrapper DOM parity 已补充，保留 product-review-driven SRK lower-level table pixel parity / route polish 作为后续 review-driven slice。
 
 最终收口前必须完成：
 
