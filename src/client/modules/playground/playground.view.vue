@@ -69,7 +69,7 @@
         <div v-else-if="parseState.kind === 'invalid'" data-id="playground-invalid-json" class="playground-state">
           <h3 class="mt-16 text-center">
             Input valid srk JSON and press
-            <a-tag color="blue" class="playground-shortcut-tag">Ctrl/Cmd + S</a-tag>
+            <a-tag color="blue" class="playground-shortcut-tag mr-0">Ctrl/Cmd + S</a-tag>
             to preview
           </h3>
         </div>
@@ -380,6 +380,10 @@ export default routeView(PlaygroundPage, '/playground');
 
 .playground-shortcut-tag {
   margin-left: 0;
+  margin-right: 0;
+}
+
+.mr-0 {
   margin-right: 0;
 }
 
