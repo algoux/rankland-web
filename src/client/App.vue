@@ -43,15 +43,16 @@
                   data-id="app-site-switch-link"
                   :href="siteSwitchHref"
                   target="_blank"
+                  style="word-break: keep-all;"
                 >
                   <template v-if="siteAlias === 'cnn'">
                     全球站点
                     <ArrowRightOutlined :rotate="-45" />
                   </template>
                   <template v-else>
-                    <p class="app-site-switch-title">中国站点</p>
-                    <p class="app-site-switch-subtitle">
-                      <span>特别速度优化</span>
+                    <p class="app-site-switch-title mb-0">中国站点</p>
+                    <p class="app-site-switch-subtitle mb-0">
+                      <span class="opacity-60 text-xs">特别速度优化</span>
                       <ArrowRightOutlined :rotate="-45" />
                     </p>
                   </template>

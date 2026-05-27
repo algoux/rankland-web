@@ -151,6 +151,36 @@ async function getDesktopShellMetrics(page: Page) {
   });
 }
 
+async function getSiteSwitchMenuContentPresentation(page: Page) {
+  return page.evaluate(() => {
+    const link = document.querySelector<HTMLElement>('[data-id="app-site-switch-link"]');
+    const title = link?.querySelector<HTMLElement>('.app-site-switch-title');
+    const subtitle = link?.querySelector<HTMLElement>('.app-site-switch-subtitle');
+    const subtitleText = subtitle?.querySelector<HTMLElement>('span');
+    if (!link || !title || !subtitle || !subtitleText) {
+      throw new Error('Missing site-switch menu content');
+    }
+
+    const linkStyle = window.getComputedStyle(link);
+    const titleStyle = window.getComputedStyle(title);
+    const subtitleStyle = window.getComputedStyle(subtitle);
+    const subtitleTextStyle = window.getComputedStyle(subtitleText);
+    return {
+      linkInlineWordBreak: link.style.wordBreak,
+      linkWordBreak: linkStyle.wordBreak,
+      titleClassList: Array.from(title.classList),
+      titleMarginBottom: titleStyle.marginBottom,
+      titleText: title.textContent?.trim(),
+      subtitleClassList: Array.from(subtitle.classList),
+      subtitleMarginBottom: subtitleStyle.marginBottom,
+      subtitleText: subtitleText.textContent?.trim(),
+      subtitleTextClassList: Array.from(subtitleText.classList),
+      subtitleTextFontSize: subtitleTextStyle.fontSize,
+      subtitleTextOpacity: subtitleTextStyle.opacity,
+    };
+  });
+}
+
 test.describe('app shell full-chain behavior', () => {
   test.beforeEach(async ({ page }) => {
     await page.addInitScript(() => {
@@ -247,6 +277,19 @@ test.describe('app shell full-chain behavior', () => {
     expect(await page.locator('[data-id="app-site-switch-link"]').getAttribute('rel')).toBeNull();
     await expect(page.locator('[data-id="app-site-switch-link"] .anticon-arrow-right')).toBeVisible();
     await expect(page.locator('[data-id="app-site-switch-link"] .app-site-switch-arrow')).toHaveCount(0);
+    expect(await getSiteSwitchMenuContentPresentation(page)).toMatchObject({
+      linkInlineWordBreak: 'keep-all',
+      linkWordBreak: 'keep-all',
+      titleClassList: expect.arrayContaining(['app-site-switch-title', 'mb-0']),
+      titleMarginBottom: '0px',
+      titleText: '中国站点',
+      subtitleClassList: expect.arrayContaining(['app-site-switch-subtitle', 'mb-0']),
+      subtitleMarginBottom: '0px',
+      subtitleText: '特别速度优化',
+      subtitleTextClassList: expect.arrayContaining(['opacity-60', 'text-xs']),
+      subtitleTextFontSize: '12px',
+      subtitleTextOpacity: '0.6',
+    });
     await expect(page.locator('[data-id="search-page"]')).toBeVisible();
   });
 
