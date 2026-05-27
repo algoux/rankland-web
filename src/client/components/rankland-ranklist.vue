@@ -38,18 +38,17 @@
           </span>
           <div data-id="rankland-ranklist-header-actions" class="rankland-ranklist-header-actions">
             <a-dropdown data-id="rankland-ranklist-export-menu" :trigger="['hover']" placement="bottom">
-              <a-button
+              <a
                 data-id="rankland-ranklist-export-menu-button"
                 :class="[
-                  'rankland-ranklist-header-action-trigger border-0 border-solid border-gray-400 mr-2',
-                  { 'rankland-ranklist-header-action-separated pl-2 border-l': hasViewCount },
+                  'border-0 border-solid border-gray-400 mr-2',
+                  { 'pl-2 border-l': hasViewCount },
                 ]"
-                size="small"
                 title="导出"
                 aria-label="导出"
               >
                 <DownloadOutlined />
-              </a-button>
+              </a>
               <template #overlay>
                 <a-menu data-id="rankland-ranklist-export-menu-overlay">
                   <a-menu-item-group key="export-group" data-id="rankland-ranklist-export-menu-group" title="导出为">
@@ -83,15 +82,14 @@
             </a-dropdown>
 
             <a-dropdown data-id="rankland-ranklist-share-menu" :trigger="['hover']" placement="bottom">
-              <a-button
+              <a
                 data-id="rankland-ranklist-share-menu-button"
-                class="rankland-ranklist-header-action-trigger rankland-ranklist-header-action-separated pl-2 border-0 border-l border-solid border-gray-400"
-                size="small"
+                class="pl-2 border-0 border-l border-solid border-gray-400"
                 title="分享"
                 aria-label="分享"
               >
                 <ShareAltOutlined />
-              </a-button>
+              </a>
               <template #overlay>
                 <a-menu data-id="rankland-ranklist-share-menu-overlay">
                   <a-menu-item key="copy-link">
@@ -1034,7 +1032,8 @@ export default defineComponent({
   text-align: left;
 }
 
-.rankland-ranklist-header-actions .rankland-ranklist-header-action-trigger {
+.rankland-ranklist-header-actions [data-id='rankland-ranklist-export-menu-button'],
+.rankland-ranklist-header-actions [data-id='rankland-ranklist-share-menu-button'] {
   width: auto;
   padding: 0;
   border: 0;
@@ -1042,25 +1041,32 @@ export default defineComponent({
   background: transparent;
   box-shadow: none;
   color: var(--rankland-link-color);
+  cursor: pointer;
 }
 
-.rankland-ranklist-header-actions .rankland-ranklist-header-action-trigger:hover,
-.rankland-ranklist-header-actions .rankland-ranklist-header-action-trigger:focus {
+.rankland-ranklist-header-actions [data-id='rankland-ranklist-export-menu-button']:hover,
+.rankland-ranklist-header-actions [data-id='rankland-ranklist-export-menu-button']:focus,
+.rankland-ranklist-header-actions [data-id='rankland-ranklist-share-menu-button']:hover,
+.rankland-ranklist-header-actions [data-id='rankland-ranklist-share-menu-button']:focus {
   background: transparent;
   color: var(--rankland-link-hover-color);
 }
 
-.rankland-ranklist-header-actions .rankland-ranklist-header-action-trigger :deep(.anticon) {
+.rankland-ranklist-header-actions [data-id='rankland-ranklist-export-menu-button'] :deep(.anticon),
+.rankland-ranklist-header-actions [data-id='rankland-ranklist-share-menu-button'] :deep(.anticon) {
   color: inherit;
 }
 
-.rankland-ranklist-header-actions .rankland-ranklist-header-action-separated {
+.rankland-ranklist-header-actions [data-id='rankland-ranklist-export-menu-button'].border-l,
+.rankland-ranklist-header-actions [data-id='rankland-ranklist-share-menu-button'].border-l {
   padding-left: 8px;
   border-left: 1px solid #9ca3af;
 }
 
-.rankland-ranklist-header-actions .rankland-ranklist-header-action-separated:hover,
-.rankland-ranklist-header-actions .rankland-ranklist-header-action-separated:focus {
+.rankland-ranklist-header-actions [data-id='rankland-ranklist-export-menu-button'].border-l:hover,
+.rankland-ranklist-header-actions [data-id='rankland-ranklist-export-menu-button'].border-l:focus,
+.rankland-ranklist-header-actions [data-id='rankland-ranklist-share-menu-button'].border-l:hover,
+.rankland-ranklist-header-actions [data-id='rankland-ranklist-share-menu-button'].border-l:focus {
   border-left-color: #9ca3af;
 }
 

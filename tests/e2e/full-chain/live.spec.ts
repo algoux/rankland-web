@@ -307,6 +307,34 @@ test.describe('/live/:id full-chain route', () => {
     await expect(page.locator('[data-id="rankland-ranklist-share-menu-button"]')).toHaveClass(/(^|\s)border-l(\s|$)/);
     await expect(page.locator('[data-id="rankland-ranklist-share-menu-button"]')).toHaveClass(/(^|\s)border-solid(\s|$)/);
     await expect(page.locator('[data-id="rankland-ranklist-share-menu-button"]')).toHaveClass(/(^|\s)border-gray-400(\s|$)/);
+    const liveExportTrigger = page.locator('[data-id="rankland-ranklist-export-menu-button"]');
+    const liveShareTrigger = page.locator('[data-id="rankland-ranklist-share-menu-button"]');
+    await expect(liveExportTrigger).toHaveJSProperty('tagName', 'A');
+    await expect(liveShareTrigger).toHaveJSProperty('tagName', 'A');
+    expect(await liveExportTrigger.getAttribute('href')).toBeNull();
+    expect(await liveShareTrigger.getAttribute('href')).toBeNull();
+    expect(await liveExportTrigger.evaluate((element) => Array.from(element.classList))).toEqual([
+      'border-0',
+      'border-solid',
+      'border-gray-400',
+      'mr-2',
+      'ant-dropdown-trigger',
+    ]);
+    expect(await liveShareTrigger.evaluate((element) => Array.from(element.classList))).toEqual([
+      'pl-2',
+      'border-0',
+      'border-l',
+      'border-solid',
+      'border-gray-400',
+      'ant-dropdown-trigger',
+    ]);
+    for (const trigger of [liveExportTrigger, liveShareTrigger]) {
+      const classList = await trigger.evaluate((element) => Array.from(element.classList));
+      expect(classList).not.toContain('ant-btn');
+      expect(classList).not.toContain('ant-btn-sm');
+      expect(classList).not.toContain('rankland-ranklist-header-action-trigger');
+      expect(classList).not.toContain('rankland-ranklist-header-action-separated');
+    }
     expect(await getHeaderActionTriggerStyle(page, '[data-id="rankland-ranklist-export-menu-button"]')).toMatchObject({
       paddingLeft: '0px',
       borderLeftWidth: '0px',
