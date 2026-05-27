@@ -433,6 +433,42 @@ async function getFilterControlSpacing(page: Page) {
   });
 }
 
+async function getFilterControlInnerGaps(page: Page) {
+  return page.evaluate(() => {
+    const organizationFilterLabel = document
+      .querySelector<HTMLElement>('[data-id="rankland-ranklist-organization-filter"]')
+      ?.closest<HTMLElement>('.rankland-ranklist-filter');
+    const organizationFilter = document.querySelector<HTMLElement>('[data-id="rankland-ranklist-organization-filter"]');
+    const organizationText = Array.from(organizationFilterLabel?.children || []).find(
+      (element): element is HTMLElement =>
+        element instanceof HTMLElement && element.textContent?.trim() === '筛选',
+    );
+    const officialFilter = document.querySelector<HTMLElement>('[data-id="rankland-ranklist-official-filter"]');
+    const officialWrapper = officialFilter?.closest<HTMLElement>('.rankland-ranklist-checkbox');
+    const officialText = Array.from(officialWrapper?.children || []).find(
+      (element): element is HTMLElement =>
+        element instanceof HTMLElement && element.textContent?.trim() === '仅正式参赛',
+    );
+    if (!organizationFilterLabel || !organizationFilter || !organizationText || !officialWrapper || !officialFilter || !officialText) {
+      throw new Error('Missing ranklist filter inner gap targets');
+    }
+
+    const organizationFilterLabelStyle = window.getComputedStyle(organizationFilterLabel);
+    const officialWrapperStyle = window.getComputedStyle(officialWrapper);
+    const organizationTextBox = organizationText.getBoundingClientRect();
+    const organizationFilterBox = organizationFilter.getBoundingClientRect();
+    const officialTextBox = officialText.getBoundingClientRect();
+    const officialFilterBox = officialFilter.getBoundingClientRect();
+
+    return {
+      checkboxColumnGap: officialWrapperStyle.columnGap,
+      officialTextToSwitchGap: Math.round(officialFilterBox.left - officialTextBox.right),
+      organizationFilterColumnGap: organizationFilterLabelStyle.columnGap,
+      organizationTextToSelectGap: Math.round(organizationFilterBox.left - organizationTextBox.right),
+    };
+  });
+}
+
 async function getMobileFilterControlLayout(page: Page) {
   return page.evaluate(() => {
     const controls = document.querySelector<HTMLElement>('[data-id="rankland-ranklist-controls"]');
@@ -1326,10 +1362,16 @@ test.describe('/ranklist/:id full-chain route', () => {
     ]);
     expect(await getFilterControlSpacing(page)).toMatchObject({
       filtersColumnGap: '0px',
-      organizationFilterColumnGap: '8px',
+      organizationFilterColumnGap: 'normal',
       checkboxMarginLeft: '20px',
-      checkboxColumnGap: '4px',
+      checkboxColumnGap: 'normal',
       markerMarginLeft: '20px',
+    });
+    expect(await getFilterControlInnerGaps(page)).toMatchObject({
+      checkboxColumnGap: 'normal',
+      officialTextToSwitchGap: 4,
+      organizationFilterColumnGap: 'normal',
+      organizationTextToSelectGap: 8,
     });
     expect(await getControlsUtilityClasses(page)).toMatchObject({
       controlsClasses: expect.arrayContaining([

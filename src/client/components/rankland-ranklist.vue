@@ -1109,16 +1109,22 @@ export default defineComponent({
 :global(.rankland-ranklist-filter) {
   display: inline-flex;
   align-items: center;
-  gap: 8px;
 }
 
 :global(.rankland-ranklist-checkbox) {
   margin-left: 20px;
-  gap: 4px;
 }
 
 .rankland-ranklist-select {
   width: 160px;
+}
+
+.rankland-ranklist-select.ml-2 {
+  margin-left: 8px;
+}
+
+:global(.rankland-ranklist-checkbox .mr-1) {
+  margin-right: 4px;
 }
 
 :global(.rankland-ranklist-marker-filter) {
