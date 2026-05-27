@@ -13,7 +13,6 @@
       <a-input-search
         v-model:value="inputKeyword"
         data-id="search-input"
-        class="search-input"
         placeholder="输入关键词搜索"
         allow-clear
         enter-button
@@ -209,10 +208,6 @@ export default routeView(SearchPage, '/search');
 .mb-6 {
   margin-top: 0;
   margin-bottom: 24px;
-}
-
-.search-input {
-  margin-top: 0;
 }
 
 .mt-10 {

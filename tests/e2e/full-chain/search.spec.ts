@@ -75,7 +75,11 @@ test.describe('/search full-chain route', () => {
     await expect(searchHeading).toHaveCSS('margin-top', '0px');
     await expect(searchHeading).toHaveCSS('margin-bottom', '24px');
     await expect(page.locator('h3.search-heading')).toHaveCount(0);
-    await expect(page.locator('.ant-input-search:has([data-id="search-input"])')).toBeVisible();
+    const searchInputWrapper = page.locator('.ant-input-search:has([data-id="search-input"])');
+    await expect(searchInputWrapper).toBeVisible();
+    await expect(searchInputWrapper).not.toHaveClass(/search-input/);
+    await expect(searchInputWrapper).toHaveCSS('margin-top', '0px');
+    await expect(page.locator('.search-input')).toHaveCount(0);
     await expect(page.locator('[data-id="search-input"].ant-input')).toBeVisible();
     await expect(page.locator('.ant-input-search-button.ant-btn-primary')).toBeVisible();
     await expect(page.locator('.ant-input-search-button .anticon-search')).toBeVisible();
