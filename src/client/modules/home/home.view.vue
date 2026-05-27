@@ -12,7 +12,7 @@
 
       <div data-id="home-recommendations" class="block home-section">
         <h1 class="block-title">为你推荐</h1>
-        <a-row :gutter="[16, 16]" style="margin-left: 0; margin-right: 0;">
+        <a-row :gutter="16" style="margin-left: 0; margin-right: 0;">
           <a-col class="mb-4" :xs="24" :sm="12">
             <router-link
               data-id="home-recommendation-search"
@@ -50,7 +50,7 @@
 
       <div data-id="home-tools" class="block home-section">
         <h1 class="block-title">算竞周边工具</h1>
-        <a-row :gutter="[16, 16]" style="margin-left: 0; margin-right: 0;">
+        <a-row :gutter="16" style="margin-left: 0; margin-right: 0;">
           <a-col class="mb-4" :xs="24" :sm="12">
             <a
               data-id="home-tool-paste-then-ac"

@@ -197,6 +197,25 @@ async function getHomeCardColumnPresentation(page: Page) {
   });
 }
 
+async function getHomeCardRowPresentation(page: Page) {
+  return page.evaluate(() => {
+    const rowDataIds = ['home-recommendations', 'home-tools'];
+
+    return rowDataIds.map((dataId) => {
+      const row = document.querySelector<HTMLElement>(`[data-id="${dataId}"] .ant-row`);
+      if (!row) {
+        throw new Error(`Missing home card row: ${dataId}`);
+      }
+
+      const style = getComputedStyle(row);
+      return {
+        dataId,
+        rowGap: style.rowGap,
+      };
+    });
+  });
+}
+
 test.describe('/ full-chain route', () => {
   test('renders the RankLand home page through SSR, hydration, RanklandApiService, and the mock backend', async ({
     page,
@@ -306,6 +325,16 @@ test.describe('/ full-chain route', () => {
     await expect(page.locator('[data-id="home-tools"] .ant-row')).toBeVisible();
     await expect(page.locator('[data-id="home-tools"] .ant-col')).toHaveCount(2);
     await expect(page.locator('[data-id="home-tools"] .ant-card-hoverable')).toHaveCount(2);
+    expect(await getHomeCardRowPresentation(page)).toEqual([
+      {
+        dataId: 'home-recommendations',
+        rowGap: 'normal',
+      },
+      {
+        dataId: 'home-tools',
+        rowGap: 'normal',
+      },
+    ]);
     expect(await getHomeCardColumnPresentation(page)).toEqual([
       {
         dataId: 'home-recommendation-search',
