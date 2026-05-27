@@ -31,7 +31,7 @@
         class="mt-10"
         :data-result-count="searchRows.length"
       >
-        <div class="opacity-70">搜索到 <span data-id="search-result-count">{{ searchRows.length }}</span> 个结果</div>
+        <div class="opacity-70">搜索到 {{ searchRows.length }} 个结果</div>
         <div v-if="searchRows.length > 0" class="mt-2">
           <a-list size="small" :data-source="searchRows">
             <template #renderItem="{ item }">

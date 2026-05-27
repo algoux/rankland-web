@@ -205,13 +205,11 @@ test.describe('/search full-chain route', () => {
     await expect(page.locator('[data-id="search-result-section"]')).toHaveJSProperty('tagName', 'DIV');
     await expect(page.locator('[data-id="search-result-section"]')).not.toHaveClass(/search-section/);
     await expect(page.locator('[data-id="search-result-section"]')).toHaveAttribute('data-result-count', '1');
-    await expect(page.locator('[data-id="search-result-count"]')).toHaveText('1');
-    await expect(page.locator('[data-id="search-result-section"] > div.opacity-70').first()).toContainText(
-      '搜索到 1 个结果',
-    );
-    await expect(page.locator('[data-id="search-result-section"] > div.opacity-70').first()).not.toHaveClass(
-      /search-section-title/,
-    );
+    const resultSummary = page.locator('[data-id="search-result-section"] > div.opacity-70').first();
+    await expect(resultSummary).toHaveText('搜索到 1 个结果');
+    await expect(resultSummary.locator('[data-id="search-result-count"]')).toHaveCount(0);
+    await expect(page.locator('[data-id="search-result-count"]')).toHaveCount(0);
+    await expect(resultSummary).not.toHaveClass(/search-section-title/);
     await expect(page.locator('[data-id="search-result-section"] > div.mt-2 > .ant-list.ant-list-sm')).toBeVisible();
     await expect(page.locator('[data-id="search-result-section"] .search-list')).toHaveCount(0);
     await expect(page.locator('[data-id="search-ranklist-item"]')).toHaveCount(1);
@@ -312,7 +310,10 @@ test.describe('/search full-chain route', () => {
     expect(response?.ok()).toBe(true);
     await expect(page.locator('[data-id="search-result-section"]')).toBeVisible();
     await expect(page.locator('[data-id="search-result-section"]')).toHaveAttribute('data-result-count', '0');
-    await expect(page.locator('[data-id="search-result-count"]')).toHaveText('0');
+    const resultSummary = page.locator('[data-id="search-result-section"] > div.opacity-70').first();
+    await expect(resultSummary).toHaveText('搜索到 0 个结果');
+    await expect(resultSummary.locator('[data-id="search-result-count"]')).toHaveCount(0);
+    await expect(page.locator('[data-id="search-result-count"]')).toHaveCount(0);
     await expect(page.locator('[data-id="search-ranklist-item"]')).toHaveCount(0);
     await expect(page.locator('[data-id="search-empty-state"]')).toHaveCount(0);
 
