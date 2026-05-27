@@ -20,16 +20,16 @@
         @search="submitSearch"
       />
 
-      <a-spin v-if="loading" data-id="search-loading" class="search-state mt-10" />
+      <a-spin v-if="loading" data-id="search-loading" class="mt-10" />
 
-      <div v-else-if="loadError" data-id="search-error" class="search-state mt-10">
+      <div v-else-if="loadError" data-id="search-error" class="mt-10">
         <div class="search-error-message text-red-500">初始化榜单数据库失败，请刷新再试。</div>
       </div>
 
-      <section
+      <div
         v-else-if="hasKeyword"
         data-id="search-result-section"
-        class="search-section mt-10"
+        class="mt-10"
         :data-result-count="searchRows.length"
       >
         <div class="search-section-title opacity-70">搜索到 <span data-id="search-result-count">{{ searchRows.length }}</span> 个结果</div>
@@ -54,9 +54,9 @@
             </a-list-item>
           </template>
         </a-list>
-      </section>
+      </div>
 
-      <section v-else data-id="search-recent-section" class="search-section mt-10">
+      <div v-else data-id="search-recent-section" class="mt-10">
         <div class="search-section-title opacity-70">最近更新</div>
         <div v-if="recentRows.length === 0" class="search-empty-state mt-2">暂无最近更新的榜单</div>
         <a-list v-else class="search-list mt-2" size="small" :data-source="recentRows">
@@ -80,7 +80,7 @@
             </a-list-item>
           </template>
         </a-list>
-      </section>
+      </div>
     </div>
   </div>
 </template>
@@ -213,8 +213,7 @@ export default routeView(SearchPage, '/search');
   margin-top: 0;
 }
 
-.search-section,
-.search-state {
+.mt-10 {
   margin-top: 40px;
 }
 

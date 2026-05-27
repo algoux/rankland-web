@@ -76,6 +76,8 @@ test.describe('/search full-chain route', () => {
     await expect(page.locator('.ant-input-search-button .anticon-search')).toBeVisible();
     await expect(page.locator('.ant-input-search-button')).toHaveText('');
     await expect(page.locator('[data-id="search-recent-section"]')).toBeVisible();
+    await expect(page.locator('[data-id="search-recent-section"]')).toHaveJSProperty('tagName', 'DIV');
+    await expect(page.locator('[data-id="search-recent-section"]')).not.toHaveClass(/search-section/);
     await expect(page.locator('[data-id="search-recent-section"] .ant-list.ant-list-sm')).toBeVisible();
     await expect(page.locator('[data-id="search-recent-section"] .search-list')).toHaveCSS('margin-top', '8px');
     await expect(page.locator('[data-id="search-ranklist-item"]')).toHaveCount(3);
@@ -107,6 +109,7 @@ test.describe('/search full-chain route', () => {
     expect(response?.ok()).toBe(true);
     await expect(page.locator('[data-id="search-loading"].ant-spin')).toBeVisible();
     await expect(page.locator('[data-id="search-loading"]')).toHaveClass(/mt-10/);
+    await expect(page.locator('[data-id="search-loading"]')).not.toHaveClass(/search-state/);
     await expect(page.locator('[data-id="search-recent-section"]')).toBeVisible();
   });
 
@@ -132,6 +135,7 @@ test.describe('/search full-chain route', () => {
       '初始化榜单数据库失败，请刷新再试。',
     );
     await expect(page.locator('[data-id="search-error"]')).toHaveClass(/mt-10/);
+    await expect(page.locator('[data-id="search-error"]')).not.toHaveClass(/search-state/);
     await expect(page.locator('[data-id="search-error"]')).not.toHaveClass(/text-red-500/);
     await expect(page.locator('[data-id="search-error"]')).toHaveCSS('margin-top', '40px');
     await expect(page.locator('[data-id="search-error"] .search-error-message')).toHaveText(
@@ -184,6 +188,8 @@ test.describe('/search full-chain route', () => {
     await expect(page.locator('[data-id="search-input"].ant-input')).toHaveValue('Test 2024');
     await expect(page.locator('.ant-input-search:has([data-id="search-input"]) .ant-input-clear-icon')).toBeVisible();
     await expect(page.locator('[data-id="search-result-section"]')).toBeVisible();
+    await expect(page.locator('[data-id="search-result-section"]')).toHaveJSProperty('tagName', 'DIV');
+    await expect(page.locator('[data-id="search-result-section"]')).not.toHaveClass(/search-section/);
     await expect(page.locator('[data-id="search-result-section"]')).toHaveAttribute('data-result-count', '1');
     await expect(page.locator('[data-id="search-result-count"]')).toHaveText('1');
     await expect(page.locator('[data-id="search-result-section"] .search-section-title')).toHaveCSS('opacity', '0.7');
