@@ -150,7 +150,7 @@
         <p data-id="rankland-ranklist-time" class="rankland-ranklist-time text-center mb-0">{{ contestTimeRange }}</p>
       </header>
 
-      <div v-if="showProgress" data-id="rankland-ranklist-progress" class="rankland-ranklist-progress">
+      <div v-if="showProgress" data-id="rankland-ranklist-progress" class="rankland-ranklist-progress mx-4">
         <ProgressBar :data="ranklist" enable-time-travel :live="isLive" @time-travel="handleTimeTravel" />
       </div>
 

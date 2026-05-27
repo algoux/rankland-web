@@ -487,6 +487,18 @@ test.describe('/ranklist/:id full-chain route', () => {
       `${mockBaseURL}/srk-assets/test-key/banner.png`,
     );
     await expect(page.locator('[data-id="rankland-ranklist-progress"]')).toBeVisible();
+    const progressWrapper = page.locator('[data-id="rankland-ranklist-progress"]');
+    await expect(progressWrapper).toHaveClass(/(^|\s)mx-4(\s|$)/);
+    expect(await progressWrapper.evaluate((element) => {
+      const style = window.getComputedStyle(element);
+      return {
+        marginLeft: style.marginLeft,
+        marginRight: style.marginRight,
+      };
+    })).toMatchObject({
+      marginLeft: '16px',
+      marginRight: '16px',
+    });
     await expect(page.locator('[data-id="rankland-ranklist-filters"]')).toBeVisible();
     expect(await getTableWrapperMarginLeft(page)).toBe('16px');
     expect(await getTimeToProgressGap(page)).toBe(5);
