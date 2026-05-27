@@ -1,28 +1,27 @@
 <template>
-  <div class="rankland-ranklist">
-    <div
-      v-if="ranklistState.kind === 'check-error'"
-      data-id="rankland-ranklist-check-error"
-      class="ml-8"
-    >
-      <h3>Error occurred while checking srk:</h3>
-      <pre>{{ ranklistState.message }}</pre>
-    </div>
-    <div
-      v-else-if="ranklistState.kind === 'error'"
-      data-id="rankland-ranklist-render-error"
-      class="rankland-ranklist-error"
-      role="alert"
-    >
-      <a-alert
-        message="Error occurred when rendering srk"
-        :description="ranklistState.message"
-        type="error"
-        show-icon
-      />
-    </div>
-    <template v-else>
-      <header v-if="showHeader" class="rankland-ranklist-header">
+  <div
+    v-if="ranklistState.kind === 'check-error'"
+    data-id="rankland-ranklist-check-error"
+    class="ml-8"
+  >
+    <h3>Error occurred while checking srk:</h3>
+    <pre>{{ ranklistState.message }}</pre>
+  </div>
+  <div
+    v-else-if="ranklistState.kind === 'error'"
+    data-id="rankland-ranklist-render-error"
+    class="rankland-ranklist-error"
+    role="alert"
+  >
+    <a-alert
+      message="Error occurred when rendering srk"
+      :description="ranklistState.message"
+      type="error"
+      show-icon
+    />
+  </div>
+  <template v-else>
+    <template v-if="showHeader">
         <div v-if="contestBannerSrc" class="flex items-center justify-center">
           <SrkAssetImage
             data-id="rankland-ranklist-banner"
@@ -148,8 +147,8 @@
             </a-dropdown>
           </span>
         </div>
-        <p data-id="rankland-ranklist-time" class="rankland-ranklist-time text-center mb-0">{{ contestTimeRange }}</p>
-      </header>
+      <p data-id="rankland-ranklist-time" class="rankland-ranklist-time text-center mb-0">{{ contestTimeRange }}</p>
+    </template>
 
       <div v-if="showProgress" data-id="rankland-ranklist-progress" class="rankland-ranklist-progress mx-4">
         <ProgressBar :data="ranklist" enable-time-travel :live="isLive" @time-travel="handleTimeTravel" />
@@ -362,8 +361,7 @@
           </a>
         </p>
       </footer>
-    </template>
-  </div>
+  </template>
 </template>
 
 <script lang="ts">
@@ -930,27 +928,17 @@ export default defineComponent({
   src: url('../assets/fonts/ZCOOL_XiaoWei/ZCOOLXiaoWei-Regular.woff2') format('woff2');
 }
 
-.rankland-ranklist {
-  width: 100%;
-  overflow-x: auto;
-}
-
-.rankland-ranklist a,
+a,
 .rankland-ranklist-footer :deep(.contact-us-trigger) {
   color: var(--rankland-link-color);
 }
 
-.rankland-ranklist a:hover,
+a:hover,
 .rankland-ranklist-footer :deep(.contact-us-trigger:hover) {
   color: var(--rankland-link-hover-color);
 }
 
-.rankland-ranklist-header {
-  margin-bottom: 0;
-  text-align: center;
-}
-
-.rankland-ranklist-header h1 {
+[data-id='rankland-ranklist-title'].text-center.mb-1 {
   margin: 0 0 4px;
   font-size: 32px;
   font-weight: 500;

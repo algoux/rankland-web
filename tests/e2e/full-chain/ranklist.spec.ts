@@ -597,6 +597,18 @@ async function getRanklistLoadedWrapperDom(page: Page) {
   });
 }
 
+async function getRanklistRendererTopLevelDom(page: Page) {
+  return page.locator('[data-id="ranklist-content"]').evaluate((content) => (
+    Array.from(content.children)
+      .filter((child) => child.getAttribute('data-id') !== 'ranklist-hydrated')
+      .map((child) => ({
+        tagName: child.tagName,
+        dataId: child.getAttribute('data-id'),
+        classList: Array.from(child.classList),
+      }))
+  ));
+}
+
 async function hasLoadedZcoolXiaoWeiFont(page: Page) {
   return page.evaluate(async () => {
     await document.fonts.ready;
@@ -666,6 +678,55 @@ test.describe('/ranklist/:id full-chain route', () => {
       contentMarginTop: '32px',
       contentMarginBottom: '32px',
     });
+    await expect(page.locator('.rankland-ranklist')).toHaveCount(0);
+    await expect(page.locator('.rankland-ranklist-header')).toHaveCount(0);
+    expect(await getRanklistRendererTopLevelDom(page)).toEqual([
+      {
+        tagName: 'DIV',
+        dataId: null,
+        classList: ['flex', 'items-center', 'justify-center'],
+      },
+      {
+        tagName: 'H1',
+        dataId: 'rankland-ranklist-title',
+        classList: ['text-center', 'mb-1'],
+      },
+      {
+        tagName: 'DIV',
+        dataId: 'rankland-ranklist-header-meta',
+        classList: ['text-center', 'mt-1'],
+      },
+      {
+        tagName: 'P',
+        dataId: 'rankland-ranklist-time',
+        classList: ['rankland-ranklist-time', 'text-center', 'mb-0'],
+      },
+      {
+        tagName: 'DIV',
+        dataId: 'rankland-ranklist-progress',
+        classList: ['rankland-ranklist-progress', 'mx-4'],
+      },
+      {
+        tagName: 'DIV',
+        dataId: 'rankland-ranklist-controls',
+        classList: ['rankland-ranklist-controls', 'mt-3', 'mx-4', 'flex', 'justify-between', 'items-center'],
+      },
+      {
+        tagName: 'DIV',
+        dataId: 'rankland-ranklist-table-spacer',
+        classList: ['mt-6'],
+      },
+      {
+        tagName: 'DIV',
+        dataId: 'rankland-ranklist-table-wrapper',
+        classList: ['ml-4'],
+      },
+      {
+        tagName: 'FOOTER',
+        dataId: 'rankland-ranklist-footer',
+        classList: ['rankland-ranklist-footer', 'text-center', 'mt-8'],
+      },
+    ]);
     await expect(page.locator('.srk-user-cell', { hasText: 'Team Alpha' })).toBeVisible();
     await expect(page.locator('.srk-user-cell', { hasText: 'Team Beta' })).toBeVisible();
     await expect(page.locator('[data-id="ranklist-hydrated"]')).toHaveText('hydrated');
@@ -746,7 +807,7 @@ test.describe('/ranklist/:id full-chain route', () => {
     expect(await getHeaderMetaDomParity(page)).toEqual({
       contributorsParentDataId: 'rankland-ranklist-header-meta',
       refLinksParentDataId: 'rankland-ranklist-header-meta',
-      timeParentDataId: '',
+      timeParentDataId: 'ranklist-content',
     });
     expect(await page.locator('[data-id="rankland-ranklist-ref-links"]').evaluate((element) => (
       Array.from(element.children)
