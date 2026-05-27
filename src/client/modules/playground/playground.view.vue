@@ -74,9 +74,9 @@
           </h3>
         </div>
 
-        <section v-else data-id="playground-preview" class="playground-preview">
+        <div v-else data-id="playground-preview" class="mt-8 mb-8">
           <RanklandRanklist :ranklist="parseState.data" name="playground" show-header show-filter />
-        </section>
+        </div>
       </div>
     </section>
 
@@ -383,8 +383,12 @@ export default routeView(PlaygroundPage, '/playground');
   margin-right: 0;
 }
 
-.playground-preview {
-  margin: 32px 0;
+.mt-8 {
+  margin-top: 32px;
+}
+
+.mb-8 {
+  margin-bottom: 32px;
 }
 
 .playground-welcome-modal {
