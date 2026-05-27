@@ -8,7 +8,7 @@
 
     <div>
       <div data-id="search-hydrated" class="search-hydrated">{{ hydrated ? 'hydrated' : 'csr' }}</div>
-      <h3 class="search-heading mb-6">在榜单数据库中探索</h3>
+      <h3 class="mb-6">在榜单数据库中探索</h3>
 
       <a-input-search
         v-model:value="inputKeyword"
@@ -206,11 +206,8 @@ export default routeView(SearchPage, '/search');
   color: transparent;
 }
 
-.search-heading {
-  margin-top: 0;
-}
-
 .mb-6 {
+  margin-top: 0;
   margin-bottom: 24px;
 }
 

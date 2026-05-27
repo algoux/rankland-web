@@ -69,7 +69,12 @@ test.describe('/search full-chain route', () => {
     await expect(page.locator('[data-id="search-hydrated"]')).toHaveCSS('height', '1px');
     await expect(page.locator('[data-id="search-hydrated"]')).toHaveCSS('overflow', 'hidden');
     await expect(page.locator('[data-id="search-hydrated"]')).toHaveCSS('color', 'rgba(0, 0, 0, 0)');
-    await expect(page.locator('h3.mb-6', { hasText: '在榜单数据库中探索' })).toBeVisible();
+    const searchHeading = page.locator('h3.mb-6', { hasText: '在榜单数据库中探索' });
+    await expect(searchHeading).toBeVisible();
+    await expect(searchHeading).toHaveClass(/^mb-6$/);
+    await expect(searchHeading).toHaveCSS('margin-top', '0px');
+    await expect(searchHeading).toHaveCSS('margin-bottom', '24px');
+    await expect(page.locator('h3.search-heading')).toHaveCount(0);
     await expect(page.locator('.ant-input-search:has([data-id="search-input"])')).toBeVisible();
     await expect(page.locator('[data-id="search-input"].ant-input')).toBeVisible();
     await expect(page.locator('.ant-input-search-button.ant-btn-primary')).toBeVisible();
