@@ -210,16 +210,20 @@ test.describe('/search full-chain route', () => {
     await expect(
       page.locator('[data-id="search-ranklist-item"][data-ranklist-key="test-key"] .anticon-eye'),
     ).toBeVisible();
-    await expect(page.locator('[data-id="search-ranklist-item"] .search-view-count')).toHaveCSS('opacity', '0.7');
-    await expect(page.locator('[data-id="search-ranklist-item"] .search-created-at')).toHaveCSS(
-      'margin-top',
-      '0px',
-    );
-    await expect(page.locator('[data-id="search-ranklist-item"] .search-created-at')).toHaveCSS('opacity', '0.5');
-    await expect(page.locator('[data-id="search-ranklist-item"] .search-created-at')).toHaveCSS(
-      'font-size',
-      '14px',
-    );
+    const resultRow = page.locator('[data-id="search-ranklist-item"][data-ranklist-key="test-key"]');
+    const resultTitle = resultRow.locator(':scope > p.mb-0').first();
+    const resultViewCount = resultRow.locator(':scope > p.mb-0 > span.ml-2.opacity-70');
+    const resultCreatedAt = resultRow.locator(':scope > p.mb-0.opacity-50.text-sm');
+    await expect(resultTitle).toBeVisible();
+    await expect(resultTitle).not.toHaveClass(/search-row-title/);
+    await expect(resultViewCount).toBeVisible();
+    await expect(resultViewCount).not.toHaveClass(/search-view-count/);
+    await expect(resultViewCount).toHaveCSS('opacity', '0.7');
+    await expect(resultCreatedAt).toBeVisible();
+    await expect(resultCreatedAt).not.toHaveClass(/search-created-at/);
+    await expect(resultCreatedAt).toHaveCSS('margin-top', '0px');
+    await expect(resultCreatedAt).toHaveCSS('opacity', '0.5');
+    await expect(resultCreatedAt).toHaveCSS('font-size', '14px');
 
     const requests = await readRequests(request);
     expect(requests.filter((requestRecord) => requestRecord.path === '/rank/listall')).toHaveLength(1);
@@ -239,12 +243,19 @@ test.describe('/search full-chain route', () => {
     await expect(page.locator('[data-id="search-result-section"] > div.mt-2')).toBeVisible();
     await expect(page.locator('[data-id="search-result-section"] > div.mt-2')).toHaveClass(/mt-2/);
     await expect(page.locator('[data-id="search-result-section"] > div.mt-2 > .ant-list')).toBeVisible();
-    await expect(page.locator('[data-id="search-result-section"] .search-row-title')).toHaveClass(/mb-0/);
-    await expect(page.locator('[data-id="search-result-section"] .search-view-count')).toHaveClass(/ml-2/);
-    await expect(page.locator('[data-id="search-result-section"] .search-view-count')).toHaveClass(/opacity-70/);
-    await expect(page.locator('[data-id="search-result-section"] .search-created-at')).toHaveClass(/mb-0/);
-    await expect(page.locator('[data-id="search-result-section"] .search-created-at')).toHaveClass(/opacity-50/);
-    await expect(page.locator('[data-id="search-result-section"] .search-created-at')).toHaveClass(/text-sm/);
+    const resultRow = page.locator('[data-id="search-result-section"] [data-id="search-ranklist-item"]').first();
+    const resultTitle = resultRow.locator(':scope > p.mb-0').first();
+    const resultViewCount = resultRow.locator(':scope > p.mb-0 > span.ml-2.opacity-70');
+    const resultCreatedAt = resultRow.locator(':scope > p.mb-0.opacity-50.text-sm');
+    await expect(resultTitle).toBeVisible();
+    await expect(resultTitle).toHaveClass(/^mb-0$/);
+    await expect(resultViewCount).toBeVisible();
+    await expect(resultViewCount).toHaveClass(/^ml-2 opacity-70$/);
+    await expect(resultCreatedAt).toBeVisible();
+    await expect(resultCreatedAt).toHaveClass(/^mb-0 opacity-50 text-sm$/);
+    await expect(page.locator('[data-id="search-ranklist-item"] .search-row-title')).toHaveCount(0);
+    await expect(page.locator('[data-id="search-ranklist-item"] .search-view-count')).toHaveCount(0);
+    await expect(page.locator('[data-id="search-ranklist-item"] .search-created-at')).toHaveCount(0);
 
     const recentResponse = await page.goto('/search');
 
@@ -255,16 +266,19 @@ test.describe('/search full-chain route', () => {
     await expect(page.locator('[data-id="search-recent-section"] > div.mt-2')).toBeVisible();
     await expect(page.locator('[data-id="search-recent-section"] > div.mt-2')).toHaveClass(/mt-2/);
     await expect(page.locator('[data-id="search-recent-section"] > div.mt-2 > .ant-list')).toBeVisible();
-    await expect(page.locator('[data-id="search-recent-section"] .search-row-title').first()).toHaveClass(/mb-0/);
-    await expect(page.locator('[data-id="search-recent-section"] .search-view-count').first()).toHaveClass(/ml-2/);
-    await expect(page.locator('[data-id="search-recent-section"] .search-view-count').first()).toHaveClass(
-      /opacity-70/,
-    );
-    await expect(page.locator('[data-id="search-recent-section"] .search-created-at').first()).toHaveClass(/mb-0/);
-    await expect(page.locator('[data-id="search-recent-section"] .search-created-at').first()).toHaveClass(
-      /opacity-50/,
-    );
-    await expect(page.locator('[data-id="search-recent-section"] .search-created-at').first()).toHaveClass(/text-sm/);
+    const recentRow = page.locator('[data-id="search-recent-section"] [data-id="search-ranklist-item"]').first();
+    const recentTitle = recentRow.locator(':scope > p.mb-0').first();
+    const recentViewCount = recentRow.locator(':scope > p.mb-0 > span.ml-2.opacity-70');
+    const recentCreatedAt = recentRow.locator(':scope > p.mb-0.opacity-50.text-sm');
+    await expect(recentTitle).toBeVisible();
+    await expect(recentTitle).toHaveClass(/^mb-0$/);
+    await expect(recentViewCount).toBeVisible();
+    await expect(recentViewCount).toHaveClass(/^ml-2 opacity-70$/);
+    await expect(recentCreatedAt).toBeVisible();
+    await expect(recentCreatedAt).toHaveClass(/^mb-0 opacity-50 text-sm$/);
+    await expect(page.locator('[data-id="search-ranklist-item"] .search-row-title')).toHaveCount(0);
+    await expect(page.locator('[data-id="search-ranklist-item"] .search-view-count')).toHaveCount(0);
+    await expect(page.locator('[data-id="search-ranklist-item"] .search-created-at')).toHaveCount(0);
   });
 
   test('renders zero search results without an extra empty-state message like the legacy page', async ({

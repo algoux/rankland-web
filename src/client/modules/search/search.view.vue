@@ -41,7 +41,7 @@
                 class="search-list-item"
                 :data-ranklist-key="item.uniqueKey"
               >
-                <p class="search-row-title mb-0">
+                <p class="mb-0">
                   <router-link
                     data-id="search-ranklist-link"
                     :data-ranklist-key="item.uniqueKey"
@@ -49,9 +49,9 @@
                   >
                     {{ item.name }}
                   </router-link>
-                  <span class="search-view-count ml-2 opacity-70"><EyeOutlined /> {{ item.viewCnt }}</span>
+                  <span class="ml-2 opacity-70"><EyeOutlined /> {{ item.viewCnt }}</span>
                 </p>
-                <p class="search-created-at mb-0 opacity-50 text-sm">创建于 {{ formatCreatedAt(item.createdAt) }}</p>
+                <p class="mb-0 opacity-50 text-sm">创建于 {{ formatCreatedAt(item.createdAt) }}</p>
               </a-list-item>
             </template>
           </a-list>
@@ -69,7 +69,7 @@
                 class="search-list-item"
                 :data-ranklist-key="item.uniqueKey"
               >
-                <p class="search-row-title mb-0">
+                <p class="mb-0">
                   <router-link
                     data-id="search-ranklist-link"
                     :data-ranklist-key="item.uniqueKey"
@@ -77,9 +77,9 @@
                   >
                     {{ item.name }}
                   </router-link>
-                  <span class="search-view-count ml-2 opacity-70"><EyeOutlined /> {{ item.viewCnt }}</span>
+                  <span class="ml-2 opacity-70"><EyeOutlined /> {{ item.viewCnt }}</span>
                 </p>
-                <p class="search-created-at mb-0 opacity-50 text-sm">创建于 {{ formatCreatedAt(item.createdAt) }}</p>
+                <p class="mb-0 opacity-50 text-sm">创建于 {{ formatCreatedAt(item.createdAt) }}</p>
               </a-list-item>
             </template>
           </a-list>
@@ -234,18 +234,24 @@ export default routeView(SearchPage, '/search');
   display: block;
 }
 
-.search-row-title {
-  margin: 0;
+.mb-0 {
+  margin-top: 0;
+  margin-bottom: 0;
 }
 
-.search-view-count {
+.ml-2 {
   margin-left: 8px;
+}
+
+.opacity-70 {
   opacity: 0.7;
 }
 
-.search-created-at {
-  margin: 0;
+.opacity-50 {
   opacity: 0.5;
+}
+
+.text-sm {
   font-size: 14px;
 }
 
