@@ -89,7 +89,7 @@
         <div
           v-else-if="ranklist"
           data-id="collection-ranklist-content"
-          class="collection-ranklist-content"
+          class="collection-ranklist-content pb-8"
           :data-ranklist-id="rankId"
           :data-row-count="rowCount"
         >
@@ -608,7 +608,7 @@ html.dark .collection-nav {
   padding: 16px;
 }
 
-.collection-ranklist-content {
+.pb-8 {
   padding-bottom: 32px;
 }
 

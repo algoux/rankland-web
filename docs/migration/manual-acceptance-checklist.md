@@ -62,7 +62,7 @@ git status --short --branch
 备注：
 
 ```text
-2026-05-27 最新记录：Route content utility class parity 已通过 focused RED/GREEN、完整 `test:migration`（build、35 unit files / 151 unit tests、1 SSR smoke test、1 shallow Playwright test、58 full-chain Playwright tests）和 `git diff --check`；focused RED 复现 ranklist/live loaded content wrapper 缺少旧版 `mt-8 mb-8` class token，GREEN 验证两条 route 均恢复旧版 class token，并保持 32px 顶部/底部间距与 live scroll-solution 外层布局。
+2026-05-27 最新记录：Collection selected-ranklist pb-8 class parity 已通过 focused RED/GREEN、完整 `test:migration`（build、35 unit files / 151 unit tests、1 SSR smoke test、1 shallow Playwright test、58 full-chain Playwright tests）和 `git diff --check`；focused RED 复现 collection selected ranklist wrapper 缺少旧版 `pb-8` class token，GREEN 验证 wrapper 恢复旧版 class token 并保持 32px 底部 padding。
 ```
 
 ## 全局外壳与跨路由行为
@@ -286,6 +286,7 @@ App shell Ant Design Vue Layout/Menu/Dropdown/Button、旧版全局 body light/d
 - `[x]` 合集隐藏标题不设置额外层级，保持旧版 `z-index: auto`
 - `[x]` 合集折叠态子菜单标题左右内边距使用旧版 `0px`
 - `[x]` 合集榜单面板使用旧版 `position: relative` 和 `flex: 1`
+- `[x]` 选中榜单内容 wrapper 保留旧版 `pb-8` class token 和 32px 底部 padding
 - `[x]` 桌面端布局可接受
 - `[x]` 移动端布局可接受
 
@@ -299,7 +300,7 @@ App shell Ant Design Vue Layout/Menu/Dropdown/Button、旧版全局 body light/d
 备注：
 
 ```text
-2026-05-27 复核：collection full-chain 覆盖 SSR/hydration、hydration marker 视觉隐藏、invalid rankId cleanup、Ant Design Vue menu/category icons/mobile collapse、旧版 `MenuFoldOutlined` / `MenuUnfoldOutlined` collapse icon、remaining-height/nav animation contract、selected-ranklist wrapper/filter/progress/footer/action、空选择/加载/错误/Not Found 状态；已补充旧版 `.srk-collection-ranklist` `position: relative` / `flex: 1`、collapsed submenu-title 0px 左右内边距、nav light `#f4f4f4`、dark `#111111`、dark border `#434343`、`.srk-collection-hidden-header h3.mb-0` DOM、`.srk-collection-container` / `.srk-collection-nav` / `.srk-collection-ranklist` 外壳类名、nav `z-index: 1` 和 hidden-header `z-index: auto` 断言。
+2026-05-27 复核：collection full-chain 覆盖 SSR/hydration、hydration marker 视觉隐藏、invalid rankId cleanup、Ant Design Vue menu/category icons/mobile collapse、旧版 `MenuFoldOutlined` / `MenuUnfoldOutlined` collapse icon、remaining-height/nav animation contract、selected-ranklist wrapper/filter/progress/footer/action、空选择/加载/错误/Not Found 状态；已补充旧版 selected-ranklist content `pb-8` class token 和 32px 底部 padding、旧版 `.srk-collection-ranklist` `position: relative` / `flex: 1`、collapsed submenu-title 0px 左右内边距、nav light `#f4f4f4`、dark `#111111`、dark border `#434343`、`.srk-collection-hidden-header h3.mb-0` DOM、`.srk-collection-container` / `.srk-collection-nav` / `.srk-collection-ranklist` 外壳类名、nav `z-index: 1` 和 hidden-header `z-index: auto` 断言。
 ```
 
 ## 演练场 `/playground`
@@ -514,7 +515,7 @@ URL:
 - `[x]` 接受路由兼容迁移完成，但保留列出的后续 slice
 - `[ ]` 暂不收口，先修复阻塞项
 
-无当前已复现阻塞；Route content utility class parity、Live route wrapper chrome parity、Live scroll-solution unknown result class parity、SRK checker error DOM parity、user modal empty organization line parity、SRK modal root class parity、SRK table spacer DOM parity、SRK header action display parity、SRK header action gap parity、SRK extra ref-link spacing parity、SRK view-count utility-class parity、SRK progress wrapper utility-class parity、user modal empty photo wrapper parity、SRK asset image error parity、Contact QQ image class parity、SRK header utility class parity、SRK header action utility class parity、SRK header title typography parity、header text size parity、header view-count fallback parity、SRK controls utility class parity、SRK remarks wrapper utility class parity、SRK footer utility class parity、SSR hydration marker visual parity、search state utility class parity、search error DOM parity、search list utility class parity、Playground legacy shell class parity、Playground invalid prompt class parity、user modal root class parity、user modal organization line class parity、user modal team members class parity、user modal team separator raw text coverage、user modal markers class parity、user modal unofficial line class parity、user modal segment line class parity、user modal segment label class parity、user modal slogan spacing class parity、user modal photo wrapper class parity 和 user modal photo/slogan shared wrapper DOM parity 已补充，保留 product-review-driven SRK lower-level table pixel parity / route polish 作为后续 review-driven slice。
+无当前已复现阻塞；Collection selected-ranklist pb-8 class parity、Route content utility class parity、Live route wrapper chrome parity、Live scroll-solution unknown result class parity、SRK checker error DOM parity、user modal empty organization line parity、SRK modal root class parity、SRK table spacer DOM parity、SRK header action display parity、SRK header action gap parity、SRK extra ref-link spacing parity、SRK view-count utility-class parity、SRK progress wrapper utility-class parity、user modal empty photo wrapper parity、SRK asset image error parity、Contact QQ image class parity、SRK header utility class parity、SRK header action utility class parity、SRK header title typography parity、header text size parity、header view-count fallback parity、SRK controls utility class parity、SRK remarks wrapper utility class parity、SRK footer utility class parity、SSR hydration marker visual parity、search state utility class parity、search error DOM parity、search list utility class parity、Playground legacy shell class parity、Playground invalid prompt class parity、user modal root class parity、user modal organization line class parity、user modal team members class parity、user modal team separator raw text coverage、user modal markers class parity、user modal unofficial line class parity、user modal segment line class parity、user modal segment label class parity、user modal slogan spacing class parity、user modal photo wrapper class parity 和 user modal photo/slogan shared wrapper DOM parity 已补充，保留 product-review-driven SRK lower-level table pixel parity / route polish 作为后续 review-driven slice。
 
 最终收口前必须完成：
 

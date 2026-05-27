@@ -110,6 +110,7 @@ test.describe('/collection/:id full-chain route', () => {
     await expect(
       page.locator('[data-id="collection-ranklist-content"][data-ranklist-id="test-key"][data-row-count="2"]'),
     ).toBeVisible();
+    await expect(page.locator('[data-id="collection-ranklist-content"]')).toHaveClass(/(^|\s)pb-8(\s|$)/);
     expect(await getRouteContentSpacing(page, '[data-id="collection-ranklist-content"]')).toMatchObject({
       paddingBottom: '32px',
     });
