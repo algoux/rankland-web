@@ -43,7 +43,6 @@
                   data-id="app-site-switch-link"
                   :href="siteSwitchHref"
                   target="_blank"
-                  rel="noreferrer"
                 >
                   <template v-if="siteAlias === 'cnn'">
                     全球站点
