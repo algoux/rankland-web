@@ -126,7 +126,7 @@
             <span v-else>{{ contributor.label }}</span>
           </template>
         </p>
-        <p v-if="mainRefLinks.length > 0" data-id="rankland-ranklist-ref-links" class="rankland-ranklist-ref-links">
+        <span v-if="mainRefLinks.length > 0" data-id="rankland-ranklist-ref-links" class="rankland-ranklist-ref-links">
           相关链接：<template v-for="(refLink, refLinkIndex) in mainRefLinks" :key="refLink.key">
             <span v-if="refLinkIndex > 0">, </span>
             <a :href="refLink.href" target="_blank" rel="noreferrer">{{ refLink.label }}</a>
@@ -154,7 +154,7 @@
               </a-menu>
             </template>
           </a-dropdown>
-        </p>
+        </span>
         <p data-id="rankland-ranklist-time" class="rankland-ranklist-time text-center mb-0">{{ contestTimeRange }}</p>
       </header>
 
