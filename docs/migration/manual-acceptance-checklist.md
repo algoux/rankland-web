@@ -62,7 +62,7 @@ git status --short --branch
 备注：
 
 ```text
-2026-05-28 最新记录：Ranklist banner wrapper class parity 已通过 focused RED/GREEN、ranklist full-chain 9 tests、完整默认 `test:migration`（build、35 unit files / 152 unit tests、1 SSR smoke test、1 shallow Playwright test、60 passed / 1 skipped full-chain Playwright tests）和 `git diff --check`。RED 复现 banner wrapper 旧版 utility 语义缺失，`align-items` 为 `normal`，并由测试守住不渲染 Vue-only `.rankland-ranklist-banner-wrap`；GREEN 验证 wrapper 仅保留旧版 `flex items-center justify-center` class 合同、不渲染该 Vue-only 产品类，并保留 `display:flex`、居中对齐、wrapper 0px bottom margin 和 banner image 8px bottom margin。
+2026-05-28 最新记录：Ranklist header meta class parity 已通过 focused RED/GREEN、ranklist full-chain 9 tests、完整默认 `test:migration`（build、35 unit files / 152 unit tests、1 SSR smoke test、1 shallow Playwright test、60 passed / 1 skipped full-chain Playwright tests）和 `git diff --check`。RED 复现 metadata block classList 仍包含 Vue-only `.rankland-ranklist-header-meta`；GREEN 验证 metadata block 仅保留旧版 `text-center mt-1` class 合同、不渲染该 Vue-only 产品类，并保留 block display、无 gap、子节点 DOM、14px 字号和 4px top margin。
 ```
 
 ## 全局外壳与跨路由行为
@@ -229,6 +229,7 @@ App shell Ant Design Vue Layout/Menu/Dropdown/Button、旧版根布局 `layout` 
 - `[x]` SRK header title 使用旧版 `h1.text-center.mb-1` 的 32px/500/4px 标题排版
 - `[x]` SRK header banner wrapper 不渲染 Vue-only `.rankland-ranklist-banner-wrap`，保留旧版 `flex items-center justify-center` 工具类和 `display:flex` / `align-items:center` / `justify-content:center` 布局；banner image、title、meta、contributors 和 time 保留旧版 `mb-2` / `text-center mb-1` / `text-center mt-1` / `mb-0` / `text-center mb-0` 工具类，且 banner wrapper/image 的 0px/8px margin 来源与旧 React 一致
 - `[x]` SRK header contributors 和 ref-links 保留旧 React 作为 header meta block 子节点的 DOM 结构，time 仍为 meta block 后的 header sibling
+- `[x]` SRK header meta block 不渲染 Vue-only `.rankland-ranklist-header-meta`，仅保留旧版 `text-center mt-1` class 合同，并保留 4px top margin、block display、无 gap 和子节点 DOM
 - `[x]` SRK header meta、贡献者、相关链接和时间使用旧版 Ant Design body 14px 字号
 - `[x]` SRK header 在 metadata 缺失 `viewCnt` 时仍保留旧版 Eye icon 和 `-` 占位
 - `[x]` SRK header 浏览量节点保留旧版 `mr-2` 工具类
@@ -318,6 +319,8 @@ App shell Ant Design Vue Layout/Menu/Dropdown/Button、旧版根布局 `layout` 
 2026-05-28 追加复核：ranklist SRK 表格 spacer class 合同已覆盖旧 React `div.mt-6` 行为；RED 复现 Vue spacer 仍包含 `.rankland-ranklist-table-spacer` 产品类，GREEN 验证 spacer classList 仅保留旧版 `mt-6` 且不含 `.rankland-ranklist-table-spacer`，computed 24px spacer margin、table wrapper 0px top margin、modal ancestry、筛选控件、深色模式和 ranklist 全文件 full-chain 9 tests 均保持通过。
 
 2026-05-28 追加复核：ranklist SRK banner wrapper class 合同已覆盖旧 React `div.flex.items-center.justify-center` 行为；RED 复现 wrapper 旧版 utility 语义缺失，`align-items` 为 `normal`，并由测试守住不渲染 Vue-only `.rankland-ranklist-banner-wrap`；GREEN 验证 wrapper classList 仅保留旧版 `flex` / `items-center` / `justify-center` 且不含 `.rankland-ranklist-banner-wrap`，computed `display:flex`、`align-items:center`、`justify-content:center`、wrapper 0px bottom margin、banner image 8px bottom margin和 ranklist 全文件 full-chain 9 tests 均保持通过。
+
+2026-05-28 追加复核：ranklist SRK header meta class 合同已覆盖旧 React `div.text-center.mt-1` 行为；RED 复现 metadata block 仍包含 `.rankland-ranklist-header-meta` 产品类，GREEN 验证 metadata block classList 精确等于 `text-center mt-1` 且不含 `.rankland-ranklist-header-meta`，computed block display、无 gap、4px top margin、14px 字号、meta 子节点 DOM 和 ranklist 全文件 full-chain 9 tests 均保持通过。
 ```
 
 ## 合集页 `/collection/:id`
@@ -599,7 +602,7 @@ URL:
 - `[x]` 接受路由兼容迁移完成，但保留列出的后续 slice
 - `[ ]` 暂不收口，先修复阻塞项
 
-最新自动化结论：Ranklist banner wrapper class parity 已纳入收口记录，完整 gate 已通过。
+最新自动化结论：Ranklist header meta class parity 已纳入收口记录，完整 gate 已通过。
 
 无当前已复现阻塞；SRK controls extra-action gap parity、App shell legacy layout/logo class parity、App shell site-switch trigger `px-2` class parity、App shell site-switch dropdown content class/style parity、Fallback 404 class token parity、SRK table wrapper class attribute parity、Playground preview wrapper DOM/class parity、Playground docs link anchor class parity、Playground docs link wrapper class parity、Playground docs link wrapper DOM parity、Playground docs link rel omission parity、App shell site-switch rel omission parity、Beian link rel omission parity、Home external link rel omission parity、ContactUs trigger anchor DOM parity、SRK contributor link rel parity、SRK header ref-link rel parity、SRK header meta DOM parity、SRK contributor item span DOM parity、SRK ref-link item span DOM parity、Playground shortcut tag mr-0 class parity、Collection selected-ranklist pb-8 class parity、Collection wrapper DOM parity、Collection hidden-header title style parity、Route content utility class parity、Ranklist loaded wrapper DOM parity、Live route wrapper chrome parity、Live root wrapper DOM parity、Live content wrapper DOM parity、Live scroll-solution unknown result class parity、Live scroll-solution order parity、Live mobile scroll toggle DOM parity、SRK checker error DOM parity、SRK check-error wrapper class parity、user modal empty organization line parity、SRK modal root class parity、SRK modal table-wrapper DOM parity、SRK table spacer DOM parity、SRK header action display parity、SRK header action gap parity、SRK extra ref-link spacing parity、SRK view-count utility-class parity、SRK progress wrapper utility-class parity、user modal empty photo wrapper parity、SRK asset image error parity、Contact QQ image class parity、SRK header utility class parity、SRK header action utility class parity、SRK header title typography parity、header text size parity、header view-count fallback parity、SRK controls utility class parity、SRK remarks wrapper utility class parity、SRK footer utility class parity、SSR hydration marker visual parity、search shell DOM parity、search heading DOM parity、search input DOM parity、search list item DOM parity、search result count DOM parity、search keyword whitespace parity、search state wrapper DOM parity、search section content DOM parity、search row content DOM parity、search error message DOM parity、search state utility class parity、search error DOM parity、search list utility class parity、Playground legacy shell class parity、Playground invalid prompt class parity、user modal root class parity、user modal organization line class parity、user modal team members class parity、user modal team separator raw text coverage、user modal team-member entry DOM parity、user modal markers class parity、user modal unofficial line class parity、user modal segment line class parity、user modal segment label class parity、user modal slogan spacing class parity、user modal photo wrapper class parity 和 user modal photo/slogan shared wrapper DOM parity 已补充，保留 product-review-driven SRK lower-level table pixel parity / route polish 作为后续 review-driven slice。
 

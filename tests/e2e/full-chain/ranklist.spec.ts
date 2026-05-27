@@ -693,11 +693,12 @@ test.describe('/ranklist/:id full-chain route', () => {
       bannerWrapMarginBottom: '0px',
       bannerMarginBottom: '8px',
       titleClasses: expect.arrayContaining(['text-center', 'mb-1']),
-      metaClasses: expect.arrayContaining(['rankland-ranklist-header-meta', 'text-center', 'mt-1']),
       contributorsClasses: expect.arrayContaining(['rankland-ranklist-contributors', 'mb-0']),
       timeClasses: expect.arrayContaining(['rankland-ranklist-time', 'text-center', 'mb-0']),
     });
     expect(headerUtilityClasses.bannerWrapClasses).not.toContain('rankland-ranklist-banner-wrap');
+    expect(headerUtilityClasses.metaClasses).toEqual(['text-center', 'mt-1']);
+    expect(headerUtilityClasses.metaClasses).not.toContain('rankland-ranklist-header-meta');
     expect(await getRanklistHeaderTextSizes(page)).toMatchObject({
       viewCountFontSize: '14px',
       contributorsFontSize: '14px',
