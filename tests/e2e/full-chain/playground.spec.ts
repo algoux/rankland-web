@@ -1,6 +1,7 @@
 import { expect, test } from '@playwright/test';
 import type { APIRequestContext, Locator, Page } from '@playwright/test';
 import { denyExternalCalls } from '../helpers/mock-api';
+import ranklistFixture from '../../fixtures/ranklist.srk.json';
 
 const mockPort = process.env.FULL_CHAIN_MOCK_PORT || '3101';
 const mockBaseURL = `http://127.0.0.1:${mockPort}`;
@@ -182,6 +183,42 @@ test.describe('/playground full-chain route', () => {
 
     const requests = await readRequests(request);
     expect(requests).toHaveLength(0);
+  });
+
+  test('preserves the legacy empty user organization line in the SRK user modal', async ({ page, request }) => {
+    await denyExternalCalls(page);
+    await request.post(`${mockBaseURL}/__reset`);
+    await markPlaygroundWelcomeRead(page);
+
+    await page.goto('/playground');
+    await expectMonacoReady(page);
+
+    const source = JSON.parse(JSON.stringify(ranklistFixture));
+    source.contest.title = 'Empty Organization User Modal Fixture';
+    delete source.rows[0].user.organization;
+    await replaceMonacoSource(page, JSON.stringify(source));
+
+    await expect(page.locator('[data-id="rankland-ranklist-title"]')).toHaveText(
+      'Empty Organization User Modal Fixture',
+    );
+    await page.locator('.srk-user-cell', { hasText: 'Team Alpha' }).click();
+
+    const userModal = page.locator('[data-id="rankland-ranklist-user-modal"]');
+    await expect(userModal.locator('.srk-modal')).toBeVisible();
+    const organizationLine = userModal.locator('[data-id="rankland-user-modal-organization"]');
+    await expect(organizationLine).toHaveCount(1);
+    await expect(organizationLine).toHaveText('');
+    await expect(organizationLine).toHaveClass(/(^|\s)mb-0(\s|$)/);
+    expect(await organizationLine.evaluate((element) => {
+      const style = window.getComputedStyle(element);
+      return {
+        marginTop: style.marginTop,
+        marginBottom: style.marginBottom,
+      };
+    })).toMatchObject({
+      marginTop: '0px',
+      marginBottom: '0px',
+    });
   });
 
   test('shows invalid JSON state after previewing malformed source', async ({ page, request }) => {

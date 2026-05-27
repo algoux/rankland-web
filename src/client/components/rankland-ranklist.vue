@@ -265,7 +265,6 @@
         >
           <div v-if="activeUserPayload" class="rankland-user-modal-body user-modal">
             <p
-              v-if="activeUserOrganization"
               data-id="rankland-user-modal-organization"
               class="rankland-user-modal-line rankland-user-modal-organization mb-0"
             >
