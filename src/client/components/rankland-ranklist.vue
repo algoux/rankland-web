@@ -3,7 +3,7 @@
     <div
       v-if="ranklistState.kind === 'check-error'"
       data-id="rankland-ranklist-check-error"
-      class="rankland-ranklist-check-error ml-8"
+      class="ml-8"
     >
       <h3>Error occurred while checking srk:</h3>
       <pre>{{ ranklistState.message }}</pre>

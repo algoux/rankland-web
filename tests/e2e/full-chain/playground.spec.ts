@@ -276,7 +276,8 @@ test.describe('/playground full-chain route', () => {
 
     const checkError = page.locator('[data-id="rankland-ranklist-check-error"]');
     await expect(checkError).toBeVisible();
-    await expect(checkError).toHaveClass(/(^|\s)ml-8(\s|$)/);
+    await expect(checkError).toHaveClass(/^ml-8$/);
+    await expect(checkError).not.toHaveClass(/rankland-ranklist-check-error/);
     await expect(checkError.locator('h3')).toHaveText('Error occurred while checking srk:');
     await expect(checkError.locator('pre')).not.toBeEmpty();
     await expect(checkError).toHaveCSS('margin-left', '32px');
