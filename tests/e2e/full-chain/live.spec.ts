@@ -606,6 +606,14 @@ test.describe('/live/:id full-chain route', () => {
       const toastStyle = getComputedStyle(toastElement);
 
       return {
+        dom: {
+          containerTagName: containerElement.tagName,
+          listCount: containerElement.querySelectorAll('ul, li').length,
+          rowTagName: toastElement.tagName,
+          visibleChildTags: Array.from(containerElement.children)
+            .filter((child) => child.getAttribute('data-id') !== 'live-scroll-solution-status')
+            .map((child) => child.tagName),
+        },
         container: {
           bottom: containerBox.bottom,
           left: containerBox.left,
@@ -628,6 +636,12 @@ test.describe('/live/:id full-chain route', () => {
       };
     });
 
+    expect(toastifyLayout.dom).toEqual({
+      containerTagName: 'DIV',
+      rowTagName: 'DIV',
+      listCount: 0,
+      visibleChildTags: ['DIV'],
+    });
     expect(toastifyLayout.container.position).toBe('fixed');
     expect(Math.round(toastifyLayout.container.width)).toBe(250);
     expect(Math.round(toastifyLayout.container.left)).toBe(0);

@@ -1,34 +1,32 @@
 <template>
-  <aside
+  <div
     class="live-scroll-solution plugin_scroll-solution-container Toastify__toast-container Toastify__toast-container--bottom-left"
     data-id="live-scroll-solution"
   >
     <div data-id="live-scroll-solution-status" class="live-scroll-solution-status">{{ status }}</div>
-    <ul class="live-scroll-solution-list">
-      <li
-        v-for="solution in solutions"
-        :key="solution.key"
-        class="live-scroll-solution-item Toastify__toast Toastify__toast--default Toastify__zoom-enter"
-        data-id="live-scroll-solution-item"
-      >
-        <div class="Toastify__toast-body">
-          <div class="container">
-            <div class="score live-scroll-solution-score">{{ solution.solved }}</div>
-            <div class="user live-scroll-solution-user">
-              <span class="user-name live-scroll-solution-user-name">{{ solution.user.name }}</span>
-              <span v-if="solution.user.organization" class="user-second-name live-scroll-solution-user-organization">
-                {{ solution.user.organization }}
-              </span>
-            </div>
-            <div class="problem live-scroll-solution-problem">{{ solution.problemAlias }}</div>
-            <div class="result live-scroll-solution-result" :class="getResultClass(solution.result)">
-              <span>{{ getResultText(solution.result) }}</span>
-            </div>
+    <div
+      v-for="solution in solutions"
+      :key="solution.key"
+      class="live-scroll-solution-item Toastify__toast Toastify__toast--default Toastify__zoom-enter"
+      data-id="live-scroll-solution-item"
+    >
+      <div class="Toastify__toast-body">
+        <div class="container">
+          <div class="score live-scroll-solution-score">{{ solution.solved }}</div>
+          <div class="user live-scroll-solution-user">
+            <span class="user-name live-scroll-solution-user-name">{{ solution.user.name }}</span>
+            <span v-if="solution.user.organization" class="user-second-name live-scroll-solution-user-organization">
+              {{ solution.user.organization }}
+            </span>
+          </div>
+          <div class="problem live-scroll-solution-problem">{{ solution.problemAlias }}</div>
+          <div class="result live-scroll-solution-result" :class="getResultClass(solution.result)">
+            <span>{{ getResultText(solution.result) }}</span>
           </div>
         </div>
-      </li>
-    </ul>
-  </aside>
+      </div>
+    </div>
+  </div>
 </template>
 
 <script lang="ts">
@@ -95,12 +93,6 @@ export default defineComponent({
 
 .live-scroll-solution-status {
   display: none;
-}
-
-.live-scroll-solution-list {
-  margin: 0;
-  padding: 0;
-  list-style: none;
 }
 
 .live-scroll-solution-item {
