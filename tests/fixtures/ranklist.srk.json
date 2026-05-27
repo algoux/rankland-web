@@ -14,7 +14,7 @@
       { "title": "Archive", "link": "https://example.com/archive" }
     ]
   },
-  "contributors": ["https://github.com/rankland-alpha", "Team Beta"],
+  "contributors": ["RankLand Alpha (https://github.com/rankland-alpha)", "Team Beta"],
   "remarks": "赛后补题榜单，仅供展示",
   "markers": [
     { "id": "gold", "label": "Gold Group", "style": "yellow" },

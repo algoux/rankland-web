@@ -120,7 +120,7 @@
         >
           贡献者：<template v-for="(contributor, contributorIndex) in headerContributors" :key="contributor.key">
             <span>
-              {{ contributorIndex > 0 ? ', ' : '' }}<a v-if="contributor.href" :href="contributor.href" target="_blank" rel="noreferrer">
+              {{ contributorIndex > 0 ? ', ' : '' }}<a v-if="contributor.href" :href="contributor.href" target="_blank" rel="noopener">
                 {{ contributor.label }}
               </a><span v-else>{{ contributor.label }}</span>
             </span>

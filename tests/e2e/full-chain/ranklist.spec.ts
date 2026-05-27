@@ -516,13 +516,25 @@ test.describe('/ranklist/:id full-chain route', () => {
     await expect(page.locator('[data-id="rankland-ranklist-view-count"] .anticon-eye')).toBeVisible();
     await expect(page.locator('[data-id="rankland-ranklist-view-count"]')).toHaveClass(/(^|\s)mr-2(\s|$)/);
     await expect(page.locator('[data-id="rankland-ranklist-contributors"]')).toContainText(
-      '贡献者：https://github.com/rankland-alpha, Team Beta',
+      '贡献者：RankLand Alpha, Team Beta',
     );
     expect(await page.locator('[data-id="rankland-ranklist-contributors"]').evaluate((element) => (
       Array.from(element.children)
         .filter((child) => child.tagName === 'SPAN')
         .map((child) => (child.textContent || '').replace(/\s+/g, ' ').trim())
-    ))).toEqual(['https://github.com/rankland-alpha', ', Team Beta']);
+    ))).toEqual(['RankLand Alpha', ', Team Beta']);
+    await expect(page.locator('[data-id="rankland-ranklist-contributors"] a', { hasText: 'RankLand Alpha' })).toHaveAttribute(
+      'href',
+      'https://github.com/rankland-alpha',
+    );
+    await expect(page.locator('[data-id="rankland-ranklist-contributors"] a', { hasText: 'RankLand Alpha' })).toHaveAttribute(
+      'target',
+      '_blank',
+    );
+    await expect(page.locator('[data-id="rankland-ranklist-contributors"] a', { hasText: 'RankLand Alpha' })).toHaveAttribute(
+      'rel',
+      'noopener',
+    );
     expect(await getHeaderMetaBlockSpacing(page)).toMatchObject({
       metaMarginBottom: '0px',
       contributorsMarginTop: '0px',
