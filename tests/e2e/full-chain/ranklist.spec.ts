@@ -203,6 +203,7 @@ async function getHeaderUtilityClasses(page: Page) {
     return {
       bannerWrapClasses: Array.from(bannerWrap.classList),
       bannerClasses: Array.from(banner.classList),
+      bannerInlineStyle: banner.getAttribute('style') || '',
       bannerWrapAlignItems: bannerWrapStyle.alignItems,
       bannerWrapDisplay: bannerWrapStyle.display,
       bannerWrapJustifyContent: bannerWrapStyle.justifyContent,
@@ -747,7 +748,7 @@ test.describe('/ranklist/:id full-chain route', () => {
         'items-center',
         'justify-center',
       ]),
-      bannerClasses: expect.arrayContaining(['rankland-ranklist-banner', 'mb-2']),
+      bannerClasses: expect.arrayContaining(['mb-2']),
       bannerWrapAlignItems: 'center',
       bannerWrapDisplay: 'flex',
       bannerWrapJustifyContent: 'center',
@@ -758,6 +759,10 @@ test.describe('/ranklist/:id full-chain route', () => {
       timeClasses: expect.arrayContaining(['rankland-ranklist-time', 'text-center', 'mb-0']),
     });
     expect(headerUtilityClasses.bannerWrapClasses).not.toContain('rankland-ranklist-banner-wrap');
+    expect(headerUtilityClasses.bannerClasses).toEqual(['mb-2']);
+    expect(headerUtilityClasses.bannerClasses).not.toContain('rankland-ranklist-banner');
+    expect(headerUtilityClasses.bannerInlineStyle.replace(/\s+/g, '')).toContain('max-width:min(100%,1820px)');
+    expect(headerUtilityClasses.bannerInlineStyle.replace(/\s+/g, '')).toContain('max-height:40vh');
     expect(headerUtilityClasses.metaClasses).toEqual(['text-center', 'mt-1']);
     expect(headerUtilityClasses.metaClasses).not.toContain('rankland-ranklist-header-meta');
     expect(await getRanklistHeaderTextSizes(page)).toMatchObject({

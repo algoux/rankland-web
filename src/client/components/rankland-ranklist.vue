@@ -27,7 +27,8 @@
             data-id="rankland-ranklist-banner"
             :src="contestBannerSrc"
             alt="Contest Banner"
-            img-class="rankland-ranklist-banner mb-2"
+            img-class="mb-2"
+            style="max-width: min(100%, 1820px); max-height: 40vh"
           />
         </div>
         <h1 data-id="rankland-ranklist-title" class="text-center mb-1">{{ ranklistTitle }}</h1>
@@ -950,12 +951,7 @@ a:hover,
   justify-content: center;
 }
 
-.rankland-ranklist-banner {
-  max-width: min(100%, 1820px);
-  max-height: 40vh;
-}
-
-.rankland-ranklist-banner.mb-2 {
+[data-id='rankland-ranklist-banner'].mb-2 {
   margin-bottom: 8px;
 }
 
