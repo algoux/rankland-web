@@ -52,7 +52,6 @@
           class="playground-docs-link"
           href="https://srk.algoux.org/zh/"
           target="_blank"
-          rel="noreferrer"
         >
           <QuestionCircleOutlined /> srk 文档
         </a>
