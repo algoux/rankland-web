@@ -203,6 +203,9 @@ async function getHeaderUtilityClasses(page: Page) {
     return {
       bannerWrapClasses: Array.from(bannerWrap.classList),
       bannerClasses: Array.from(banner.classList),
+      bannerWrapAlignItems: bannerWrapStyle.alignItems,
+      bannerWrapDisplay: bannerWrapStyle.display,
+      bannerWrapJustifyContent: bannerWrapStyle.justifyContent,
       bannerWrapMarginBottom: bannerWrapStyle.marginBottom,
       bannerMarginBottom: bannerStyle.marginBottom,
       titleClasses: Array.from(title.classList),
@@ -676,14 +679,17 @@ test.describe('/ranklist/:id full-chain route', () => {
       fontWeight: '500',
       marginBottom: '4px',
     });
-    expect(await getHeaderUtilityClasses(page)).toMatchObject({
+    const headerUtilityClasses = await getHeaderUtilityClasses(page);
+    expect(headerUtilityClasses).toMatchObject({
       bannerWrapClasses: expect.arrayContaining([
-        'rankland-ranklist-banner-wrap',
         'flex',
         'items-center',
         'justify-center',
       ]),
       bannerClasses: expect.arrayContaining(['rankland-ranklist-banner', 'mb-2']),
+      bannerWrapAlignItems: 'center',
+      bannerWrapDisplay: 'flex',
+      bannerWrapJustifyContent: 'center',
       bannerWrapMarginBottom: '0px',
       bannerMarginBottom: '8px',
       titleClasses: expect.arrayContaining(['text-center', 'mb-1']),
@@ -691,6 +697,7 @@ test.describe('/ranklist/:id full-chain route', () => {
       contributorsClasses: expect.arrayContaining(['rankland-ranklist-contributors', 'mb-0']),
       timeClasses: expect.arrayContaining(['rankland-ranklist-time', 'text-center', 'mb-0']),
     });
+    expect(headerUtilityClasses.bannerWrapClasses).not.toContain('rankland-ranklist-banner-wrap');
     expect(await getRanklistHeaderTextSizes(page)).toMatchObject({
       viewCountFontSize: '14px',
       contributorsFontSize: '14px',

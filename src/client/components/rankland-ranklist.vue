@@ -23,7 +23,7 @@
     </div>
     <template v-else>
       <header v-if="showHeader" class="rankland-ranklist-header">
-        <div v-if="contestBannerSrc" class="rankland-ranklist-banner-wrap flex items-center justify-center">
+        <div v-if="contestBannerSrc" class="flex items-center justify-center">
           <SrkAssetImage
             data-id="rankland-ranklist-banner"
             :src="contestBannerSrc"
@@ -983,8 +983,9 @@ export default defineComponent({
   font-weight: 500;
 }
 
-.rankland-ranklist-banner-wrap {
+.flex.items-center.justify-center {
   display: flex;
+  align-items: center;
   justify-content: center;
 }
 
