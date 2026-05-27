@@ -128,8 +128,9 @@
         </p>
         <span v-if="mainRefLinks.length > 0" data-id="rankland-ranklist-ref-links" class="rankland-ranklist-ref-links">
           相关链接：<template v-for="(refLink, refLinkIndex) in mainRefLinks" :key="refLink.key">
-            <span v-if="refLinkIndex > 0">, </span>
-            <a :href="refLink.href" target="_blank" rel="noreferrer">{{ refLink.label }}</a>
+            <span>
+              {{ refLinkIndex > 0 ? ', ' : '' }}<a :href="refLink.href" target="_blank" rel="noreferrer">{{ refLink.label }}</a>
+            </span>
           </template>
           <a-dropdown
             v-if="extraRefLinks.length > 0"
