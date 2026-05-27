@@ -32,54 +32,58 @@
         class="mt-10"
         :data-result-count="searchRows.length"
       >
-        <div class="search-section-title opacity-70">搜索到 <span data-id="search-result-count">{{ searchRows.length }}</span> 个结果</div>
-        <a-list v-if="searchRows.length > 0" class="search-list mt-2" size="small" :data-source="searchRows">
-          <template #renderItem="{ item }">
-            <a-list-item
-              data-id="search-ranklist-item"
-              class="search-list-item"
-              :data-ranklist-key="item.uniqueKey"
-            >
-              <p class="search-row-title mb-0">
-                <router-link
-                  data-id="search-ranklist-link"
-                  :data-ranklist-key="item.uniqueKey"
-                  :to="buildRanklistPath(item.uniqueKey)"
-                >
-                  {{ item.name }}
-                </router-link>
-                <span class="search-view-count ml-2 opacity-70"><EyeOutlined /> {{ item.viewCnt }}</span>
-              </p>
-              <p class="search-created-at mb-0 opacity-50 text-sm">创建于 {{ formatCreatedAt(item.createdAt) }}</p>
-            </a-list-item>
-          </template>
-        </a-list>
+        <div class="opacity-70">搜索到 <span data-id="search-result-count">{{ searchRows.length }}</span> 个结果</div>
+        <div v-if="searchRows.length > 0" class="mt-2">
+          <a-list size="small" :data-source="searchRows">
+            <template #renderItem="{ item }">
+              <a-list-item
+                data-id="search-ranklist-item"
+                class="search-list-item"
+                :data-ranklist-key="item.uniqueKey"
+              >
+                <p class="search-row-title mb-0">
+                  <router-link
+                    data-id="search-ranklist-link"
+                    :data-ranklist-key="item.uniqueKey"
+                    :to="buildRanklistPath(item.uniqueKey)"
+                  >
+                    {{ item.name }}
+                  </router-link>
+                  <span class="search-view-count ml-2 opacity-70"><EyeOutlined /> {{ item.viewCnt }}</span>
+                </p>
+                <p class="search-created-at mb-0 opacity-50 text-sm">创建于 {{ formatCreatedAt(item.createdAt) }}</p>
+              </a-list-item>
+            </template>
+          </a-list>
+        </div>
       </div>
 
       <div v-else data-id="search-recent-section" class="mt-10">
-        <div class="search-section-title opacity-70">最近更新</div>
-        <div v-if="recentRows.length === 0" class="search-empty-state mt-2">暂无最近更新的榜单</div>
-        <a-list v-else class="search-list mt-2" size="small" :data-source="recentRows">
-          <template #renderItem="{ item }">
-            <a-list-item
-              data-id="search-ranklist-item"
-              class="search-list-item"
-              :data-ranklist-key="item.uniqueKey"
-            >
-              <p class="search-row-title mb-0">
-                <router-link
-                  data-id="search-ranklist-link"
-                  :data-ranklist-key="item.uniqueKey"
-                  :to="buildRanklistPath(item.uniqueKey)"
-                >
-                  {{ item.name }}
-                </router-link>
-                <span class="search-view-count ml-2 opacity-70"><EyeOutlined /> {{ item.viewCnt }}</span>
-              </p>
-              <p class="search-created-at mb-0 opacity-50 text-sm">创建于 {{ formatCreatedAt(item.createdAt) }}</p>
-            </a-list-item>
-          </template>
-        </a-list>
+        <div class="opacity-70">最近更新</div>
+        <div v-if="recentRows.length === 0" class="mt-2">暂无最近更新的榜单</div>
+        <div v-else class="mt-2">
+          <a-list size="small" :data-source="recentRows">
+            <template #renderItem="{ item }">
+              <a-list-item
+                data-id="search-ranklist-item"
+                class="search-list-item"
+                :data-ranklist-key="item.uniqueKey"
+              >
+                <p class="search-row-title mb-0">
+                  <router-link
+                    data-id="search-ranklist-link"
+                    :data-ranklist-key="item.uniqueKey"
+                    :to="buildRanklistPath(item.uniqueKey)"
+                  >
+                    {{ item.name }}
+                  </router-link>
+                  <span class="search-view-count ml-2 opacity-70"><EyeOutlined /> {{ item.viewCnt }}</span>
+                </p>
+                <p class="search-created-at mb-0 opacity-50 text-sm">创建于 {{ formatCreatedAt(item.createdAt) }}</p>
+              </a-list-item>
+            </template>
+          </a-list>
+        </div>
       </div>
     </div>
   </div>
@@ -185,6 +189,7 @@ export default routeView(SearchPage, '/search');
 <style lang="less" scoped>
 .normal-content {
   padding: 32px 50px;
+  color: var(--rankland-legacy-text-color);
 }
 
 @media screen and (max-width: 768px) {
@@ -217,16 +222,12 @@ export default routeView(SearchPage, '/search');
   margin-top: 40px;
 }
 
+.mt-2 {
+  margin-top: 8px;
+}
+
 .search-error-message {
   color: #ef4444;
-}
-
-.search-section-title {
-  opacity: 0.7;
-}
-
-.search-list {
-  margin: 8px 0 0;
 }
 
 .search-list-item {
@@ -246,11 +247,6 @@ export default routeView(SearchPage, '/search');
   margin: 0;
   opacity: 0.5;
   font-size: 14px;
-}
-
-.search-empty-state {
-  margin-top: 8px;
-  color: var(--rankland-legacy-text-color);
 }
 
 @media (max-width: 640px) {

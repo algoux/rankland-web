@@ -78,8 +78,13 @@ test.describe('/search full-chain route', () => {
     await expect(page.locator('[data-id="search-recent-section"]')).toBeVisible();
     await expect(page.locator('[data-id="search-recent-section"]')).toHaveJSProperty('tagName', 'DIV');
     await expect(page.locator('[data-id="search-recent-section"]')).not.toHaveClass(/search-section/);
+    await expect(page.locator('[data-id="search-recent-section"] > div.opacity-70').first()).toHaveText('最近更新');
+    await expect(page.locator('[data-id="search-recent-section"] > div.opacity-70').first()).not.toHaveClass(
+      /search-section-title/,
+    );
+    await expect(page.locator('[data-id="search-recent-section"] > div.mt-2 > .ant-list.ant-list-sm')).toBeVisible();
+    await expect(page.locator('[data-id="search-recent-section"] .search-list')).toHaveCount(0);
     await expect(page.locator('[data-id="search-recent-section"] .ant-list.ant-list-sm')).toBeVisible();
-    await expect(page.locator('[data-id="search-recent-section"] .search-list')).toHaveCSS('margin-top', '8px');
     await expect(page.locator('[data-id="search-ranklist-item"]')).toHaveCount(3);
     await expect(page.locator('[data-id="search-ranklist-item"].ant-list-item')).toHaveCount(3);
     await expect(page.locator('[data-id="search-ranklist-link"][data-ranklist-key="test-key"]')).toHaveAttribute(
@@ -163,17 +168,13 @@ test.describe('/search full-chain route', () => {
     expect(response?.ok()).toBe(true);
     await expect(page.locator('[data-id="search-recent-section"]')).toBeVisible();
     await expect(page.locator('[data-id="search-ranklist-item"]')).toHaveCount(0);
-    await expect(page.locator('[data-id="search-recent-section"] .search-empty-state')).toHaveText(
-      '暂无最近更新的榜单',
-    );
-    await expect(page.locator('[data-id="search-recent-section"] .search-empty-state')).toHaveCSS(
-      'margin-top',
-      '8px',
-    );
-    await expect(page.locator('[data-id="search-recent-section"] .search-empty-state')).toHaveCSS(
-      'color',
-      'rgba(255, 255, 255, 0.85)',
-    );
+    const recentEmptyState = page.locator('[data-id="search-recent-section"] > div.mt-2', {
+      hasText: '暂无最近更新的榜单',
+    });
+    await expect(recentEmptyState).toBeVisible();
+    await expect(recentEmptyState).not.toHaveClass(/search-empty-state/);
+    await expect(recentEmptyState).toHaveCSS('margin-top', '8px');
+    await expect(recentEmptyState).toHaveCSS('color', 'rgba(255, 255, 255, 0.85)');
   });
 
   test('shows Fuse results for kw query and preserves result count selector', async ({ page, request }) => {
@@ -192,9 +193,14 @@ test.describe('/search full-chain route', () => {
     await expect(page.locator('[data-id="search-result-section"]')).not.toHaveClass(/search-section/);
     await expect(page.locator('[data-id="search-result-section"]')).toHaveAttribute('data-result-count', '1');
     await expect(page.locator('[data-id="search-result-count"]')).toHaveText('1');
-    await expect(page.locator('[data-id="search-result-section"] .search-section-title')).toHaveCSS('opacity', '0.7');
-    await expect(page.locator('[data-id="search-result-section"] .ant-list.ant-list-sm')).toBeVisible();
-    await expect(page.locator('[data-id="search-result-section"] .search-list')).toHaveCSS('margin-top', '8px');
+    await expect(page.locator('[data-id="search-result-section"] > div.opacity-70').first()).toContainText(
+      '搜索到 1 个结果',
+    );
+    await expect(page.locator('[data-id="search-result-section"] > div.opacity-70').first()).not.toHaveClass(
+      /search-section-title/,
+    );
+    await expect(page.locator('[data-id="search-result-section"] > div.mt-2 > .ant-list.ant-list-sm')).toBeVisible();
+    await expect(page.locator('[data-id="search-result-section"] .search-list')).toHaveCount(0);
     await expect(page.locator('[data-id="search-ranklist-item"]')).toHaveCount(1);
     await expect(page.locator('[data-id="search-ranklist-item"].ant-list-item')).toHaveCount(1);
     await expect(page.locator('[data-id="search-ranklist-link"][data-ranklist-key="test-key"]')).toHaveAttribute(
@@ -229,8 +235,10 @@ test.describe('/search full-chain route', () => {
     expect(resultResponse).not.toBeNull();
     expect(resultResponse?.ok()).toBe(true);
     await expect(page.locator('[data-id="search-result-section"]')).toHaveClass(/mt-10/);
-    await expect(page.locator('[data-id="search-result-section"] .search-section-title')).toHaveClass(/opacity-70/);
-    await expect(page.locator('[data-id="search-result-section"] .search-list')).toHaveClass(/mt-2/);
+    await expect(page.locator('[data-id="search-result-section"] > div.opacity-70')).toHaveClass(/opacity-70/);
+    await expect(page.locator('[data-id="search-result-section"] > div.mt-2')).toBeVisible();
+    await expect(page.locator('[data-id="search-result-section"] > div.mt-2')).toHaveClass(/mt-2/);
+    await expect(page.locator('[data-id="search-result-section"] > div.mt-2 > .ant-list')).toBeVisible();
     await expect(page.locator('[data-id="search-result-section"] .search-row-title')).toHaveClass(/mb-0/);
     await expect(page.locator('[data-id="search-result-section"] .search-view-count')).toHaveClass(/ml-2/);
     await expect(page.locator('[data-id="search-result-section"] .search-view-count')).toHaveClass(/opacity-70/);
@@ -243,8 +251,10 @@ test.describe('/search full-chain route', () => {
     expect(recentResponse).not.toBeNull();
     expect(recentResponse?.ok()).toBe(true);
     await expect(page.locator('[data-id="search-recent-section"]')).toHaveClass(/mt-10/);
-    await expect(page.locator('[data-id="search-recent-section"] .search-section-title')).toHaveClass(/opacity-70/);
-    await expect(page.locator('[data-id="search-recent-section"] .search-list')).toHaveClass(/mt-2/);
+    await expect(page.locator('[data-id="search-recent-section"] > div.opacity-70')).toHaveClass(/opacity-70/);
+    await expect(page.locator('[data-id="search-recent-section"] > div.mt-2')).toBeVisible();
+    await expect(page.locator('[data-id="search-recent-section"] > div.mt-2')).toHaveClass(/mt-2/);
+    await expect(page.locator('[data-id="search-recent-section"] > div.mt-2 > .ant-list')).toBeVisible();
     await expect(page.locator('[data-id="search-recent-section"] .search-row-title').first()).toHaveClass(/mb-0/);
     await expect(page.locator('[data-id="search-recent-section"] .search-view-count').first()).toHaveClass(/ml-2/);
     await expect(page.locator('[data-id="search-recent-section"] .search-view-count').first()).toHaveClass(
