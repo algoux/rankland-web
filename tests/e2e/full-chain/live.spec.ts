@@ -157,6 +157,8 @@ async function getLiveWrapperChrome(page: Page) {
       pagePaddingRight: pageStyle.paddingRight,
       pagePaddingBottom: pageStyle.paddingBottom,
       pagePaddingLeft: pageStyle.paddingLeft,
+      contentTagName: contentElement.tagName,
+      contentClasses: Array.from(contentElement.classList),
       contentMaxWidth: contentStyle.maxWidth,
       contentMarginLeft: contentStyle.marginLeft,
       contentMarginRight: contentStyle.marginRight,
@@ -238,6 +240,8 @@ test.describe('/live/:id full-chain route', () => {
       pagePaddingRight: '0px',
       pagePaddingBottom: '0px',
       pagePaddingLeft: '0px',
+      contentTagName: 'DIV',
+      contentClasses: ['mt-8', 'mb-8'],
       contentMaxWidth: 'none',
       contentMarginLeft: '250px',
       contentMarginRight: '0px',
@@ -517,7 +521,7 @@ test.describe('/live/:id full-chain route', () => {
     expect(mobile.panel.left).toBeGreaterThanOrEqual(0);
     expect(mobile.panel.right).toBeLessThanOrEqual(mobile.viewport.width);
     expect(mobile.panel.width).toBeLessThanOrEqual(mobile.viewport.width);
-    expect(mobile.content.left).toBeLessThan(250);
+    expect(mobile.content.left).toBe(250);
     expect(mobile.progressRight.left).toBeGreaterThanOrEqual(0);
     expect(mobile.progressRight.right).toBeLessThanOrEqual(mobile.viewport.width);
     const mobileScreenshot = testInfo.outputPath('live-realtime-mobile.png');

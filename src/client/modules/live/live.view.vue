@@ -22,15 +22,15 @@
 
     <a-spin v-else-if="!ranklist" data-id="live-loading" class="live-state mt-16 text-center" />
 
-    <section
+    <div
       v-else
       data-id="live-ranklist-content"
-      class="live-content mt-8 mb-8"
+      class="mt-8 mb-8"
       :data-ranklist-id="id"
       :data-live-id="liveId"
       :data-row-count="rowCount"
       :data-focus="focusQuery"
-      :class="{ 'live-content-with-scroll-solution': scrollSolutionEnabled }"
+      :style="{ marginLeft: scrollSolutionEnabled ? '250px' : undefined }"
     >
       <div data-id="live-hydrated" class="live-hydrated">{{ hydrated ? 'hydrated' : 'csr' }}</div>
 
@@ -62,7 +62,7 @@
           </label>
         </template>
       </RanklandRanklist>
-    </section>
+    </div>
   </div>
 </template>
 
@@ -441,8 +441,7 @@ export default routeView(LivePage, '/live/:id', LiveRPO);
 </script>
 
 <style lang="less" scoped>
-.live-state,
-.live-content {
+.live-state {
   margin-right: 0;
   margin-left: 0;
 }
@@ -467,11 +466,6 @@ export default routeView(LivePage, '/live/:id', LiveRPO);
 
 .mb-4 {
   margin-bottom: 16px;
-}
-
-.live-content-with-scroll-solution {
-  margin-left: 250px;
-  margin-right: 0;
 }
 
 .live-hydrated {
@@ -501,11 +495,6 @@ export default routeView(LivePage, '/live/:id', LiveRPO);
 }
 
 @media (max-width: 767px) {
-  .live-content-with-scroll-solution {
-    margin-right: auto;
-    margin-left: auto;
-  }
-
   .live-scroll-toggle {
     display: none;
   }
