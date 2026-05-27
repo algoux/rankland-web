@@ -71,7 +71,6 @@
           :style="{
             fontSize: collapsed ? '14px' : undefined,
             marginLeft: collapsed ? '0px' : '8px',
-            marginTop: collapsed ? '4px' : '0px',
           }"
         >
           榜单合集
@@ -580,10 +579,6 @@ html.dark .srk-collection-nav {
   align-items: center;
   justify-content: center;
   height: 64px;
-}
-
-.srk-collection-hidden-header h3 {
-  line-height: 1;
 }
 
 .srk-collection-ranklist {

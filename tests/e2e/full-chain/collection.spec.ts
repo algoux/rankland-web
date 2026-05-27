@@ -140,6 +140,21 @@ async function getCollectionLoadedWrapperDom(page: Page) {
   });
 }
 
+async function getCollectionHiddenTitleStyle(page: Page) {
+  return page.locator('.srk-collection-hidden-header h3.mb-0').evaluate((element) => {
+    const htmlElement = element as HTMLElement;
+    const style = window.getComputedStyle(htmlElement);
+
+    return {
+      inlineFontSize: htmlElement.style.fontSize,
+      inlineMarginLeft: htmlElement.style.marginLeft,
+      inlineMarginTop: htmlElement.style.marginTop,
+      computedFontSize: style.fontSize,
+      computedLineHeight: style.lineHeight,
+    };
+  });
+}
+
 test.describe('/collection/:id full-chain route', () => {
   test('renders selected ranklist through SSR, hydration, RanklandApiService, and the mock backend', async ({
     page,
@@ -273,6 +288,13 @@ test.describe('/collection/:id full-chain route', () => {
     await expect(page.locator('[data-id="collection-collapse-button"] .anticon-menu-fold')).toBeVisible();
     await expect(page.locator('.srk-collection-hidden-header')).toBeVisible();
     await expect(page.locator('.srk-collection-hidden-header h3.mb-0')).toHaveText('榜单合集');
+    const expandedHiddenTitleStyle = await getCollectionHiddenTitleStyle(page);
+    expect(expandedHiddenTitleStyle.inlineFontSize).toBe('');
+    expect(expandedHiddenTitleStyle.inlineMarginLeft).toBe('8px');
+    expect(expandedHiddenTitleStyle.inlineMarginTop).toBe('');
+    expect(Number.parseFloat(expandedHiddenTitleStyle.computedLineHeight)).toBeGreaterThan(
+      Number.parseFloat(expandedHiddenTitleStyle.computedFontSize),
+    );
     await expect(page.locator('[data-id="collection-category-icon-dir-icpc"] img')).toHaveAttribute('alt', 'ICPC');
     await expect(page.locator('[data-id="collection-category-icon-dir-ccpc"] img')).toHaveAttribute('alt', 'CCPC');
     await expect(
@@ -284,6 +306,13 @@ test.describe('/collection/:id full-chain route', () => {
 
     await page.locator('[data-id="collection-collapse-button"]').click();
     await expect(page.locator('[data-id="collection-collapse-button"] .anticon-menu-unfold')).toBeVisible();
+    const collapsedHiddenTitleStyle = await getCollectionHiddenTitleStyle(page);
+    expect(collapsedHiddenTitleStyle.inlineFontSize).toBe('14px');
+    expect(collapsedHiddenTitleStyle.inlineMarginLeft).toBe('0px');
+    expect(collapsedHiddenTitleStyle.inlineMarginTop).toBe('');
+    expect(Number.parseFloat(collapsedHiddenTitleStyle.computedLineHeight)).toBeGreaterThan(
+      Number.parseFloat(collapsedHiddenTitleStyle.computedFontSize),
+    );
     const collapsedSubmenuTitle = page
       .locator('[data-id="collection-nav-menu"].ant-menu-inline-collapsed > .ant-menu-submenu > .ant-menu-submenu-title')
       .first();
