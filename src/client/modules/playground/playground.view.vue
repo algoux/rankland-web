@@ -67,7 +67,7 @@
         </div>
 
         <div v-else-if="parseState.kind === 'invalid'" data-id="playground-invalid-json" class="playground-state">
-          <h3>
+          <h3 class="mt-16 text-center">
             Input valid srk JSON and press
             <a-tag color="blue" class="playground-shortcut-tag">Ctrl/Cmd + S</a-tag>
             to preview
