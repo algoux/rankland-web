@@ -143,11 +143,11 @@ test.describe('/search full-chain route', () => {
     await expect(page.locator('[data-id="search-error"]')).not.toHaveClass(/search-state/);
     await expect(page.locator('[data-id="search-error"]')).not.toHaveClass(/text-red-500/);
     await expect(page.locator('[data-id="search-error"]')).toHaveCSS('margin-top', '40px');
-    await expect(page.locator('[data-id="search-error"] .search-error-message')).toHaveText(
-      '初始化榜单数据库失败，请刷新再试。',
-    );
-    await expect(page.locator('[data-id="search-error"] .search-error-message')).toHaveClass(/text-red-500/);
-    await expect(page.locator('[data-id="search-error"] .search-error-message')).toHaveCSS('color', 'rgb(239, 68, 68)');
+    const errorMessage = page.locator('[data-id="search-error"] > div.text-red-500');
+    await expect(errorMessage).toHaveText('初始化榜单数据库失败，请刷新再试。');
+    await expect(errorMessage).toHaveClass(/^text-red-500$/);
+    await expect(errorMessage).toHaveCSS('color', 'rgb(239, 68, 68)');
+    await expect(page.locator('[data-id="search-error"] .search-error-message')).toHaveCount(0);
   });
 
   test('renders the recent empty state with the legacy mt-2 spacing', async ({ page, request }) => {

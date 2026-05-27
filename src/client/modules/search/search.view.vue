@@ -23,7 +23,7 @@
       <a-spin v-if="loading" data-id="search-loading" class="mt-10" />
 
       <div v-else-if="loadError" data-id="search-error" class="mt-10">
-        <div class="search-error-message text-red-500">初始化榜单数据库失败，请刷新再试。</div>
+        <div class="text-red-500">初始化榜单数据库失败，请刷新再试。</div>
       </div>
 
       <div
@@ -226,7 +226,7 @@ export default routeView(SearchPage, '/search');
   margin-top: 8px;
 }
 
-.search-error-message {
+.text-red-500 {
   color: #ef4444;
 }
 
