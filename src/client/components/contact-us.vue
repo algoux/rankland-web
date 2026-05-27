@@ -1,13 +1,8 @@
 <template>
-  <span class="contact-us">
-    <button
-      data-id="contact-us-trigger"
-      class="contact-us-trigger"
-      type="button"
-      @click="openDialog"
-    >
-      <slot>联系我们</slot>
-    </button>
+  <span class="contact-us" @click="openDialog">
+    <slot>
+      <a data-id="contact-us-trigger" class="contact-us-trigger">联系我们</a>
+    </slot>
 
     <a-modal
       v-model:open="open"
@@ -68,13 +63,10 @@ export default defineComponent({
 
 .contact-us-trigger {
   display: inline;
-  padding: 0;
   color: var(--rankland-link-color);
   font: inherit;
   text-align: inherit;
   text-decoration: none;
-  background: transparent;
-  border: 0;
   cursor: pointer;
 }
 

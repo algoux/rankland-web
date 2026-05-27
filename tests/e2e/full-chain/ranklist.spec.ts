@@ -662,7 +662,11 @@ test.describe('/ranklist/:id full-chain route', () => {
       ],
     });
     await expect(page.locator('[data-id="rankland-ranklist-beian"]')).toHaveCount(0);
-    await page.locator('[data-id="rankland-ranklist-footer"] [data-id="contact-us-trigger"]').click();
+    const footerContactTrigger = page.locator('[data-id="rankland-ranklist-footer"] [data-id="contact-us-trigger"]');
+    await expect(footerContactTrigger).toHaveText('联系我们');
+    await expect(footerContactTrigger).toHaveJSProperty('tagName', 'A');
+    expect(await footerContactTrigger.getAttribute('href')).toBeNull();
+    await footerContactTrigger.click();
     await expect(page.locator('[data-id="contact-us-dialog"]')).toBeVisible();
     await expect(page.locator('[data-id="contact-us-email"][href="mailto:algoux.org@gmail.com"]')).toHaveText(
       'algoux.org@gmail.com',

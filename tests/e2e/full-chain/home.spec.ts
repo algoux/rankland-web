@@ -312,6 +312,10 @@ test.describe('/ full-chain route', () => {
     await expect(page.locator('[data-id="home-tool-paste-then-ac"] img[alt="paste.then.ac logo"]')).toHaveCSS('margin-right', '12px');
     await expect(page.locator('[data-id="home-tool-algo-bootstrap"][href="https://ab.algoux.cn/?utm_source=rankland"]')).toBeVisible();
     await expect(page.locator('[data-id="home-hydrated"]')).toHaveText('hydrated');
+    const homeContactTrigger = page.locator('[data-id="home-contact"] [data-id="contact-us-trigger"]');
+    await expect(homeContactTrigger).toHaveText('与我们联系');
+    await expect(homeContactTrigger).toHaveJSProperty('tagName', 'A');
+    expect(await homeContactTrigger.getAttribute('href')).toBeNull();
     await page.locator('[data-id="home-contact"] [data-id="contact-us-trigger"]').click();
     await expect(page.locator('[data-id="contact-us-dialog"]')).toBeVisible();
     await expect(page.locator('.contact-us-modal-wrap .ant-modal-content')).toHaveCSS(

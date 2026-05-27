@@ -120,7 +120,9 @@
         <h1 class="block-title">联系我们</h1>
         <p>
           如要为赛事寻求专业的实时外榜托管服务或希望补全/纠正本站数据，欢迎
-          <ContactUs>与我们联系</ContactUs>。
+          <ContactUs>
+            <a data-id="contact-us-trigger" class="contact-us-trigger">与我们联系</a>
+          </ContactUs>。
         </p>
       </div>
 

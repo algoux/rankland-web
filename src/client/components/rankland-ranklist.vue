@@ -248,7 +248,9 @@
         </p>
         <p class="mt-1 mb-0">
           需要专业的赛事外榜托管？
-          <ContactUs>联系我们</ContactUs>
+          <ContactUs>
+            <a data-id="contact-us-trigger" class="contact-us-trigger">联系我们</a>
+          </ContactUs>
         </p>
         <p v-if="footerSiteState.showBeian" data-id="rankland-ranklist-beian" class="mt-1 mb-0">
           备案号：
