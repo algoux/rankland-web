@@ -32,7 +32,7 @@ describe('live scroll-solution state', () => {
     expect(getScrollSolutionResultClass('WA')).toBe('result-rj');
     expect(getScrollSolutionResultClass('RJ')).toBe('result-rj');
     expect(getScrollSolutionResultClass('?')).toBe('result-fz');
-    expect(getScrollSolutionResultClass('SKIPPED')).toBe('result-unknown');
+    expect(getScrollSolutionResultClass('SKIPPED')).toBe('');
   });
 
   it('keeps FB solutions out of the queue for immediate display', () => {

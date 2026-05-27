@@ -60,7 +60,7 @@ export function getScrollSolutionResultClass(result: string): string {
   if (result === '?') {
     return 'result-fz';
   }
-  return 'result-unknown';
+  return '';
 }
 
 export function getScrollSolutionDelay(result: string): number {
