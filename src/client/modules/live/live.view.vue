@@ -309,7 +309,7 @@ const LivePage = defineComponent({
       const key = `${Date.now()}-${this.scrollSolutionSequence}`;
       this.scrollSolutionSequence += 1;
       const displayed = { ...item, key };
-      this.scrollSolutions = [displayed, ...this.scrollSolutions].slice(0, this.scrollSolutionVisibleLimit);
+      this.scrollSolutions = [...this.scrollSolutions, displayed].slice(-this.scrollSolutionVisibleLimit);
       let dismissTimer = 0;
       dismissTimer = window.setTimeout(() => {
         this.scrollSolutions = this.scrollSolutions.filter((solution) => solution.key !== key);

@@ -14,19 +14,33 @@ function bytes(text: string) {
   return Array.from(new TextEncoder().encode(text));
 }
 
-function makeRealtimeSolutionBytes() {
+function makeRealtimeSolutionBytes({
+  problemAlias = 'A',
+  result = 'AC',
+  solved = 2,
+  userId = 'team-alpha',
+}: {
+  problemAlias?: string;
+  result?: string;
+  solved?: number;
+  userId?: string;
+} = {}) {
   const fields = [
     [0, 0, 0, 0, 0, 0, 0, 7],
-    bytes('A'),
-    bytes('team-alpha'),
-    bytes('AC'),
-    [2],
+    bytes(problemAlias),
+    bytes(userId),
+    bytes(result),
+    [solved],
   ];
   const header = [fields.length, ...fields.map((field) => field.length)];
   return [...header, ...fields.flat()];
 }
 
-async function emitRealtimeSolution(page: Page, url: string) {
+async function emitRealtimeSolution(
+  page: Page,
+  url: string,
+  options: Parameters<typeof makeRealtimeSolutionBytes>[0] = {},
+) {
   await page.evaluate(
     ({ url, message }) => {
       (
@@ -37,7 +51,7 @@ async function emitRealtimeSolution(page: Page, url: string) {
     },
     {
       url,
-      message: makeRealtimeSolutionBytes(),
+      message: makeRealtimeSolutionBytes(options),
     },
   );
 }
@@ -586,6 +600,37 @@ test.describe('/live/:id full-chain route', () => {
     expect(toastifyLayout.toast.animationName).toBe('Toastify__zoomIn');
     expect(toastifyLayout.toast.animationDuration).toBe('0.75s');
     expect(toastifyLayout.toast.animationFillMode).toBe('forwards');
+  });
+
+  test('keeps visible realtime rows in legacy oldest-first Toastify order', async ({ page, request }) => {
+    await page.setViewportSize({ width: 1280, height: 720 });
+    await denyExternalCalls(page);
+    await stubWebSocket(page);
+    await request.post(`${mockBaseURL}/__reset`);
+
+    await page.goto('/live/live-test-key?token=t0&scrollSolution=1&focus=yes');
+
+    const wsUrl = `ws://127.0.0.1:${mockPort}/ranking/record/live-rid-1?token=t0`;
+    await expect(page.locator('[data-id="live-scroll-solution-status"]')).toHaveText('connected');
+    await emitRealtimeSolution(page, wsUrl, {
+      problemAlias: 'A',
+      result: 'FB',
+      solved: 2,
+      userId: 'team-alpha',
+    });
+    await emitRealtimeSolution(page, wsUrl, {
+      problemAlias: 'B',
+      result: 'FB',
+      solved: 1,
+      userId: 'team-beta',
+    });
+
+    const rows = page.locator('[data-id="live-scroll-solution-item"]');
+    await expect(rows).toHaveCount(2);
+    await expect(rows.nth(0).locator('.user-name')).toHaveText('Team Alpha');
+    await expect(rows.nth(0).locator('.problem')).toHaveText('A');
+    await expect(rows.nth(1).locator('.user-name')).toHaveText('Team Beta');
+    await expect(rows.nth(1).locator('.problem')).toHaveText('B');
   });
 
   test('keeps the normal live page within desktop and mobile viewport bounds', async ({
