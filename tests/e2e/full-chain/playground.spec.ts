@@ -150,8 +150,10 @@ test.describe('/playground full-chain route', () => {
     await expect(page.locator('[data-id="playground-editor"]')).toHaveCSS('border-radius', '0px');
     await expect(page.locator('.playground-layout')).toHaveCSS('display', 'flex');
     await expect(page.locator('.playground-layout')).toHaveCSS('max-width', 'none');
+    await expect(page.locator('.playground-layout')).toHaveClass(/(^|\s)srk-playground-container(\s|$)/);
     await expect(page.locator('.playground-editor-pane')).toHaveCSS('width', '500px');
     await expect(page.locator('.playground-preview-pane')).toHaveCSS('flex-grow', '1');
+    await expect(page.locator('.playground-preview-pane')).toHaveClass(/(^|\s)srk-playground-preview(\s|$)/);
     await expect(page.locator('[data-id="playground-docs-link"]')).toHaveAttribute(
       'href',
       'https://srk.algoux.org/zh/',

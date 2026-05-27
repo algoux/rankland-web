@@ -8,7 +8,7 @@
 
     <div data-id="playground-hydrated" class="playground-hydrated">{{ hydrated ? 'hydrated' : 'csr' }}</div>
 
-    <section class="playground-layout" :style="{ height: `${remainingHeight}px` }">
+    <section class="playground-layout srk-playground-container" :style="{ height: `${remainingHeight}px` }">
       <div class="playground-editor-pane">
         <div data-id="playground-editor-ready" class="playground-editor-ready">
           {{ editorReady ? 'ready' : editorLoadingStage }}
@@ -46,7 +46,7 @@
         </div>
       </div>
 
-      <div class="playground-preview-pane">
+      <div class="playground-preview-pane srk-playground-preview">
         <a
           data-id="playground-docs-link"
           class="playground-docs-link"
