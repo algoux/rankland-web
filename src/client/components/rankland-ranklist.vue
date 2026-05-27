@@ -1003,7 +1003,6 @@ export default defineComponent({
 }
 
 .rankland-ranklist-ref-link-extra-action {
-  margin-left: 4px;
   cursor: pointer;
 }
 

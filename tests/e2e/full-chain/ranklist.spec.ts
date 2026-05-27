@@ -467,6 +467,10 @@ test.describe('/ranklist/:id full-chain route', () => {
     );
     await expect(page.locator('[data-id="rankland-ranklist-ref-link-extra-action"]')).toHaveText('and 1 more');
     await expect(page.locator('[data-id="rankland-ranklist-ref-link-extra-action"] .anticon-caret-down')).toBeVisible();
+    await expect(page.locator('[data-id="rankland-ranklist-ref-link-extra-action"]')).toHaveCSS(
+      'margin-left',
+      '0px',
+    );
     await expect.poll(() => getRanklistLinkColors(page)).toMatchObject({
       viewCountColor: 'rgba(0, 0, 0, 0.85)',
       refLinkColor: 'rgb(255, 129, 4)',
