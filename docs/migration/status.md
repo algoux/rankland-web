@@ -5,9 +5,9 @@ This file is the quick global dashboard for the RankLand migration. Update it at
 ## Current Focus
 
 - Active branch: `migration/live-page-foundation`
-- Current slice: Route state utility class parity
-- Latest slice commit: `fix: 还原路由状态工具类`
-- Last recorded full gate: passed on 2026-05-27 for Route state utility class parity with Node `v24.11.1`, pnpm `8.15.9`, generated 8 client routes, build, 35 unit files / 151 unit tests, 1 SSR smoke test, 1 shallow Playwright test, and 58 passed / 1 skipped default full-chain Playwright tests with the conditional beian spec skipped outside `cnn`; focused RED reproduced missing old route-state class tokens on ranklist NotFound and loading templates, focused GREEN verified ranklist/live `mt-16 text-center`, collection `pt-16 text-center`, and NotFound `h3.mb-4` class tokens while preserving Ant Design actions, copy, titles, and request behavior; `git diff --check` also passed.
+- Current slice: Collection empty heading class token parity
+- Latest slice commit: `fix: 还原合集空状态标题类名`
+- Last recorded full gate: passed on 2026-05-27 for Collection empty heading class token parity with Node `v24.11.1`, pnpm `8.15.9`, generated 8 client routes, build, 35 unit files / 151 unit tests, 1 SSR smoke test, 1 shallow Playwright test, and 58 passed / 1 skipped default full-chain Playwright tests with the conditional beian spec skipped outside `cnn`; focused RED reproduced the no-class collection empty-state heading, and focused GREEN verified old React `h3.pt-16.text-center` class tokens while preserving copy, 64px top spacing, centered text, and wrapper `data-id`; `git diff --check` also passed.
 - Next recommended focus: product-review-driven SRK lower-level table pixel parity or route polish
 
 ## Route Progress

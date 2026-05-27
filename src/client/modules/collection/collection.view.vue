@@ -107,7 +107,7 @@
         </div>
 
         <div v-else data-id="collection-empty-state" class="collection-empty-state">
-          <h3>请展开左侧边栏并选择一个榜单</h3>
+          <h3 class="pt-16 text-center">请展开左侧边栏并选择一个榜单</h3>
         </div>
       </section>
     </section>

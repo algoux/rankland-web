@@ -284,6 +284,7 @@ App shell Ant Design Vue Layout/Menu/Dropdown/Button、旧版全局 body light/d
 - `[x]` Hydration 后选中榜单内容保持正常
 - `[x]` 测试用 hydration marker 不作为可见产品文本展示
 - `[x]` 没有 `rankId` 时的默认合集状态可接受
+- `[x]` 空合集选择标题保留旧版 `h3.pt-16.text-center` DOM/class token
 - `[x]` 有效 `rankId` 可以渲染选中榜单
 - `[x]` 无效 `rankId` 会被替换，且不会请求不存在的榜单数据
 - `[x]` 榜单之间仅 query 变化的前端导航可接受
