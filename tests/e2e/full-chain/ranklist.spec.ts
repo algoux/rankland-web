@@ -451,6 +451,7 @@ test.describe('/ranklist/:id full-chain route', () => {
     });
     await expect(page.locator('[data-id="rankland-ranklist-view-count"]')).toHaveText('42');
     await expect(page.locator('[data-id="rankland-ranklist-view-count"] .anticon-eye')).toBeVisible();
+    await expect(page.locator('[data-id="rankland-ranklist-view-count"]')).toHaveClass(/(^|\s)mr-2(\s|$)/);
     await expect(page.locator('[data-id="rankland-ranklist-contributors"]')).toContainText(
       '贡献者：https://github.com/rankland-alpha, Team Beta',
     );

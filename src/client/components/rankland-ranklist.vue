@@ -25,7 +25,7 @@
         </div>
         <h1 data-id="rankland-ranklist-title" class="text-center mb-1">{{ ranklistTitle }}</h1>
         <div data-id="rankland-ranklist-header-meta" class="rankland-ranklist-header-meta text-center mt-1">
-          <span v-if="hasViewCount" data-id="rankland-ranklist-view-count" class="rankland-ranklist-view-count">
+          <span v-if="hasViewCount" data-id="rankland-ranklist-view-count" class="rankland-ranklist-view-count mr-2">
             <EyeOutlined /> {{ meta.viewCnt || '-' }}
           </span>
           <div data-id="rankland-ranklist-header-actions" class="rankland-ranklist-header-actions">
