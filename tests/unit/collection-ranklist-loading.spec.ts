@@ -7,7 +7,7 @@ describe('collection selected ranklist loading parity', () => {
     const source = readFileSync(path.join(process.cwd(), 'src/client/modules/collection/collection.view.vue'), 'utf8');
 
     expect(source).toContain(
-      '<a-spin v-else-if="isRanklistSwitching" data-id="collection-ranklist-loading" class="collection-state" />',
+      '<a-spin v-else-if="isRanklistSwitching" data-id="collection-ranklist-loading" class="collection-state pt-16 text-center" />',
     );
     expect(source).toContain('isRanklistSwitching(): boolean');
     expect(source).toContain('return Boolean(this.renderSwitchLock || (loadedRankId && this.rankId && loadedRankId !== this.rankId));');

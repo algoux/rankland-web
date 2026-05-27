@@ -217,6 +217,8 @@ App shell Ant Design Vue Layout/Menu/Dropdown/Button、旧版全局 body light/d
 - `[x]` SRK 备注外层保留旧版 `mb-4 text-center` 工具类
 - `[x]` SRK 备注 pill 使用旧版 light/dark primary rgba 边框
 - `[x]` 缺失榜单展示 Not Found
+- `[x]` 榜单 Not Found 外壳保留旧版 `mt-16 text-center` 工具类，标题保留旧版 `h3.mb-4`
+- `[x]` 榜单通用错误和 loading 状态保留旧版 `mt-16 text-center` 工具类
 - `[x]` 筛选和进度控制可用
 - `[x]` SRK progress 外壳保留旧版 `mx-4` 工具类和 16px 左右外边距
 - `[x]` SRK controls 根节点、组织筛选、正式筛选和分组筛选保留旧版 `mt-3 mx-4 flex justify-between items-center` / `ml-2` / `ml-5 inline-flex items-center` / `mr-1` 工具类
@@ -286,6 +288,8 @@ App shell Ant Design Vue Layout/Menu/Dropdown/Button、旧版全局 body light/d
 - `[x]` 无效 `rankId` 会被替换，且不会请求不存在的榜单数据
 - `[x]` 榜单之间仅 query 变化的前端导航可接受
 - `[x]` 缺失合集展示 Not Found
+- `[x]` 合集 Not Found 外壳保留旧版 `pt-16 text-center` 工具类，标题保留旧版 `h3.mb-4`
+- `[x]` 合集通用错误、合集 loading、选中榜单错误和选中榜单 loading 状态保留旧版 `pt-16 text-center` 工具类
 - `[x]` 合集树或菜单可用
 - `[x]` 分类或分组展示可接受
 - `[x]` 合集导航浅色背景使用旧版 `#f4f4f4`
@@ -386,6 +390,8 @@ App shell Ant Design Vue Layout/Menu/Dropdown/Button、旧版全局 body light/d
 - `[x]` scroll-solution 未知结果使用旧版 `--` 文案且不添加 Vue-only `result-unknown` 类
 - `[x]` 移动端隐藏 scroll-solution 开关，同时保留榜单渲染
 - `[x]` 缺失 live contest 展示 Not Found
+- `[x]` Live Not Found 外壳保留旧版 `mt-16 text-center` 工具类，标题保留旧版 `h3.mb-4`
+- `[x]` Live 通用错误和 loading 状态保留旧版 `mt-16 text-center` 工具类
 - `[x]` 桌面端普通 live 布局可接受
 - `[x]` 移动端普通 live 布局可接受
 - `[x]` 桌面端实时布局可接受

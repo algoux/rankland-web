@@ -594,6 +594,8 @@ test.describe('/live/:id full-chain route', () => {
     expect(response).not.toBeNull();
     expect(response?.ok()).toBe(true);
     await expect(page.locator('[data-id="live-loading"].ant-spin')).toBeVisible();
+    await expect(page.locator('[data-id="live-loading"]')).toHaveClass(/(^|\s)mt-16(\s|$)/);
+    await expect(page.locator('[data-id="live-loading"]')).toHaveClass(/(^|\s)text-center(\s|$)/);
     expect(await getRouteContentSpacing(page, '[data-id="live-loading"]')).toMatchObject({
       marginTop: '64px',
       paddingTop: '0px',
@@ -612,7 +614,10 @@ test.describe('/live/:id full-chain route', () => {
     expect(response?.ok()).toBe(true);
     await expect(page).toHaveTitle('Not Found | RankLand');
     await expect(page.locator('[data-id="live-not-found"]')).toBeVisible();
+    await expect(page.locator('[data-id="live-not-found"]')).toHaveClass(/(^|\s)mt-16(\s|$)/);
+    await expect(page.locator('[data-id="live-not-found"]')).toHaveClass(/(^|\s)text-center(\s|$)/);
     await expect(page.locator('[data-id="live-not-found"] h3')).toHaveText('Ranklist Not Found');
+    await expect(page.locator('[data-id="live-not-found"] h3')).toHaveClass(/(^|\s)mb-4(\s|$)/);
     await expect(page.locator('[data-id="live-not-found-home-link"][href="/"]')).toBeVisible();
     await expect(page.locator('[data-id="live-not-found-home-link"] .ant-btn')).toHaveClass(/ant-btn-primary/);
     await expect(page.locator('[data-id="live-not-found-home-link"] .ant-btn')).toHaveClass(/ant-btn-sm/);
@@ -637,6 +642,8 @@ test.describe('/live/:id full-chain route', () => {
     await expect(page).toHaveTitle('Live | RankLand');
     await expect(page.locator('[data-id="live-error"]')).toBeVisible();
     await expect(page.locator('[data-id="live-error"] p')).toHaveText('An error occurred while loading data');
+    await expect(page.locator('[data-id="live-error"]')).toHaveClass(/(^|\s)mt-16(\s|$)/);
+    await expect(page.locator('[data-id="live-error"]')).toHaveClass(/(^|\s)text-center(\s|$)/);
     await expect(page.locator('[data-id="live-error"]')).toHaveCSS('text-align', 'center');
     await expect(page.locator('[data-id="live-error"] pre')).toHaveCount(0);
     await expect(page.locator('[data-id="live-refresh"]')).toHaveText('Refresh');

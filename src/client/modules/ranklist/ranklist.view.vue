@@ -5,21 +5,21 @@
       <link rel="canonical" :href="canonicalUrl">
     </Head>
 
-    <section v-if="isNotFound" data-id="ranklist-not-found" class="ranklist-state">
-      <h3>Ranklist Not Found</h3>
+    <section v-if="isNotFound" data-id="ranklist-not-found" class="ranklist-state mt-16 text-center">
+      <h3 class="mb-4">Ranklist Not Found</h3>
       <router-link to="/" data-id="ranklist-not-found-home-link">
         <a-button type="primary" size="small">Back to Home</a-button>
       </router-link>
     </section>
 
-    <section v-else-if="hasGenericError" data-id="ranklist-error" class="ranklist-state">
+    <section v-else-if="hasGenericError" data-id="ranklist-error" class="ranklist-state mt-16 text-center">
       <p>An error occurred while loading data</p>
       <a-button data-id="ranklist-refresh" type="primary" size="small" @click="refresh">
         Refresh
       </a-button>
     </section>
 
-    <a-spin v-else-if="!ranklist" data-id="ranklist-loading" class="ranklist-state" />
+    <a-spin v-else-if="!ranklist" data-id="ranklist-loading" class="ranklist-state mt-16 text-center" />
 
     <section
       v-else
@@ -144,6 +144,18 @@ export default routeView(RanklistPage, '/ranklist/:id', RanklistRPO, undefined, 
 
 .ranklist-state h3 {
   margin: 0 0 16px;
+}
+
+.mt-16 {
+  margin-top: 64px;
+}
+
+.text-center {
+  text-align: center;
+}
+
+.mb-4 {
+  margin-bottom: 16px;
 }
 
 .ranklist-hydrated {

@@ -1126,7 +1126,10 @@ test.describe('/ranklist/:id full-chain route', () => {
     expect(response?.ok()).toBe(true);
     await expect(page).toHaveTitle('Not Found | RankLand');
     await expect(page.locator('[data-id="ranklist-not-found"]')).toBeVisible();
+    await expect(page.locator('[data-id="ranklist-not-found"]')).toHaveClass(/(^|\s)mt-16(\s|$)/);
+    await expect(page.locator('[data-id="ranklist-not-found"]')).toHaveClass(/(^|\s)text-center(\s|$)/);
     await expect(page.locator('[data-id="ranklist-not-found"] h3')).toHaveText('Ranklist Not Found');
+    await expect(page.locator('[data-id="ranklist-not-found"] h3')).toHaveClass(/(^|\s)mb-4(\s|$)/);
     await expect(page.locator('[data-id="ranklist-not-found-home-link"][href="/"]')).toBeVisible();
     await expect(page.locator('[data-id="ranklist-not-found-home-link"] .ant-btn')).toHaveClass(/ant-btn-primary/);
     await expect(page.locator('[data-id="ranklist-not-found-home-link"] .ant-btn')).toHaveClass(/ant-btn-sm/);
@@ -1150,6 +1153,8 @@ test.describe('/ranklist/:id full-chain route', () => {
     await expect(page).toHaveTitle('RankLand');
     await expect(page.locator('[data-id="ranklist-error"]')).toBeVisible();
     await expect(page.locator('[data-id="ranklist-error"] p')).toHaveText('An error occurred while loading data');
+    await expect(page.locator('[data-id="ranklist-error"]')).toHaveClass(/(^|\s)mt-16(\s|$)/);
+    await expect(page.locator('[data-id="ranklist-error"]')).toHaveClass(/(^|\s)text-center(\s|$)/);
     await expect(page.locator('[data-id="ranklist-error"]')).toHaveCSS('margin-top', '64px');
     await expect(page.locator('[data-id="ranklist-error"]')).toHaveCSS('text-align', 'center');
     await expect(page.locator('[data-id="ranklist-refresh"]')).toHaveText('Refresh');

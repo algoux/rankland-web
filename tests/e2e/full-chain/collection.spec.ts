@@ -168,6 +168,8 @@ test.describe('/collection/:id full-chain route', () => {
     await expect(page.locator('[data-id="collection-ranklist-error"] p')).toHaveText(
       'An error occurred while loading data',
     );
+    await expect(page.locator('[data-id="collection-ranklist-error"]')).toHaveClass(/(^|\s)pt-16(\s|$)/);
+    await expect(page.locator('[data-id="collection-ranklist-error"]')).toHaveClass(/(^|\s)text-center(\s|$)/);
     await expect(page.locator('[data-id="collection-ranklist-error"]')).toHaveCSS('padding-top', '64px');
     await expect(page.locator('[data-id="collection-ranklist-error"]')).toHaveCSS('text-align', 'center');
     await expect(page.locator('[data-id="collection-ranklist-refresh"]')).toHaveText('Refresh');
@@ -343,7 +345,10 @@ test.describe('/collection/:id full-chain route', () => {
     expect(response?.ok()).toBe(true);
     await expect(page).toHaveTitle('Not Found | RankLand');
     await expect(page.locator('[data-id="collection-not-found"]')).toBeVisible();
+    await expect(page.locator('[data-id="collection-not-found"]')).toHaveClass(/(^|\s)pt-16(\s|$)/);
+    await expect(page.locator('[data-id="collection-not-found"]')).toHaveClass(/(^|\s)text-center(\s|$)/);
     await expect(page.locator('[data-id="collection-not-found"] h3')).toHaveText('Collection Not Found');
+    await expect(page.locator('[data-id="collection-not-found"] h3')).toHaveClass(/(^|\s)mb-4(\s|$)/);
     await expect(page.locator('[data-id="collection-not-found-home-link"][href="/"]')).toBeVisible();
     await expect(page.locator('[data-id="collection-not-found-home-link"] .ant-btn')).toHaveClass(/ant-btn-primary/);
     await expect(page.locator('[data-id="collection-not-found-home-link"] .ant-btn')).toHaveClass(/ant-btn-sm/);
@@ -372,6 +377,8 @@ test.describe('/collection/:id full-chain route', () => {
     await expect(page).toHaveTitle('RankLand');
     await expect(page.locator('[data-id="collection-error"]')).toBeVisible();
     await expect(page.locator('[data-id="collection-error"] p')).toHaveText('An error occurred while loading data');
+    await expect(page.locator('[data-id="collection-error"]')).toHaveClass(/(^|\s)pt-16(\s|$)/);
+    await expect(page.locator('[data-id="collection-error"]')).toHaveClass(/(^|\s)text-center(\s|$)/);
     await expect(page.locator('[data-id="collection-error"]')).toHaveCSS('padding-top', '64px');
     await expect(page.locator('[data-id="collection-error"]')).toHaveCSS('text-align', 'center');
     await expect(page.locator('[data-id="collection-refresh"]')).toHaveText('Refresh');

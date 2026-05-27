@@ -7,21 +7,21 @@
       <link rel="canonical" :href="canonicalUrl">
     </Head>
 
-    <section v-if="isNotFound" data-id="collection-not-found" class="collection-state">
-      <h3>Collection Not Found</h3>
+    <section v-if="isNotFound" data-id="collection-not-found" class="collection-state pt-16 text-center">
+      <h3 class="mb-4">Collection Not Found</h3>
       <router-link to="/" data-id="collection-not-found-home-link">
         <a-button type="primary" size="small">Back to Home</a-button>
       </router-link>
     </section>
 
-    <section v-else-if="hasCollectionError" data-id="collection-error" class="collection-state">
+    <section v-else-if="hasCollectionError" data-id="collection-error" class="collection-state pt-16 text-center">
       <p>{{ collectionLoadError?.message }}</p>
       <a-button data-id="collection-refresh" type="primary" size="small" @click="refresh">
         Refresh
       </a-button>
     </section>
 
-    <a-spin v-else-if="!collection" data-id="collection-loading" class="collection-state" />
+    <a-spin v-else-if="!collection" data-id="collection-loading" class="collection-state pt-16 text-center" />
 
     <section
       v-else
@@ -77,14 +77,14 @@
       >
         <div data-id="collection-hydrated" class="collection-hydrated">{{ hydrated ? 'hydrated' : 'ssr' }}</div>
 
-        <div v-if="ranklistLoadError" data-id="collection-ranklist-error" class="collection-state">
+        <div v-if="ranklistLoadError" data-id="collection-ranklist-error" class="collection-state pt-16 text-center">
           <p>{{ ranklistLoadError.message }}</p>
           <a-button data-id="collection-ranklist-refresh" type="primary" size="small" @click="refresh">
             Refresh
           </a-button>
         </div>
 
-        <a-spin v-else-if="isRanklistSwitching" data-id="collection-ranklist-loading" class="collection-state" />
+        <a-spin v-else-if="isRanklistSwitching" data-id="collection-ranklist-loading" class="collection-state pt-16 text-center" />
 
         <div
           v-else-if="ranklist"
@@ -624,6 +624,18 @@ html.dark .collection-nav {
 
 .collection-state h3 {
   margin: 0 0 16px;
+}
+
+.pt-16 {
+  padding-top: 64px;
+}
+
+.text-center {
+  text-align: center;
+}
+
+.mb-4 {
+  margin-bottom: 16px;
 }
 
 .collection-hydrated {
