@@ -207,7 +207,7 @@
       </div>
 
       <div data-id="rankland-ranklist-table-wrapper" :class="['rankland-ranklist-table-wrapper', tableClass]">
-        <div v-if="ranklistState.staticRanklist.remarks" class="rankland-ranklist-remarks">
+        <div v-if="ranklistState.staticRanklist.remarks" class="rankland-ranklist-remarks mb-4 text-center">
           <span class="srk-remarks">备注：{{ resolveTextValue(ranklistState.staticRanklist.remarks) }}</span>
         </div>
 

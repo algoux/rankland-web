@@ -493,6 +493,9 @@ test.describe('/ranklist/:id full-chain route', () => {
     expect(await getProgressToControlsGap(page)).toBe(12);
     expect(await getControlsToTableGap(page)).toBe(24);
     const remarks = page.locator('[data-id="rankland-ranklist-table-wrapper"] .srk-remarks');
+    const remarksWrapper = page.locator('[data-id="rankland-ranklist-table-wrapper"] .rankland-ranklist-remarks');
+    await expect(remarksWrapper).toHaveClass(/(^|\s)mb-4(\s|$)/);
+    await expect(remarksWrapper).toHaveClass(/(^|\s)text-center(\s|$)/);
     await expect(remarks).toHaveText('备注：赛后补题榜单，仅供展示');
     await expect(remarks).toBeVisible();
     expect(await remarks.evaluate((element) => {
