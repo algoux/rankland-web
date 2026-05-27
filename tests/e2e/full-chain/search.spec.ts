@@ -58,6 +58,12 @@ test.describe('/search full-chain route', () => {
     await expect(page).toHaveTitle('探索 | RankLand');
     await expect(page.locator('[data-id="search-page"]')).toBeVisible();
     await expect(page.locator('[data-id="search-page"]')).toHaveClass(/normal-content/);
+    await expect(page.locator('[data-id="search-page"]')).toHaveJSProperty('tagName', 'DIV');
+    await expect(page.locator('[data-id="search-page"]')).not.toHaveClass(/search-page/);
+    await expect(page.locator('[data-id="search-page"] > div').first()).toBeVisible();
+    await expect(page.locator('[data-id="search-page"] > div').first()).not.toHaveClass(/search-panel/);
+    await expect(page.locator('[data-id="search-page"] > section.search-panel')).toHaveCount(0);
+    await expect(page.locator('[data-id="search-page"]')).not.toHaveCSS('min-height', '560px');
     await expect(page.locator('[data-id="search-hydrated"]')).toHaveText('hydrated');
     await expect(page.locator('[data-id="search-hydrated"]')).toHaveCSS('width', '1px');
     await expect(page.locator('[data-id="search-hydrated"]')).toHaveCSS('height', '1px');

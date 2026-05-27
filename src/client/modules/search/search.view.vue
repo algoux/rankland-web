@@ -1,12 +1,12 @@
 <template>
-  <main data-id="search-page" class="search-page normal-content">
+  <div data-id="search-page" class="normal-content">
     <Head>
       <title>{{ pageTitle }}</title>
       <meta property="og:title" :content="pageTitle">
       <link rel="canonical" :href="canonicalPath">
     </Head>
 
-    <section class="search-panel">
+    <div>
       <div data-id="search-hydrated" class="search-hydrated">{{ hydrated ? 'hydrated' : 'csr' }}</div>
       <h3 class="search-heading mb-6">在榜单数据库中探索</h3>
 
@@ -81,8 +81,8 @@
           </template>
         </a-list>
       </section>
-    </section>
-  </main>
+    </div>
+  </div>
 </template>
 
 <script lang="ts">
@@ -183,10 +183,6 @@ export default routeView(SearchPage, '/search');
 </script>
 
 <style lang="less" scoped>
-.search-page {
-  min-height: 70vh;
-}
-
 .normal-content {
   padding: 32px 50px;
 }
