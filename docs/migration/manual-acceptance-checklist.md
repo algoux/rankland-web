@@ -62,7 +62,7 @@ git status --short --branch
 备注：
 
 ```text
-2026-05-27 最新记录：Playground docs link rel omission parity 已通过 focused RED/GREEN、完整默认 `test:migration`（build、35 unit files / 151 unit tests、1 SSR smoke test、1 shallow Playwright test、58 passed / 1 skipped full-chain Playwright tests）和 `git diff --check`；focused RED 复现 Playground 预览区 srk 文档链接仍带 Vue-added `rel="noreferrer"`，GREEN 验证旧 React `SrkPlayground` 的 docs link 保持 `target="_blank"` 且无 `rel` DOM/referrer 语义，同时保留 href、文本、问号图标、右上角位置、预览和无上游请求行为。
+2026-05-27 最新记录：Playground docs link wrapper DOM parity 已通过 focused RED/GREEN、完整默认 `test:migration`（build、35 unit files / 151 unit tests、1 SSR smoke test、1 shallow Playwright test、58 passed / 1 skipped full-chain Playwright tests）和 `git diff --check`；focused RED 复现 Playground 预览区 srk 文档链接缺少旧 React `div.absolute.right-4.top-4` 外壳，GREEN 验证 docs link 外壳 DOM、`target="_blank"` 且无 `rel`、href、文本、问号图标、右上角位置、预览和无上游请求行为。
 ```
 
 ## 全局外壳与跨路由行为
@@ -336,6 +336,7 @@ App shell Ant Design Vue Layout/Menu/Dropdown/Button、旧版全局 body light/d
 - `[x]` 编辑区控件可用
 - `[x]` 预览区可用
 - `[x]` 预览区右上角 `srk 文档` 入口位置、问号图标、外链地址与旧版一致
+- `[x]` 预览区右上角 `srk 文档` 入口保留旧版 `div.absolute.right-4.top-4` 外壳 DOM
 - `[x]` 预览区右上角 `srk 文档` 入口保留旧版 `target="_blank"` 且无 `rel` 的 DOM/referrer 语义
 - `[x]` 欢迎弹窗使用旧版“点击右上角 QuestionCircle 图标”的 srk 文档提示，不展示迁移版“页面中的 srk 文档入口”文案
 - `[x]` Playground 根布局和预览 pane 保留旧版 `.srk-playground-container` / `.srk-playground-preview` 类名
@@ -351,7 +352,7 @@ App shell Ant Design Vue Layout/Menu/Dropdown/Button、旧版全局 body light/d
 备注：
 
 ```text
-2026-05-27 复核：`tests/e2e/full-chain/playground.spec.ts` 覆盖旧 React `.srk-playground-container` / `.srk-playground-preview` 外壳类名、桌面 flex 布局、500px 编辑器、自适应预览区、编辑器外壳无旧版不存在的额外边框/圆角、旧 React 不存在的 `Playground` 顶部标题栏和可见 `Preview` 按钮已移除、hydration marker 和 editor-ready marker 视觉隐藏、欢迎弹窗旧版右上角 `QuestionCircleOutlined` 文档提示语和图标、invalid JSON 标题旧版 `h3.mt-16.text-center` 类名、invalid JSON 快捷键 Tag 旧版 `mr-0` class token 和 0px 右/左间距、旧 React 预览区右上角 `QuestionCircleOutlined` srk 文档入口位置、图标、地址、`target="_blank"` 和无 `rel` DOM/referrer 语义，以及结构非法 object JSON 的旧版 SRK checker-error `div.ml-8 > h3 + pre` DOM。
+2026-05-27 复核：`tests/e2e/full-chain/playground.spec.ts` 覆盖旧 React `.srk-playground-container` / `.srk-playground-preview` 外壳类名、桌面 flex 布局、500px 编辑器、自适应预览区、编辑器外壳无旧版不存在的额外边框/圆角、旧 React 不存在的 `Playground` 顶部标题栏和可见 `Preview` 按钮已移除、hydration marker 和 editor-ready marker 视觉隐藏、欢迎弹窗旧版右上角 `QuestionCircleOutlined` 文档提示语和图标、invalid JSON 标题旧版 `h3.mt-16.text-center` 类名、invalid JSON 快捷键 Tag 旧版 `mr-0` class token 和 0px 右/左间距、旧 React 预览区右上角 `div.absolute.right-4.top-4` 外壳、`QuestionCircleOutlined` srk 文档入口位置、图标、地址、`target="_blank"` 和无 `rel` DOM/referrer 语义，以及结构非法 object JSON 的旧版 SRK checker-error `div.ml-8 > h3 + pre` DOM。
 ```
 
 ## 实时榜单页 `/live/:id`
@@ -526,9 +527,9 @@ URL:
 - `[x]` 接受路由兼容迁移完成，但保留列出的后续 slice
 - `[ ]` 暂不收口，先修复阻塞项
 
-最新自动化结论：Playground docs link rel omission parity 已纳入收口记录。
+最新自动化结论：Playground docs link wrapper DOM parity 已纳入收口记录。
 
-无当前已复现阻塞；Playground docs link rel omission parity、App shell site-switch rel omission parity、Beian link rel omission parity、Home external link rel omission parity、ContactUs trigger anchor DOM parity、SRK contributor link rel parity、SRK header ref-link rel parity、SRK contributor item span DOM parity、SRK ref-link item span DOM parity、Playground shortcut tag mr-0 class parity、Collection selected-ranklist pb-8 class parity、Route content utility class parity、Live route wrapper chrome parity、Live scroll-solution unknown result class parity、SRK checker error DOM parity、user modal empty organization line parity、SRK modal root class parity、SRK table spacer DOM parity、SRK header action display parity、SRK header action gap parity、SRK extra ref-link spacing parity、SRK view-count utility-class parity、SRK progress wrapper utility-class parity、user modal empty photo wrapper parity、SRK asset image error parity、Contact QQ image class parity、SRK header utility class parity、SRK header action utility class parity、SRK header title typography parity、header text size parity、header view-count fallback parity、SRK controls utility class parity、SRK remarks wrapper utility class parity、SRK footer utility class parity、SSR hydration marker visual parity、search state utility class parity、search error DOM parity、search list utility class parity、Playground legacy shell class parity、Playground invalid prompt class parity、user modal root class parity、user modal organization line class parity、user modal team members class parity、user modal team separator raw text coverage、user modal markers class parity、user modal unofficial line class parity、user modal segment line class parity、user modal segment label class parity、user modal slogan spacing class parity、user modal photo wrapper class parity 和 user modal photo/slogan shared wrapper DOM parity 已补充，保留 product-review-driven SRK lower-level table pixel parity / route polish 作为后续 review-driven slice。
+无当前已复现阻塞；Playground docs link wrapper DOM parity、Playground docs link rel omission parity、App shell site-switch rel omission parity、Beian link rel omission parity、Home external link rel omission parity、ContactUs trigger anchor DOM parity、SRK contributor link rel parity、SRK header ref-link rel parity、SRK contributor item span DOM parity、SRK ref-link item span DOM parity、Playground shortcut tag mr-0 class parity、Collection selected-ranklist pb-8 class parity、Route content utility class parity、Live route wrapper chrome parity、Live scroll-solution unknown result class parity、SRK checker error DOM parity、user modal empty organization line parity、SRK modal root class parity、SRK table spacer DOM parity、SRK header action display parity、SRK header action gap parity、SRK extra ref-link spacing parity、SRK view-count utility-class parity、SRK progress wrapper utility-class parity、user modal empty photo wrapper parity、SRK asset image error parity、Contact QQ image class parity、SRK header utility class parity、SRK header action utility class parity、SRK header title typography parity、header text size parity、header view-count fallback parity、SRK controls utility class parity、SRK remarks wrapper utility class parity、SRK footer utility class parity、SSR hydration marker visual parity、search state utility class parity、search error DOM parity、search list utility class parity、Playground legacy shell class parity、Playground invalid prompt class parity、user modal root class parity、user modal organization line class parity、user modal team members class parity、user modal team separator raw text coverage、user modal markers class parity、user modal unofficial line class parity、user modal segment line class parity、user modal segment label class parity、user modal slogan spacing class parity、user modal photo wrapper class parity 和 user modal photo/slogan shared wrapper DOM parity 已补充，保留 product-review-driven SRK lower-level table pixel parity / route polish 作为后续 review-driven slice。
 
 最终收口前必须完成：
 

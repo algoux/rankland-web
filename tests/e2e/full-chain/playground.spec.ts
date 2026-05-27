@@ -161,11 +161,13 @@ test.describe('/playground full-chain route', () => {
     );
     await expect(page.locator('[data-id="playground-docs-link"]')).toHaveAttribute('target', '_blank');
     expect(await page.locator('[data-id="playground-docs-link"]').getAttribute('rel')).toBeNull();
-    await expect(page.locator('.playground-preview-pane [data-id="playground-docs-link"]')).toBeVisible();
+    const docsLinkWrapper = page.locator('.playground-preview-pane > .absolute.right-4.top-4');
+    await expect(docsLinkWrapper).toHaveCount(1);
+    await expect(docsLinkWrapper.locator('[data-id="playground-docs-link"]')).toBeVisible();
     await expect(page.locator('[data-id="playground-docs-link"] .anticon-question-circle')).toBeVisible();
-    await expect(page.locator('[data-id="playground-docs-link"]')).toHaveCSS('position', 'absolute');
-    await expect(page.locator('[data-id="playground-docs-link"]')).toHaveCSS('right', '16px');
-    await expect(page.locator('[data-id="playground-docs-link"]')).toHaveCSS('top', '16px');
+    await expect(docsLinkWrapper).toHaveCSS('position', 'absolute');
+    await expect(docsLinkWrapper).toHaveCSS('right', '16px');
+    await expect(docsLinkWrapper).toHaveCSS('top', '16px');
     await expect(page.locator('[data-id="playground-preview"]')).toBeVisible();
     await expect(page.locator('[data-id="playground-preview-meta"]')).toHaveCount(0);
     await expect(page.locator('[data-id="playground-row-count"]')).toHaveCount(0);

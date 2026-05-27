@@ -47,14 +47,16 @@
       </div>
 
       <div class="playground-preview-pane srk-playground-preview">
-        <a
-          data-id="playground-docs-link"
-          class="playground-docs-link"
-          href="https://srk.algoux.org/zh/"
-          target="_blank"
-        >
-          <QuestionCircleOutlined /> srk 文档
-        </a>
+        <div class="absolute right-4 top-4 playground-docs-link-wrapper">
+          <a
+            data-id="playground-docs-link"
+            class="playground-docs-link"
+            href="https://srk.algoux.org/zh/"
+            target="_blank"
+          >
+            <QuestionCircleOutlined /> srk 文档
+          </a>
+        </div>
 
         <div v-if="editorErrorMessage" data-id="playground-editor-error" class="playground-state playground-state-error">
           <h3>Failed to load Monaco editor</h3>
@@ -344,11 +346,14 @@ export default routeView(PlaygroundPage, '/playground');
   overflow-x: auto;
 }
 
-.playground-docs-link {
+.playground-docs-link-wrapper {
   position: absolute;
   top: 16px;
   right: 16px;
   z-index: 1;
+}
+
+.playground-docs-link {
   display: inline-flex;
   align-items: center;
   gap: 4px;
