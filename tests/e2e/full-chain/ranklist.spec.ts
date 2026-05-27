@@ -250,6 +250,16 @@ async function getUserModalBodyColor(page: Page) {
   });
 }
 
+async function getModalRootClasses(page: Page, wrapperDataId: string) {
+  return page.evaluate((dataId) => {
+    const modalRoot = document.querySelector<HTMLElement>(`[data-id="${dataId}"] .srk-modal-root`);
+    if (!modalRoot) {
+      throw new Error(`Missing modal root for ${dataId}`);
+    }
+    return Array.from(modalRoot.classList);
+  }, wrapperDataId);
+}
+
 async function getTableWrapperMarginLeft(page: Page) {
   return page.evaluate(() => {
     const wrapper = document.querySelector<HTMLElement>('[data-id="rankland-ranklist-table-wrapper"]');
@@ -739,6 +749,14 @@ test.describe('/ranklist/:id full-chain route', () => {
     await page.locator('.srk-user-cell', { hasText: 'Team Alpha' }).click();
     const userModal = page.locator('[data-id="rankland-ranklist-user-modal"]');
     await expect(userModal.locator('.srk-modal')).toBeVisible();
+    expect(await getModalRootClasses(page, 'rankland-ranklist-user-modal')).toEqual(
+      expect.arrayContaining([
+        'srk-modal-root',
+        'srk-animated-modal-root',
+        'srk-react-modal-root',
+        'srk-general-modal-root',
+      ]),
+    );
     await expect(userModal.locator('.srk-modal-title')).toHaveText('Team Alpha');
     await expect(userModal.locator('.user-modal')).toBeVisible();
     await expect(userModal.locator('[data-id="rankland-user-modal-name"]')).toHaveCount(0);
@@ -956,6 +974,26 @@ test.describe('/ranklist/:id full-chain route', () => {
     });
     await userModal.getByRole('button', { name: 'Close' }).click();
     await expect(userModal.locator('.srk-modal')).toBeHidden();
+
+    await page
+      .locator('tr', { hasText: 'Team Alpha' })
+      .locator('.srk-prest-status-block-accepted')
+      .first()
+      .click();
+    const solutionModal = page.locator('[data-id="rankland-ranklist-solution-modal"]');
+    await expect(solutionModal.locator('.srk-modal')).toBeVisible();
+    expect(await getModalRootClasses(page, 'rankland-ranklist-solution-modal')).toEqual(
+      expect.arrayContaining([
+        'srk-modal-root',
+        'srk-animated-modal-root',
+        'srk-react-modal-root',
+        'srk-general-modal-root',
+      ]),
+    );
+    await expect(solutionModal).toContainText('Solutions of A (Team Alpha)');
+    await expect(solutionModal).toContainText('Accepted');
+    await solutionModal.getByRole('button', { name: 'Close' }).click();
+    await expect(solutionModal.locator('.srk-modal')).toBeHidden();
 
     const requestsResponse = await request.get(`${mockBaseURL}/__requests`);
     const requests = (await requestsResponse.json()) as Array<{ path: string; search: string }>;

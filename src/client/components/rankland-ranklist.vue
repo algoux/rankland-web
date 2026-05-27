@@ -259,7 +259,7 @@
           :open="!!activeUserPayload"
           :title="activeUserTitle"
           :width="userModalWidth"
-          root-class-name="srk-general-modal-root"
+          root-class-name="srk-general-modal-root srk-react-modal-root"
           wrap-class-name="rankland-user-modal"
           @close="handleUserModalClose"
         >
@@ -354,6 +354,7 @@
           :problem="activeSolutionPayload?.problem"
           :problem-index="activeSolutionPayload?.problemIndex || 0"
           :solutions="activeSolutionPayload?.solutions || []"
+          root-class-name="srk-general-modal-root srk-react-modal-root"
           @close="handleSolutionModalClose"
         />
       </div>
