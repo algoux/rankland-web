@@ -874,9 +874,24 @@ test.describe('/ranklist/:id full-chain route', () => {
     });
     expect(tableSpacerStyle.spacerClasses).not.toContain('rankland-ranklist-table-spacer');
     const remarks = page.locator('[data-id="rankland-ranklist-table-wrapper"] .srk-remarks');
-    const remarksWrapper = page.locator('[data-id="rankland-ranklist-table-wrapper"] .rankland-ranklist-remarks');
-    await expect(remarksWrapper).toHaveClass(/(^|\s)mb-4(\s|$)/);
-    await expect(remarksWrapper).toHaveClass(/(^|\s)text-center(\s|$)/);
+    const remarksWrapperStyle = await remarks.evaluate((element) => {
+      const wrapper = element.parentElement;
+      if (!wrapper) {
+        throw new Error('Missing SRK remarks wrapper');
+      }
+      const style = window.getComputedStyle(wrapper);
+      return {
+        classList: Array.from(wrapper.classList),
+        marginBottom: style.marginBottom,
+        textAlign: style.textAlign,
+      };
+    });
+    expect(remarksWrapperStyle).toMatchObject({
+      classList: ['mb-4', 'text-center'],
+      marginBottom: '16px',
+      textAlign: 'center',
+    });
+    expect(remarksWrapperStyle.classList).not.toContain('rankland-ranklist-remarks');
     expect(await getModalTableWrapperDomParity(page)).toEqual({
       userModalInsideTableWrapper: true,
       solutionModalInsideTableWrapper: true,
