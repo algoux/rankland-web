@@ -240,6 +240,23 @@ async function getHomeToolLogoPresentation(page: Page) {
   });
 }
 
+async function getHomeAboutSeparatorPresentation(page: Page) {
+  return page.evaluate(() => {
+    const separator = document.querySelector<HTMLElement>('[data-id="home-about"] .home-separator');
+    if (!separator) {
+      throw new Error('Missing home about separator');
+    }
+
+    const style = getComputedStyle(separator);
+    return {
+      classList: Array.from(separator.classList),
+      marginLeft: style.marginLeft,
+      marginRight: style.marginRight,
+      text: separator.textContent?.trim(),
+    };
+  });
+}
+
 test.describe('/ full-chain route', () => {
   test('renders the RankLand home page through SSR, hydration, RanklandApiService, and the mock backend', async ({
     page,
@@ -321,6 +338,12 @@ test.describe('/ full-chain route', () => {
       'color',
       'rgba(255, 255, 255, 0.85)',
     );
+    expect(await getHomeAboutSeparatorPresentation(page)).toEqual({
+      classList: expect.arrayContaining(['mx-2', 'home-separator']),
+      marginLeft: '8px',
+      marginRight: '8px',
+      text: '|',
+    });
     await expect(page.locator('[data-id="home-recommendations"] .ant-row')).toBeVisible();
     await expect(page.locator('[data-id="home-recommendations"] .ant-col')).toHaveCount(2);
     await expect(page.locator('[data-id="home-recommendations"] .ant-card-hoverable')).toHaveCount(2);

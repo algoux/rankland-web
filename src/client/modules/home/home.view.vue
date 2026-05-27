@@ -137,7 +137,7 @@
         <p>
           其他链接：
           <a href="https://algoux.org" target="_blank">首页</a>
-          <span class="home-separator">|</span>
+          <span class="mx-2 home-separator">|</span>
           <a href="https://servicestatus.algoux.org" target="_blank">服务状态</a>
         </p>
         <p v-if="showBeian">
@@ -306,6 +306,11 @@ export default routeView(HomePage, '/', undefined, undefined, {
 
 .mr-3 {
   margin-right: 12px;
+}
+
+.mx-2 {
+  margin-right: 8px;
+  margin-left: 8px;
 }
 
 .inline-block {

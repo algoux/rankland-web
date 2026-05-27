@@ -62,7 +62,7 @@ git status --short --branch
 备注：
 
 ```text
-2026-05-27 最新记录：Home tool logo class token parity 已通过 focused RED/GREEN、完整默认 `test:migration`（build、35 unit files / 151 unit tests、1 SSR smoke test、1 shallow Playwright test、58 passed / 1 skipped full-chain Playwright tests）和 `git diff --check`；RED 复现 paste.then.ac 和 Algo Bootstrap 工具卡 logo 缺少旧版 `mr-3 inline-block` class token 且计算为 `display: block`，GREEN 验证旧版 `img.mr-3.inline-block` class token、`display: inline-block`、12px 右间距、paste logo 24px 尺寸和 2px 内边距，同时保留首页行/列间距、SSR 内容、卡片行为、暗色正文色、统计请求、联系弹窗和外链语义覆盖。
+2026-05-27 最新记录：Home about separator class token parity 已通过 focused RED/GREEN、完整默认 `test:migration`（build、35 unit files / 151 unit tests、1 SSR smoke test、1 shallow Playwright test、58 passed / 1 skipped full-chain Playwright tests）和 `git diff --check`；RED 复现首页 About 区域“其他链接”分隔符缺少旧版 `mx-2` class token，GREEN 验证旧版 `span.mx-2` class token、`|` 文本和 8px 左右间距，同时保留首页 SSR 内容、卡片行为、暗色正文色、统计请求、联系弹窗和外链语义覆盖。
 ```
 
 ## 全局外壳与跨路由行为
@@ -128,6 +128,7 @@ App shell Ant Design Vue Layout/Menu/Dropdown/Button、旧版全局 body light/d
 - `[x]` 推荐/工具卡片正文使用旧版 `mt-4 mb-0` class 和 16px/0px 段落间距
 - `[x]` 首页工具卡 logo 保留旧版 `mr-3 inline-block` class 和 inline-block 显示语义
 - `[x]` paste.then.ac 工具卡 logo 尺寸和 `2px` 内边距与旧首页一致
+- `[x]` 首页 about 区域“其他链接”分隔符保留旧版 `mx-2` class 和 8px 左右间距
 - `[x]` 深色模式下 hero、资源列表和关于区域分隔符使用旧版 Ant Design 正文色
 - `[x]` 结构化内容和标题满足当前 SEO 基线
 - `[x]` 首页使用旧版 `main.normal-content` 和 `.home-intro` 内容容器 DOM
@@ -152,7 +153,7 @@ App shell Ant Design Vue Layout/Menu/Dropdown/Button、旧版全局 body light/d
 备注：
 
 ```text
-2026-05-27 复核：home full-chain 断言 SSR HTML 包含首页内容、统计数据和 JSON-LD，hydration marker 正常；旧版 `main.normal-content` 和 `.home-intro` 内容容器 DOM、五个旧版 `div.block` 内容区块 DOM、旧版 `normal-content` desktop 32px/50px padding、mobile 32px/20px padding、无桌面 max-width cap、`home-intro` block 40px 顶部间距、hero 文案段落旧版 `text-base` class token、`h1.block-title` DOM、32px/500 区块标题视觉和 block title 20px 底部间距已覆盖；Ant Design Card/Row/Col 推荐/工具区、推荐/工具卡片行旧版水平-only gutter 和 `rowGap: normal`、推荐/工具卡片列旧版 `mb-4` class 与 16px bottom margin、推荐卡片旧版 dark Card 背景/边框/圆角/文字色、hero/resource/about 非卡片正文旧版暗色正文色、旧版 `h2` 标题和 `UnorderedListOutlined` / `TrophyOutlined` 图标、标题图标/logo 的旧版 `mr-3` 右间距、工具卡 logo 旧版 `mr-3 inline-block` class token、inline-block display 和 12px right spacing、卡片正文旧版 `mt-4 mb-0` class 与 16px/0px margin、统计数字旧版 `strong` DOM 与加粗非斜体视觉、paste.then.ac logo 24px 尺寸和 2px 内边距、默认可见首页外链旧版 `target="_blank"` 且无 `rel`、`cnn` 站点首页备案链接旧版 `target="_blank"` 且无 `rel`、联系弹窗 Ant Design Modal 深色样式、联系弹窗 QQ 群图片旧版 `w-full` 类名、桌面/移动端截图和 bounds、partial upstream statistics 的旧版 `-` fallback 与 SSR/hydration 一致性已覆盖。
+2026-05-27 复核：home full-chain 断言 SSR HTML 包含首页内容、统计数据和 JSON-LD，hydration marker 正常；旧版 `main.normal-content` 和 `.home-intro` 内容容器 DOM、五个旧版 `div.block` 内容区块 DOM、旧版 `normal-content` desktop 32px/50px padding、mobile 32px/20px padding、无桌面 max-width cap、`home-intro` block 40px 顶部间距、hero 文案段落旧版 `text-base` class token、`h1.block-title` DOM、32px/500 区块标题视觉和 block title 20px 底部间距已覆盖；Ant Design Card/Row/Col 推荐/工具区、推荐/工具卡片行旧版水平-only gutter 和 `rowGap: normal`、推荐/工具卡片列旧版 `mb-4` class 与 16px bottom margin、推荐卡片旧版 dark Card 背景/边框/圆角/文字色、hero/resource/about 非卡片正文旧版暗色正文色、旧版 `h2` 标题和 `UnorderedListOutlined` / `TrophyOutlined` 图标、标题图标/logo 的旧版 `mr-3` 右间距、工具卡 logo 旧版 `mr-3 inline-block` class token、inline-block display 和 12px right spacing、about 分隔符旧版 `mx-2` class token 与 8px 左右间距、卡片正文旧版 `mt-4 mb-0` class 与 16px/0px margin、统计数字旧版 `strong` DOM 与加粗非斜体视觉、paste.then.ac logo 24px 尺寸和 2px 内边距、默认可见首页外链旧版 `target="_blank"` 且无 `rel`、`cnn` 站点首页备案链接旧版 `target="_blank"` 且无 `rel`、联系弹窗 Ant Design Modal 深色样式、联系弹窗 QQ 群图片旧版 `w-full` 类名、桌面/移动端截图和 bounds、partial upstream statistics 的旧版 `-` fallback 与 SSR/hydration 一致性已覆盖。
 ```
 
 ## 搜索页 `/search`
