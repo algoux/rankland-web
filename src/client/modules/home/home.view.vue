@@ -3,7 +3,7 @@
     <div data-id="home-intro" class="home-intro">
       <section data-id="home-hero" class="home-hero">
         <h1>欢迎来到 RankLand</h1>
-        <p>
+        <p class="text-base">
           这里是一个由算法竞赛爱好者们自发维护的、专注于托管和分享任何竞赛榜单的宝地，你可以轻松查阅 ICPC、CCPC
           等赛事的历史榜单。
         </p>

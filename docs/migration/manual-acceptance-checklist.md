@@ -62,7 +62,7 @@ git status --short --branch
 备注：
 
 ```text
-2026-05-27 最新记录：Fallback 404 class token parity 已通过 focused RED/GREEN、完整默认 `test:migration`（build、35 unit files / 151 unit tests、1 SSR smoke test、1 shallow Playwright test、58 passed / 1 skipped full-chain Playwright tests）和 `git diff --check`；RED 复现 unknown public route 的 fallback 元素仍输出 Vue-only `fallback-not-found` class，GREEN 验证旧版 `text-center mt-32 text-xl` class token、HTTP 404、文案、128px 顶部间距、20px 字号和居中布局。
+2026-05-27 最新记录：Home hero text-base class token parity 已通过 focused RED/GREEN、完整默认 `test:migration`（build、35 unit files / 151 unit tests、1 SSR smoke test、1 shallow Playwright test、58 passed / 1 skipped full-chain Playwright tests）和 `git diff --check`；RED 复现首页 hero 文案段落 class 为空，GREEN 验证旧版 `p.text-base` class token，同时保留 SSR 内容、暗色正文色、统计请求、联系弹窗和外链语义覆盖。
 ```
 
 ## 全局外壳与跨路由行为
@@ -130,6 +130,7 @@ App shell Ant Design Vue Layout/Menu/Dropdown/Button、旧版全局 body light/d
 - `[x]` 首页使用旧版 `main.normal-content` 和 `.home-intro` 内容容器 DOM
 - `[x]` 首页五个内容区块使用旧版 `div.block` DOM，同时保留迁移测试用 `home-section` 样式钩子
 - `[x]` 首页内容区使用旧版 `normal-content` padding、无桌面 max-width cap，并保留 `home-intro` block/title 间距
+- `[x]` 首页 hero 文案段落保留旧版 `text-base` class token
 - `[x]` 首页区块标题使用旧版 `h1.block-title` DOM 和 32px/500 heading 视觉
 - `[x]` 首页推荐卡统计数字使用旧版 `strong` DOM 和加粗非斜体视觉
 - `[x]` 首页工具、资源、about/其他默认可见外链保留旧版 `target="_blank"` 且无 `rel` 的 DOM/referrer 语义
@@ -148,7 +149,7 @@ App shell Ant Design Vue Layout/Menu/Dropdown/Button、旧版全局 body light/d
 备注：
 
 ```text
-2026-05-27 复核：home full-chain 断言 SSR HTML 包含首页内容、统计数据和 JSON-LD，hydration marker 正常；旧版 `main.normal-content` 和 `.home-intro` 内容容器 DOM、五个旧版 `div.block` 内容区块 DOM、旧版 `normal-content` desktop 32px/50px padding、mobile 32px/20px padding、无桌面 max-width cap、`home-intro` block 40px 顶部间距、`h1.block-title` DOM、32px/500 区块标题视觉和 block title 20px 底部间距已覆盖；Ant Design Card/Row/Col 推荐/工具区、推荐卡片旧版 dark Card 背景/边框/圆角/文字色、hero/resource/about 非卡片正文旧版暗色正文色、旧版 `h2` 标题和 `UnorderedListOutlined` / `TrophyOutlined` 图标、标题图标/logo 的旧版 `mr-3` 右间距、卡片正文旧版 `mt-4 mb-0` class 与 16px/0px margin、统计数字旧版 `strong` DOM 与加粗非斜体视觉、paste.then.ac logo 24px 尺寸和 2px 内边距、默认可见首页外链旧版 `target="_blank"` 且无 `rel`、`cnn` 站点首页备案链接旧版 `target="_blank"` 且无 `rel`、联系弹窗 Ant Design Modal 深色样式、联系弹窗 QQ 群图片旧版 `w-full` 类名、桌面/移动端截图和 bounds、partial upstream statistics 的旧版 `-` fallback 与 SSR/hydration 一致性已覆盖。
+2026-05-27 复核：home full-chain 断言 SSR HTML 包含首页内容、统计数据和 JSON-LD，hydration marker 正常；旧版 `main.normal-content` 和 `.home-intro` 内容容器 DOM、五个旧版 `div.block` 内容区块 DOM、旧版 `normal-content` desktop 32px/50px padding、mobile 32px/20px padding、无桌面 max-width cap、`home-intro` block 40px 顶部间距、hero 文案段落旧版 `text-base` class token、`h1.block-title` DOM、32px/500 区块标题视觉和 block title 20px 底部间距已覆盖；Ant Design Card/Row/Col 推荐/工具区、推荐卡片旧版 dark Card 背景/边框/圆角/文字色、hero/resource/about 非卡片正文旧版暗色正文色、旧版 `h2` 标题和 `UnorderedListOutlined` / `TrophyOutlined` 图标、标题图标/logo 的旧版 `mr-3` 右间距、卡片正文旧版 `mt-4 mb-0` class 与 16px/0px margin、统计数字旧版 `strong` DOM 与加粗非斜体视觉、paste.then.ac logo 24px 尺寸和 2px 内边距、默认可见首页外链旧版 `target="_blank"` 且无 `rel`、`cnn` 站点首页备案链接旧版 `target="_blank"` 且无 `rel`、联系弹窗 Ant Design Modal 深色样式、联系弹窗 QQ 群图片旧版 `w-full` 类名、桌面/移动端截图和 bounds、partial upstream statistics 的旧版 `-` fallback 与 SSR/hydration 一致性已覆盖。
 ```
 
 ## 搜索页 `/search`
