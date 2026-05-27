@@ -493,6 +493,8 @@ async function getFilterControlDomParity(page: Page) {
       directLabelCount: filters.querySelectorAll(':scope > label').length,
       filtersClasses: Array.from(filters.classList),
       markerParentDataId: markerFilter.parentElement?.getAttribute('data-id') || '',
+      organizationFilterClasses: Array.from(organizationFilter.classList),
+      organizationFilterInlineWidth: organizationFilter.style.width,
       organizationParentDataId: organizationFilter.parentElement?.getAttribute('data-id') || '',
       organizationParentTagName: organizationFilter.parentElement?.tagName || '',
       officialWrapperClasses: Array.from(officialWrapper.classList),
@@ -1418,12 +1420,15 @@ test.describe('/ranklist/:id full-chain route', () => {
       directLabelCount: 0,
       filtersClasses: [],
       markerParentDataId: 'rankland-ranklist-filters',
+      organizationFilterClasses: expect.arrayContaining(['ml-2']),
+      organizationFilterInlineWidth: '160px',
       organizationParentDataId: 'rankland-ranklist-filters',
       organizationParentTagName: 'DIV',
       officialWrapperParentDataId: 'rankland-ranklist-filters',
       officialWrapperTagName: 'SPAN',
     });
-    expect(await getControlsUtilityClasses(page)).toMatchObject({
+    const controlsUtilityClasses = await getControlsUtilityClasses(page);
+    expect(controlsUtilityClasses).toMatchObject({
       controlsClasses: expect.arrayContaining([
         'rankland-ranklist-controls',
         'mt-3',
@@ -1432,7 +1437,7 @@ test.describe('/ranklist/:id full-chain route', () => {
         'justify-between',
         'items-center',
       ]),
-      organizationFilterClasses: expect.arrayContaining(['rankland-ranklist-select', 'ml-2']),
+      organizationFilterClasses: expect.arrayContaining(['ml-2']),
       officialWrapperClasses: expect.arrayContaining([
         'rankland-ranklist-checkbox',
         'ml-5',
@@ -1447,6 +1452,7 @@ test.describe('/ranklist/:id full-chain route', () => {
         'items-center',
       ]),
     });
+    expect(controlsUtilityClasses.organizationFilterClasses).not.toContain('rankland-ranklist-select');
 
     await page.setViewportSize({ width: 390, height: 844 });
     await reloadRanklistAndWaitForHydration(page);

@@ -177,7 +177,8 @@
             mode="multiple"
             allow-clear
             placeholder="选择组织/单位"
-            class="rankland-ranklist-select ml-2"
+            class="ml-2"
+            style="width: 160px"
             :max-tag-count="0"
             :max-tag-placeholder="formatOrganizationSelectionPlaceholder"
           >
@@ -1108,11 +1109,7 @@ export default defineComponent({
   margin-left: 20px;
 }
 
-.rankland-ranklist-select {
-  width: 160px;
-}
-
-.rankland-ranklist-select.ml-2 {
+[data-id='rankland-ranklist-organization-filter'].ml-2 {
   margin-left: 8px;
 }
 
