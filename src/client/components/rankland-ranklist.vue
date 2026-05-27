@@ -10,8 +10,8 @@
   <div
     v-else-if="ranklistState.kind === 'error'"
     data-id="rankland-ranklist-render-error"
-    class="rankland-ranklist-error"
     role="alert"
+    style="max-width: 400px; margin: 100px auto"
   >
     <a-alert
       message="Error occurred when rendering srk"
@@ -1262,8 +1262,4 @@ span.ml-5.inline-flex.items-center .mr-1 {
   width: 100%;
 }
 
-.rankland-ranklist-error {
-  max-width: 400px;
-  margin: 100px auto;
-}
 </style>
