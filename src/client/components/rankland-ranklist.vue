@@ -230,6 +230,114 @@
           @user-click="handleUserClick"
           @solution-click="handleSolutionClick"
         />
+
+        <div data-id="rankland-ranklist-user-modal">
+          <Modal
+            :open="!!activeUserPayload"
+            :title="activeUserTitle"
+            :width="userModalWidth"
+            root-class-name="srk-general-modal-root srk-react-modal-root"
+            wrap-class-name="rankland-user-modal"
+            @close="handleUserModalClose"
+          >
+            <div v-if="activeUserPayload" class="rankland-user-modal-body user-modal">
+              <p
+                data-id="rankland-user-modal-organization"
+                class="rankland-user-modal-line rankland-user-modal-organization mb-0"
+              >
+                {{ activeUserOrganization }}
+              </p>
+              <p
+                v-if="activeUserPayload.user.official === false"
+                data-id="rankland-user-modal-unofficial"
+                class="rankland-user-modal-unofficial mt-4 mb-0"
+              >
+                ＊ 非正式参加者
+              </p>
+              <div
+                v-if="activeUserTeamMembers.length > 0"
+                data-id="rankland-user-modal-team-members"
+                class="rankland-user-modal-team-members user-modal-info-team-members mt-2"
+              >
+                <span
+                  v-for="(member, memberIndex) in activeUserTeamMembers"
+                  :key="memberIndex"
+                  data-id="rankland-user-modal-team-member-entry"
+                >
+                  <span
+                    v-if="memberIndex > 0"
+                    data-id="rankland-user-modal-team-separator"
+                    class="rankland-user-modal-team-separator user-modal-info-team-members-slash"
+                  >
+                    {{ ' / ' }}
+                  </span>
+                  <span data-id="rankland-user-modal-team-member">{{ resolveTextValue(member.name) }}</span>
+                </span>
+              </div>
+              <div v-if="activeUserMarkerLabels.length > 0" class="rankland-user-modal-markers user-modal-info-markers mt-2">
+                <span
+                  v-for="marker in activeUserMarkerLabels"
+                  :key="marker.id"
+                  data-id="rankland-user-modal-marker"
+                  class="rankland-user-modal-marker user-modal-info-marker"
+                  :class="marker.className"
+                  :style="marker.style"
+                >
+                  {{ marker.label }}
+                </span>
+              </div>
+              <p
+                v-if="activeUserSegment"
+                data-id="rankland-user-modal-segment"
+                class="rankland-user-modal-line rankland-user-modal-segment mt-4 mb-0"
+              >
+                所在奖区（{{ activeUserSegment.seriesTitle }}）：
+                <span
+                  data-id="rankland-user-modal-segment-label"
+                  class="rankland-user-modal-segment-label user-modal-segment-label"
+                  :class="`bg-segment-${activeUserSegment.segmentStyle}`"
+                >
+                  {{ activeUserSegment.segmentTitle }}
+                </span>
+              </p>
+              <div class="rankland-user-modal-photo mt-4">
+                <SrkAssetImage
+                  v-if="activeUserPhotoSrc"
+                  data-id="rankland-user-modal-photo"
+                  :src="activeUserPhotoSrc"
+                  alt="选手照片"
+                />
+                <p
+                  v-if="activeUserSlogan"
+                  data-id="rankland-user-modal-slogan"
+                  class="rankland-user-modal-slogan slogan mt-4 mb-2"
+                >
+                  {{ activeUserSlogan }}
+                </p>
+              </div>
+
+              <div
+                v-if="activeUserRankTimeData"
+                data-id="rankland-rank-time-panel"
+                class="rankland-rank-time-panel mt-4"
+              >
+                <RanklandRankTimeChart :rank-time-data="activeUserRankTimeData" />
+              </div>
+            </div>
+          </Modal>
+        </div>
+
+        <div data-id="rankland-ranklist-solution-modal">
+          <DefaultSolutionModal
+            :open="!!activeSolutionPayload"
+            :user="activeSolutionPayload?.user"
+            :problem="activeSolutionPayload?.problem"
+            :problem-index="activeSolutionPayload?.problemIndex || 0"
+            :solutions="activeSolutionPayload?.solutions || []"
+            root-class-name="srk-general-modal-root srk-react-modal-root"
+            @close="handleSolutionModalClose"
+          />
+        </div>
       </div>
 
       <footer v-if="showFooter" data-id="rankland-ranklist-footer" class="rankland-ranklist-footer text-center mt-8">
@@ -264,114 +372,6 @@
           </a>
         </p>
       </footer>
-
-      <div data-id="rankland-ranklist-user-modal">
-        <Modal
-          :open="!!activeUserPayload"
-          :title="activeUserTitle"
-          :width="userModalWidth"
-          root-class-name="srk-general-modal-root srk-react-modal-root"
-          wrap-class-name="rankland-user-modal"
-          @close="handleUserModalClose"
-        >
-          <div v-if="activeUserPayload" class="rankland-user-modal-body user-modal">
-            <p
-              data-id="rankland-user-modal-organization"
-              class="rankland-user-modal-line rankland-user-modal-organization mb-0"
-            >
-              {{ activeUserOrganization }}
-            </p>
-            <p
-              v-if="activeUserPayload.user.official === false"
-              data-id="rankland-user-modal-unofficial"
-              class="rankland-user-modal-unofficial mt-4 mb-0"
-            >
-              ＊ 非正式参加者
-            </p>
-            <div
-              v-if="activeUserTeamMembers.length > 0"
-              data-id="rankland-user-modal-team-members"
-              class="rankland-user-modal-team-members user-modal-info-team-members mt-2"
-            >
-              <span
-                v-for="(member, memberIndex) in activeUserTeamMembers"
-                :key="memberIndex"
-                data-id="rankland-user-modal-team-member-entry"
-              >
-                <span
-                  v-if="memberIndex > 0"
-                  data-id="rankland-user-modal-team-separator"
-                  class="rankland-user-modal-team-separator user-modal-info-team-members-slash"
-                >
-                  {{ ' / ' }}
-                </span>
-                <span data-id="rankland-user-modal-team-member">{{ resolveTextValue(member.name) }}</span>
-              </span>
-            </div>
-            <div v-if="activeUserMarkerLabels.length > 0" class="rankland-user-modal-markers user-modal-info-markers mt-2">
-              <span
-                v-for="marker in activeUserMarkerLabels"
-                :key="marker.id"
-                data-id="rankland-user-modal-marker"
-                class="rankland-user-modal-marker user-modal-info-marker"
-                :class="marker.className"
-                :style="marker.style"
-              >
-                {{ marker.label }}
-              </span>
-            </div>
-            <p
-              v-if="activeUserSegment"
-              data-id="rankland-user-modal-segment"
-              class="rankland-user-modal-line rankland-user-modal-segment mt-4 mb-0"
-            >
-              所在奖区（{{ activeUserSegment.seriesTitle }}）：
-              <span
-                data-id="rankland-user-modal-segment-label"
-                class="rankland-user-modal-segment-label user-modal-segment-label"
-                :class="`bg-segment-${activeUserSegment.segmentStyle}`"
-              >
-                {{ activeUserSegment.segmentTitle }}
-              </span>
-            </p>
-            <div class="rankland-user-modal-photo mt-4">
-              <SrkAssetImage
-                v-if="activeUserPhotoSrc"
-                data-id="rankland-user-modal-photo"
-                :src="activeUserPhotoSrc"
-                alt="选手照片"
-              />
-              <p
-                v-if="activeUserSlogan"
-                data-id="rankland-user-modal-slogan"
-                class="rankland-user-modal-slogan slogan mt-4 mb-2"
-              >
-                {{ activeUserSlogan }}
-              </p>
-            </div>
-
-            <div
-              v-if="activeUserRankTimeData"
-              data-id="rankland-rank-time-panel"
-              class="rankland-rank-time-panel mt-4"
-            >
-              <RanklandRankTimeChart :rank-time-data="activeUserRankTimeData" />
-            </div>
-          </div>
-        </Modal>
-      </div>
-
-      <div data-id="rankland-ranklist-solution-modal">
-        <DefaultSolutionModal
-          :open="!!activeSolutionPayload"
-          :user="activeSolutionPayload?.user"
-          :problem="activeSolutionPayload?.problem"
-          :problem-index="activeSolutionPayload?.problemIndex || 0"
-          :solutions="activeSolutionPayload?.solutions || []"
-          root-class-name="srk-general-modal-root srk-react-modal-root"
-          @close="handleSolutionModalClose"
-        />
-      </div>
     </template>
   </div>
 </template>

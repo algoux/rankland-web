@@ -305,6 +305,24 @@ async function getTableWrapperMarginLeft(page: Page) {
   });
 }
 
+async function getModalTableWrapperDomParity(page: Page) {
+  return page.evaluate(() => {
+    const tableWrapper = document.querySelector<HTMLElement>('[data-id="rankland-ranklist-table-wrapper"]');
+    const userModal = document.querySelector<HTMLElement>('[data-id="rankland-ranklist-user-modal"]');
+    const solutionModal = document.querySelector<HTMLElement>('[data-id="rankland-ranklist-solution-modal"]');
+    const footer = document.querySelector<HTMLElement>('[data-id="rankland-ranklist-footer"]');
+    if (!tableWrapper || !userModal || !solutionModal || !footer) {
+      throw new Error('Missing ranklist modal table-wrapper DOM targets');
+    }
+
+    return {
+      userModalInsideTableWrapper: tableWrapper.contains(userModal),
+      solutionModalInsideTableWrapper: tableWrapper.contains(solutionModal),
+      footerInsideTableWrapper: tableWrapper.contains(footer),
+    };
+  });
+}
+
 async function getControlsToTableGap(page: Page) {
   return page.evaluate(() => {
     const controls = document.querySelector<HTMLElement>('[data-id="rankland-ranklist-controls"]');
@@ -648,6 +666,11 @@ test.describe('/ranklist/:id full-chain route', () => {
     const remarksWrapper = page.locator('[data-id="rankland-ranklist-table-wrapper"] .rankland-ranklist-remarks');
     await expect(remarksWrapper).toHaveClass(/(^|\s)mb-4(\s|$)/);
     await expect(remarksWrapper).toHaveClass(/(^|\s)text-center(\s|$)/);
+    expect(await getModalTableWrapperDomParity(page)).toEqual({
+      userModalInsideTableWrapper: true,
+      solutionModalInsideTableWrapper: true,
+      footerInsideTableWrapper: false,
+    });
     await expect(remarks).toHaveText('备注：赛后补题榜单，仅供展示');
     await expect(remarks).toBeVisible();
     expect(await remarks.evaluate((element) => {
