@@ -47,7 +47,7 @@
       </div>
 
       <div class="playground-preview-pane srk-playground-preview">
-        <div class="absolute right-4 top-4 playground-docs-link-wrapper">
+        <div class="absolute right-4 top-4">
           <a
             data-id="playground-docs-link"
             class="playground-docs-link"
@@ -346,7 +346,7 @@ export default routeView(PlaygroundPage, '/playground');
   overflow-x: auto;
 }
 
-.playground-docs-link-wrapper {
+.srk-playground-preview > .absolute.right-4.top-4 {
   position: absolute;
   top: 16px;
   right: 16px;

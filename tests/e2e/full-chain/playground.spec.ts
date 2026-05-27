@@ -163,6 +163,7 @@ test.describe('/playground full-chain route', () => {
     expect(await page.locator('[data-id="playground-docs-link"]').getAttribute('rel')).toBeNull();
     const docsLinkWrapper = page.locator('.playground-preview-pane > .absolute.right-4.top-4');
     await expect(docsLinkWrapper).toHaveCount(1);
+    await expect(docsLinkWrapper).toHaveClass('absolute right-4 top-4');
     await expect(docsLinkWrapper.locator('[data-id="playground-docs-link"]')).toBeVisible();
     await expect(page.locator('[data-id="playground-docs-link"] .anticon-question-circle')).toBeVisible();
     await expect(docsLinkWrapper).toHaveCSS('position', 'absolute');
