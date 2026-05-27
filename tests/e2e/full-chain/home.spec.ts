@@ -216,6 +216,30 @@ async function getHomeCardRowPresentation(page: Page) {
   });
 }
 
+async function getHomeToolLogoPresentation(page: Page) {
+  return page.evaluate(() => {
+    const logos = [
+      { dataId: 'home-tool-paste-then-ac', alt: 'paste.then.ac logo' },
+      { dataId: 'home-tool-algo-bootstrap', alt: 'Algo Bootstrap logo' },
+    ];
+
+    return logos.map(({ dataId, alt }) => {
+      const logo = document.querySelector<HTMLElement>(`[data-id="${dataId}"] img[alt="${alt}"]`);
+      if (!logo) {
+        throw new Error(`Missing home tool logo: ${dataId}`);
+      }
+
+      const style = getComputedStyle(logo);
+      return {
+        dataId,
+        classList: Array.from(logo.classList),
+        display: style.display,
+        marginRight: style.marginRight,
+      };
+    });
+  });
+}
+
 test.describe('/ full-chain route', () => {
   test('renders the RankLand home page through SSR, hydration, RanklandApiService, and the mock backend', async ({
     page,
@@ -389,6 +413,20 @@ test.describe('/ full-chain route', () => {
     await expect(page.locator('[data-id="home-tool-paste-then-ac"] img[alt="paste.then.ac logo"]')).toHaveCSS('padding', '2px');
     await expect(page.locator('[data-id="home-tool-paste-then-ac"] img[alt="paste.then.ac logo"]')).toHaveCSS('margin-right', '12px');
     await expect(page.locator('[data-id="home-tool-algo-bootstrap"][href="https://ab.algoux.cn/?utm_source=rankland"]')).toBeVisible();
+    expect(await getHomeToolLogoPresentation(page)).toEqual([
+      {
+        dataId: 'home-tool-paste-then-ac',
+        classList: expect.arrayContaining(['mr-3', 'inline-block']),
+        display: 'inline-block',
+        marginRight: '12px',
+      },
+      {
+        dataId: 'home-tool-algo-bootstrap',
+        classList: expect.arrayContaining(['mr-3', 'inline-block']),
+        display: 'inline-block',
+        marginRight: '12px',
+      },
+    ]);
     const legacyNoRelExternalLinks = [
       'https://paste.then.ac/?utm_source=rankland',
       'https://ab.algoux.cn/?utm_source=rankland',

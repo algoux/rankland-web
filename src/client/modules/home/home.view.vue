@@ -60,7 +60,7 @@
             >
               <a-card hoverable class="home-card">
                 <h2 class="home-card-title">
-                  <img :src="pasteThenACLogo" alt="paste.then.ac logo" class="home-card-logo-padded">
+                  <img :src="pasteThenACLogo" alt="paste.then.ac logo" class="mr-3 inline-block home-card-logo-padded">
                   <span>paste.then.ac</span>
                 </h2>
                 <p class="mt-4 mb-0">免注册、更适合算竞宝宝体质的的代码剪贴板</p>
@@ -76,7 +76,7 @@
             >
               <a-card hoverable class="home-card">
                 <h2 class="home-card-title">
-                  <img :src="algoBootstrapLogo" alt="Algo Bootstrap logo">
+                  <img :src="algoBootstrapLogo" alt="Algo Bootstrap logo" class="mr-3 inline-block">
                   <span>Algo Bootstrap</span>
                 </h2>
                 <p class="mt-4 mb-0">一键配置 C++、Python 和 VS Code 编程环境</p>
@@ -304,6 +304,14 @@ export default routeView(HomePage, '/', undefined, undefined, {
   margin-bottom: 16px;
 }
 
+.mr-3 {
+  margin-right: 12px;
+}
+
+.inline-block {
+  display: inline-block;
+}
+
 .home-section .block-title {
   margin: 0 0 20px;
   color: var(--rankland-legacy-text-color);
@@ -362,9 +370,8 @@ export default routeView(HomePage, '/', undefined, undefined, {
 }
 
 .home-card-title {
-  display: inline-flex;
-  align-items: center;
-  gap: 0;
+  display: block;
+  column-gap: 0;
 }
 
 .home-card-title img {
