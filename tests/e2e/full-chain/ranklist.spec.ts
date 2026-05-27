@@ -1446,13 +1446,13 @@ test.describe('/ranklist/:id full-chain route', () => {
       ]),
       officialTextClasses: expect.arrayContaining(['mr-1']),
       markerFilterClasses: expect.arrayContaining([
-        'rankland-ranklist-marker-filter',
         'ml-5',
         'inline-flex',
         'items-center',
       ]),
     });
     expect(controlsUtilityClasses.organizationFilterClasses).not.toContain('rankland-ranklist-select');
+    expect(controlsUtilityClasses.markerFilterClasses).not.toContain('rankland-ranklist-marker-filter');
 
     await page.setViewportSize({ width: 390, height: 844 });
     await reloadRanklistAndWaitForHydration(page);

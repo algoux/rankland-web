@@ -200,7 +200,7 @@
             v-if="ranklistState.markers.length > 0"
             v-model:value="filter.marker"
             data-id="rankland-ranklist-marker-filter"
-            class="rankland-ranklist-marker-filter ml-5 inline-flex items-center"
+            class="ml-5 inline-flex items-center"
             button-style="solid"
           >
             <a-radio-button value="">全部</a-radio-button>
@@ -1117,7 +1117,7 @@ export default defineComponent({
   margin-right: 4px;
 }
 
-:global(.rankland-ranklist-marker-filter) {
+[data-id='rankland-ranklist-marker-filter'].ml-5 {
   display: inline-flex;
   align-items: center;
   margin-left: 20px;
