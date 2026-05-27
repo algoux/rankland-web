@@ -50,7 +50,6 @@
         <div class="absolute right-4 top-4">
           <a
             data-id="playground-docs-link"
-            class="playground-docs-link"
             href="https://srk.algoux.org/zh/"
             target="_blank"
           >
@@ -351,13 +350,6 @@ export default routeView(PlaygroundPage, '/playground');
   top: 16px;
   right: 16px;
   z-index: 1;
-}
-
-.playground-docs-link {
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-  line-height: 1.5;
 }
 
 .playground-state {
