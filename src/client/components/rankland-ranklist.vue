@@ -16,12 +16,12 @@
     <template v-else>
       <header v-if="showHeader" class="rankland-ranklist-header">
         <div v-if="contestBannerSrc" class="rankland-ranklist-banner-wrap flex items-center justify-center">
-          <img
+          <SrkAssetImage
             data-id="rankland-ranklist-banner"
             :src="contestBannerSrc"
             alt="Contest Banner"
-            class="rankland-ranklist-banner mb-2"
-          >
+            img-class="rankland-ranklist-banner mb-2"
+          />
         </div>
         <h1 data-id="rankland-ranklist-title" class="text-center mb-1">{{ ranklistTitle }}</h1>
         <div data-id="rankland-ranklist-header-meta" class="rankland-ranklist-header-meta text-center mt-1">
@@ -320,12 +320,12 @@
               </span>
             </p>
             <div v-if="activeUserPhotoSrc || activeUserSlogan" class="rankland-user-modal-photo mt-4">
-              <img
+              <SrkAssetImage
                 v-if="activeUserPhotoSrc"
                 data-id="rankland-user-modal-photo"
                 :src="activeUserPhotoSrc"
                 alt="选手照片"
-              >
+              />
               <p
                 v-if="activeUserSlogan"
                 data-id="rankland-user-modal-slogan"
@@ -384,6 +384,7 @@ import { notification } from 'ant-design-vue';
 import '@algoux/standard-ranklist-renderer-component-styles';
 import ContactUs from './contact-us.vue';
 import RanklandRankTimeChart from './rankland-rank-time-chart.vue';
+import SrkAssetImage from './srk-asset-image.vue';
 import { createRanklandFooterSiteState } from './rankland-footer-site';
 import { createRanklandRanklistState, type RanklandRanklistFilterState } from './rankland-ranklist-state';
 import {
@@ -474,6 +475,7 @@ export default defineComponent({
     Ranklist,
     RanklandRankTimeChart,
     ShareAltOutlined,
+    SrkAssetImage,
   },
   props: {
     ranklist: {

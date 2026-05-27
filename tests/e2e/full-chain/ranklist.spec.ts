@@ -873,6 +873,30 @@ test.describe('/ranklist/:id full-chain route', () => {
     expect(srkFileRequests).toHaveLength(1);
   });
 
+  test('hides broken SRK asset images like the legacy SrkAssetImage component', async ({ page, request }) => {
+    await request.post(`${mockBaseURL}/__reset`);
+    await page.route('**/srk-assets/test-key/banner.png', async (route) => {
+      await route.fulfill({ status: 404, body: 'missing banner' });
+    });
+    await page.route('**/srk-assets/test-key/team-alpha.png', async (route) => {
+      await route.fulfill({ status: 404, body: 'missing photo' });
+    });
+
+    const response = await page.goto('/ranklist/test-key?focus=yes');
+    expect(response?.status()).toBe(200);
+
+    const banner = page.locator('[data-id="rankland-ranklist-banner"]');
+    await expect(banner).toHaveAttribute('src', `${mockBaseURL}/srk-assets/test-key/banner.png`);
+    await expect.poll(async () => banner.evaluate((element) => window.getComputedStyle(element).display)).toBe('none');
+
+    await page.locator('.srk-user-cell', { hasText: 'Team Alpha' }).click();
+    const userModal = page.locator('.rankland-user-modal');
+    await expect(userModal).toBeVisible();
+    const photo = userModal.locator('[data-id="rankland-user-modal-photo"]');
+    await expect(photo).toHaveAttribute('src', `${mockBaseURL}/srk-assets/test-key/team-alpha.png`);
+    await expect.poll(async () => photo.evaluate((element) => window.getComputedStyle(element).display)).toBe('none');
+  });
+
   test('uses the legacy responsive width for the user info modal on mobile', async ({ page, request }) => {
     await denyExternalCalls(page);
     await request.post(`${mockBaseURL}/__reset`);
