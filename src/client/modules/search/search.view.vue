@@ -37,7 +37,6 @@
             <template #renderItem="{ item }">
               <a-list-item
                 data-id="search-ranklist-item"
-                class="search-list-item"
                 :data-ranklist-key="item.uniqueKey"
               >
                 <p class="mb-0">
@@ -65,7 +64,6 @@
             <template #renderItem="{ item }">
               <a-list-item
                 data-id="search-ranklist-item"
-                class="search-list-item"
                 :data-ranklist-key="item.uniqueKey"
               >
                 <p class="mb-0">
@@ -220,10 +218,6 @@ export default routeView(SearchPage, '/search');
 
 .text-red-500 {
   color: #ef4444;
-}
-
-.search-list-item {
-  display: block;
 }
 
 .mb-0 {

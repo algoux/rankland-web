@@ -96,6 +96,10 @@ test.describe('/search full-chain route', () => {
     await expect(page.locator('[data-id="search-recent-section"] .ant-list.ant-list-sm')).toBeVisible();
     await expect(page.locator('[data-id="search-ranklist-item"]')).toHaveCount(3);
     await expect(page.locator('[data-id="search-ranklist-item"].ant-list-item')).toHaveCount(3);
+    const recentListItem = page.locator('[data-id="search-ranklist-item"].ant-list-item').first();
+    await expect(recentListItem).not.toHaveClass(/search-list-item/);
+    await expect(recentListItem).toHaveCSS('display', 'flex');
+    await expect(page.locator('.search-list-item')).toHaveCount(0);
     await expect(page.locator('[data-id="search-ranklist-link"][data-ranklist-key="test-key"]')).toHaveAttribute(
       'href',
       '/ranklist/test-key',
@@ -253,6 +257,8 @@ test.describe('/search full-chain route', () => {
     await expect(page.locator('[data-id="search-result-section"] > div.mt-2')).toHaveClass(/mt-2/);
     await expect(page.locator('[data-id="search-result-section"] > div.mt-2 > .ant-list')).toBeVisible();
     const resultRow = page.locator('[data-id="search-result-section"] [data-id="search-ranklist-item"]').first();
+    await expect(resultRow).not.toHaveClass(/search-list-item/);
+    await expect(resultRow).toHaveCSS('display', 'flex');
     const resultTitle = resultRow.locator(':scope > p.mb-0').first();
     const resultViewCount = resultRow.locator(':scope > p.mb-0 > span.ml-2.opacity-70');
     const resultCreatedAt = resultRow.locator(':scope > p.mb-0.opacity-50.text-sm');
@@ -276,6 +282,9 @@ test.describe('/search full-chain route', () => {
     await expect(page.locator('[data-id="search-recent-section"] > div.mt-2')).toHaveClass(/mt-2/);
     await expect(page.locator('[data-id="search-recent-section"] > div.mt-2 > .ant-list')).toBeVisible();
     const recentRow = page.locator('[data-id="search-recent-section"] [data-id="search-ranklist-item"]').first();
+    await expect(recentRow).not.toHaveClass(/search-list-item/);
+    await expect(recentRow).toHaveCSS('display', 'flex');
+    await expect(page.locator('.search-list-item')).toHaveCount(0);
     const recentTitle = recentRow.locator(':scope > p.mb-0').first();
     const recentViewCount = recentRow.locator(':scope > p.mb-0 > span.ml-2.opacity-70');
     const recentCreatedAt = recentRow.locator(':scope > p.mb-0.opacity-50.text-sm');
