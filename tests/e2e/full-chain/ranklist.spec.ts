@@ -787,11 +787,13 @@ test.describe('/ranklist/:id full-chain route', () => {
     expect(await getTimeToProgressGap(page)).toBe(5);
     expect(await getProgressToControlsGap(page)).toBe(12);
     expect(await getControlsToTableGap(page)).toBe(24);
-    expect(await getTableSpacerStyle(page)).toEqual({
-      spacerClasses: expect.arrayContaining(['rankland-ranklist-table-spacer', 'mt-6']),
+    const tableSpacerStyle = await getTableSpacerStyle(page);
+    expect(tableSpacerStyle).toEqual({
+      spacerClasses: expect.arrayContaining(['mt-6']),
       spacerMarginTop: '24px',
       tableWrapperMarginTop: '0px',
     });
+    expect(tableSpacerStyle.spacerClasses).not.toContain('rankland-ranklist-table-spacer');
     const remarks = page.locator('[data-id="rankland-ranklist-table-wrapper"] .srk-remarks');
     const remarksWrapper = page.locator('[data-id="rankland-ranklist-table-wrapper"] .rankland-ranklist-remarks');
     await expect(remarksWrapper).toHaveClass(/(^|\s)mb-4(\s|$)/);

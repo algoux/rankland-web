@@ -62,7 +62,7 @@ git status --short --branch
 备注：
 
 ```text
-2026-05-28 最新记录：Ranklist official filter class parity 已通过 focused RED/GREEN、ranklist full-chain 9 tests、完整默认 `test:migration`（build、35 unit files / 152 unit tests、1 SSR smoke test、1 shallow Playwright test、60 passed / 1 skipped full-chain Playwright tests）和 `git diff --check`。RED 复现 official-only wrapper classList 仍包含 Vue-only `.rankland-ranklist-checkbox`，GREEN 验证 official-only wrapper 仅保留旧版 `span.ml-5.inline-flex.items-center` class 合同并不渲染该 Vue-only 产品类，同时保留 official-only 筛选、20px 左边距、4px 文字到 Switch 间距和移动端布局。
+2026-05-28 最新记录：Ranklist table spacer class parity 已通过 focused RED/GREEN、ranklist full-chain 9 tests、完整默认 `test:migration`（build、35 unit files / 152 unit tests、1 SSR smoke test、1 shallow Playwright test、60 passed / 1 skipped full-chain Playwright tests）和 `git diff --check`。RED 复现 table spacer classList 仍包含 Vue-only `.rankland-ranklist-table-spacer`，GREEN 验证 spacer 仅保留旧版 `div.mt-6` class 合同并不渲染该 Vue-only 产品类，同时保留 24px controls-to-table 间距和 table wrapper 0px top margin。
 ```
 
 ## 全局外壳与跨路由行为
@@ -224,7 +224,7 @@ App shell Ant Design Vue Layout/Menu/Dropdown/Button、旧版根布局 `layout` 
 - `[x]` loaded content wrapper 保留旧版 `mt-8 mb-8` class token 和 32px 顶部/底部间距
 - `[x]` loaded content wrapper 不渲染 Vue-only `ranklist-content` 产品 class
 - `[x]` 有效榜单的 SRK 表格渲染达到验收标准
-- `[x]` SRK 表格前保留旧版 `div.mt-6` spacer DOM，表格前 24px 间距不依赖 Vue-only wrapper margin
+- `[x]` SRK 表格前保留旧版 `div.mt-6` spacer DOM，不渲染 Vue-only `.rankland-ranklist-table-spacer` 产品类，表格前 24px 间距不依赖 Vue-only wrapper margin
 - `[x]` SRK 用户弹窗和题目弹窗 wrapper 保留旧版位于 table wrapper 内的 DOM 结构，footer 仍位于 table wrapper 外
 - `[x]` SRK header title 使用旧版 `h1.text-center.mb-1` 的 32px/500/4px 标题排版
 - `[x]` SRK header banner、title、meta、contributors 和 time 保留旧版 `flex items-center justify-center` / `mb-2` / `text-center mb-1` / `text-center mt-1` / `mb-0` / `text-center mb-0` 工具类，且 banner wrapper/image 的 0px/8px margin 来源与旧 React 一致
@@ -314,6 +314,8 @@ App shell Ant Design Vue Layout/Menu/Dropdown/Button、旧版根布局 `layout` 
 2026-05-28 追加复核：ranklist SRK 分组筛选 Radio.Group class 合同已覆盖旧 React `className="ml-5 inline-flex items-center"` 行为；RED 复现 Vue marker Radio.Group 根节点仍包含 `.rankland-ranklist-marker-filter` 产品类，GREEN 验证根节点 classList 包含 `ml-5` / `inline-flex` / `items-center` 且不含 `.rankland-ranklist-marker-filter`，computed 20px 左边距、marker 筛选、移动端布局和 ranklist 全文件 full-chain 9 tests 均保持通过。
 
 2026-05-28 追加复核：ranklist SRK 正式筛选 wrapper class 合同已覆盖旧 React `span.ml-5.inline-flex.items-center` 行为；RED 复现 Vue official-only wrapper 仍包含 `.rankland-ranklist-checkbox` 产品类，GREEN 验证 wrapper classList 包含 `ml-5` / `inline-flex` / `items-center` 且不含 `.rankland-ranklist-checkbox`，computed 20px 左边距、official-only 筛选、4px 文字到 Switch 间距、移动端布局和 ranklist 全文件 full-chain 9 tests 均保持通过。
+
+2026-05-28 追加复核：ranklist SRK 表格 spacer class 合同已覆盖旧 React `div.mt-6` 行为；RED 复现 Vue spacer 仍包含 `.rankland-ranklist-table-spacer` 产品类，GREEN 验证 spacer classList 仅保留旧版 `mt-6` 且不含 `.rankland-ranklist-table-spacer`，computed 24px spacer margin、table wrapper 0px top margin、modal ancestry、筛选控件、深色模式和 ranklist 全文件 full-chain 9 tests 均保持通过。
 ```
 
 ## 合集页 `/collection/:id`
@@ -595,7 +597,7 @@ URL:
 - `[x]` 接受路由兼容迁移完成，但保留列出的后续 slice
 - `[ ]` 暂不收口，先修复阻塞项
 
-最新自动化结论：Ranklist filter controls DOM parity 已纳入收口记录，完整 gate 已通过。
+最新自动化结论：Ranklist table spacer class parity 已纳入收口记录，完整 gate 已通过。
 
 无当前已复现阻塞；SRK controls extra-action gap parity、App shell legacy layout/logo class parity、App shell site-switch trigger `px-2` class parity、App shell site-switch dropdown content class/style parity、Fallback 404 class token parity、SRK table wrapper class attribute parity、Playground preview wrapper DOM/class parity、Playground docs link anchor class parity、Playground docs link wrapper class parity、Playground docs link wrapper DOM parity、Playground docs link rel omission parity、App shell site-switch rel omission parity、Beian link rel omission parity、Home external link rel omission parity、ContactUs trigger anchor DOM parity、SRK contributor link rel parity、SRK header ref-link rel parity、SRK header meta DOM parity、SRK contributor item span DOM parity、SRK ref-link item span DOM parity、Playground shortcut tag mr-0 class parity、Collection selected-ranklist pb-8 class parity、Collection wrapper DOM parity、Collection hidden-header title style parity、Route content utility class parity、Ranklist loaded wrapper DOM parity、Live route wrapper chrome parity、Live root wrapper DOM parity、Live content wrapper DOM parity、Live scroll-solution unknown result class parity、Live scroll-solution order parity、Live mobile scroll toggle DOM parity、SRK checker error DOM parity、SRK check-error wrapper class parity、user modal empty organization line parity、SRK modal root class parity、SRK modal table-wrapper DOM parity、SRK table spacer DOM parity、SRK header action display parity、SRK header action gap parity、SRK extra ref-link spacing parity、SRK view-count utility-class parity、SRK progress wrapper utility-class parity、user modal empty photo wrapper parity、SRK asset image error parity、Contact QQ image class parity、SRK header utility class parity、SRK header action utility class parity、SRK header title typography parity、header text size parity、header view-count fallback parity、SRK controls utility class parity、SRK remarks wrapper utility class parity、SRK footer utility class parity、SSR hydration marker visual parity、search shell DOM parity、search heading DOM parity、search input DOM parity、search list item DOM parity、search result count DOM parity、search keyword whitespace parity、search state wrapper DOM parity、search section content DOM parity、search row content DOM parity、search error message DOM parity、search state utility class parity、search error DOM parity、search list utility class parity、Playground legacy shell class parity、Playground invalid prompt class parity、user modal root class parity、user modal organization line class parity、user modal team members class parity、user modal team separator raw text coverage、user modal team-member entry DOM parity、user modal markers class parity、user modal unofficial line class parity、user modal segment line class parity、user modal segment label class parity、user modal slogan spacing class parity、user modal photo wrapper class parity 和 user modal photo/slogan shared wrapper DOM parity 已补充，保留 product-review-driven SRK lower-level table pixel parity / route polish 作为后续 review-driven slice。
 

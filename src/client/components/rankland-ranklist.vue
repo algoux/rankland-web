@@ -215,7 +215,7 @@
         </div>
       </div>
 
-      <div data-id="rankland-ranklist-table-spacer" class="rankland-ranklist-table-spacer mt-6" />
+      <div data-id="rankland-ranklist-table-spacer" class="mt-6" />
       <div data-id="rankland-ranklist-table-wrapper" v-bind="tableWrapperAttrs">
         <div v-if="ranklistState.staticRanklist.remarks" class="rankland-ranklist-remarks mb-4 text-center">
           <span class="srk-remarks">备注：{{ resolveTextValue(ranklistState.staticRanklist.remarks) }}</span>
@@ -1138,10 +1138,6 @@ span.ml-5.inline-flex.items-center .mr-1 {
   border-radius: 4px;
   font-size: 12px;
   opacity: 0.75;
-}
-
-.rankland-ranklist-table-spacer {
-  height: 0;
 }
 
 .mt-6 {
