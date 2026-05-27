@@ -518,6 +518,11 @@ test.describe('/ranklist/:id full-chain route', () => {
     await expect(page.locator('[data-id="rankland-ranklist-contributors"]')).toContainText(
       '贡献者：https://github.com/rankland-alpha, Team Beta',
     );
+    expect(await page.locator('[data-id="rankland-ranklist-contributors"]').evaluate((element) => (
+      Array.from(element.children)
+        .filter((child) => child.tagName === 'SPAN')
+        .map((child) => (child.textContent || '').replace(/\s+/g, ' ').trim())
+    ))).toEqual(['https://github.com/rankland-alpha', ', Team Beta']);
     expect(await getHeaderMetaBlockSpacing(page)).toMatchObject({
       metaMarginBottom: '0px',
       contributorsMarginTop: '0px',

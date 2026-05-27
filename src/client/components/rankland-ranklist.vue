@@ -119,11 +119,11 @@
           class="rankland-ranklist-contributors mb-0"
         >
           贡献者：<template v-for="(contributor, contributorIndex) in headerContributors" :key="contributor.key">
-            <span v-if="contributorIndex > 0">, </span>
-            <a v-if="contributor.href" :href="contributor.href" target="_blank" rel="noreferrer">
-              {{ contributor.label }}
-            </a>
-            <span v-else>{{ contributor.label }}</span>
+            <span>
+              {{ contributorIndex > 0 ? ', ' : '' }}<a v-if="contributor.href" :href="contributor.href" target="_blank" rel="noreferrer">
+                {{ contributor.label }}
+              </a><span v-else>{{ contributor.label }}</span>
+            </span>
           </template>
         </p>
         <span v-if="mainRefLinks.length > 0" data-id="rankland-ranklist-ref-links" class="rankland-ranklist-ref-links">
