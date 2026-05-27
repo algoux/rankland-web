@@ -684,7 +684,8 @@ test.describe('/live/:id full-chain route', () => {
     await expect(page.locator('[data-id="live-ranklist-content"]')).toBeVisible();
     await expect(page.locator('[data-id="live-hydrated"]')).toHaveText('hydrated');
     await expect(page.getByText('Team Alpha')).toBeVisible();
-    await expect(page.locator('[data-id="live-scroll-solution-toggle"]')).toBeHidden();
+    await expect(page.locator('[data-id="live-scroll-solution-toggle"]')).toHaveCount(0);
+    await expect(page.locator('.live-scroll-toggle')).toHaveCount(0);
     await expect(page.locator('[data-id="live-scroll-solution"]')).toBeHidden();
   });
 

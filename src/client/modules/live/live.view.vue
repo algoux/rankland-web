@@ -51,7 +51,7 @@
         table-class="ml-4"
       >
         <template #extra-action>
-          <label class="live-scroll-toggle inline-flex items-center">
+          <label v-if="showScrollSolutionToggle" class="live-scroll-toggle inline-flex items-center">
             <span class="mr-1">实时滚动提交状态</span>
             <a-switch
               data-id="live-scroll-solution-toggle"
@@ -151,6 +151,7 @@ const LivePage = defineComponent({
       scrollSolutionDismissTimers: [] as number[],
       scrollSolutionSequence: 0,
       scrollSolutionContainerMaxHeight: 0,
+      clientWidth: 0,
     };
   },
   computed: {
@@ -171,6 +172,9 @@ const LivePage = defineComponent({
     },
     scrollSolutionVisibleLimit(): number {
       return getScrollSolutionVisibleLimit(this.scrollSolutionContainerMaxHeight);
+    },
+    showScrollSolutionToggle(): boolean {
+      return this.clientWidth >= 768;
     },
     ranklistTitle(): string {
       const title = this.ranklist?.contest?.title || this.info?.title;
@@ -272,6 +276,7 @@ const LivePage = defineComponent({
     },
     updateScrollSolutionContainerHeight() {
       this.scrollSolutionContainerMaxHeight = window.innerHeight;
+      this.clientWidth = window.innerWidth;
       this.scrollSolutions = this.scrollSolutions.slice(0, this.scrollSolutionVisibleLimit);
     },
     resetScrollSolutions() {
