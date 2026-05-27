@@ -147,6 +147,34 @@ async function getLiveWrapperChrome(page: Page) {
   });
 }
 
+async function getLiveControlsChrome(page: Page) {
+  return page.evaluate(() => {
+    const controls = document.querySelector<HTMLElement>('[data-id="rankland-ranklist-controls"]');
+    const extraAction = document.querySelector<HTMLElement>('[data-id="rankland-ranklist-extra-action"]');
+    const liveToggle = document.querySelector<HTMLElement>('.live-scroll-toggle');
+    if (!controls || !extraAction || !liveToggle) {
+      throw new Error('Missing live controls chrome target');
+    }
+
+    const controlsStyle = window.getComputedStyle(controls);
+    const extraActionStyle = window.getComputedStyle(extraAction);
+    const liveToggleStyle = window.getComputedStyle(liveToggle);
+    return {
+      controlsClasses: Array.from(controls.classList),
+      controlsDisplay: controlsStyle.display,
+      controlsJustifyContent: controlsStyle.justifyContent,
+      controlsAlignItems: controlsStyle.alignItems,
+      controlsColumnGap: controlsStyle.columnGap,
+      controlsRowGap: controlsStyle.rowGap,
+      extraActionDisplay: extraActionStyle.display,
+      extraActionColumnGap: extraActionStyle.columnGap,
+      extraActionRowGap: extraActionStyle.rowGap,
+      liveToggleDisplay: liveToggleStyle.display,
+      liveToggleColumnGap: liveToggleStyle.columnGap,
+    };
+  });
+}
+
 async function selectRanklistOrganization(page: Page, organization: string) {
   await page.locator('[data-id="rankland-ranklist-organization-filter"] .ant-select-selector').click();
   await page.locator('.ant-select-dropdown .ant-select-item-option', { hasText: organization }).click();
@@ -205,6 +233,26 @@ test.describe('/live/:id full-chain route', () => {
     await expect(page.locator('[data-id="rankland-ranklist-progress"]')).toBeVisible();
     await expect(page.locator('[data-id="rankland-ranklist-filters"]')).toBeVisible();
     await expect(page.locator('[data-id="rankland-ranklist-extra-action"]')).toBeVisible();
+    expect(await getLiveControlsChrome(page)).toMatchObject({
+      controlsClasses: expect.arrayContaining([
+        'rankland-ranklist-controls',
+        'mt-3',
+        'mx-4',
+        'flex',
+        'justify-between',
+        'items-center',
+      ]),
+      controlsDisplay: 'flex',
+      controlsJustifyContent: 'space-between',
+      controlsAlignItems: 'center',
+      controlsColumnGap: 'normal',
+      controlsRowGap: 'normal',
+      extraActionDisplay: 'block',
+      extraActionColumnGap: 'normal',
+      extraActionRowGap: 'normal',
+      liveToggleDisplay: 'inline-flex',
+      liveToggleColumnGap: '4px',
+    });
     await expect(page.locator('[data-id="rankland-ranklist-table-wrapper"]')).toHaveClass('ml-4');
     expect(await getTableWrapperMarginLeft(page)).toBe('16px');
     await expect(page.locator('[data-id="rankland-ranklist-footer"]')).toContainText('Powered by Standard Ranklist');

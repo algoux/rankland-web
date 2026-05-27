@@ -1088,7 +1088,6 @@ export default defineComponent({
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 16px;
   margin: 12px 16px 0;
 }
 
@@ -1099,8 +1098,7 @@ export default defineComponent({
   gap: 0;
 }
 
-:global(.rankland-ranklist-filter),
-.rankland-ranklist-extra-action {
+:global(.rankland-ranklist-filter) {
   display: inline-flex;
   align-items: center;
   gap: 8px;
