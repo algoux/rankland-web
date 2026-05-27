@@ -634,6 +634,19 @@ test.describe('/ranklist/:id full-chain route', () => {
     });
     await expect(page.locator('[data-id="rankland-ranklist-footer"]')).toContainText('Powered by Standard Ranklist');
     await expect(page.locator('[data-id="rankland-ranklist-footer"]')).toContainText('需要专业的赛事外榜托管？');
+    const footerGitHubLink = page.locator('[data-id="rankland-ranklist-footer"] a[href="https://github.com/algoux"]');
+    await expect(footerGitHubLink).toHaveAttribute('target', '_blank');
+    expect(await footerGitHubLink.getAttribute('rel')).toBeNull();
+    const footerStandardRanklistLink = page.locator(
+      '[data-id="rankland-ranklist-footer"] a[href="https://github.com/algoux/standard-ranklist"]',
+    );
+    await expect(footerStandardRanklistLink).toHaveAttribute('target', '_blank');
+    expect(await footerStandardRanklistLink.getAttribute('rel')).toBeNull();
+    const footerCollectionLink = page.locator(
+      '[data-id="rankland-ranklist-footer"] a[href="https://github.com/algoux/srk-collection"]',
+    );
+    await expect(footerCollectionLink).toHaveAttribute('target', '_blank');
+    expect(await footerCollectionLink.getAttribute('rel')).toBeNull();
     expect(await getFooterParagraphSpacing(page)).toEqual([
       { marginTop: '0px', marginBottom: '0px' },
       { marginTop: '4px', marginBottom: '0px' },

@@ -234,17 +234,17 @@
       <footer v-if="showFooter" data-id="rankland-ranklist-footer" class="rankland-ranklist-footer text-center mt-8">
         <p class="mb-0">© 2022-present algoUX. All Rights Reserved.</p>
         <p class="mt-1 mb-0">
-          Find us on <a href="https://github.com/algoux" target="_blank" rel="noreferrer">GitHub</a>
+          Find us on <a href="https://github.com/algoux" target="_blank">GitHub</a>
         </p>
         <p class="mt-1 mb-0">
           Powered by
-          <a href="https://github.com/algoux/standard-ranklist" target="_blank" rel="noreferrer">
+          <a href="https://github.com/algoux/standard-ranklist" target="_blank">
             Standard Ranklist
           </a>
         </p>
         <p class="mt-1 mb-0">
           欢迎补充榜单数据至
-          <a href="https://github.com/algoux/srk-collection" target="_blank" rel="noreferrer">榜单合集</a>
+          <a href="https://github.com/algoux/srk-collection" target="_blank">榜单合集</a>
         </p>
         <p class="mt-1 mb-0">
           需要专业的赛事外榜托管？
