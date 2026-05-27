@@ -62,7 +62,7 @@ git status --short --branch
 备注：
 
 ```text
-2026-05-27 最新记录：Live scroll toggle utility-class parity 已通过 focused RED/GREEN、完整默认 `test:migration`（build、35 unit files / 151 unit tests、1 SSR smoke test、1 shallow Playwright test、58 passed / 1 skipped full-chain Playwright tests）和 `git diff --check`；RED 复现 `.live-scroll-toggle` 缺少旧版 `inline-flex items-center`、文本缺少 `mr-1`、wrapper 仍为 Vue-only `column-gap: 4px`；GREEN 验证旧版 wrapper class token、文本 `mr-1` 4px margin、wrapper gap `normal`、开关 shape/state、文字样式，以及已还原的 SRK controls root / extra-action no-gap chrome。
+2026-05-27 最新记录：SRK banner mb-2 spacing parity 已通过 focused RED/GREEN、完整默认 `test:migration`（build、35 unit files / 151 unit tests、1 SSR smoke test、1 shallow Playwright test、58 passed / 1 skipped full-chain Playwright tests）和 `git diff --check`；RED 复现 SRK banner wrapper 仍为 Vue-only `margin-bottom: 8px`、banner image `mb-2` 未承载间距且 `margin-bottom: 0px`；GREEN 验证旧版 wrapper 0px bottom margin、banner image `mb-2` 8px bottom margin、既有 wrapper/image class token 和既有 max-width/max-height 行为。
 ```
 
 ## 全局外壳与跨路由行为
@@ -214,7 +214,7 @@ App shell Ant Design Vue Layout/Menu/Dropdown/Button、旧版根布局 `layout` 
 - `[x]` 有效榜单的 SRK 表格渲染达到验收标准
 - `[x]` SRK 表格前保留旧版 `div.mt-6` spacer DOM，表格前 24px 间距不依赖 Vue-only wrapper margin
 - `[x]` SRK header title 使用旧版 `h1.text-center.mb-1` 的 32px/500/4px 标题排版
-- `[x]` SRK header banner、title、meta、contributors 和 time 保留旧版 `flex items-center justify-center` / `mb-2` / `text-center mb-1` / `text-center mt-1` / `mb-0` / `text-center mb-0` 工具类
+- `[x]` SRK header banner、title、meta、contributors 和 time 保留旧版 `flex items-center justify-center` / `mb-2` / `text-center mb-1` / `text-center mt-1` / `mb-0` / `text-center mb-0` 工具类，且 banner wrapper/image 的 0px/8px margin 来源与旧 React 一致
 - `[x]` SRK header meta、贡献者、相关链接和时间使用旧版 Ant Design body 14px 字号
 - `[x]` SRK header 在 metadata 缺失 `viewCnt` 时仍保留旧版 Eye icon 和 `-` 占位
 - `[x]` SRK header 浏览量节点保留旧版 `mr-2` 工具类

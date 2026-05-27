@@ -982,12 +982,15 @@ export default defineComponent({
 .rankland-ranklist-banner-wrap {
   display: flex;
   justify-content: center;
-  margin-bottom: 8px;
 }
 
 .rankland-ranklist-banner {
   max-width: min(100%, 1820px);
   max-height: 40vh;
+}
+
+.rankland-ranklist-banner.mb-2 {
+  margin-bottom: 8px;
 }
 
 .rankland-ranklist-header-meta {

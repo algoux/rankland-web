@@ -183,9 +183,13 @@ async function getHeaderUtilityClasses(page: Page) {
     if (!banner || !bannerWrap || !title || !meta || !contributors || !time) {
       throw new Error('Missing ranklist header utility class targets');
     }
+    const bannerWrapStyle = window.getComputedStyle(bannerWrap);
+    const bannerStyle = window.getComputedStyle(banner);
     return {
       bannerWrapClasses: Array.from(bannerWrap.classList),
       bannerClasses: Array.from(banner.classList),
+      bannerWrapMarginBottom: bannerWrapStyle.marginBottom,
+      bannerMarginBottom: bannerStyle.marginBottom,
       titleClasses: Array.from(title.classList),
       metaClasses: Array.from(meta.classList),
       contributorsClasses: Array.from(contributors.classList),
@@ -501,6 +505,8 @@ test.describe('/ranklist/:id full-chain route', () => {
         'justify-center',
       ]),
       bannerClasses: expect.arrayContaining(['rankland-ranklist-banner', 'mb-2']),
+      bannerWrapMarginBottom: '0px',
+      bannerMarginBottom: '8px',
       titleClasses: expect.arrayContaining(['text-center', 'mb-1']),
       metaClasses: expect.arrayContaining(['rankland-ranklist-header-meta', 'text-center', 'mt-1']),
       contributorsClasses: expect.arrayContaining(['rankland-ranklist-contributors', 'mb-0']),
