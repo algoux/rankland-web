@@ -708,6 +708,11 @@ test.describe('/ranklist/:id full-chain route', () => {
     await expect(page.locator('[data-id="rankland-ranklist-view-count"]')).toHaveText('42');
     await expect(page.locator('[data-id="rankland-ranklist-view-count"] .anticon-eye')).toBeVisible();
     await expect(page.locator('[data-id="rankland-ranklist-view-count"]')).toHaveClass(/(^|\s)mr-2(\s|$)/);
+    const viewCountClasses = await page.locator('[data-id="rankland-ranklist-view-count"]').evaluate((element) => (
+      Array.from(element.classList)
+    ));
+    expect(viewCountClasses).toEqual(['mr-2']);
+    expect(viewCountClasses).not.toContain('rankland-ranklist-view-count');
     await expect(page.locator('[data-id="rankland-ranklist-contributors"]')).toContainText(
       '贡献者：RankLand Alpha, Team Beta',
     );
