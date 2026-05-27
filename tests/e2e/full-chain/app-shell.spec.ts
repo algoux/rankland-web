@@ -391,6 +391,7 @@ test.describe('app shell full-chain behavior', () => {
     expect(response).not.toBeNull();
     expect(response?.status()).toBe(404);
     await expect(page.locator('[data-id="fallback-not-found"]')).toHaveText('404 Not Found · 你来到了榜单荒地');
+    await expect(page.locator('[data-id="fallback-not-found"]')).toHaveClass('text-center mt-32 text-xl');
     await expect(page.locator('[data-id="fallback-not-found"]')).toHaveCSS('margin-top', '128px');
     await expect(page.locator('[data-id="fallback-not-found"]')).toHaveCSS('font-size', '20px');
     await expect(page.locator('[data-id="fallback-not-found"]')).toHaveCSS('text-align', 'center');
