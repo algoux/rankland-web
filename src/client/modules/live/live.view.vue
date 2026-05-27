@@ -1,5 +1,5 @@
 <template>
-  <main data-id="live-page" class="live-page">
+  <div data-id="live-page">
     <Head>
       <title>{{ pageTitle }}</title>
       <meta property="og:title" :content="pageTitle">
@@ -63,7 +63,7 @@
         </template>
       </RanklandRanklist>
     </section>
-  </main>
+  </div>
 </template>
 
 <script lang="ts">
@@ -441,10 +441,6 @@ export default routeView(LivePage, '/live/:id', LiveRPO);
 </script>
 
 <style lang="less" scoped>
-.live-page {
-  min-height: 70vh;
-}
-
 .live-state,
 .live-content {
   margin-right: 0;

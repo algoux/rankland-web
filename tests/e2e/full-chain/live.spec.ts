@@ -150,6 +150,9 @@ async function getLiveWrapperChrome(page: Page) {
     const pageStyle = window.getComputedStyle(pageElement);
     const contentStyle = window.getComputedStyle(contentElement);
     return {
+      pageTagName: pageElement.tagName,
+      pageClasses: Array.from(pageElement.classList),
+      pageMinHeight: pageStyle.minHeight,
       pagePaddingTop: pageStyle.paddingTop,
       pagePaddingRight: pageStyle.paddingRight,
       pagePaddingBottom: pageStyle.paddingBottom,
@@ -228,6 +231,9 @@ test.describe('/live/:id full-chain route', () => {
       marginBottom: '32px',
     });
     expect(await getLiveWrapperChrome(page)).toMatchObject({
+      pageTagName: 'DIV',
+      pageClasses: [],
+      pageMinHeight: '0px',
       pagePaddingTop: '0px',
       pagePaddingRight: '0px',
       pagePaddingBottom: '0px',
