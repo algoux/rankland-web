@@ -13,7 +13,7 @@
       <div data-id="home-recommendations" class="block home-section">
         <h1 class="block-title">为你推荐</h1>
         <a-row :gutter="[16, 16]" style="margin-left: 0; margin-right: 0;">
-          <a-col :xs="24" :sm="12">
+          <a-col class="mb-4" :xs="24" :sm="12">
             <router-link
               data-id="home-recommendation-search"
               class="home-card-link"
@@ -30,7 +30,7 @@
               </a-card>
             </router-link>
           </a-col>
-          <a-col :xs="24" :sm="12">
+          <a-col class="mb-4" :xs="24" :sm="12">
             <router-link
               data-id="home-recommendation-collection"
               class="home-card-link"
@@ -51,7 +51,7 @@
       <div data-id="home-tools" class="block home-section">
         <h1 class="block-title">算竞周边工具</h1>
         <a-row :gutter="[16, 16]" style="margin-left: 0; margin-right: 0;">
-          <a-col :xs="24" :sm="12">
+          <a-col class="mb-4" :xs="24" :sm="12">
             <a
               data-id="home-tool-paste-then-ac"
               class="home-card-link"
@@ -67,7 +67,7 @@
               </a-card>
             </a>
           </a-col>
-          <a-col :xs="24" :sm="12">
+          <a-col class="mb-4" :xs="24" :sm="12">
             <a
               data-id="home-tool-algo-bootstrap"
               class="home-card-link"
@@ -298,6 +298,10 @@ export default routeView(HomePage, '/', undefined, undefined, {
 
 .home-section {
   margin-top: 40px;
+}
+
+.mb-4 {
+  margin-bottom: 16px;
 }
 
 .home-section .block-title {
