@@ -1,5 +1,5 @@
 <template>
-  <main>
+  <div>
     <Head>
       <title>{{ pageTitle }}</title>
       <link rel="canonical" :href="canonicalUrl">
@@ -21,10 +21,10 @@
 
     <a-spin v-else-if="!ranklist" data-id="ranklist-loading" class="ranklist-state mt-16 text-center" />
 
-    <section
+    <div
       v-else
       data-id="ranklist-content"
-      class="ranklist-content mt-8 mb-8"
+      class="mt-8 mb-8"
       :data-ranklist-id="ranklistId"
       :data-row-count="rowCount"
     >
@@ -40,8 +40,8 @@
         show-footer
         table-class="ml-4"
       />
-    </section>
-  </main>
+    </div>
+  </div>
 </template>
 
 <script lang="ts">

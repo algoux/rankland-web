@@ -472,6 +472,25 @@ async function getRouteContentSpacing(page: Page, selector: string) {
   }, selector);
 }
 
+async function getRanklistLoadedWrapperDom(page: Page) {
+  return page.evaluate(() => {
+    const content = document.querySelector<HTMLElement>('[data-id="ranklist-content"]');
+    if (!content || !(content.parentElement instanceof HTMLElement)) {
+      throw new Error('Missing ranklist content wrapper');
+    }
+
+    const contentStyle = window.getComputedStyle(content);
+    return {
+      rootTagName: content.parentElement.tagName,
+      rootClasses: Array.from(content.parentElement.classList),
+      contentTagName: content.tagName,
+      contentClasses: Array.from(content.classList),
+      contentMarginTop: contentStyle.marginTop,
+      contentMarginBottom: contentStyle.marginBottom,
+    };
+  });
+}
+
 async function hasLoadedZcoolXiaoWeiFont(page: Page) {
   return page.evaluate(async () => {
     await document.fonts.ready;
@@ -532,6 +551,14 @@ test.describe('/ranklist/:id full-chain route', () => {
     expect(await getRouteContentSpacing(page, '[data-id="ranklist-content"]')).toMatchObject({
       marginTop: '32px',
       marginBottom: '32px',
+    });
+    expect(await getRanklistLoadedWrapperDom(page)).toMatchObject({
+      rootTagName: 'DIV',
+      rootClasses: [],
+      contentTagName: 'DIV',
+      contentClasses: ['mt-8', 'mb-8'],
+      contentMarginTop: '32px',
+      contentMarginBottom: '32px',
     });
     await expect(page.locator('.srk-user-cell', { hasText: 'Team Alpha' })).toBeVisible();
     await expect(page.locator('.srk-user-cell', { hasText: 'Team Beta' })).toBeVisible();
