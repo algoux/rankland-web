@@ -5,9 +5,9 @@ This file is the quick global dashboard for the RankLand migration. Update it at
 ## Current Focus
 
 - Active branch: `migration/live-page-foundation`
-- Current slice: Ranklist filter control inner gap parity
-- Latest slice commit: `fix: 还原榜单筛选控件内部间距`
-- Last recorded full gate: passed on 2026-05-28 for Ranklist filter control inner gap parity with Node `v24.11.1`, pnpm `8.15.9`, generated 8 client routes, build, 35 unit files / 152 unit tests, 1 SSR smoke test, 1 shallow Playwright test, and 60 passed / 1 skipped default full-chain Playwright tests with the conditional beian spec skipped outside `cnn`; focused RED reproduced Vue-only wrapper gaps with `organizationFilterColumnGap: 8px` and `checkboxColumnGap: 4px`; focused GREEN verified no declared wrapper gap (`normal`) while the old utility-spacing visual gaps are restored locally as organization text-to-Select `8px` and official text-to-Switch `4px`; full Ranklist full-chain regression passed 9 tests including mobile controls layout and desktop/mobile viewport bounds; `git diff --check` also passed.
+- Current slice: Ranklist filter controls DOM parity
+- Latest slice commit: `fix: 还原榜单筛选控件 DOM`
+- Last recorded full gate: passed on 2026-05-28 for Ranklist filter controls DOM parity with Node `v24.11.1`, pnpm `8.15.9`, generated 8 client routes, build, 35 unit files / 152 unit tests, 1 SSR smoke test, 1 shallow Playwright test, and 60 passed / 1 skipped default full-chain Playwright tests with the conditional beian spec skipped outside `cnn`; focused RED reproduced Vue-only direct `LABEL` wrappers under the filters root, organization Select parent `LABEL`, and official wrapper `LABEL` with `.rankland-ranklist-filter`; focused GREEN verified the old React direct child sequence `SPAN` / Select root / official `SPAN` / Radio.Group root, no direct labels, organization Select parent as filters root, official wrapper as `SPAN`, and no `.rankland-ranklist-filter`; full Ranklist full-chain regression passed 9 tests including spacing, mobile layout, and desktop/mobile viewport bounds; `git diff --check` also passed.
 - Next recommended focus: product-review-driven SRK lower-level table pixel parity or route polish
 
 ## Route Progress

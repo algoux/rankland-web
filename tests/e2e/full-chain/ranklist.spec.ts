@@ -411,21 +411,19 @@ async function getFooterUtilityClasses(page: Page) {
 async function getFilterControlSpacing(page: Page) {
   return page.evaluate(() => {
     const filters = document.querySelector<HTMLElement>('[data-id="rankland-ranklist-filters"]');
-    const organizationFilterLabel = document
-      .querySelector<HTMLElement>('[data-id="rankland-ranklist-organization-filter"]')
-      ?.closest<HTMLElement>('.rankland-ranklist-filter');
+    const organizationFilter = document.querySelector<HTMLElement>('[data-id="rankland-ranklist-organization-filter"]');
     const checkbox = document.querySelector<HTMLElement>('.rankland-ranklist-checkbox');
     const markerFilter = document.querySelector<HTMLElement>('[data-id="rankland-ranklist-marker-filter"]');
-    if (!filters || !organizationFilterLabel || !checkbox || !markerFilter) {
+    if (!filters || !organizationFilter || !checkbox || !markerFilter) {
       throw new Error('Missing ranklist filter controls');
     }
     const filtersStyle = window.getComputedStyle(filters);
-    const organizationFilterLabelStyle = window.getComputedStyle(organizationFilterLabel);
+    const organizationFilterStyle = window.getComputedStyle(organizationFilter);
     const checkboxStyle = window.getComputedStyle(checkbox);
     const markerFilterStyle = window.getComputedStyle(markerFilter);
     return {
       filtersColumnGap: filtersStyle.columnGap,
-      organizationFilterColumnGap: organizationFilterLabelStyle.columnGap,
+      organizationFilterMarginLeft: organizationFilterStyle.marginLeft,
       checkboxMarginLeft: checkboxStyle.marginLeft,
       checkboxColumnGap: checkboxStyle.columnGap,
       markerMarginLeft: markerFilterStyle.marginLeft,
@@ -435,25 +433,26 @@ async function getFilterControlSpacing(page: Page) {
 
 async function getFilterControlInnerGaps(page: Page) {
   return page.evaluate(() => {
-    const organizationFilterLabel = document
-      .querySelector<HTMLElement>('[data-id="rankland-ranklist-organization-filter"]')
-      ?.closest<HTMLElement>('.rankland-ranklist-filter');
+    const filters = document.querySelector<HTMLElement>('[data-id="rankland-ranklist-filters"]');
     const organizationFilter = document.querySelector<HTMLElement>('[data-id="rankland-ranklist-organization-filter"]');
-    const organizationText = Array.from(organizationFilterLabel?.children || []).find(
-      (element): element is HTMLElement =>
-        element instanceof HTMLElement && element.textContent?.trim() === '筛选',
-    );
+    const organizationText =
+      Array.from(filters?.children || []).find(
+        (element): element is HTMLElement =>
+          element instanceof HTMLElement && element.textContent?.trim() === '筛选',
+      ) ||
+      Array.from(filters?.querySelectorAll<HTMLElement>('span') || []).find(
+        (element) => element.textContent?.trim() === '筛选',
+      );
     const officialFilter = document.querySelector<HTMLElement>('[data-id="rankland-ranklist-official-filter"]');
     const officialWrapper = officialFilter?.closest<HTMLElement>('.rankland-ranklist-checkbox');
     const officialText = Array.from(officialWrapper?.children || []).find(
       (element): element is HTMLElement =>
         element instanceof HTMLElement && element.textContent?.trim() === '仅正式参赛',
     );
-    if (!organizationFilterLabel || !organizationFilter || !organizationText || !officialWrapper || !officialFilter || !officialText) {
+    if (!filters || !organizationFilter || !organizationText || !officialWrapper || !officialFilter || !officialText) {
       throw new Error('Missing ranklist filter inner gap targets');
     }
 
-    const organizationFilterLabelStyle = window.getComputedStyle(organizationFilterLabel);
     const officialWrapperStyle = window.getComputedStyle(officialWrapper);
     const organizationTextBox = organizationText.getBoundingClientRect();
     const organizationFilterBox = organizationFilter.getBoundingClientRect();
@@ -463,8 +462,41 @@ async function getFilterControlInnerGaps(page: Page) {
     return {
       checkboxColumnGap: officialWrapperStyle.columnGap,
       officialTextToSwitchGap: Math.round(officialFilterBox.left - officialTextBox.right),
-      organizationFilterColumnGap: organizationFilterLabelStyle.columnGap,
       organizationTextToSelectGap: Math.round(organizationFilterBox.left - organizationTextBox.right),
+    };
+  });
+}
+
+async function getFilterControlDomParity(page: Page) {
+  return page.evaluate(() => {
+    const filters = document.querySelector<HTMLElement>('[data-id="rankland-ranklist-filters"]');
+    const organizationFilter = document.querySelector<HTMLElement>('[data-id="rankland-ranklist-organization-filter"]');
+    const officialFilter = document.querySelector<HTMLElement>('[data-id="rankland-ranklist-official-filter"]');
+    const officialWrapper = officialFilter?.closest<HTMLElement>('.rankland-ranklist-checkbox');
+    const markerFilter = document.querySelector<HTMLElement>('[data-id="rankland-ranklist-marker-filter"]');
+    if (!filters || !organizationFilter || !officialWrapper || !markerFilter) {
+      throw new Error('Missing ranklist filter DOM parity targets');
+    }
+
+    const children = Array.from(filters.children).map((child) => {
+      const element = child as HTMLElement;
+      return {
+        classList: Array.from(element.classList),
+        dataId: element.getAttribute('data-id') || '',
+        tagName: element.tagName,
+        text: element.textContent?.trim() || '',
+      };
+    });
+
+    return {
+      childSummaries: children.slice(0, 4),
+      directLabelCount: filters.querySelectorAll(':scope > label').length,
+      markerParentDataId: markerFilter.parentElement?.getAttribute('data-id') || '',
+      organizationParentDataId: organizationFilter.parentElement?.getAttribute('data-id') || '',
+      organizationParentTagName: organizationFilter.parentElement?.tagName || '',
+      officialWrapperClasses: Array.from(officialWrapper.classList),
+      officialWrapperParentDataId: officialWrapper.parentElement?.getAttribute('data-id') || '',
+      officialWrapperTagName: officialWrapper.tagName,
     };
   });
 }
@@ -1362,7 +1394,7 @@ test.describe('/ranklist/:id full-chain route', () => {
     ]);
     expect(await getFilterControlSpacing(page)).toMatchObject({
       filtersColumnGap: '0px',
-      organizationFilterColumnGap: 'normal',
+      organizationFilterMarginLeft: '8px',
       checkboxMarginLeft: '20px',
       checkboxColumnGap: 'normal',
       markerMarginLeft: '20px',
@@ -1370,8 +1402,24 @@ test.describe('/ranklist/:id full-chain route', () => {
     expect(await getFilterControlInnerGaps(page)).toMatchObject({
       checkboxColumnGap: 'normal',
       officialTextToSwitchGap: 4,
-      organizationFilterColumnGap: 'normal',
       organizationTextToSelectGap: 8,
+    });
+    expect(await getFilterControlDomParity(page)).toMatchObject({
+      childSummaries: [
+        { tagName: 'SPAN', text: '筛选' },
+        { dataId: 'rankland-ranklist-organization-filter', tagName: 'DIV' },
+        {
+          classList: expect.arrayContaining(['rankland-ranklist-checkbox', 'ml-5', 'inline-flex', 'items-center']),
+          tagName: 'SPAN',
+        },
+        { dataId: 'rankland-ranklist-marker-filter', tagName: 'DIV' },
+      ],
+      directLabelCount: 0,
+      markerParentDataId: 'rankland-ranklist-filters',
+      organizationParentDataId: 'rankland-ranklist-filters',
+      organizationParentTagName: 'DIV',
+      officialWrapperParentDataId: 'rankland-ranklist-filters',
+      officialWrapperTagName: 'SPAN',
     });
     expect(await getControlsUtilityClasses(page)).toMatchObject({
       controlsClasses: expect.arrayContaining([
@@ -1384,7 +1432,6 @@ test.describe('/ranklist/:id full-chain route', () => {
       ]),
       organizationFilterClasses: expect.arrayContaining(['rankland-ranklist-select', 'ml-2']),
       officialWrapperClasses: expect.arrayContaining([
-        'rankland-ranklist-filter',
         'rankland-ranklist-checkbox',
         'ml-5',
         'inline-flex',
