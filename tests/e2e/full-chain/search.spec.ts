@@ -126,9 +126,13 @@ test.describe('/search full-chain route', () => {
       '初始化榜单数据库失败，请刷新再试。',
     );
     await expect(page.locator('[data-id="search-error"]')).toHaveClass(/mt-10/);
-    await expect(page.locator('[data-id="search-error"]')).toHaveClass(/text-red-500/);
+    await expect(page.locator('[data-id="search-error"]')).not.toHaveClass(/text-red-500/);
     await expect(page.locator('[data-id="search-error"]')).toHaveCSS('margin-top', '40px');
-    await expect(page.locator('[data-id="search-error"]')).toHaveCSS('color', 'rgb(239, 68, 68)');
+    await expect(page.locator('[data-id="search-error"] .search-error-message')).toHaveText(
+      '初始化榜单数据库失败，请刷新再试。',
+    );
+    await expect(page.locator('[data-id="search-error"] .search-error-message')).toHaveClass(/text-red-500/);
+    await expect(page.locator('[data-id="search-error"] .search-error-message')).toHaveCSS('color', 'rgb(239, 68, 68)');
   });
 
   test('renders the recent empty state with the legacy mt-2 spacing', async ({ page, request }) => {
