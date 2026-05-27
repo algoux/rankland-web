@@ -126,6 +126,27 @@ async function getRouteContentSpacing(page: Page, selector: string) {
   }, selector);
 }
 
+async function getLiveWrapperChrome(page: Page) {
+  return page.evaluate(() => {
+    const pageElement = document.querySelector<HTMLElement>('[data-id="live-page"]');
+    const contentElement = document.querySelector<HTMLElement>('[data-id="live-ranklist-content"]');
+    if (!pageElement || !contentElement) {
+      throw new Error('Missing live page or content element');
+    }
+    const pageStyle = window.getComputedStyle(pageElement);
+    const contentStyle = window.getComputedStyle(contentElement);
+    return {
+      pagePaddingTop: pageStyle.paddingTop,
+      pagePaddingRight: pageStyle.paddingRight,
+      pagePaddingBottom: pageStyle.paddingBottom,
+      pagePaddingLeft: pageStyle.paddingLeft,
+      contentMaxWidth: contentStyle.maxWidth,
+      contentMarginLeft: contentStyle.marginLeft,
+      contentMarginRight: contentStyle.marginRight,
+    };
+  });
+}
+
 async function selectRanklistOrganization(page: Page, organization: string) {
   await page.locator('[data-id="rankland-ranklist-organization-filter"] .ant-select-selector').click();
   await page.locator('.ant-select-dropdown .ant-select-item-option', { hasText: organization }).click();
@@ -155,6 +176,15 @@ test.describe('/live/:id full-chain route', () => {
     expect(await getRouteContentSpacing(page, '[data-id="live-ranklist-content"]')).toMatchObject({
       marginTop: '32px',
       marginBottom: '32px',
+    });
+    expect(await getLiveWrapperChrome(page)).toMatchObject({
+      pagePaddingTop: '0px',
+      pagePaddingRight: '0px',
+      pagePaddingBottom: '0px',
+      pagePaddingLeft: '0px',
+      contentMaxWidth: 'none',
+      contentMarginLeft: '250px',
+      contentMarginRight: '0px',
     });
     await expect(page.locator('[data-id="live-hydrated"]')).toHaveText('hydrated');
     await expect(page.locator('[data-id="live-hydrated"]')).toHaveCSS('width', '1px');

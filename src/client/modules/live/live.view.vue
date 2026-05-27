@@ -438,14 +438,12 @@ export default routeView(LivePage, '/live/:id', LiveRPO);
 <style lang="less" scoped>
 .live-page {
   min-height: 70vh;
-  padding: 24px 16px;
 }
 
 .live-state,
 .live-content {
-  max-width: 1280px;
-  margin-right: auto;
-  margin-left: auto;
+  margin-right: 0;
+  margin-left: 0;
 }
 
 .live-state {
@@ -465,7 +463,7 @@ export default routeView(LivePage, '/live/:id', LiveRPO);
 
 .live-content-with-scroll-solution {
   margin-left: 250px;
-  margin-right: 16px;
+  margin-right: 0;
 }
 
 .live-hydrated {

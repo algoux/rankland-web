@@ -62,7 +62,7 @@ git status --short --branch
 备注：
 
 ```text
-2026-05-27 最新记录：Live scroll-solution unknown result class parity 已通过 focused RED/GREEN、完整 `test:migration`（build、35 unit files / 151 unit tests、1 SSR smoke test、1 shallow Playwright test、58 full-chain Playwright tests）和 `git diff --check`；focused RED 复现未知实时结果 `SKIPPED` 仍返回 Vue-only `result-unknown`，GREEN 验证旧版 fallback 不添加结果专属 class，同时继续显示 `--`。
+2026-05-27 最新记录：Live route wrapper chrome parity 已通过 focused RED/GREEN、live full-chain 全文件、完整 `test:migration`（build、35 unit files / 151 unit tests、1 SSR smoke test、1 shallow Playwright test、58 full-chain Playwright tests）和 `git diff --check`；focused RED 复现 loaded live route 仍有 Vue-only `24px`/`16px` 页面 padding、`1280px` max-width 和 `16px` scroll-solution 右外边距，GREEN 验证旧版无 padding、无宽度上限、无自动居中，并保留旧版 `250px` scroll-solution 左偏移。
 ```
 
 ## 全局外壳与跨路由行为
@@ -361,6 +361,8 @@ App shell Ant Design Vue Layout/Menu/Dropdown/Button、旧版全局 body light/d
 - `[x]` 关闭 scroll-solution 时保留其他 query 参数
 - `[x]` 关闭 scroll-solution 时 WebSocket 会关闭
 - `[x]` WebSocket 异常关闭时展示实时错误，同时保留榜单可见
+- `[x]` loaded live 外层布局不添加 Vue-only route padding、`1280px` max-width 或自动居中
+- `[x]` scroll-solution 模式下 live 内容区保留旧版 `250px` 左偏移且不添加额外右外边距
 - `[x]` scroll-solution 开关文本与 Switch 间距使用旧版 `4px`
 - `[x]` scroll-solution 开关文字使用旧版 `14px` 和 light `rgba(0, 0, 0, 0.85)` 正文色
 - `[x]` scroll-solution 未知结果使用旧版 `--` 文案且不添加 Vue-only `result-unknown` 类
@@ -379,7 +381,7 @@ App shell Ant Design Vue Layout/Menu/Dropdown/Button、旧版全局 body light/d
 备注：
 
 ```text
-2026-05-27 复核：live full-chain 使用 mock backend 和 stub WebSocket 覆盖 CSR hydration、hydration marker 视觉隐藏、query 保留、polling、WebSocket setup/reconnect/close、Toastify/scroll-solution、scroll-solution 开关旧版 4px 间距、旧版 14px 和 light `rgba(0, 0, 0, 0.85)` 文字样式、未知实时结果旧版 `--` fallback 与无 `result-unknown` class、no-meta header action 旧版工具类和导出按钮不带 `pl-2 border-l`、用户弹窗 rank-time 旧版 chart-only `mt-4` 外壳类名和 G2 图表、Not Found、普通/实时桌面移动端截图和 bounds。
+2026-05-27 复核：live full-chain 使用 mock backend 和 stub WebSocket 覆盖 CSR hydration、hydration marker 视觉隐藏、query 保留、polling、loaded live 外层无 Vue-only padding/max-width/auto-centering、scroll-solution 旧版 250px 左偏移且无额外右外边距、WebSocket setup/reconnect/close、Toastify/scroll-solution、scroll-solution 开关旧版 4px 间距、旧版 14px 和 light `rgba(0, 0, 0, 0.85)` 文字样式、未知实时结果旧版 `--` fallback 与无 `result-unknown` class、no-meta header action 旧版工具类和导出按钮不带 `pl-2 border-l`、用户弹窗 rank-time 旧版 chart-only `mt-4` 外壳类名和 G2 图表、Not Found、普通/实时桌面移动端截图和 bounds。
 ```
 
 ## API 与数据行为
@@ -510,7 +512,7 @@ URL:
 - `[x]` 接受路由兼容迁移完成，但保留列出的后续 slice
 - `[ ]` 暂不收口，先修复阻塞项
 
-无当前已复现阻塞；Live scroll-solution unknown result class parity、SRK checker error DOM parity、user modal empty organization line parity、SRK modal root class parity、SRK table spacer DOM parity、SRK header action display parity、SRK header action gap parity、SRK extra ref-link spacing parity、SRK view-count utility-class parity、SRK progress wrapper utility-class parity、user modal empty photo wrapper parity、SRK asset image error parity、Contact QQ image class parity、SRK header utility class parity、SRK header action utility class parity、SRK header title typography parity、header text size parity、header view-count fallback parity、SRK controls utility class parity、SRK remarks wrapper utility class parity、SRK footer utility class parity、SSR hydration marker visual parity、search state utility class parity、search error DOM parity、search list utility class parity、Playground legacy shell class parity、Playground invalid prompt class parity、user modal root class parity、user modal organization line class parity、user modal team members class parity、user modal team separator raw text coverage、user modal markers class parity、user modal unofficial line class parity、user modal segment line class parity、user modal segment label class parity、user modal slogan spacing class parity、user modal photo wrapper class parity 和 user modal photo/slogan shared wrapper DOM parity 已补充，保留 product-review-driven SRK lower-level table pixel parity / route polish 作为后续 review-driven slice。
+无当前已复现阻塞；Live route wrapper chrome parity、Live scroll-solution unknown result class parity、SRK checker error DOM parity、user modal empty organization line parity、SRK modal root class parity、SRK table spacer DOM parity、SRK header action display parity、SRK header action gap parity、SRK extra ref-link spacing parity、SRK view-count utility-class parity、SRK progress wrapper utility-class parity、user modal empty photo wrapper parity、SRK asset image error parity、Contact QQ image class parity、SRK header utility class parity、SRK header action utility class parity、SRK header title typography parity、header text size parity、header view-count fallback parity、SRK controls utility class parity、SRK remarks wrapper utility class parity、SRK footer utility class parity、SSR hydration marker visual parity、search state utility class parity、search error DOM parity、search list utility class parity、Playground legacy shell class parity、Playground invalid prompt class parity、user modal root class parity、user modal organization line class parity、user modal team members class parity、user modal team separator raw text coverage、user modal markers class parity、user modal unofficial line class parity、user modal segment line class parity、user modal segment label class parity、user modal slogan spacing class parity、user modal photo wrapper class parity 和 user modal photo/slogan shared wrapper DOM parity 已补充，保留 product-review-driven SRK lower-level table pixel parity / route polish 作为后续 review-driven slice。
 
 最终收口前必须完成：
 
