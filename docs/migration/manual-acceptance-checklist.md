@@ -62,7 +62,7 @@ git status --short --branch
 备注：
 
 ```text
-2026-05-28 最新记录：Live mobile scroll toggle DOM parity 已通过 focused RED/GREEN、完整默认 `test:migration`（build、35 unit files / 152 unit tests、1 SSR smoke test、1 shallow Playwright test、60 passed / 1 skipped full-chain Playwright tests）和 `git diff --check`；RED 复现 Vue-only 移动端仍保留隐藏 `[data-id="live-scroll-solution-toggle"]` DOM，旧 React 在 `clientWidth < 768` 时返回 `null`；GREEN 验证移动端 live 榜单仍渲染，同时 `[data-id="live-scroll-solution-toggle"]` 和 `.live-scroll-toggle` 不在 DOM 中，scroll-solution 面板保持隐藏。
+2026-05-28 最新记录：Ranklist filters root class parity 已通过 focused RED/GREEN、ranklist full-chain 9 tests、完整默认 `test:migration`（build、35 unit files / 152 unit tests、1 SSR smoke test、1 shallow Playwright test、60 passed / 1 skipped full-chain Playwright tests）和 `git diff --check`；RED 复现 filters 根节点仍带 Vue-only `.rankland-ranklist-filters` class，GREEN 验证 `[data-id="rankland-ranklist-filters"]` classList 为空，同时保留旧版 direct-child DOM、筛选行为和移动端布局。
 ```
 
 ## 全局外壳与跨路由行为
@@ -250,6 +250,7 @@ App shell Ant Design Vue Layout/Menu/Dropdown/Button、旧版根布局 `layout` 
 - `[x]` SRK controls 移动端保留旧版 row/center 布局、组织筛选 `160px` 宽度、正式筛选和分组筛选 20px 左边距，不使用 Vue-only column/stretch/100% 宽度覆盖
 - `[x]` SRK controls 内部间距不使用 Vue-only wrapper gap；组织筛选由本地 `.ml-2` 提供 8px，正式筛选文字由本地 `.mr-1` 提供 4px
 - `[x]` SRK filters 根节点直接包含旧版 `span`、Select、正式筛选 `span`、Radio.Group，不渲染 Vue-only `label.rankland-ranklist-filter` wrapper
+- `[x]` SRK filters 根节点保留旧版 plain `div` class 合同，不渲染 Vue-only `.rankland-ranklist-filters` 产品类；布局样式改由稳定 `data-id` 承载
 - `[x]` 点击行或成员可以打开用户弹窗
 - `[x]` 用户弹窗和题目解法弹窗根节点保留旧版 `srk-react-modal-root`，同时保留 `srk-modal-root`、`srk-animated-modal-root` 和 `srk-general-modal-root`
 - `[x]` 用户弹窗内容根节点保留旧版 `.user-modal` 类
@@ -302,6 +303,8 @@ App shell Ant Design Vue Layout/Menu/Dropdown/Button、旧版根布局 `layout` 
 2026-05-28 追加复核：ranklist SRK controls 内部间距已覆盖旧 React utility spacing 合同；RED 复现 Vue-only wrapper `gap` 仍为组织筛选 `8px`、正式筛选 `4px`，GREEN 验证 wrapper computed `column-gap: normal`，实际视觉间距由本地旧 utility 样式恢复为「筛选」到 Select `8px`、正式筛选文字到 Switch `4px`，ranklist 全文件 full-chain 9 tests 通过。
 
 2026-05-28 追加复核：ranklist SRK controls DOM 已覆盖旧 React direct-child 合同；RED 复现 filters 根节点下两个 Vue-only `LABEL` wrapper、organization Select parent 为 `LABEL`、official wrapper 为 `LABEL.rankland-ranklist-filter`，GREEN 验证 filters direct children 以 `SPAN`、Select root、official `SPAN`、Radio.Group root 开头，无 direct label，organization Select parent 为 filters root，official wrapper 为 `SPAN` 且不含 `.rankland-ranklist-filter`，ranklist 全文件 full-chain 9 tests 通过。
+
+2026-05-28 追加复核：ranklist SRK filters 根节点 class 合同已覆盖旧 React plain `div` 行为；RED 复现 Vue-only `.rankland-ranklist-filters` 产品类仍在根节点 classList 中，GREEN 验证 `[data-id="rankland-ranklist-filters"]` classList 为空，布局改由稳定 data-id 样式承载，旧版 direct-child DOM、筛选交互、移动端布局和 ranklist 全文件 full-chain 9 tests 均保持通过。
 ```
 
 ## 合集页 `/collection/:id`

@@ -169,7 +169,7 @@
         data-id="rankland-ranklist-controls"
         class="rankland-ranklist-controls mt-3 mx-4 flex justify-between items-center"
       >
-        <div v-if="showFilter" data-id="rankland-ranklist-filters" class="rankland-ranklist-filters">
+        <div v-if="showFilter" data-id="rankland-ranklist-filters">
           <span>筛选</span>
           <a-select
             v-model:value="filter.organizations"
@@ -1097,7 +1097,7 @@ export default defineComponent({
   margin: 12px 16px 0;
 }
 
-:global(.rankland-ranklist-filters) {
+[data-id='rankland-ranklist-filters'] {
   display: flex;
   flex-wrap: wrap;
   align-items: center;

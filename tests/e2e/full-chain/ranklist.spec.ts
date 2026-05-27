@@ -491,6 +491,7 @@ async function getFilterControlDomParity(page: Page) {
     return {
       childSummaries: children.slice(0, 4),
       directLabelCount: filters.querySelectorAll(':scope > label').length,
+      filtersClasses: Array.from(filters.classList),
       markerParentDataId: markerFilter.parentElement?.getAttribute('data-id') || '',
       organizationParentDataId: organizationFilter.parentElement?.getAttribute('data-id') || '',
       organizationParentTagName: organizationFilter.parentElement?.tagName || '',
@@ -1415,6 +1416,7 @@ test.describe('/ranklist/:id full-chain route', () => {
         { dataId: 'rankland-ranklist-marker-filter', tagName: 'DIV' },
       ],
       directLabelCount: 0,
+      filtersClasses: [],
       markerParentDataId: 'rankland-ranklist-filters',
       organizationParentDataId: 'rankland-ranklist-filters',
       organizationParentTagName: 'DIV',
