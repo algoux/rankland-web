@@ -905,6 +905,10 @@ test.describe('/ranklist/:id full-chain route', () => {
     await expect(ranklistShareTrigger).toHaveJSProperty('tagName', 'A');
     expect(await ranklistExportTrigger.getAttribute('href')).toBeNull();
     expect(await ranklistShareTrigger.getAttribute('href')).toBeNull();
+    expect(await ranklistExportTrigger.getAttribute('title')).toBeNull();
+    expect(await ranklistShareTrigger.getAttribute('title')).toBeNull();
+    expect(await ranklistExportTrigger.getAttribute('aria-label')).toBeNull();
+    expect(await ranklistShareTrigger.getAttribute('aria-label')).toBeNull();
     expect(await ranklistExportTrigger.evaluate((element) => Array.from(element.classList))).toEqual([
       'border-0',
       'border-solid',

@@ -313,6 +313,10 @@ test.describe('/live/:id full-chain route', () => {
     await expect(liveShareTrigger).toHaveJSProperty('tagName', 'A');
     expect(await liveExportTrigger.getAttribute('href')).toBeNull();
     expect(await liveShareTrigger.getAttribute('href')).toBeNull();
+    expect(await liveExportTrigger.getAttribute('title')).toBeNull();
+    expect(await liveShareTrigger.getAttribute('title')).toBeNull();
+    expect(await liveExportTrigger.getAttribute('aria-label')).toBeNull();
+    expect(await liveShareTrigger.getAttribute('aria-label')).toBeNull();
     expect(await liveExportTrigger.evaluate((element) => Array.from(element.classList))).toEqual([
       'border-0',
       'border-solid',

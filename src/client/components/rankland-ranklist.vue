@@ -44,8 +44,6 @@
                   'border-0 border-solid border-gray-400 mr-2',
                   { 'pl-2 border-l': hasViewCount },
                 ]"
-                title="导出"
-                aria-label="导出"
               >
                 <DownloadOutlined />
               </a>
@@ -85,8 +83,6 @@
               <a
                 data-id="rankland-ranklist-share-menu-button"
                 class="pl-2 border-0 border-l border-solid border-gray-400"
-                title="分享"
-                aria-label="分享"
               >
                 <ShareAltOutlined />
               </a>
