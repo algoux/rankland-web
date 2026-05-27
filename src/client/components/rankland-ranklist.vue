@@ -1307,26 +1307,4 @@ export default defineComponent({
   max-width: 400px;
   margin: 100px auto;
 }
-
-@media (max-width: 767px) {
-  .rankland-ranklist-controls {
-    align-items: stretch;
-    flex-direction: column;
-  }
-
-  :global(.rankland-ranklist-filters) {
-    align-items: stretch;
-    flex-direction: column;
-    gap: 12px;
-  }
-
-  :global(.rankland-ranklist-checkbox),
-  :global(.rankland-ranklist-marker-filter) {
-    margin-left: 0;
-  }
-
-  .rankland-ranklist-select {
-    width: 100%;
-  }
-}
 </style>

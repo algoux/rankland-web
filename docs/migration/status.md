@@ -5,9 +5,9 @@ This file is the quick global dashboard for the RankLand migration. Update it at
 ## Current Focus
 
 - Active branch: `migration/live-page-foundation`
-- Current slice: Collection hidden-header title style parity
-- Latest slice commit: `fix: 还原合集隐藏标题样式`
-- Last recorded full gate: passed on 2026-05-28 for Collection hidden-header title style parity with Node `v24.11.1`, pnpm `8.15.9`, generated 8 client routes, build, 35 unit files / 152 unit tests, 1 SSR smoke test, 1 shallow Playwright test, and 60 passed / 1 skipped default full-chain Playwright tests with the conditional beian spec skipped outside `cnn`; focused RED reproduced that `.srk-collection-hidden-header h3.mb-0` still emitted Vue-only inline `marginTop: 0px` where old React emitted no inline `marginTop`; focused GREEN verified no inline `marginTop`, preserved old expanded `marginLeft: 8px`, collapsed `fontSize: 14px` / `marginLeft: 0px`, and removed the Vue-only `line-height: 1` override by asserting computed line-height is greater than font size; full Collection full-chain regression passed 11 tests; `git diff --check` also passed.
+- Current slice: Ranklist mobile filter controls layout parity
+- Latest slice commit: `fix: 还原榜单移动端筛选布局`
+- Last recorded full gate: passed on 2026-05-28 for Ranklist mobile filter controls layout parity with Node `v24.11.1`, pnpm `8.15.9`, generated 8 client routes, build, 35 unit files / 152 unit tests, 1 SSR smoke test, 1 shallow Playwright test, and 60 passed / 1 skipped default full-chain Playwright tests with the conditional beian spec skipped outside `cnn`; focused RED reproduced that mobile SRK filter controls still used Vue-only `column` / `stretch` layout, `12px` filter gap, `0px` official/marker left margins, and stretched organization Select width `324.609px`; focused GREEN verified the old React mobile row layout with controls `row` / `center`, filter group `row` / `center`, no 12px gap, Select `160px`, and official/marker `20px` left margins; full Ranklist full-chain regression passed 9 tests including desktop/mobile viewport bounds; `git diff --check` also passed.
 - Next recommended focus: product-review-driven SRK lower-level table pixel parity or route polish
 
 ## Route Progress

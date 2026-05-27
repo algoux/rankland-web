@@ -433,6 +433,36 @@ async function getFilterControlSpacing(page: Page) {
   });
 }
 
+async function getMobileFilterControlLayout(page: Page) {
+  return page.evaluate(() => {
+    const controls = document.querySelector<HTMLElement>('[data-id="rankland-ranklist-controls"]');
+    const filters = document.querySelector<HTMLElement>('[data-id="rankland-ranklist-filters"]');
+    const organizationFilter = document.querySelector<HTMLElement>('[data-id="rankland-ranklist-organization-filter"]');
+    const officialWrapper = document.querySelector<HTMLElement>('.rankland-ranklist-checkbox');
+    const markerFilter = document.querySelector<HTMLElement>('[data-id="rankland-ranklist-marker-filter"]');
+    if (!controls || !filters || !organizationFilter || !officialWrapper || !markerFilter) {
+      throw new Error('Missing ranklist mobile filter layout targets');
+    }
+
+    const controlsStyle = window.getComputedStyle(controls);
+    const filtersStyle = window.getComputedStyle(filters);
+    const organizationFilterStyle = window.getComputedStyle(organizationFilter);
+    const officialWrapperStyle = window.getComputedStyle(officialWrapper);
+    const markerFilterStyle = window.getComputedStyle(markerFilter);
+    return {
+      controlsAlignItems: controlsStyle.alignItems,
+      controlsFlexDirection: controlsStyle.flexDirection,
+      filtersAlignItems: filtersStyle.alignItems,
+      filtersColumnGap: filtersStyle.columnGap,
+      filtersFlexDirection: filtersStyle.flexDirection,
+      filtersRowGap: filtersStyle.rowGap,
+      markerMarginLeft: markerFilterStyle.marginLeft,
+      officialMarginLeft: officialWrapperStyle.marginLeft,
+      organizationFilterWidth: organizationFilterStyle.width,
+    };
+  });
+}
+
 async function getControlsUtilityClasses(page: Page) {
   return page.evaluate(() => {
     const controls = document.querySelector<HTMLElement>('[data-id="rankland-ranklist-controls"]');
@@ -1327,6 +1357,22 @@ test.describe('/ranklist/:id full-chain route', () => {
       ]),
     });
 
+    await page.setViewportSize({ width: 390, height: 844 });
+    await reloadRanklistAndWaitForHydration(page);
+    expect(await getMobileFilterControlLayout(page)).toMatchObject({
+      controlsAlignItems: 'center',
+      controlsFlexDirection: 'row',
+      filtersAlignItems: 'center',
+      filtersColumnGap: '0px',
+      filtersFlexDirection: 'row',
+      filtersRowGap: '0px',
+      markerMarginLeft: '20px',
+      officialMarginLeft: '20px',
+      organizationFilterWidth: '160px',
+    });
+
+    await page.setViewportSize({ width: 1280, height: 800 });
+    await reloadRanklistAndWaitForHydration(page);
     await expect(page.locator('.srk-user-cell', { hasText: 'Team Alpha' })).toBeVisible();
     await expect(page.locator('.srk-user-cell', { hasText: 'Team Beta' })).toBeVisible();
 
