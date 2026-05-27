@@ -149,6 +149,9 @@ test.describe('/playground full-chain route', () => {
     await expect(page.locator('[data-id="playground-editor"]')).toHaveAttribute('data-editor-diagnostics', 'srk-schema');
     await expect(page.locator('[data-id="playground-editor"]')).toHaveCSS('border-top-width', '0px');
     await expect(page.locator('[data-id="playground-editor"]')).toHaveCSS('border-radius', '0px');
+    const monacoMinimap = page.locator('[data-id="playground-editor"] .minimap');
+    await expect(monacoMinimap).toBeVisible();
+    expect(await monacoMinimap.evaluate((element) => element.getBoundingClientRect().width)).toBeGreaterThan(0);
     await expect(page.locator('.playground-layout')).toHaveCSS('display', 'flex');
     await expect(page.locator('.playground-layout')).toHaveCSS('max-width', 'none');
     await expect(page.locator('.playground-layout')).toHaveClass(/(^|\s)srk-playground-container(\s|$)/);

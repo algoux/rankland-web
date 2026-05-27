@@ -161,11 +161,6 @@ const PlaygroundPage = defineComponent({
     monacoEditorOptions(): Record<string, unknown> {
       return {
         selectOnLineNumbers: true,
-        automaticLayout: true,
-        minimap: {
-          enabled: false,
-        },
-        scrollBeyondLastLine: false,
       };
     },
   },
