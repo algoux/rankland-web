@@ -982,7 +982,6 @@ export default defineComponent({
   flex-wrap: wrap;
   align-items: center;
   justify-content: center;
-  gap: 8px;
   margin: 4px 0 0;
   font-size: 14px;
 }

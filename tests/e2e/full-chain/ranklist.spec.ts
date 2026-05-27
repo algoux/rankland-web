@@ -100,6 +100,24 @@ async function getHeaderActionTriggerStyle(page: Page, selector: string) {
   });
 }
 
+async function getHeaderActionGapStyle(page: Page) {
+  return page.evaluate(() => {
+    const meta = document.querySelector<HTMLElement>('[data-id="rankland-ranklist-header-meta"]');
+    const actions = document.querySelector<HTMLElement>('[data-id="rankland-ranklist-header-actions"]');
+    if (!meta || !actions) {
+      throw new Error('Missing ranklist header meta/action elements');
+    }
+    const metaStyle = window.getComputedStyle(meta);
+    const actionsStyle = window.getComputedStyle(actions);
+    return {
+      metaColumnGap: metaStyle.columnGap,
+      metaRowGap: metaStyle.rowGap,
+      actionsColumnGap: actionsStyle.columnGap,
+      actionsRowGap: actionsStyle.rowGap,
+    };
+  });
+}
+
 async function getHeaderMetaBlockSpacing(page: Page) {
   return page.evaluate(() => {
     const meta = document.querySelector<HTMLElement>('[data-id="rankland-ranklist-header-meta"]');
@@ -579,6 +597,12 @@ test.describe('/ranklist/:id full-chain route', () => {
     await expect(page.locator('[data-id="rankland-ranklist-share-menu-button"]')).toHaveClass(/(^|\s)border-l(\s|$)/);
     await expect(page.locator('[data-id="rankland-ranklist-share-menu-button"]')).toHaveClass(/(^|\s)border-solid(\s|$)/);
     await expect(page.locator('[data-id="rankland-ranklist-share-menu-button"]')).toHaveClass(/(^|\s)border-gray-400(\s|$)/);
+    expect(await getHeaderActionGapStyle(page)).toEqual({
+      metaColumnGap: 'normal',
+      metaRowGap: 'normal',
+      actionsColumnGap: 'normal',
+      actionsRowGap: 'normal',
+    });
     for (const selector of [
       '[data-id="rankland-ranklist-export-menu-button"]',
       '[data-id="rankland-ranklist-share-menu-button"]',
