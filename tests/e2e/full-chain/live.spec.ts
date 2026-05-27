@@ -152,13 +152,15 @@ async function getLiveControlsChrome(page: Page) {
     const controls = document.querySelector<HTMLElement>('[data-id="rankland-ranklist-controls"]');
     const extraAction = document.querySelector<HTMLElement>('[data-id="rankland-ranklist-extra-action"]');
     const liveToggle = document.querySelector<HTMLElement>('.live-scroll-toggle');
-    if (!controls || !extraAction || !liveToggle) {
+    const liveToggleText = liveToggle?.querySelector<HTMLElement>('span');
+    if (!controls || !extraAction || !liveToggle || !liveToggleText) {
       throw new Error('Missing live controls chrome target');
     }
 
     const controlsStyle = window.getComputedStyle(controls);
     const extraActionStyle = window.getComputedStyle(extraAction);
     const liveToggleStyle = window.getComputedStyle(liveToggle);
+    const liveToggleTextStyle = window.getComputedStyle(liveToggleText);
     return {
       controlsClasses: Array.from(controls.classList),
       controlsDisplay: controlsStyle.display,
@@ -169,8 +171,12 @@ async function getLiveControlsChrome(page: Page) {
       extraActionDisplay: extraActionStyle.display,
       extraActionColumnGap: extraActionStyle.columnGap,
       extraActionRowGap: extraActionStyle.rowGap,
+      liveToggleClasses: Array.from(liveToggle.classList),
       liveToggleDisplay: liveToggleStyle.display,
       liveToggleColumnGap: liveToggleStyle.columnGap,
+      liveToggleRowGap: liveToggleStyle.rowGap,
+      liveToggleTextClasses: Array.from(liveToggleText.classList),
+      liveToggleTextMarginRight: liveToggleTextStyle.marginRight,
     };
   });
 }
@@ -224,7 +230,11 @@ test.describe('/live/:id full-chain route', () => {
     await expect(page.locator('[data-id="live-scroll-solution-toggle"]')).toHaveClass(/ant-switch/);
     await expect(page.locator('[data-id="live-scroll-solution-toggle"]')).toHaveClass(/ant-switch-small/);
     await expect(page.locator('[data-id="live-scroll-solution-toggle"]')).toHaveAttribute('aria-checked', 'true');
-    await expect(page.locator('.live-scroll-toggle')).toHaveCSS('column-gap', '4px');
+    await expect(page.locator('.live-scroll-toggle')).toHaveClass(/(^|\s)inline-flex(\s|$)/);
+    await expect(page.locator('.live-scroll-toggle')).toHaveClass(/(^|\s)items-center(\s|$)/);
+    await expect(page.locator('.live-scroll-toggle > span').first()).toHaveClass(/(^|\s)mr-1(\s|$)/);
+    await expect(page.locator('.live-scroll-toggle > span').first()).toHaveCSS('margin-right', '4px');
+    await expect(page.locator('.live-scroll-toggle')).toHaveCSS('column-gap', 'normal');
     await expect(page.locator('.live-scroll-toggle')).toHaveCSS('font-size', '14px');
     await expect(page.locator('.live-scroll-toggle')).toHaveCSS('color', 'rgba(0, 0, 0, 0.85)');
     await expect(page.locator('[data-id="live-scroll-solution-status"]')).toHaveText('connected');
@@ -250,8 +260,12 @@ test.describe('/live/:id full-chain route', () => {
       extraActionDisplay: 'block',
       extraActionColumnGap: 'normal',
       extraActionRowGap: 'normal',
+      liveToggleClasses: expect.arrayContaining(['live-scroll-toggle', 'inline-flex', 'items-center']),
       liveToggleDisplay: 'inline-flex',
-      liveToggleColumnGap: '4px',
+      liveToggleColumnGap: 'normal',
+      liveToggleRowGap: 'normal',
+      liveToggleTextClasses: expect.arrayContaining(['mr-1']),
+      liveToggleTextMarginRight: '4px',
     });
     await expect(page.locator('[data-id="rankland-ranklist-table-wrapper"]')).toHaveClass('ml-4');
     expect(await getTableWrapperMarginLeft(page)).toBe('16px');

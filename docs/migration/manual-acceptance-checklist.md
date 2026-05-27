@@ -62,7 +62,7 @@ git status --short --branch
 备注：
 
 ```text
-2026-05-27 最新记录：SRK controls extra-action gap parity 已通过 focused RED/GREEN、完整默认 `test:migration`（build、35 unit files / 151 unit tests、1 SSR smoke test、1 shallow Playwright test、58 passed / 1 skipped full-chain Playwright tests）和 `git diff --check`；RED 复现 Vue-only SRK controls 根节点 `16px` gap 与 extra-action 外层 `flex` / `8px` gap，GREEN 验证旧版 controls utility classes、无声明 controls root gap、plain block extra-action wrapper 和既有 4px Live toggle gap。
+2026-05-27 最新记录：Live scroll toggle utility-class parity 已通过 focused RED/GREEN、完整默认 `test:migration`（build、35 unit files / 151 unit tests、1 SSR smoke test、1 shallow Playwright test、58 passed / 1 skipped full-chain Playwright tests）和 `git diff --check`；RED 复现 `.live-scroll-toggle` 缺少旧版 `inline-flex items-center`、文本缺少 `mr-1`、wrapper 仍为 Vue-only `column-gap: 4px`；GREEN 验证旧版 wrapper class token、文本 `mr-1` 4px margin、wrapper gap `normal`、开关 shape/state、文字样式，以及已还原的 SRK controls root / extra-action no-gap chrome。
 ```
 
 ## 全局外壳与跨路由行为

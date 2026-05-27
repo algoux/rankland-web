@@ -51,8 +51,8 @@
         table-class="ml-4"
       >
         <template #extra-action>
-          <label class="live-scroll-toggle">
-            <span>实时滚动提交状态</span>
+          <label class="live-scroll-toggle inline-flex items-center">
+            <span class="mr-1">实时滚动提交状态</span>
             <a-switch
               data-id="live-scroll-solution-toggle"
               :checked="scrollSolutionEnabled"
@@ -492,8 +492,11 @@ export default routeView(LivePage, '/live/:id', LiveRPO);
   display: inline-flex;
   flex-shrink: 0;
   align-items: center;
-  gap: 4px;
   font-size: 14px;
+}
+
+.live-scroll-toggle .mr-1 {
+  margin-right: 4px;
 }
 
 @media (max-width: 767px) {
