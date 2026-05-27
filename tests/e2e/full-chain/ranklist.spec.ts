@@ -118,6 +118,22 @@ async function getHeaderActionGapStyle(page: Page) {
   });
 }
 
+async function getHeaderActionDisplayStyle(page: Page) {
+  return page.evaluate(() => {
+    const meta = document.querySelector<HTMLElement>('[data-id="rankland-ranklist-header-meta"]');
+    const actions = document.querySelector<HTMLElement>('[data-id="rankland-ranklist-header-actions"]');
+    if (!meta || !actions) {
+      throw new Error('Missing ranklist header meta/action elements');
+    }
+    const metaStyle = window.getComputedStyle(meta);
+    const actionsStyle = window.getComputedStyle(actions);
+    return {
+      metaDisplay: metaStyle.display,
+      actionsDisplay: actionsStyle.display,
+    };
+  });
+}
+
 async function getHeaderMetaBlockSpacing(page: Page) {
   return page.evaluate(() => {
     const meta = document.querySelector<HTMLElement>('[data-id="rankland-ranklist-header-meta"]');
@@ -602,6 +618,10 @@ test.describe('/ranklist/:id full-chain route', () => {
       metaRowGap: 'normal',
       actionsColumnGap: 'normal',
       actionsRowGap: 'normal',
+    });
+    expect(await getHeaderActionDisplayStyle(page)).toEqual({
+      metaDisplay: 'block',
+      actionsDisplay: 'inline',
     });
     for (const selector of [
       '[data-id="rankland-ranklist-export-menu-button"]',

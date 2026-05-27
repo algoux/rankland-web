@@ -976,17 +976,13 @@ export default defineComponent({
   max-height: 40vh;
 }
 
-.rankland-ranklist-header-meta,
-.rankland-ranklist-header-actions {
-  display: inline-flex;
-  flex-wrap: wrap;
-  align-items: center;
-  justify-content: center;
+.rankland-ranklist-header-meta {
   margin: 4px 0 0;
   font-size: 14px;
 }
 
 .rankland-ranklist-header-actions {
+  display: inline;
   margin: 0;
 }
 
