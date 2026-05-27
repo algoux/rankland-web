@@ -361,7 +361,7 @@ test.describe('/live/:id full-chain route', () => {
     await page.locator('[data-id="rankland-ranklist-export-gym-ghost-action"]').click();
     const liveGymGhostDownload = await liveGymGhostDownloadPromise;
     expect(liveGymGhostDownload.suggestedFilename()).toBe('live-test-key_gymghost.dat');
-    await expect(page.locator('[data-id="rankland-ranklist-action-status"]')).toHaveText('Gym Ghost 已导出');
+    await expect(page.locator('[data-id="rankland-ranklist-action-status"]')).toHaveCount(0);
 
     await page.locator('[data-id="rankland-ranklist-share-menu-button"]').hover();
     await page.locator('[data-id="rankland-ranklist-copy-embed-action"]').click();

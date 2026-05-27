@@ -102,9 +102,6 @@
               </template>
             </a-dropdown>
 
-            <span v-if="actionStatus" data-id="rankland-ranklist-action-status" class="rankland-ranklist-action-status">
-              {{ actionStatus }}
-            </span>
           </div>
 
           <p
@@ -538,7 +535,6 @@ export default defineComponent({
       timeTravelTime: null as number | null,
       activeUserPayload: null as UserClickPayload | null,
       activeSolutionPayload: null as SolutionClickPayload | null,
-      actionStatus: '',
       rankTimeDataSet: null as RankTimeDataSet | null,
       ranklistTheme: 'light' as 'light' | 'dark',
       viewportWidth: 1280,
@@ -804,7 +800,6 @@ export default defineComponent({
       this.timeTravelTime = null;
       this.activeUserPayload = null;
       this.activeSolutionPayload = null;
-      this.actionStatus = '';
       this.rankTimeDataSet = null;
     },
     resolveTextValue(value: srk.Text | undefined): string {
@@ -857,41 +852,25 @@ export default defineComponent({
       anchor.click();
       anchor.remove();
       window.URL.revokeObjectURL(url);
-      this.actionStatus = 'SRK 已导出';
     },
     async downloadGymGhostDat() {
-      try {
-        const file = await createGymGhostExportFile(this.ranklist, this.actionName);
-        const blob = new Blob([file.content], { type: file.type });
-        const url = window.URL.createObjectURL(blob);
-        const anchor = document.createElement('a');
-        anchor.href = url;
-        anchor.download = file.filename;
-        anchor.style.display = 'none';
-        document.body.appendChild(anchor);
-        anchor.click();
-        anchor.remove();
-        window.URL.revokeObjectURL(url);
-        this.actionStatus = 'Gym Ghost 已导出';
-      } catch (error) {
-        this.actionStatus = 'Gym Ghost 导出失败';
-      }
+      const file = await createGymGhostExportFile(this.ranklist, this.actionName);
+      const blob = new Blob([file.content], { type: file.type });
+      const url = window.URL.createObjectURL(blob);
+      const anchor = document.createElement('a');
+      anchor.href = url;
+      anchor.download = file.filename;
+      anchor.style.display = 'none';
+      document.body.appendChild(anchor);
+      anchor.click();
+      anchor.remove();
+      window.URL.revokeObjectURL(url);
     },
     async downloadVJudgeReplay() {
-      try {
-        await writeVJudgeReplayFile(this.ranklist, this.actionName);
-        this.actionStatus = 'VJudge Replay 已导出';
-      } catch (error) {
-        this.actionStatus = 'VJudge Replay 导出失败';
-      }
+      await writeVJudgeReplayFile(this.ranklist, this.actionName);
     },
     async downloadGeneralExcel() {
-      try {
-        await writeGeneralExcelFile(this.ranklist, this.actionName);
-        this.actionStatus = 'Excel 已导出';
-      } catch (error) {
-        this.actionStatus = 'Excel 导出失败';
-      }
+      await writeGeneralExcelFile(this.ranklist, this.actionName);
     },
     async copyCurrentPageLink() {
       await this.copyText(normalizeRanklandShareUrl(window.location.href), '链接已复制');
@@ -916,8 +895,8 @@ export default defineComponent({
             width: '280px',
           },
         });
-      } catch (error) {
-        this.actionStatus = '复制失败';
+      } catch {
+        return;
       }
     },
     async writeClipboardText(text: string) {
@@ -1064,11 +1043,6 @@ export default defineComponent({
 .rankland-ranklist-header-actions [data-id='rankland-ranklist-share-menu-button'].border-l:hover,
 .rankland-ranklist-header-actions [data-id='rankland-ranklist-share-menu-button'].border-l:focus {
   border-left-color: #9ca3af;
-}
-
-.rankland-ranklist-action-status {
-  align-self: center;
-  color: #237804;
 }
 
 .rankland-ranklist-time {

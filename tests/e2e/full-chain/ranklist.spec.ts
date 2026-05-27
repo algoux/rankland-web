@@ -1000,6 +1000,7 @@ test.describe('/ranklist/:id full-chain route', () => {
     const downloadPath = await download.path();
     expect(downloadPath).not.toBeNull();
     expect(JSON.parse(await readFile(downloadPath!, 'utf8')).contest.title).toBe('Test Contest 2024');
+    await expect(page.locator('[data-id="rankland-ranklist-action-status"]')).toHaveCount(0);
 
     await page.locator('[data-id="rankland-ranklist-export-menu-button"]').hover();
     const gymGhostDownloadPromise = page.waitForEvent('download');
@@ -1011,21 +1012,21 @@ test.describe('/ranklist/:id full-chain route', () => {
     const gymGhostContent = await readFile(gymGhostDownloadPath!, 'utf8');
     expect(gymGhostContent).toContain('@contest "Test Contest 2024"');
     expect(gymGhostContent).toContain('Team Alpha');
-    await expect(page.locator('[data-id="rankland-ranklist-action-status"]')).toHaveText('Gym Ghost 已导出');
+    await expect(page.locator('[data-id="rankland-ranklist-action-status"]')).toHaveCount(0);
 
     await page.locator('[data-id="rankland-ranklist-export-menu-button"]').hover();
     const vjudgeDownloadPromise = page.waitForEvent('download');
     await page.locator('[data-id="rankland-ranklist-export-vjudge-action"]').click();
     const vjudgeDownload = await vjudgeDownloadPromise;
     expect(vjudgeDownload.suggestedFilename()).toBe('test-key_vjreplay.xlsx');
-    await expect(page.locator('[data-id="rankland-ranklist-action-status"]')).toHaveText('VJudge Replay 已导出');
+    await expect(page.locator('[data-id="rankland-ranklist-action-status"]')).toHaveCount(0);
 
     await page.locator('[data-id="rankland-ranklist-export-menu-button"]').hover();
     const excelDownloadPromise = page.waitForEvent('download');
     await page.locator('[data-id="rankland-ranklist-export-xlsx-action"]').click();
     const excelDownload = await excelDownloadPromise;
     expect(excelDownload.suggestedFilename()).toBe('test-key.xlsx');
-    await expect(page.locator('[data-id="rankland-ranklist-action-status"]')).toHaveText('Excel 已导出');
+    await expect(page.locator('[data-id="rankland-ranklist-action-status"]')).toHaveCount(0);
 
     await page.locator('[data-id="rankland-ranklist-share-menu-button"]').hover();
     await page.locator('[data-id="rankland-ranklist-copy-link-action"]').click();
