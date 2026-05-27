@@ -28,6 +28,8 @@ const gen = new NbClientVueRouteGenerator({
   scanGlobs: [
     'modules/**/*.view.vue',
     'modules/**/*.view.tsx',
+    '!modules/about/**/*.view.vue',
+    '!modules/demo/**/*.view.vue',
     '!modules/e2e/**/*.view.vue',
     '!modules/e2e/**/*.view.tsx',
   ],

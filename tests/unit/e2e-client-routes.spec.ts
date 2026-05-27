@@ -23,6 +23,8 @@ describe('getClientRoutesMapForServer', () => {
 
     expect(routes.has('E2eRanklandProbe')).toBe(false);
     expect(routes.has('Home')).toBe(true);
+    expect(routes.has('About')).toBe(false);
+    expect(routes.has('DemoDetail')).toBe(false);
   });
 
   it('exposes public RankLand routes as SSR', () => {

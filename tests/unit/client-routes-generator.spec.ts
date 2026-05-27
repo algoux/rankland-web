@@ -9,4 +9,11 @@ describe('client route generator config', () => {
     expect(script).toContain("'!modules/e2e/**/*.view.vue'");
     expect(script).toContain("'!modules/e2e/**/*.view.tsx'");
   });
+
+  it('excludes scaffold demo/about views from generated RankLand public routes', () => {
+    const script = readFileSync(path.join(process.cwd(), 'scripts/client-routes.gen.js'), 'utf8');
+
+    expect(script).toContain("'!modules/about/**/*.view.vue'");
+    expect(script).toContain("'!modules/demo/**/*.view.vue'");
+  });
 });

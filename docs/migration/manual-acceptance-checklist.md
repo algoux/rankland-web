@@ -46,7 +46,7 @@ git status --short --branch
 
 - Node：`v24.11.1` 或兼容 `^24.0.0`
 - pnpm：`8.15.9` 或兼容 `^8.0.0`
-- `gen:client-router`：生成 8 条 client route，且没有非预期路由文件 diff
+- `gen:client-router`：生成 6 条 client route，且没有非预期路由文件 diff
 - `test:migration`：build、unit、SSR、浅层 E2E、full-chain E2E 全部通过
 
 检查项：
@@ -62,7 +62,7 @@ git status --short --branch
 备注：
 
 ```text
-2026-05-28 最新记录：Live realtime Toastify DOM parity 已通过 focused RED/GREEN、live full-chain 11 tests、完整默认 `test:migration`（build、35 unit files / 152 unit tests、1 SSR smoke test、1 shallow Playwright test、60 passed / 1 skipped full-chain Playwright tests）和 `git diff --check`。RED 复现 Vue Live 实时提交面板仍渲染 `ASIDE > UL > LI`；GREEN 验证实时面板恢复旧 React Toastify `DIV` container + direct visible `DIV` toast row DOM，且无 `ul` / `li` product structure。
+2026-05-28 最新记录：Public route surface parity 已通过 focused RED/GREEN、app-shell full-chain 8 tests、完整默认 `test:migration`（生成 6 条 client route、build、35 unit files / 153 unit tests、1 SSR smoke test、1 shallow Playwright test、60 passed / 1 skipped full-chain Playwright tests）和 `git diff --check`。RED 复现脚手架 `/about`、`/demo/detail/:id` 仍暴露在生成的 client/server route map 且缺少 generator exclude；GREEN 验证生成路由只保留 6 条 RankLand 公开路由，移除 stale `DemoDetail` server override，且 `/about`、`/demo/detail/123` 均进入旧版 fallback 404。
 ```
 
 ## 全局外壳与跨路由行为
@@ -95,6 +95,7 @@ git status --short --branch
 - `[x]` 迁移后的公开路由移动端没有横向溢出
 - `[x]` 直达页面和前端跳转后的页面标题可接受
 - `[x]` 直接刷新公开路由 URL 可正常工作
+- `[x]` 旧 RankLand 不存在的脚手架 `/about` 和 `/demo/detail/:id` 不再作为公开路由暴露，直接访问返回旧版 fallback 404
 - `[x]` 公开资源缺失时的 Not Found 行为可接受
 
 需要决策：
@@ -614,7 +615,7 @@ URL:
 - `[x]` 接受路由兼容迁移完成，但保留列出的后续 slice
 - `[ ]` 暂不收口，先修复阻塞项
 
-最新自动化结论：Live realtime Toastify DOM parity 已纳入收口记录，完整 gate 已通过。
+最新自动化结论：Public route surface parity 已纳入收口记录，完整 gate 已通过。
 
 无当前已复现阻塞；SRK controls extra-action gap parity、App shell legacy layout/logo class parity、App shell site-switch trigger `px-2` class parity、App shell site-switch dropdown content class/style parity、Fallback 404 class token parity、SRK table wrapper class attribute parity、Playground preview wrapper DOM/class parity、Playground docs link anchor class parity、Playground docs link wrapper class parity、Playground docs link wrapper DOM parity、Playground docs link rel omission parity、App shell site-switch rel omission parity、Beian link rel omission parity、Home external link rel omission parity、ContactUs trigger anchor DOM parity、SRK contributor link rel parity、SRK header ref-link rel parity、SRK header meta DOM parity、SRK renderer top-level wrapper DOM parity、SRK contributor item span DOM parity、SRK ref-link item span DOM parity、Playground shortcut tag mr-0 class parity、Collection selected-ranklist pb-8 class parity、Collection wrapper DOM parity、Collection hidden-header title style parity、Route content utility class parity、Ranklist loaded wrapper DOM parity、Live route wrapper chrome parity、Live root wrapper DOM parity、Live content wrapper DOM parity、Live realtime Toastify DOM parity、Live scroll-solution unknown result class parity、Live scroll-solution order parity、Live mobile scroll toggle DOM parity、SRK checker error DOM parity、SRK check-error wrapper class parity、user modal empty organization line parity、SRK modal root class parity、SRK modal table-wrapper DOM parity、SRK table spacer DOM parity、SRK header action display parity、SRK header action gap parity、SRK header action attribute parity、SRK header action status removal parity、SRK extra ref-link spacing parity、SRK view-count utility-class parity、SRK progress wrapper utility-class parity、user modal empty photo wrapper parity、SRK asset image error parity、Contact QQ image class parity、SRK header utility class parity、SRK header action utility class parity、SRK header title typography parity、header text size parity、header view-count fallback parity、SRK controls utility class parity、SRK remarks wrapper utility class parity、SRK footer utility class parity、SSR hydration marker visual parity、search shell DOM parity、search heading DOM parity、search input DOM parity、search list item DOM parity、search result count DOM parity、search keyword whitespace parity、search state wrapper DOM parity、search section content DOM parity、search row content DOM parity、search error message DOM parity、search state utility class parity、search error DOM parity、search list utility class parity、Playground legacy shell class parity、Playground invalid prompt class parity、user modal root class parity、user modal organization line class parity、user modal team members class parity、user modal team separator raw text coverage、user modal team-member entry DOM parity、user modal markers class parity、user modal unofficial line class parity、user modal segment line class parity、user modal segment label class parity、user modal slogan spacing class parity、user modal photo wrapper class parity 和 user modal photo/slogan shared wrapper DOM parity 已补充，保留 product-review-driven SRK lower-level table pixel parity / route polish 作为后续 review-driven slice。
 

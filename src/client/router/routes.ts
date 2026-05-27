@@ -5,37 +5,16 @@
 
 import { parseRoutes, RenderMethodKind } from 'bwcx-client-vue3';
 import { CollectionRPO } from '../../common/modules/collection/collection.rpo';
-import { DemoDetailRPO } from '../../common/modules/demo/demo.rpo';
 import { LiveRPO } from '../../common/modules/live/live.rpo';
 import { RanklistRPO } from '../../common/modules/ranklist/ranklist.rpo';
 
 const clientRoutes = parseRoutes([
-  {
-    name: 'About',
-    path: '/about',
-    fullPath: '/about',
-    component: () => import(/* webpackChunkName: "About" */ '../modules/about/about.view.vue'),
-    routeProps: undefined,
-    priority: undefined,
-    renderMethod: undefined,
-    otherOptions: undefined,
-  },
   {
     name: 'Collection',
     path: '/collection/:id',
     fullPath: '/collection/:id',
     component: () => import(/* webpackChunkName: "Collection" */ '../modules/collection/collection.view.vue'),
     routeProps: CollectionRPO,
-    priority: undefined,
-    renderMethod: RenderMethodKind.SSR,
-    otherOptions: undefined,
-  },
-  {
-    name: 'DemoDetail',
-    path: '/demo/detail/:id',
-    fullPath: '/demo/detail/:id',
-    component: () => import(/* webpackChunkName: "DemoDetail" */ '../modules/demo/demo-detail.view.vue'),
-    routeProps: DemoDetailRPO,
     priority: undefined,
     renderMethod: RenderMethodKind.SSR,
     otherOptions: undefined,

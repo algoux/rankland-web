@@ -12,7 +12,7 @@ The review still does not claim that every possible production SRK fixture has b
 | Requirement | Evidence | Status |
 | --- | --- | --- |
 | Use Node 24 and pnpm 8 | `package.json` engines require Node `^24.0.0` and pnpm `^8.0.0`; local verification used `node v24.11.1` and `pnpm 8.15.9`. | Verified |
-| Preserve public routes | `docs/migration/inventory.md`, `src/common/rankland-router/routes.ts`, `src/common/router/client-routes.ts`, and `src/client/router/routes.ts` all include `/`, `/search`, `/ranklist/:id`, `/collection/:id`, `/playground`, and `/live/:id`. | Verified |
+| Preserve public routes | `docs/migration/inventory.md`, `src/common/rankland-router/routes.ts`, `src/common/router/client-routes.ts`, and `src/client/router/routes.ts` all include `/`, `/search`, `/ranklist/:id`, `/collection/:id`, `/playground`, and `/live/:id`; scaffold `/about` and `/demo/detail/:id` are excluded from generated public route maps and covered as fallback 404s. | Verified |
 | Preserve SSR/CSR boundary | `ranklandRoutes` marks `/`, `/ranklist/:id`, and `/collection/:id` as SSR; `/search`, `/playground`, and `/live/:id` as CSR. Generated route metadata uses `RenderMethodKind.SSR` for SSR routes and `undefined` for CSR routes. | Verified |
 | Do not embed React | Migrated public route targets are Vue modules under `src/client/modules/**`; SRK rendering uses Vue/component-core packages and Vue wrapper code. | Verified |
 | Do not hand-edit generated router outputs | Generated files retain the `DO NOT MODIFY IT BY HAND` header; `corepack pnpm run gen:client-router` is the one-shot generation gate and `gen:client-router:watch` is the dev watcher. | Verified |
@@ -83,6 +83,6 @@ Fresh verification on 2026-05-28:
 
 - `node -v`: `v24.11.1`
 - `corepack pnpm -v`: `8.15.9`
-- `corepack pnpm run gen:client-router`: generated 8 client routes, exited cleanly; warning only: `Skipped due to language "js" is not supported. Only [ts,tsx] are supported (file: src/client/modules/fallback/not-found.view.vue)`
+- `corepack pnpm run gen:client-router`: generated 6 client routes, exited cleanly; warning only: `Skipped due to language "js" is not supported. Only [ts,tsx] are supported (file: src/client/modules/fallback/not-found.view.vue)`
 - `corepack pnpm test:migration`: passed build, 35 unit files / 152 unit tests, 1 SSR smoke test, 1 shallow Playwright test, and 60 passed / 1 skipped default full-chain Playwright tests during the Live realtime Toastify DOM parity verification
 - `git diff --check`: passed

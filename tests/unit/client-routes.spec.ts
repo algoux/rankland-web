@@ -23,6 +23,10 @@ describe('client routes', () => {
 
     expect(routes.some((route) => route.name === 'E2eRanklandProbe')).toBe(false);
     expect(routes.some((route) => route.path === '/__e2e/rankland-probe/:id')).toBe(false);
+    expect(routes.some((route) => route.name === 'About')).toBe(false);
+    expect(routes.some((route) => route.path === '/about')).toBe(false);
+    expect(routes.some((route) => route.name === 'DemoDetail')).toBe(false);
+    expect(routes.some((route) => route.path === '/demo/detail/:id')).toBe(false);
     expect(ranklistRoute).toMatchObject({
       path: '/ranklist/:id',
     });
@@ -55,6 +59,14 @@ describe('client routes', () => {
     const liveRoute = routes.find((route) => route.name === 'Live');
     const playgroundRoute = routes.find((route) => route.name === 'Playground');
 
+    expect(routes.map((route) => route.name)).toEqual([
+      'Collection',
+      'Home',
+      'Live',
+      'Playground',
+      'Ranklist',
+      'Search',
+    ]);
     expect(ranklistRoute?.routeProps).toBe(RanklistRPO);
     expect(collectionRoute?.routeProps).toBe(CollectionRPO);
     expect(liveRoute).toMatchObject({
