@@ -151,6 +151,38 @@ async function getDesktopShellMetrics(page: Page) {
   });
 }
 
+async function getLegacyShellPresentation(page: Page) {
+  return page.evaluate(() => {
+    const shell = document.querySelector<HTMLElement>('[data-id="app-shell"]');
+    const headerInner = document.querySelector<HTMLElement>('.app-header-inner');
+    const logoLink = document.querySelector<HTMLElement>('[data-id="app-logo-link"]');
+    const logoBox = logoLink?.querySelector<HTMLElement>('.logo');
+    const logoImage = logoLink?.querySelector<HTMLImageElement>('img');
+    if (!shell || !headerInner || !logoLink || !logoImage) {
+      throw new Error('Missing legacy app shell presentation target');
+    }
+
+    const headerInnerStyle = window.getComputedStyle(headerInner);
+    const logoBoxStyle = logoBox ? window.getComputedStyle(logoBox) : undefined;
+    const logoImageStyle = window.getComputedStyle(logoImage);
+    return {
+      shellClassList: Array.from(shell.classList),
+      headerInnerClassList: Array.from(headerInner.classList),
+      headerInnerDisplay: headerInnerStyle.display,
+      headerInnerJustifyContent: headerInnerStyle.justifyContent,
+      headerInnerMinHeight: headerInnerStyle.minHeight,
+      headerInnerColumnGap: headerInnerStyle.columnGap,
+      logoLinkClassList: Array.from(logoLink.classList),
+      logoBoxClassList: logoBox ? Array.from(logoBox.classList) : [],
+      logoBoxCount: logoLink.querySelectorAll('.logo').length,
+      logoBoxWidth: logoBoxStyle?.width,
+      logoBoxHeight: logoBoxStyle?.height,
+      logoImageWidth: logoImageStyle.width,
+      logoImageHeight: logoImageStyle.height,
+    };
+  });
+}
+
 async function getSiteSwitchButtonPresentation(page: Page) {
   return page.evaluate(() => {
     const siteSwitch = document.querySelector<HTMLElement>('[data-id="app-site-switch"]');
@@ -270,6 +302,21 @@ test.describe('app shell full-chain behavior', () => {
     await expect(page.locator('[data-id="app-shell"]')).toHaveClass(/ant-layout/);
     await expect(page.locator('[data-id="app-header"]')).toHaveClass(/ant-layout-header/);
     await expect(page.locator('[data-id="app-logo-link"]')).toHaveAttribute('href', '/');
+    expect(await getLegacyShellPresentation(page)).toMatchObject({
+      shellClassList: expect.arrayContaining(['app-shell', 'layout']),
+      headerInnerClassList: expect.arrayContaining(['app-header-inner', 'flex', 'justify-between']),
+      headerInnerDisplay: 'flex',
+      headerInnerJustifyContent: 'space-between',
+      headerInnerMinHeight: '64px',
+      headerInnerColumnGap: '0px',
+      logoLinkClassList: expect.arrayContaining(['app-logo']),
+      logoBoxClassList: expect.arrayContaining(['logo']),
+      logoBoxCount: 1,
+      logoBoxWidth: '64px',
+      logoBoxHeight: '64px',
+      logoImageWidth: '40px',
+      logoImageHeight: '40px',
+    });
     await expect(page.locator('[data-id="app-nav"]')).toHaveClass(/ant-menu-horizontal/);
     await expect(page.locator('[data-id="app-nav-link"][href="/search"]')).toHaveText('探索');
     await expect(page.locator('[data-id="app-nav-link"][href="/collection/official"]')).toHaveText('榜单合集');

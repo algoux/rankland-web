@@ -5,11 +5,13 @@
     </Suspense>
   </router-view>
 
-  <a-layout v-else data-id="app-shell" class="app-shell">
+  <a-layout v-else data-id="app-shell" class="app-shell layout">
     <a-layout-header data-id="app-header" class="app-header">
-      <div class="app-header-inner">
+      <div class="app-header-inner flex justify-between">
         <router-link data-id="app-logo-link" class="app-logo" to="/" aria-label="RankLand">
-          <img :src="logo" alt="RankLand">
+          <div class="logo app-logo-box">
+            <img :src="logo" alt="RankLand">
+          </div>
         </router-link>
 
         <ClientOnly>
