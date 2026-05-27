@@ -539,6 +539,8 @@ test.describe('/ranklist/:id full-chain route', () => {
         .filter((child) => child.tagName === 'SPAN' && child.querySelector('a'))
         .map((child) => (child.textContent || '').replace(/\s+/g, ' ').trim())
     ))).toEqual(['Official Site', ', Mirror', ', Statements']);
+    await expect(page.locator('[data-id="rankland-ranklist-ref-links"] a').first()).toHaveAttribute('target', '_blank');
+    await expect(page.locator('[data-id="rankland-ranklist-ref-links"] a').first()).toHaveAttribute('rel', 'noopener');
     await expect(page.locator('[data-id="rankland-ranklist-ref-link-extra-action"]')).toHaveText('and 1 more');
     await expect(page.locator('[data-id="rankland-ranklist-ref-link-extra-action"] .anticon-caret-down')).toBeVisible();
     await expect(page.locator('[data-id="rankland-ranklist-ref-link-extra-action"]')).toHaveCSS(
@@ -706,6 +708,15 @@ test.describe('/ranklist/:id full-chain route', () => {
       page,
       'rankland-ranklist-ref-link-extra-action',
       'rankland-ranklist-ref-link-extra-archive',
+    );
+    await page.locator('[data-id="rankland-ranklist-ref-link-extra-action"]').hover();
+    await expect(page.locator('[data-id="rankland-ranklist-ref-link-extra-archive"]')).toHaveAttribute(
+      'target',
+      '_blank',
+    );
+    await expect(page.locator('[data-id="rankland-ranklist-ref-link-extra-archive"]')).toHaveAttribute(
+      'rel',
+      'noopener',
     );
 
     await page.locator('[data-id="rankland-ranklist-export-menu-button"]').hover();
