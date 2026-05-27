@@ -42,7 +42,7 @@ const ranklists: IApiRanklistInfo[] = [
 
 describe('search-result helpers', () => {
   it('normalizes search keywords from route values', () => {
-    expect(normalizeSearchKeyword('  contest  ')).toBe('contest');
+    expect(normalizeSearchKeyword('  contest  ')).toBe('  contest  ');
     expect(normalizeSearchKeyword(['contest'])).toBe('');
     expect(normalizeSearchKeyword(undefined)).toBe('');
   });
@@ -53,6 +53,14 @@ describe('search-result helpers', () => {
 
   it('returns no search rows for an empty keyword', () => {
     expect(searchRanklists(ranklists, '')).toEqual([]);
+  });
+
+  it('passes whitespace-only keywords through Fuse like the legacy page', () => {
+    expect(searchRanklists(ranklists, '   ').map((ranklist) => ranklist.uniqueKey)).toEqual([
+      'test-key',
+      'another-key',
+      'noise-key',
+    ]);
   });
 
   it('finds ranklists by name', () => {

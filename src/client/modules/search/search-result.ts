@@ -2,7 +2,7 @@ import Fuse from 'fuse.js';
 import type { IApiRanklistInfo } from '@common/rankland-api';
 
 export function normalizeSearchKeyword(value: unknown): string {
-  return typeof value === 'string' ? value.trim() : '';
+  return typeof value === 'string' ? value : '';
 }
 
 export function getRecentRanklists(ranklists: IApiRanklistInfo[], limit = 10): IApiRanklistInfo[] {
@@ -10,8 +10,7 @@ export function getRecentRanklists(ranklists: IApiRanklistInfo[], limit = 10): I
 }
 
 export function searchRanklists(ranklists: IApiRanklistInfo[], keyword: string): IApiRanklistInfo[] {
-  const normalizedKeyword = keyword.trim();
-  if (!normalizedKeyword) {
+  if (!keyword) {
     return [];
   }
 
@@ -20,7 +19,7 @@ export function searchRanklists(ranklists: IApiRanklistInfo[], keyword: string):
     threshold: 0.3,
   });
 
-  return fuse.search(normalizedKeyword).map((result) => result.item);
+  return fuse.search(keyword).map((result) => result.item);
 }
 
 function padDatePart(value: number): string {

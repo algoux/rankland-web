@@ -338,6 +338,38 @@ test.describe('/search full-chain route', () => {
     expect(requests.some((requestRecord) => requestRecord.path === '/rank/search')).toBe(false);
   });
 
+  test('preserves legacy keyword whitespace for route queries and submitted searches', async ({
+    page,
+    request,
+  }) => {
+    await denyExternalCalls(page);
+    await request.post(`${mockBaseURL}/__reset`);
+
+    const response = await page.goto('/search?kw=%20%20%20');
+
+    expect(response).not.toBeNull();
+    expect(response?.ok()).toBe(true);
+    await expect(page.locator('[data-id="search-input"].ant-input')).toHaveValue('   ');
+    await expect(page.locator('[data-id="search-result-section"]')).toBeVisible();
+    await expect(page.locator('[data-id="search-result-section"]')).toHaveAttribute('data-result-count', '3');
+    await expect(page.locator('[data-id="search-result-section"] > div.opacity-70').first()).toHaveText(
+      '搜索到 3 个结果',
+    );
+    await expect(page.locator('[data-id="search-recent-section"]')).toHaveCount(0);
+    await expect(page.locator('[data-id="search-ranklist-item"]')).toHaveCount(3);
+
+    await page.goto('/search');
+    const searchInput = page.locator('[data-id="search-input"]');
+    await searchInput.fill(' Test 2024 ');
+    await page.locator('.ant-input-search-button').click();
+    await expect(page).toHaveURL(/\/search\?kw=%20Test%202024%20$/);
+    await expect(page.locator('[data-id="search-input"].ant-input')).toHaveValue(' Test 2024 ');
+
+    const requests = await readRequests(request);
+    expect(requests.filter((requestRecord) => requestRecord.path === '/rank/listall')).toHaveLength(2);
+    expect(requests.some((requestRecord) => requestRecord.path === '/rank/search')).toBe(false);
+  });
+
   test('keeps search results within desktop and mobile viewport bounds', async ({ page, request }, testInfo) => {
     await denyExternalCalls(page);
     await request.post(`${mockBaseURL}/__reset`);
