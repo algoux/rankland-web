@@ -187,7 +187,7 @@
             </a-select-option>
           </a-select>
 
-          <span class="rankland-ranklist-checkbox ml-5 inline-flex items-center">
+          <span class="ml-5 inline-flex items-center">
             <span class="mr-1">仅正式参赛</span>
             <a-switch
               v-model:checked="filter.officialOnly"
@@ -1105,7 +1105,9 @@ export default defineComponent({
   gap: 0;
 }
 
-:global(.rankland-ranklist-checkbox) {
+span.ml-5.inline-flex.items-center {
+  display: inline-flex;
+  align-items: center;
   margin-left: 20px;
 }
 
@@ -1113,7 +1115,7 @@ export default defineComponent({
   margin-left: 8px;
 }
 
-:global(.rankland-ranklist-checkbox .mr-1) {
+span.ml-5.inline-flex.items-center .mr-1 {
   margin-right: 4px;
 }
 

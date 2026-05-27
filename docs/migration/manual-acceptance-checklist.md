@@ -62,7 +62,7 @@ git status --short --branch
 备注：
 
 ```text
-2026-05-28 最新记录：Ranklist marker filter class parity 已通过 focused RED/GREEN、ranklist full-chain 9 tests、完整默认 `test:migration`（build、35 unit files / 152 unit tests、1 SSR smoke test、1 shallow Playwright test、60 passed / 1 skipped full-chain Playwright tests）和 `git diff --check`；RED 复现 marker Radio.Group classList 仍包含 Vue-only `.rankland-ranklist-marker-filter`，GREEN 验证 marker Radio.Group 仅保留旧版 `ml-5 inline-flex items-center` class 合同并不渲染该 Vue-only 产品类，同时保留 marker 筛选、20px 左边距和移动端布局。
+2026-05-28 最新记录：Ranklist official filter class parity 已通过 focused RED/GREEN、ranklist full-chain 9 tests、完整默认 `test:migration`（build、35 unit files / 152 unit tests、1 SSR smoke test、1 shallow Playwright test、60 passed / 1 skipped full-chain Playwright tests）和 `git diff --check`。RED 复现 official-only wrapper classList 仍包含 Vue-only `.rankland-ranklist-checkbox`，GREEN 验证 official-only wrapper 仅保留旧版 `span.ml-5.inline-flex.items-center` class 合同并不渲染该 Vue-only 产品类，同时保留 official-only 筛选、20px 左边距、4px 文字到 Switch 间距和移动端布局。
 ```
 
 ## 全局外壳与跨路由行为
@@ -252,6 +252,7 @@ App shell Ant Design Vue Layout/Menu/Dropdown/Button、旧版根布局 `layout` 
 - `[x]` SRK filters 根节点直接包含旧版 `span`、Select、正式筛选 `span`、Radio.Group，不渲染 Vue-only `label.rankland-ranklist-filter` wrapper
 - `[x]` SRK filters 根节点保留旧版 plain `div` class 合同，不渲染 Vue-only `.rankland-ranklist-filters` 产品类；布局样式改由稳定 `data-id` 承载
 - `[x]` SRK 组织筛选 Select 根节点保留旧版 `ml-2` class 和 inline `width: 160px` 合同，不渲染 Vue-only `.rankland-ranklist-select` 产品类
+- `[x]` SRK 正式筛选 wrapper 保留旧版 `span.ml-5.inline-flex.items-center` class 合同，不渲染 Vue-only `.rankland-ranklist-checkbox` 产品类
 - `[x]` SRK 分组筛选 Radio.Group 保留旧版 `ml-5 inline-flex items-center` class 合同，不渲染 Vue-only `.rankland-ranklist-marker-filter` 产品类
 - `[x]` 点击行或成员可以打开用户弹窗
 - `[x]` 用户弹窗和题目解法弹窗根节点保留旧版 `srk-react-modal-root`，同时保留 `srk-modal-root`、`srk-animated-modal-root` 和 `srk-general-modal-root`
@@ -311,6 +312,8 @@ App shell Ant Design Vue Layout/Menu/Dropdown/Button、旧版根布局 `layout` 
 2026-05-28 追加复核：ranklist SRK 组织筛选 Select class/style 合同已覆盖旧 React `className="ml-2"` + `style={{ width: '160px' }}` 行为；RED 复现 Vue 组织 Select 根节点缺少 inline width，GREEN 验证根节点 classList 包含 `ml-2` 且不含 `.rankland-ranklist-select`，inline width 为 `160px`，computed width/8px 左边距、selected-tag 行为、移动端布局和 ranklist 全文件 full-chain 9 tests 均保持通过。
 
 2026-05-28 追加复核：ranklist SRK 分组筛选 Radio.Group class 合同已覆盖旧 React `className="ml-5 inline-flex items-center"` 行为；RED 复现 Vue marker Radio.Group 根节点仍包含 `.rankland-ranklist-marker-filter` 产品类，GREEN 验证根节点 classList 包含 `ml-5` / `inline-flex` / `items-center` 且不含 `.rankland-ranklist-marker-filter`，computed 20px 左边距、marker 筛选、移动端布局和 ranklist 全文件 full-chain 9 tests 均保持通过。
+
+2026-05-28 追加复核：ranklist SRK 正式筛选 wrapper class 合同已覆盖旧 React `span.ml-5.inline-flex.items-center` 行为；RED 复现 Vue official-only wrapper 仍包含 `.rankland-ranklist-checkbox` 产品类，GREEN 验证 wrapper classList 包含 `ml-5` / `inline-flex` / `items-center` 且不含 `.rankland-ranklist-checkbox`，computed 20px 左边距、official-only 筛选、4px 文字到 Switch 间距、移动端布局和 ranklist 全文件 full-chain 9 tests 均保持通过。
 ```
 
 ## 合集页 `/collection/:id`
