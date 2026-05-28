@@ -3,7 +3,6 @@
     <Head>
       <title>{{ pageTitle }}</title>
       <meta property="og:title" :content="pageTitle">
-      <link rel="canonical" :href="canonicalPath">
     </Head>
 
     <div>
@@ -134,9 +133,6 @@ const SearchPage = defineComponent({
     },
     pageTitle(): string {
       return formatTitle('探索');
-    },
-    canonicalPath(): string {
-      return ranklandRoutes.search.build({ kw: this.keyword || undefined });
     },
   },
   mounted() {
