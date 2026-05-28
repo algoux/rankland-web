@@ -712,7 +712,7 @@ test.describe('/ranklist/:id full-chain route', () => {
       {
         tagName: 'DIV',
         dataId: 'rankland-ranklist-controls',
-        classList: ['rankland-ranklist-controls', 'mt-3', 'mx-4', 'flex', 'justify-between', 'items-center'],
+        classList: ['mt-3', 'mx-4', 'flex', 'justify-between', 'items-center'],
       },
       {
         tagName: 'DIV',
@@ -1573,14 +1573,13 @@ test.describe('/ranklist/:id full-chain route', () => {
     });
     const controlsUtilityClasses = await getControlsUtilityClasses(page);
     expect(controlsUtilityClasses).toMatchObject({
-      controlsClasses: expect.arrayContaining([
-        'rankland-ranklist-controls',
+      controlsClasses: [
         'mt-3',
         'mx-4',
         'flex',
         'justify-between',
         'items-center',
-      ]),
+      ],
       organizationFilterClasses: expect.arrayContaining(['ml-2']),
       officialWrapperClasses: expect.arrayContaining([
         'ml-5',
@@ -1594,6 +1593,7 @@ test.describe('/ranklist/:id full-chain route', () => {
         'items-center',
       ]),
     });
+    expect(controlsUtilityClasses.controlsClasses).not.toContain('rankland-ranklist-controls');
     expect(controlsUtilityClasses.organizationFilterClasses).not.toContain('rankland-ranklist-select');
     expect(controlsUtilityClasses.officialWrapperClasses).not.toContain('rankland-ranklist-checkbox');
     expect(controlsUtilityClasses.markerFilterClasses).not.toContain('rankland-ranklist-marker-filter');

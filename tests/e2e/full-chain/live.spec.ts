@@ -268,14 +268,13 @@ test.describe('/live/:id full-chain route', () => {
     await expect(page.locator('[data-id="rankland-ranklist-filters"]')).toBeVisible();
     await expect(page.locator('[data-id="rankland-ranklist-extra-action"]')).toBeVisible();
     expect(await getLiveControlsChrome(page)).toMatchObject({
-      controlsClasses: expect.arrayContaining([
-        'rankland-ranklist-controls',
+      controlsClasses: [
         'mt-3',
         'mx-4',
         'flex',
         'justify-between',
         'items-center',
-      ]),
+      ],
       controlsDisplay: 'flex',
       controlsJustifyContent: 'space-between',
       controlsAlignItems: 'center',

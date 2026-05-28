@@ -158,7 +158,7 @@
       <div
         v-if="showFilter || hasExtraAction"
         data-id="rankland-ranklist-controls"
-        class="rankland-ranklist-controls mt-3 mx-4 flex justify-between items-center"
+        class="mt-3 mx-4 flex justify-between items-center"
       >
         <div v-if="showFilter" data-id="rankland-ranklist-filters">
           <span>筛选</span>
@@ -1053,7 +1053,7 @@ a:hover,
   }
 }
 
-.rankland-ranklist-controls {
+[data-id='rankland-ranklist-controls'].mt-3.mx-4.flex.justify-between.items-center {
   display: flex;
   align-items: center;
   justify-content: space-between;
