@@ -36,7 +36,7 @@
           <span v-if="hasViewCount" data-id="rankland-ranklist-view-count" class="mr-2">
             <EyeOutlined /> {{ meta.viewCnt || '-' }}
           </span>
-          <div data-id="rankland-ranklist-header-actions" class="rankland-ranklist-header-actions">
+          <div data-id="rankland-ranklist-header-actions">
             <a-dropdown data-id="rankland-ranklist-export-menu" :trigger="['hover']" placement="bottom">
               <a
                 data-id="rankland-ranklist-export-menu-button"
@@ -961,7 +961,7 @@ a:hover,
   font-size: 14px;
 }
 
-.rankland-ranklist-header-actions {
+[data-id='rankland-ranklist-header-actions'] {
   display: inline;
   margin: 0;
 }
@@ -981,7 +981,7 @@ a:hover,
   cursor: pointer;
 }
 
-.rankland-ranklist-header-actions button,
+[data-id='rankland-ranklist-header-actions'] button,
 :global(.ant-dropdown-menu-item) button {
   width: 100%;
   padding: 0;
@@ -992,8 +992,8 @@ a:hover,
   text-align: left;
 }
 
-.rankland-ranklist-header-actions [data-id='rankland-ranklist-export-menu-button'],
-.rankland-ranklist-header-actions [data-id='rankland-ranklist-share-menu-button'] {
+[data-id='rankland-ranklist-header-actions'] [data-id='rankland-ranklist-export-menu-button'],
+[data-id='rankland-ranklist-header-actions'] [data-id='rankland-ranklist-share-menu-button'] {
   width: auto;
   padding: 0;
   border: 0;
@@ -1004,29 +1004,29 @@ a:hover,
   cursor: pointer;
 }
 
-.rankland-ranklist-header-actions [data-id='rankland-ranklist-export-menu-button']:hover,
-.rankland-ranklist-header-actions [data-id='rankland-ranklist-export-menu-button']:focus,
-.rankland-ranklist-header-actions [data-id='rankland-ranklist-share-menu-button']:hover,
-.rankland-ranklist-header-actions [data-id='rankland-ranklist-share-menu-button']:focus {
+[data-id='rankland-ranklist-header-actions'] [data-id='rankland-ranklist-export-menu-button']:hover,
+[data-id='rankland-ranklist-header-actions'] [data-id='rankland-ranklist-export-menu-button']:focus,
+[data-id='rankland-ranklist-header-actions'] [data-id='rankland-ranklist-share-menu-button']:hover,
+[data-id='rankland-ranklist-header-actions'] [data-id='rankland-ranklist-share-menu-button']:focus {
   background: transparent;
   color: var(--rankland-link-hover-color);
 }
 
-.rankland-ranklist-header-actions [data-id='rankland-ranklist-export-menu-button'] :deep(.anticon),
-.rankland-ranklist-header-actions [data-id='rankland-ranklist-share-menu-button'] :deep(.anticon) {
+[data-id='rankland-ranklist-header-actions'] [data-id='rankland-ranklist-export-menu-button'] :deep(.anticon),
+[data-id='rankland-ranklist-header-actions'] [data-id='rankland-ranklist-share-menu-button'] :deep(.anticon) {
   color: inherit;
 }
 
-.rankland-ranklist-header-actions [data-id='rankland-ranklist-export-menu-button'].border-l,
-.rankland-ranklist-header-actions [data-id='rankland-ranklist-share-menu-button'].border-l {
+[data-id='rankland-ranklist-header-actions'] [data-id='rankland-ranklist-export-menu-button'].border-l,
+[data-id='rankland-ranklist-header-actions'] [data-id='rankland-ranklist-share-menu-button'].border-l {
   padding-left: 8px;
   border-left: 1px solid #9ca3af;
 }
 
-.rankland-ranklist-header-actions [data-id='rankland-ranklist-export-menu-button'].border-l:hover,
-.rankland-ranklist-header-actions [data-id='rankland-ranklist-export-menu-button'].border-l:focus,
-.rankland-ranklist-header-actions [data-id='rankland-ranklist-share-menu-button'].border-l:hover,
-.rankland-ranklist-header-actions [data-id='rankland-ranklist-share-menu-button'].border-l:focus {
+[data-id='rankland-ranklist-header-actions'] [data-id='rankland-ranklist-export-menu-button'].border-l:hover,
+[data-id='rankland-ranklist-header-actions'] [data-id='rankland-ranklist-export-menu-button'].border-l:focus,
+[data-id='rankland-ranklist-header-actions'] [data-id='rankland-ranklist-share-menu-button'].border-l:hover,
+[data-id='rankland-ranklist-header-actions'] [data-id='rankland-ranklist-share-menu-button'].border-l:focus {
   border-left-color: #9ca3af;
 }
 

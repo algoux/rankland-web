@@ -333,6 +333,11 @@ test.describe('/live/:id full-chain route', () => {
       'border-gray-400',
       'ant-dropdown-trigger',
     ]);
+    expect(
+      await page
+        .locator('[data-id="rankland-ranklist-header-actions"]')
+        .evaluate((element) => Array.from(element.classList)),
+    ).toEqual([]);
     for (const trigger of [liveExportTrigger, liveShareTrigger]) {
       const classList = await trigger.evaluate((element) => Array.from(element.classList));
       expect(classList).not.toContain('ant-btn');

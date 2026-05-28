@@ -130,6 +130,7 @@ async function getHeaderActionDisplayStyle(page: Page) {
     return {
       metaDisplay: metaStyle.display,
       actionsDisplay: actionsStyle.display,
+      actionsClasses: Array.from(actions.classList),
     };
   });
 }
@@ -1033,6 +1034,7 @@ test.describe('/ranklist/:id full-chain route', () => {
     expect(await getHeaderActionDisplayStyle(page)).toEqual({
       metaDisplay: 'block',
       actionsDisplay: 'inline',
+      actionsClasses: [],
     });
     for (const selector of [
       '[data-id="rankland-ranklist-export-menu-button"]',
