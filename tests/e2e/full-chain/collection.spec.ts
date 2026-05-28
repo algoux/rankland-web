@@ -194,6 +194,23 @@ async function getCollectionCollapseButtonWrapperDom(page: Page) {
   });
 }
 
+async function getCollectionMenuLabelDom(page: Page, selector: string) {
+  return page.evaluate((selector) => {
+    const element = document.querySelector<HTMLElement>(selector);
+    if (!element) {
+      throw new Error(`Missing collection menu label: ${selector}`);
+    }
+
+    return {
+      tagName: element.tagName,
+      dataCollectionKey: element.getAttribute('data-collection-key'),
+      href: element.getAttribute('href'),
+      role: element.getAttribute('role'),
+      ariaCurrent: element.getAttribute('aria-current'),
+    };
+  }, selector);
+}
+
 test.describe('/collection/:id full-chain route', () => {
   test('renders selected ranklist through SSR, hydration, RanklandApiService, and the mock backend', async ({
     page,
@@ -248,7 +265,7 @@ test.describe('/collection/:id full-chain route', () => {
     });
     await expect(
       page.locator('[data-id="collection-menu-item-test-key"][data-collection-key="test-key"]'),
-    ).toHaveAttribute('aria-current', 'page');
+    ).toHaveAttribute('href', '/collection/official?rankId=test-key');
     await expect(page.locator('.srk-user-cell', { hasText: 'Team Alpha' })).toBeVisible();
     await expect(page.locator('.srk-user-cell', { hasText: 'Team Beta' })).toBeVisible();
     await expect(page.locator('[data-id="collection-hydrated"]')).toHaveText('hydrated');
@@ -366,6 +383,20 @@ test.describe('/collection/:id full-chain route', () => {
     );
     await expect(page.locator('[data-id="collection-category-icon-dir-icpc"] img')).toHaveAttribute('alt', 'ICPC');
     await expect(page.locator('[data-id="collection-category-icon-dir-ccpc"] img')).toHaveAttribute('alt', 'CCPC');
+    expect(await getCollectionMenuLabelDom(page, '[data-id="collection-menu-item-dir-icpc"]')).toMatchObject({
+      tagName: 'SPAN',
+      dataCollectionKey: 'dir-icpc',
+      href: null,
+      role: null,
+      ariaCurrent: null,
+    });
+    expect(await getCollectionMenuLabelDom(page, '[data-id="collection-menu-item-test-key"]')).toMatchObject({
+      tagName: 'A',
+      dataCollectionKey: 'test-key',
+      href: '/collection/official?rankId=test-key',
+      role: null,
+      ariaCurrent: null,
+    });
     await expect(
       page.locator('[data-id="collection-menu-item-test-key"][data-collection-key="test-key"]'),
     ).toBeVisible();

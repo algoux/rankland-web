@@ -442,11 +442,13 @@ const CollectionPage = defineComponent({
       return {
         key: item.uniqueKey,
         label: h(
-          'span',
+          'a',
           {
             ...labelAttrs,
-            role: 'link',
-            'aria-current': this.rankId === item.uniqueKey ? 'page' : undefined,
+            href: ranklandRoutes.collection.build({ id: this.id, rankId: item.uniqueKey }),
+            onClick: (event: MouseEvent) => {
+              event.preventDefault();
+            },
           },
           item.name,
         ),
