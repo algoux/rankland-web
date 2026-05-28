@@ -1,5 +1,5 @@
 <template>
-  <main data-id="playground-page" class="playground-page">
+  <div data-id="playground-page">
     <Head>
       <title>{{ pageTitle }}</title>
       <meta property="og:title" :content="pageTitle">
@@ -8,7 +8,7 @@
 
     <div data-id="playground-hydrated" class="playground-hydrated">{{ hydrated ? 'hydrated' : 'csr' }}</div>
 
-    <section class="playground-layout srk-playground-container" :style="{ height: `${remainingHeight}px` }">
+    <div class="srk-playground-container" :style="{ height: `${remainingHeight}px` }">
       <div class="playground-editor-pane">
         <div data-id="playground-editor-ready" class="playground-editor-ready">
           {{ editorReady ? 'ready' : editorLoadingStage }}
@@ -78,7 +78,7 @@
           <RanklandRanklist :ranklist="parseState.data" name="playground" show-header show-filter />
         </div>
       </div>
-    </section>
+    </div>
 
     <a-modal
       v-if="welcomeVisible"
@@ -103,7 +103,7 @@
         </a-button>
       </template>
     </a-modal>
-  </main>
+  </div>
 </template>
 
 <script lang="ts">
@@ -282,11 +282,6 @@ export default routeView(PlaygroundPage, '/playground');
 </script>
 
 <style lang="less" scoped>
-.playground-page {
-  box-sizing: border-box;
-  min-height: 70vh;
-}
-
 .playground-hydrated {
   position: absolute;
   width: 1px;
@@ -295,7 +290,7 @@ export default routeView(PlaygroundPage, '/playground');
   color: transparent;
 }
 
-.playground-layout {
+.srk-playground-container {
   display: flex;
 }
 
@@ -402,7 +397,7 @@ export default routeView(PlaygroundPage, '/playground');
 }
 
 @media (max-width: 900px) {
-  .playground-layout {
+  .srk-playground-container {
     height: auto !important;
     flex-direction: column;
   }

@@ -32,6 +32,27 @@ async function expectNoHorizontalDocumentOverflow(page: Page) {
   expect(overflow.documentScrollWidth).toBeLessThanOrEqual(overflow.viewportWidth + 1);
 }
 
+async function getPlaygroundShellChrome(page: Page) {
+  return page.evaluate(() => {
+    const pageElement = document.querySelector<HTMLElement>('[data-id="playground-page"]');
+    const container = document.querySelector<HTMLElement>('.srk-playground-container');
+    if (!pageElement || !container) {
+      throw new Error('Missing playground shell target');
+    }
+
+    const pageStyle = window.getComputedStyle(pageElement);
+    const containerStyle = window.getComputedStyle(container);
+    return {
+      pageTagName: pageElement.tagName,
+      pageClasses: Array.from(pageElement.classList),
+      pageMinHeight: pageStyle.minHeight,
+      containerTagName: container.tagName,
+      containerClasses: Array.from(container.classList),
+      containerDisplay: containerStyle.display,
+    };
+  });
+}
+
 async function markPlaygroundWelcomeRead(page: Page) {
   await page.addInitScript(() => window.localStorage.setItem('PlaygroundWelcomeMessageRead', 'true'));
 }
@@ -152,9 +173,17 @@ test.describe('/playground full-chain route', () => {
     const monacoMinimap = page.locator('[data-id="playground-editor"] .minimap');
     await expect(monacoMinimap).toBeVisible();
     expect(await monacoMinimap.evaluate((element) => element.getBoundingClientRect().width)).toBeGreaterThan(0);
-    await expect(page.locator('.playground-layout')).toHaveCSS('display', 'flex');
-    await expect(page.locator('.playground-layout')).toHaveCSS('max-width', 'none');
-    await expect(page.locator('.playground-layout')).toHaveClass(/(^|\s)srk-playground-container(\s|$)/);
+    await expect(page.locator('.playground-layout')).toHaveCount(0);
+    expect(await getPlaygroundShellChrome(page)).toMatchObject({
+      pageTagName: 'DIV',
+      pageClasses: [],
+      pageMinHeight: '0px',
+      containerTagName: 'DIV',
+      containerClasses: ['srk-playground-container'],
+      containerDisplay: 'flex',
+    });
+    await expect(page.locator('.srk-playground-container')).toHaveCSS('display', 'flex');
+    await expect(page.locator('.srk-playground-container')).toHaveCSS('max-width', 'none');
     await expect(page.locator('.playground-editor-pane')).toHaveCSS('width', '500px');
     await expect(page.locator('.playground-preview-pane')).toHaveCSS('flex-grow', '1');
     await expect(page.locator('.playground-preview-pane')).toHaveClass(/(^|\s)srk-playground-preview(\s|$)/);
