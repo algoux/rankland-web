@@ -302,6 +302,16 @@ async function getModalRootClasses(page: Page, wrapperDataId: string) {
   }, wrapperDataId);
 }
 
+async function getModalWrapClasses(page: Page, wrapperDataId: string) {
+  return page.evaluate((dataId) => {
+    const modalWrap = document.querySelector<HTMLElement>(`[data-id="${dataId}"] .srk-modal-wrap`);
+    if (!modalWrap) {
+      throw new Error(`Missing modal wrap for ${dataId}`);
+    }
+    return Array.from(modalWrap.classList);
+  }, wrapperDataId);
+}
+
 async function getTableWrapperMarginLeft(page: Page) {
   return page.evaluate(() => {
     const wrapper = document.querySelector<HTMLElement>('[data-id="rankland-ranklist-table-wrapper"]');
@@ -1199,6 +1209,7 @@ test.describe('/ranklist/:id full-chain route', () => {
         'srk-general-modal-root',
       ]),
     );
+    expect(await getModalWrapClasses(page, 'rankland-ranklist-user-modal')).toEqual(['srk-modal-wrap']);
     await expect(userModal.locator('.srk-modal-title')).toHaveText('Team Alpha');
     const userModalBody = userModal.locator('.user-modal');
     await expect(userModalBody).toBeVisible();
@@ -1543,7 +1554,7 @@ test.describe('/ranklist/:id full-chain route', () => {
     await expect.poll(async () => banner.evaluate((element) => window.getComputedStyle(element).display)).toBe('none');
 
     await page.locator('.srk-user-cell', { hasText: 'Team Alpha' }).click();
-    const userModal = page.locator('.rankland-user-modal');
+    const userModal = page.locator('[data-id="rankland-ranklist-user-modal"] .srk-modal');
     await expect(userModal).toBeVisible();
     const photo = userModal.locator('[data-id="rankland-user-modal-photo"]');
     await expect(photo).toHaveAttribute('src', `${mockBaseURL}/srk-assets/test-key/team-alpha.png`);

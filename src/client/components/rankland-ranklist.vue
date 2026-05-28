@@ -227,7 +227,6 @@
             :title="activeUserTitle"
             :width="userModalWidth"
             root-class-name="srk-general-modal-root srk-react-modal-root"
-            wrap-class-name="rankland-user-modal"
             @close="handleUserModalClose"
           >
             <div v-if="activeUserPayload" class="user-modal">

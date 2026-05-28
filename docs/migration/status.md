@@ -5,9 +5,9 @@ This file is the quick global dashboard for the RankLand migration. Update it at
 ## Current Focus
 
 - Active branch: `migration/live-page-foundation`
-- Current slice: SRK controls empty extra-action DOM parity
-- Latest slice commit: pending `fix: 还原 SRK controls 空操作容器`
-- Last recorded full gate: passed on 2026-05-28 for SRK controls empty extra-action DOM parity; focused RED reproduced normal Ranklist controls rendering only the filters child and omitting the old React always-present empty right-side `DIV`; focused GREEN verified `[data-id="rankland-ranklist-extra-action"]` now renders as an empty plain `DIV` under controls on normal Ranklist routes while preserving existing Ant Design filter controls and filtering behavior; full gate used Node `v24.11.1` and pnpm `8.15.9`, `gen:client-router` generated 6 client routes, `test:migration` passed with build, 36 unit files / 154 unit tests, 1 SSR smoke test, 1 shallow Playwright test, and 60 passed / 1 skipped full-chain Playwright tests; `git diff --check` passed.
+- Current slice: User modal wrap class parity
+- Latest slice commit: `fix: 还原用户弹窗 wrap 类名`
+- Last recorded full gate: passed on 2026-05-28 for User modal wrap class parity; focused RED reproduced the SRK user modal wrap rendering `rankland-user-modal` in addition to old React `srk-modal-wrap`; focused GREEN verified the user modal wrap class list is exactly `srk-modal-wrap` while preserving the main Ranklist user-modal flow and broken SRK asset image hiding behavior; full gate used Node `v24.11.1` and pnpm `8.15.9`, `gen:client-router` generated 6 client routes, `test:migration` passed with build, 36 unit files / 154 unit tests, 1 SSR smoke test, 1 shallow Playwright test, and 60 passed / 1 skipped full-chain Playwright tests; `git diff --check` passed.
 - Next recommended focus: product-review-driven SRK lower-level table pixel parity or route polish
 
 ## Route Progress
@@ -64,7 +64,7 @@ This file is the quick global dashboard for the RankLand migration. Update it at
 - SRK table area now renders the old React `div.mt-6` spacer DOM before the table wrapper without the Vue-only `.rankland-ranklist-table-spacer` product class while preserving the verified 24px controls-to-table visual gap.
 - SRK table wrapper now preserves the old React class-attribute contract: ranklist/live render exact `class="ml-4"` from `tableClass`, while collection/playground keep the stable `data-id` test hook without emitting a Vue-only class attribute.
 - SRK user and solution modal wrapper nodes now render inside the table wrapper like old React `StyledRanklistRenderer`, while the footer remains after the table wrapper.
-- User modal body now renders the old React exact `.user-modal` root class without the Vue-only body class while preserving child hooks and dark text color coverage.
+- User modal wrap and body now render closer to old React: the user modal `.srk-modal-wrap` no longer carries the Vue-only `rankland-user-modal` wrap class, and the body renders the old React exact `.user-modal` root class without the Vue-only body class while preserving child hooks and dark text color coverage.
 - User modal organization line now renders the old React exact `mb-0` class token without Vue-only organization-line classes while preserving the stable `data-id` hook and computed zero-margin coverage.
 - User modal team-members row now renders the old React exact `user-modal-info-team-members mt-2` class tokens without the Vue-only team-members row class while preserving the stable `data-id` hook, item-level entry spans, raw separator text, opacity, padding, and computed spacing coverage.
 - User modal team-members separator now renders the old React exact `user-modal-info-team-members-slash` class token without the Vue-only separator class while preserving stable `data-id`, raw ` / ` text, normalized slash text, item-level member entry DOM, and separator style coverage.
@@ -82,7 +82,7 @@ This file is the quick global dashboard for the RankLand migration. Update it at
 - User modal photo and slogan now share the old React exact `div.mt-4` wrapper structure without the Vue-only `.rankland-user-modal-photo` hook while preserving old `.slogan mt-4 mb-2` classes and full-width image coverage.
 - User modal users without photo or slogan now still render the old empty photo/slogan `div.mt-4` wrapper, matching React `UserInfoModal` spacing and DOM parity.
 - User modal photo now restores the old React inline `width: 100%` style on the image while preserving the existing computed full-width CSS and broken-image hiding behavior.
-- SRK user and solution modal roots now carry the old React `srk-react-modal-root` class alongside `srk-modal-root`, `srk-animated-modal-root`, and `srk-general-modal-root`, preserving old modal root DOM hooks without changing the Vue renderer modal behavior.
+- SRK user and solution modal roots now carry the old React `srk-react-modal-root` class alongside `srk-modal-root`, `srk-animated-modal-root`, and `srk-general-modal-root`, and the user modal wrap omits the Vue-only `rankland-user-modal` class, preserving old modal root/wrap DOM hooks without changing the Vue renderer modal behavior.
 - User modal users without organization now still render the old empty organization `p.mb-0` line before the rest of the modal body, matching React `UserInfoModal` DOM parity while preserving existing zero-margin styling.
 - SRK wrapper now runs the old `ts-interface-checker@1.0.2` Ranklist checker before static conversion and renders the old checker-error exact `div.ml-8 > h3 + pre` DOM/class for structurally invalid SRK objects without the Vue-only `.rankland-ranklist-check-error` product class, while deterministic mock fixtures now use checker-valid marker presets.
 
