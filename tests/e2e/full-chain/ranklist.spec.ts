@@ -155,6 +155,20 @@ async function getHeaderMetaBlockSpacing(page: Page) {
   });
 }
 
+async function getRanklistStateWrapperPresentation(page: Page, selector: string) {
+  return page.evaluate((selector) => {
+    const element = document.querySelector<HTMLElement>(selector);
+    if (!element) {
+      throw new Error(`Missing ranklist state element: ${selector}`);
+    }
+
+    return {
+      tagName: element.tagName,
+      classList: Array.from(element.classList),
+    };
+  }, selector);
+}
+
 async function getHeaderMetaDomParity(page: Page) {
   return page.evaluate(() => {
     const meta = document.querySelector<HTMLElement>('[data-id="rankland-ranklist-header-meta"]');
@@ -1616,6 +1630,10 @@ test.describe('/ranklist/:id full-chain route', () => {
     expect(response?.ok()).toBe(true);
     await expect(page).toHaveTitle('Not Found | RankLand');
     await expect(page.locator('[data-id="ranklist-not-found"]')).toBeVisible();
+    expect(await getRanklistStateWrapperPresentation(page, '[data-id="ranklist-not-found"]')).toMatchObject({
+      tagName: 'DIV',
+      classList: ['mt-16', 'text-center'],
+    });
     await expect(page.locator('[data-id="ranklist-not-found"]')).toHaveClass(/(^|\s)mt-16(\s|$)/);
     await expect(page.locator('[data-id="ranklist-not-found"]')).toHaveClass(/(^|\s)text-center(\s|$)/);
     await expect(page.locator('[data-id="ranklist-not-found"] h3')).toHaveText('Ranklist Not Found');
@@ -1643,6 +1661,10 @@ test.describe('/ranklist/:id full-chain route', () => {
     await expect(page).toHaveTitle('RankLand');
     await expect(page.locator('[data-id="ranklist-error"]')).toBeVisible();
     await expect(page.locator('[data-id="ranklist-error"] p')).toHaveText('An error occurred while loading data');
+    expect(await getRanklistStateWrapperPresentation(page, '[data-id="ranklist-error"]')).toMatchObject({
+      tagName: 'DIV',
+      classList: ['mt-16', 'text-center'],
+    });
     await expect(page.locator('[data-id="ranklist-error"]')).toHaveClass(/(^|\s)mt-16(\s|$)/);
     await expect(page.locator('[data-id="ranklist-error"]')).toHaveClass(/(^|\s)text-center(\s|$)/);
     await expect(page.locator('[data-id="ranklist-error"]')).toHaveCSS('margin-top', '64px');

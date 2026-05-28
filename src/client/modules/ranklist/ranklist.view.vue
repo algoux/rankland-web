@@ -7,21 +7,23 @@
       <link rel="canonical" :href="canonicalUrl">
     </Head>
 
-    <section v-if="isNotFound" data-id="ranklist-not-found" class="ranklist-state mt-16 text-center">
+    <div v-if="isNotFound" data-id="ranklist-not-found" class="mt-16 text-center">
       <h3 class="mb-4">Ranklist Not Found</h3>
       <router-link to="/" data-id="ranklist-not-found-home-link">
         <a-button type="primary" size="small">Back to Home</a-button>
       </router-link>
-    </section>
+    </div>
 
-    <section v-else-if="hasGenericError" data-id="ranklist-error" class="ranklist-state mt-16 text-center">
+    <div v-else-if="hasGenericError" data-id="ranklist-error" class="mt-16 text-center">
       <p>An error occurred while loading data</p>
       <a-button data-id="ranklist-refresh" type="primary" size="small" @click="refresh">
         Refresh
       </a-button>
-    </section>
+    </div>
 
-    <a-spin v-else-if="!ranklist" data-id="ranklist-loading" class="ranklist-state mt-16 text-center" />
+    <div v-else-if="!ranklist" data-id="ranklist-loading" class="mt-16 text-center">
+      <a-spin />
+    </div>
 
     <div
       v-else
@@ -143,15 +145,6 @@ export default routeView(RanklistPage, '/ranklist/:id', RanklistRPO, undefined, 
 </script>
 
 <style lang="less" scoped>
-.ranklist-state {
-  margin-top: 64px;
-  text-align: center;
-}
-
-.ranklist-state h3 {
-  margin: 0 0 16px;
-}
-
 .mt-16 {
   margin-top: 64px;
 }
