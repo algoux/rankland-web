@@ -36,35 +36,37 @@
           </ClientOnly>
         </div>
 
-        <a-dropdown placement="bottomRight">
-          <a-button data-id="app-site-switch" class="app-site-switch px-2" type="text">
-            切换
-          </a-button>
-          <template #overlay>
-            <a-menu>
-              <a-menu-item key="site-switch">
-                <a
-                  data-id="app-site-switch-link"
-                  :href="siteSwitchHref"
-                  target="_blank"
-                  :style="siteSwitchLinkStyle"
-                >
-                  <template v-if="siteAlias === 'cnn'">
-                    全球站点
-                    <ArrowRightOutlined :rotate="-45" />
-                  </template>
-                  <template v-else>
-                    <p class="mb-0">中国站点</p>
-                    <p class="mb-0">
-                      <span class="opacity-60 text-xs">特别速度优化</span>
+        <div>
+          <a-dropdown placement="bottomRight">
+            <a-button data-id="app-site-switch" class="app-site-switch px-2" type="text">
+              切换
+            </a-button>
+            <template #overlay>
+              <a-menu>
+                <a-menu-item key="site-switch">
+                  <a
+                    data-id="app-site-switch-link"
+                    :href="siteSwitchHref"
+                    target="_blank"
+                    :style="siteSwitchLinkStyle"
+                  >
+                    <template v-if="siteAlias === 'cnn'">
+                      全球站点
                       <ArrowRightOutlined :rotate="-45" />
-                    </p>
-                  </template>
-                </a>
-              </a-menu-item>
-            </a-menu>
-          </template>
-        </a-dropdown>
+                    </template>
+                    <template v-else>
+                      <p class="mb-0">中国站点</p>
+                      <p class="mb-0">
+                        <span class="opacity-60 text-xs">特别速度优化</span>
+                        <ArrowRightOutlined :rotate="-45" />
+                      </p>
+                    </template>
+                  </a>
+                </a-menu-item>
+              </a-menu>
+            </template>
+          </a-dropdown>
+        </div>
       </div>
     </a-layout-header>
 

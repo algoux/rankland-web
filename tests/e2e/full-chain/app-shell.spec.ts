@@ -213,6 +213,31 @@ async function getHeaderNavWrapperPresentation(page: Page) {
   });
 }
 
+async function getHeaderRightMenuWrapperPresentation(page: Page) {
+  return page.evaluate(() => {
+    const headerInner = document.querySelector<HTMLElement>('.app-header-inner');
+    if (!headerInner) {
+      throw new Error('Missing app header inner');
+    }
+
+    const directChildren = Array.from(headerInner.children) as HTMLElement[];
+    const rightMenuWrapper = directChildren[2];
+    const siteSwitch = document.querySelector<HTMLElement>('[data-id="app-site-switch"]');
+    if (!rightMenuWrapper || !siteSwitch) {
+      throw new Error('Missing app header right-menu wrapper or site switch');
+    }
+
+    return {
+      directChildTags: directChildren.map((child) => child.tagName),
+      rightMenuWrapperTag: rightMenuWrapper.tagName,
+      rightMenuWrapperClassList: Array.from(rightMenuWrapper.classList),
+      rightMenuWrapperStyleAttribute: rightMenuWrapper.getAttribute('style'),
+      rightMenuWrapperContainsSiteSwitch: rightMenuWrapper.contains(siteSwitch),
+      siteSwitchDirectChildCount: headerInner.querySelectorAll(':scope > [data-id="app-site-switch"]').length,
+    };
+  });
+}
+
 async function getSiteSwitchButtonPresentation(page: Page) {
   return page.evaluate(() => {
     const siteSwitch = document.querySelector<HTMLElement>('[data-id="app-site-switch"]');
@@ -366,6 +391,14 @@ test.describe('app shell full-chain behavior', () => {
       navWrapperMinWidth: '0px',
       navWrapperContainsMenu: true,
       navMenuDirectChildCount: 0,
+    });
+    expect(await getHeaderRightMenuWrapperPresentation(page)).toMatchObject({
+      directChildTags: ['A', 'DIV', 'DIV'],
+      rightMenuWrapperTag: 'DIV',
+      rightMenuWrapperClassList: [],
+      rightMenuWrapperStyleAttribute: null,
+      rightMenuWrapperContainsSiteSwitch: true,
+      siteSwitchDirectChildCount: 0,
     });
     expect(await getSelectedNavStyle(page)).toMatchObject({
       itemColor: 'rgb(246, 172, 6)',
