@@ -151,7 +151,7 @@
       <p data-id="rankland-ranklist-time" class="text-center mb-0">{{ contestTimeRange }}</p>
     </template>
 
-      <div v-if="showProgress" data-id="rankland-ranklist-progress" class="rankland-ranklist-progress mx-4">
+      <div v-if="showProgress" data-id="rankland-ranklist-progress" class="mx-4">
         <ProgressBar :data="ranklist" enable-time-travel :live="isLive" @time-travel="handleTimeTravel" />
       </div>
 
@@ -1036,18 +1036,18 @@ a:hover,
   font-size: 14px;
 }
 
-.rankland-ranklist-progress {
+[data-id='rankland-ranklist-progress'].mx-4 {
   margin: 0 16px;
 }
 
 @media (max-width: 767px) {
-  .rankland-ranklist-progress :deep(.srk-progress-secondary-area) {
+  [data-id='rankland-ranklist-progress'].mx-4 :deep(.srk-progress-secondary-area) {
     flex-wrap: wrap;
     gap: 4px 12px;
   }
 
-  .rankland-ranklist-progress :deep(.srk-progress-secondary-area-left),
-  .rankland-ranklist-progress :deep(.srk-progress-secondary-area-right) {
+  [data-id='rankland-ranklist-progress'].mx-4 :deep(.srk-progress-secondary-area-left),
+  [data-id='rankland-ranklist-progress'].mx-4 :deep(.srk-progress-secondary-area-right) {
     flex: 1 1 140px;
     min-width: 0;
   }

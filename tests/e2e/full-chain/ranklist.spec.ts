@@ -707,7 +707,7 @@ test.describe('/ranklist/:id full-chain route', () => {
       {
         tagName: 'DIV',
         dataId: 'rankland-ranklist-progress',
-        classList: ['rankland-ranklist-progress', 'mx-4'],
+        classList: ['mx-4'],
       },
       {
         tagName: 'DIV',
@@ -855,7 +855,10 @@ test.describe('/ranklist/:id full-chain route', () => {
     );
     await expect(page.locator('[data-id="rankland-ranklist-progress"]')).toBeVisible();
     const progressWrapper = page.locator('[data-id="rankland-ranklist-progress"]');
-    await expect(progressWrapper).toHaveClass(/(^|\s)mx-4(\s|$)/);
+    await expect(progressWrapper).toHaveClass(/^mx-4$/);
+    expect(await progressWrapper.evaluate((element) => Array.from(element.classList))).not.toContain(
+      'rankland-ranklist-progress',
+    );
     expect(await progressWrapper.evaluate((element) => {
       const style = window.getComputedStyle(element);
       return {
