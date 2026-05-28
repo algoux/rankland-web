@@ -14,25 +14,27 @@
           </div>
         </router-link>
 
-        <ClientOnly>
-          <a-menu
-            data-id="app-nav"
-            class="app-nav nav-menu"
-            mode="horizontal"
-            disabled-overflow
-            :selected-keys="[selectedNavKey]"
-          >
-            <a-menu-item v-for="item in navItems" :key="item.path">
-              <router-link
-                data-id="app-nav-link"
-                :aria-current="isNavActive(item.path) ? 'page' : undefined"
-                :to="item.path"
-              >
-                {{ item.label }}
-              </router-link>
-            </a-menu-item>
-          </a-menu>
-        </ClientOnly>
+        <div style="flex: 1; min-width: 0;">
+          <ClientOnly>
+            <a-menu
+              data-id="app-nav"
+              class="app-nav nav-menu"
+              mode="horizontal"
+              disabled-overflow
+              :selected-keys="[selectedNavKey]"
+            >
+              <a-menu-item v-for="item in navItems" :key="item.path">
+                <router-link
+                  data-id="app-nav-link"
+                  :aria-current="isNavActive(item.path) ? 'page' : undefined"
+                  :to="item.path"
+                >
+                  {{ item.label }}
+                </router-link>
+              </a-menu-item>
+            </a-menu>
+          </ClientOnly>
+        </div>
 
         <a-dropdown placement="bottomRight">
           <a-button data-id="app-site-switch" class="app-site-switch px-2" type="text">

@@ -183,6 +183,36 @@ async function getLegacyShellPresentation(page: Page) {
   });
 }
 
+async function getHeaderNavWrapperPresentation(page: Page) {
+  return page.evaluate(() => {
+    const headerInner = document.querySelector<HTMLElement>('.app-header-inner');
+    if (!headerInner) {
+      throw new Error('Missing app header inner');
+    }
+
+    const directChildren = Array.from(headerInner.children) as HTMLElement[];
+    const navWrapper = directChildren[1];
+    const navMenu = document.querySelector<HTMLElement>('[data-id="app-nav"]');
+    if (!navWrapper || !navMenu) {
+      throw new Error('Missing app header nav wrapper or menu');
+    }
+
+    const navWrapperStyle = window.getComputedStyle(navWrapper);
+    return {
+      directChildTags: directChildren.map((child) => child.tagName),
+      navWrapperTag: navWrapper.tagName,
+      navWrapperInlineFlex: navWrapper.style.flex,
+      navWrapperInlineMinWidth: navWrapper.style.minWidth,
+      navWrapperFlexGrow: navWrapperStyle.flexGrow,
+      navWrapperFlexShrink: navWrapperStyle.flexShrink,
+      navWrapperFlexBasis: navWrapperStyle.flexBasis,
+      navWrapperMinWidth: navWrapperStyle.minWidth,
+      navWrapperContainsMenu: navWrapper.contains(navMenu),
+      navMenuDirectChildCount: headerInner.querySelectorAll(':scope > [data-id="app-nav"]').length,
+    };
+  });
+}
+
 async function getSiteSwitchButtonPresentation(page: Page) {
   return page.evaluate(() => {
     const siteSwitch = document.querySelector<HTMLElement>('[data-id="app-site-switch"]');
@@ -325,6 +355,18 @@ test.describe('app shell full-chain behavior', () => {
     await expect(page.locator('[data-id="app-nav-link"][href="/playground"]')).toHaveText('演练场');
     await expect(page.locator('[data-id="app-nav-link"][aria-current="page"]')).toHaveAttribute('href', '/search');
     await expect(page.locator('[data-id="app-nav"] .ant-menu-item-selected')).toContainText('探索');
+    expect(await getHeaderNavWrapperPresentation(page)).toMatchObject({
+      directChildTags: expect.arrayContaining(['A', 'DIV']),
+      navWrapperTag: 'DIV',
+      navWrapperInlineFlex: '1 1 0%',
+      navWrapperInlineMinWidth: '0px',
+      navWrapperFlexGrow: '1',
+      navWrapperFlexShrink: '1',
+      navWrapperFlexBasis: '0%',
+      navWrapperMinWidth: '0px',
+      navWrapperContainsMenu: true,
+      navMenuDirectChildCount: 0,
+    });
     expect(await getSelectedNavStyle(page)).toMatchObject({
       itemColor: 'rgb(246, 172, 6)',
       linkColor: 'rgb(246, 172, 6)',
