@@ -211,6 +211,29 @@ async function getCollectionMenuLabelDom(page: Page, selector: string) {
   }, selector);
 }
 
+async function getCollectionMenuSubmenuState(page: Page, collectionKey: string) {
+  return page.evaluate((collectionKey) => {
+    const label = document.querySelector<HTMLElement>(`[data-id="collection-menu-item-${collectionKey}"]`);
+    if (!label) {
+      throw new Error(`Missing collection menu label: ${collectionKey}`);
+    }
+
+    const submenu = label.closest<HTMLElement>('.ant-menu-submenu');
+    if (!submenu) {
+      throw new Error(`Missing collection submenu for: ${collectionKey}`);
+    }
+
+    const selectedLeaf = document.querySelector<HTMLElement>('[data-id="collection-menu-item-test-key"]');
+
+    return {
+      isOpen: submenu.classList.contains('ant-menu-submenu-open'),
+      selectedLeafVisible: selectedLeaf
+        ? Boolean(selectedLeaf.offsetWidth || selectedLeaf.offsetHeight || selectedLeaf.getClientRects().length)
+        : false,
+    };
+  }, collectionKey);
+}
+
 test.describe('/collection/:id full-chain route', () => {
   test('renders selected ranklist through SSR, hydration, RanklandApiService, and the mock backend', async ({
     page,
@@ -403,6 +426,20 @@ test.describe('/collection/:id full-chain route', () => {
     await expect(page.locator('[data-id="collection-nav-menu"] .ant-menu-item-selected')).toContainText(
       'Test Contest 2024',
     );
+    expect(await getCollectionMenuSubmenuState(page, 'dir-icpc')).toMatchObject({
+      isOpen: true,
+      selectedLeafVisible: true,
+    });
+
+    await page.locator('.ant-menu-submenu-title:has([data-id="collection-menu-item-dir-icpc"])').click();
+
+    await expect
+      .poll(() => getCollectionMenuSubmenuState(page, 'dir-icpc'))
+      .toMatchObject({
+        isOpen: false,
+        selectedLeafVisible: false,
+      });
+    await expect(page).toHaveURL('/collection/official?rankId=test-key');
 
     await page.locator('[data-id="collection-collapse-button"]').click();
     await expect(page.locator('[data-id="collection-collapse-button"] .anticon-menu-unfold')).toBeVisible();
