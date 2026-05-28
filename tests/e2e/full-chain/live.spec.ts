@@ -424,6 +424,7 @@ test.describe('/live/:id full-chain route', () => {
     const rankTimeCurve = userModal.locator('[data-id="rankland-rank-time-curve"]');
     await expect(rankTimeCurve).toBeVisible();
     expect((await rankTimeCurve.getAttribute('class')) || '').toBe('');
+    expect(await rankTimeCurve.getAttribute('data-chart-status')).toBeNull();
     expect((await rankTimeChart.getAttribute('class')) || '').toBe('');
     expect(
       await rankTimeCurve.evaluate((element) => {

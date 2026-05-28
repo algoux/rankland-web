@@ -1253,9 +1253,4 @@ span.ml-5.inline-flex.items-center .mr-1 {
   margin-top: 16px;
 }
 
-.rankland-rank-time-curve {
-  display: block;
-  width: 100%;
-}
-
 </style>

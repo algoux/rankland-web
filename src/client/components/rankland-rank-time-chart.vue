@@ -1,7 +1,6 @@
 <template>
   <div
     data-id="rankland-rank-time-curve"
-    :data-chart-status="chartStatus"
     :style="{ height: `${chartModel.containerHeight}px` }"
   >
     <div
