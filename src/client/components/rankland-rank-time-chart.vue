@@ -1,14 +1,12 @@
 <template>
   <div
     data-id="rankland-rank-time-curve"
-    class="rankland-rank-time-curve"
     :data-chart-status="chartStatus"
     :style="{ height: `${chartModel.containerHeight}px` }"
   >
     <div
       ref="chartContainer"
       data-id="rankland-rank-time-g2-chart"
-      class="rankland-rank-time-g2-chart"
       data-chart-library="@antv/g2"
       :data-line-animation="`${chartModel.lineAnimation.type}:${chartModel.lineAnimation.duration}`"
       :data-event-animation="`zoomIn:${firstEventAnimationDuration}`"
@@ -245,12 +243,12 @@ export default defineComponent({
 </script>
 
 <style lang="less" scoped>
-.rankland-rank-time-curve {
+[data-id='rankland-rank-time-curve'] {
   position: relative;
   width: 100%;
 }
 
-.rankland-rank-time-g2-chart {
+[data-id='rankland-rank-time-g2-chart'] {
   width: 100%;
   height: 100%;
 }

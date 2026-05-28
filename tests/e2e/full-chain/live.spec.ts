@@ -421,9 +421,39 @@ test.describe('/live/:id full-chain route', () => {
     await expect(rankTimeChart).toHaveAttribute('data-event-animation', 'zoomIn:200');
     await expect(rankTimeChart).toHaveAttribute('data-tooltip-items', '主排名,解题数');
     await expect(rankTimeChart).toHaveAttribute('data-event-tooltip', 'AC:A (0:40:00)');
-    await expect(userModal.locator('[data-id="rankland-rank-time-curve"] canvas')).toBeVisible();
+    const rankTimeCurve = userModal.locator('[data-id="rankland-rank-time-curve"]');
+    await expect(rankTimeCurve).toBeVisible();
+    expect((await rankTimeCurve.getAttribute('class')) || '').toBe('');
+    expect((await rankTimeChart.getAttribute('class')) || '').toBe('');
     expect(
-      await userModal.locator('[data-id="rankland-rank-time-curve"]').evaluate((element) => getComputedStyle(element).height),
+      await rankTimeCurve.evaluate((element) => {
+        const style = getComputedStyle(element);
+        return {
+          display: style.display,
+          height: style.height,
+          position: style.position,
+          width: style.width,
+        };
+      }),
+    ).toMatchObject({
+      display: 'block',
+      height: '400px',
+      position: 'relative',
+    });
+    expect(
+      await rankTimeChart.evaluate((element) => {
+        const style = getComputedStyle(element);
+        return {
+          height: style.height,
+          width: style.width,
+        };
+      }),
+    ).toMatchObject({
+      height: '400px',
+    });
+    await expect(rankTimeCurve.locator('canvas')).toBeVisible();
+    expect(
+      await rankTimeCurve.evaluate((element) => getComputedStyle(element).height),
     ).toBe('400px');
     await userModal.getByRole('button', { name: 'Close' }).click();
     await expect(userModal.locator('.srk-modal')).toBeHidden();
