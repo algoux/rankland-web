@@ -1355,9 +1355,10 @@ test.describe('/ranklist/:id full-chain route', () => {
         );
       }),
     ).toBe(true);
-    await expect(slogan).toHaveClass(/(^|\s)slogan(\s|$)/);
-    await expect(slogan).toHaveClass(/(^|\s)mt-4(\s|$)/);
-    await expect(slogan).toHaveClass(/(^|\s)mb-2(\s|$)/);
+    await expect(slogan).toHaveClass(/^slogan mt-4 mb-2$/);
+    expect(await slogan.evaluate((element) => Array.from(element.classList))).not.toContain(
+      'rankland-user-modal-slogan',
+    );
     const sloganStyle = await slogan.evaluate((element) => {
       const style = window.getComputedStyle(element);
       const beforeStyle = window.getComputedStyle(element, '::before');

@@ -5,9 +5,9 @@ This file is the quick global dashboard for the RankLand migration. Update it at
 ## Current Focus
 
 - Active branch: `migration/live-page-foundation`
-- Current slice: user modal segment label product class parity
-- Latest slice commit: `fix: 还原奖区标签类名`
-- Last recorded full gate: passed on 2026-05-28 for user modal segment label product class parity; focused RED reproduced the migrated segment label still exposing Vue-only `rankland-user-modal-segment-label`, focused GREEN verified the label now renders exact old React `user-modal-segment-label bg-segment-gold` while preserving label text, background class, inline-block display, 4px padding, 4px border radius, and white text, ranklist full-chain 9 tests passed, Node `v24.11.1`, pnpm `8.15.9`, `gen:client-router` generated 6 client routes, `test:migration` passed with build, 36 unit files / 154 unit tests, 1 SSR smoke test, 1 shallow Playwright test, and 60 passed / 1 skipped full-chain Playwright tests; `git diff --check` passed.
+- Current slice: user modal slogan product class parity
+- Latest slice commit: `fix: 还原用户标语类名`
+- Last recorded full gate: passed on 2026-05-28 for user modal slogan product class parity; focused RED reproduced the migrated slogan still exposing Vue-only `rankland-user-modal-slogan`, focused GREEN verified the slogan now renders exact old React `slogan mt-4 mb-2` while preserving text, photo/slogan shared wrapper, centered 32px ZCOOL XiaoWei text, `SLOGAN` pseudo-label, 16px top margin, and 8px bottom margin, ranklist full-chain 9 tests passed, Node `v24.11.1`, pnpm `8.15.9`, `gen:client-router` generated 6 client routes, `test:migration` passed with build, 36 unit files / 154 unit tests, 1 SSR smoke test, 1 shallow Playwright test, and 60 passed / 1 skipped full-chain Playwright tests; `git diff --check` passed.
 - Next recommended focus: product-review-driven SRK lower-level table pixel parity or route polish
 
 ## Route Progress
@@ -70,7 +70,7 @@ This file is the quick global dashboard for the RankLand migration. Update it at
 - User modal unofficial line now renders the old React exact `mt-4 mb-0` class tokens without the Vue-only unofficial-line class while preserving the stable `data-id` hook and computed spacing coverage.
 - User modal segment line now renders the old React exact `mt-4 mb-0` class tokens without Vue-only segment-line classes while preserving the stable `data-id` hook, segment label, and computed spacing coverage.
 - User modal segment label now renders the old React exact `user-modal-segment-label bg-segment-*` class tokens without the Vue-only segment-label class while preserving the stable `data-id` hook and existing style/background coverage.
-- User modal slogan now also carries the old React `.slogan mt-4 mb-2` class tokens while preserving the migrated `.rankland-user-modal-slogan` hook and existing computed typography/spacing coverage.
+- User modal slogan now renders the old React exact `slogan mt-4 mb-2` class tokens without the Vue-only slogan class while preserving the stable `data-id` hook, shared photo/slogan wrapper, and computed typography/spacing coverage.
 - User modal rank-time panel now also carries the old React `mt-4` wrapper class token while preserving the migrated `.rankland-rank-time-panel` hook and existing chart-only computed spacing coverage.
 - User modal photo wrapper now also carries the old React `mt-4` class token while preserving the migrated `.rankland-user-modal-photo` hook and existing full-width image coverage.
 - User modal photo and slogan now share the old React `div.mt-4` wrapper structure while preserving the migrated `.rankland-user-modal-photo` hook, old `.slogan mt-4 mb-2` classes, and full-width image coverage.

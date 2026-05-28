@@ -301,7 +301,7 @@
                 <p
                   v-if="activeUserSlogan"
                   data-id="rankland-user-modal-slogan"
-                  class="rankland-user-modal-slogan slogan mt-4 mb-2"
+                  class="slogan mt-4 mb-2"
                 >
                   {{ activeUserSlogan }}
                 </p>
@@ -1237,14 +1237,14 @@ span.ml-5.inline-flex.items-center .mr-1 {
   }
 }
 
-.rankland-user-modal-slogan {
+[data-id='rankland-user-modal-slogan'].slogan {
   margin: 16px 0 8px;
   font-family: 'ZCOOL XiaoWei', serif;
   font-size: 32px;
   text-align: center;
 }
 
-.rankland-user-modal-slogan::before {
+[data-id='rankland-user-modal-slogan'].slogan::before {
   display: block;
   font-size: 14px;
   content: 'SLOGAN';
