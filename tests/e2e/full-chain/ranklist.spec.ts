@@ -409,6 +409,7 @@ async function getFooterUtilityClasses(page: Page) {
     }
 
     return {
+      footerTagName: footer.tagName,
       footerClasses: Array.from(footer.classList),
       paragraphClasses: paragraphs.slice(0, 5).map((paragraph) => Array.from(paragraph.classList)),
     };
@@ -736,7 +737,7 @@ test.describe('/ranklist/:id full-chain route', () => {
         classList: ['ml-4'],
       },
       {
-        tagName: 'FOOTER',
+        tagName: 'DIV',
         dataId: 'rankland-ranklist-footer',
         classList: ['text-center', 'mt-8'],
       },
@@ -970,6 +971,7 @@ test.describe('/ranklist/:id full-chain route', () => {
       { marginTop: '4px', marginBottom: '0px' },
     ]);
     expect(await getFooterUtilityClasses(page)).toMatchObject({
+      footerTagName: 'DIV',
       footerClasses: ['text-center', 'mt-8'],
       paragraphClasses: [
         expect.arrayContaining(['mb-0']),

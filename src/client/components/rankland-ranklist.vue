@@ -331,7 +331,7 @@
         </div>
       </div>
 
-      <footer v-if="showFooter" data-id="rankland-ranklist-footer" class="text-center mt-8">
+      <div v-if="showFooter" data-id="rankland-ranklist-footer" class="text-center mt-8">
         <p class="mb-0">© 2022-present algoUX. All Rights Reserved.</p>
         <p class="mt-1 mb-0">
           Find us on <a href="https://github.com/algoux" target="_blank">GitHub</a>
@@ -362,7 +362,7 @@
             {{ footerSiteState.beianText }}
           </a>
         </p>
-      </footer>
+      </div>
   </template>
 </template>
 
