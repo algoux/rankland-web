@@ -45,7 +45,7 @@
                   data-id="app-site-switch-link"
                   :href="siteSwitchHref"
                   target="_blank"
-                  style="word-break: keep-all;"
+                  :style="siteSwitchLinkStyle"
                 >
                   <template v-if="siteAlias === 'cnn'">
                     全球站点
@@ -151,6 +151,9 @@ export default defineComponent({
         : process.env.RANKLAND_HOST_CN || process.env.HOST_CN || 'rl.algoux.cn';
 
       return `//${host}${buildLegacySiteSwitchPath(this.$route.fullPath)}`;
+    },
+    siteSwitchLinkStyle(): { wordBreak: 'keep-all' } | undefined {
+      return this.siteAlias === 'cnn' ? undefined : { wordBreak: 'keep-all' };
     },
     siteAlias(): string | undefined {
       return process.env.RANKLAND_SITE_ALIAS || process.env.SITE_ALIAS;
