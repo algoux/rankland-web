@@ -2,6 +2,8 @@
   <div>
     <Head>
       <title>{{ pageTitle }}</title>
+      <meta v-if="ranklist" property="og:title" :content="pageTitle">
+      <meta v-if="ranklist" property="og:url" :content="canonicalUrl">
       <link rel="canonical" :href="canonicalUrl">
     </Head>
 
@@ -47,11 +49,13 @@
 <script lang="ts">
 import { defineComponent, type PropType } from 'vue';
 import { routeView, RenderMethodKind } from 'bwcx-client-vue3';
+import { ranklandRoutes } from '@common/rankland-router';
 import type { IApiRanklist } from '@common/rankland-api';
 import { RanklistRPO } from '@common/modules/ranklist/ranklist.rpo';
 import type { AsyncDataOptions } from '@client/typings';
 import { formatTitle } from '@client/utils/title-format.util';
 import RanklandRanklist from '@client/components/rankland-ranklist.vue';
+import { buildHomeAbsoluteUrl } from '@client/modules/home/home-site';
 import { classifyRanklistLoadError, type RanklistLoadErrorState } from './ranklist-error';
 
 const RanklistPage = defineComponent({
@@ -103,7 +107,7 @@ const RanklistPage = defineComponent({
       return formatTitle();
     },
     canonicalUrl(): string {
-      return `/ranklist/${encodeURIComponent(this.ranklistId)}`;
+      return buildHomeAbsoluteUrl(ranklandRoutes.ranklist.build({ id: this.ranklistId }));
     },
   },
   mounted() {

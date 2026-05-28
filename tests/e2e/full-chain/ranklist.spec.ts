@@ -665,6 +665,16 @@ test.describe('/ranklist/:id full-chain route', () => {
     expect(response?.ok()).toBe(true);
     expect(await response!.text()).toContain('Test Contest 2024');
     await expect(page).toHaveTitle('Test Contest 2024 | RankLand');
+    const expectedRanklistCanonicalUrl = 'https://rl.algoux.org/ranklist/test-key';
+    await expect(page.locator('head meta[property="og:title"]')).toHaveAttribute(
+      'content',
+      'Test Contest 2024 | RankLand',
+    );
+    await expect(page.locator('head meta[property="og:url"]')).toHaveAttribute(
+      'content',
+      expectedRanklistCanonicalUrl,
+    );
+    await expect(page.locator('head link[rel="canonical"]')).toHaveAttribute('href', expectedRanklistCanonicalUrl);
     await expect(
       page.locator('[data-id="ranklist-content"][data-ranklist-id="test-key"][data-row-count="2"]'),
     ).toBeVisible();
