@@ -296,6 +296,7 @@
                   data-id="rankland-user-modal-photo"
                   :src="activeUserPhotoSrc"
                   alt="选手照片"
+                  style="width: 100%"
                 />
                 <p
                   v-if="activeUserSlogan"

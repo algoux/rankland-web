@@ -1245,6 +1245,8 @@ test.describe('/ranklist/:id full-chain route', () => {
     });
     const photo = userModal.locator('[data-id="rankland-user-modal-photo"]');
     await expect(photo).toHaveAttribute('alt', '选手照片');
+    const photoInlineStyle = (await photo.getAttribute('style')) || '';
+    expect(photoInlineStyle.replace(/\s+/g, ' ')).toContain('width: 100%');
     const photoWrapper = userModal.locator('.rankland-user-modal-photo');
     await expect(photoWrapper).toHaveClass(/(^|\s)mt-4(\s|$)/);
     const photoWrapperStyle = await photoWrapper.evaluate((element) => {

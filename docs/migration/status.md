@@ -5,9 +5,9 @@ This file is the quick global dashboard for the RankLand migration. Update it at
 ## Current Focus
 
 - Active branch: `migration/live-page-foundation`
-- Current slice: SRK remarks wrapper exact class parity
-- Latest slice commit: `fix: 还原 SRK 备注外壳精确类名`
-- Last recorded full gate: passed on 2026-05-28 for SRK remarks wrapper exact class parity with Node `v24.11.1`, pnpm `8.15.9`, generated 6 client routes, build, 36 unit files / 154 unit tests, 1 SSR smoke test, 1 shallow Playwright test, and 60 passed / 1 skipped default full-chain Playwright tests with the conditional beian spec skipped outside `cnn`; focused RED reproduced the remarks wrapper still carrying the Vue-only `rankland-ranklist-remarks` product class, focused GREEN verified the wrapper class list is exactly `mb-4 text-center`, computed 16px bottom margin and centered alignment remain, and the visible `.srk-remarks` pill behavior is unchanged; ranklist full-chain 9 tests passed; `git diff --check` also passed.
+- Current slice: user modal photo inline width parity
+- Latest slice commit: `fix: 还原用户照片内联宽度样式`
+- Last recorded full gate: passed on 2026-05-28 for user modal photo inline width parity with Node `v24.11.1`, pnpm `8.15.9`, generated 6 client routes, build, 36 unit files / 154 unit tests, 1 SSR smoke test, 1 shallow Playwright test, and 60 passed / 1 skipped default full-chain Playwright tests with the conditional beian spec skipped outside `cnn`; focused RED reproduced the migrated user photo image missing the old React inline `width: 100%` style, focused GREEN verified the inline style is restored while computed full-width photo behavior remains, and ranklist full-chain 9 tests passed; `git diff --check` also passed.
 - Next recommended focus: product-review-driven SRK lower-level table pixel parity or route polish
 
 ## Route Progress
@@ -71,6 +71,7 @@ This file is the quick global dashboard for the RankLand migration. Update it at
 - User modal photo wrapper now also carries the old React `mt-4` class token while preserving the migrated `.rankland-user-modal-photo` hook and existing full-width image coverage.
 - User modal photo and slogan now share the old React `div.mt-4` wrapper structure while preserving the migrated `.rankland-user-modal-photo` hook, old `.slogan mt-4 mb-2` classes, and full-width image coverage.
 - User modal users without photo or slogan now still render the old empty photo/slogan `div.mt-4` wrapper, matching React `UserInfoModal` spacing and DOM parity.
+- User modal photo now restores the old React inline `width: 100%` style on the image while preserving the existing computed full-width CSS and broken-image hiding behavior.
 - SRK user and solution modal roots now carry the old React `srk-react-modal-root` class alongside `srk-modal-root`, `srk-animated-modal-root`, and `srk-general-modal-root`, preserving old modal root DOM hooks without changing the Vue renderer modal behavior.
 - User modal users without organization now still render the old empty organization `p.mb-0` line before the rest of the modal body, matching React `UserInfoModal` DOM parity while preserving existing zero-margin styling.
 - SRK wrapper now runs the old `ts-interface-checker@1.0.2` Ranklist checker before static conversion and renders the old checker-error exact `div.ml-8 > h3 + pre` DOM/class for structurally invalid SRK objects without the Vue-only `.rankland-ranklist-check-error` product class, while deterministic mock fixtures now use checker-valid marker presets.
