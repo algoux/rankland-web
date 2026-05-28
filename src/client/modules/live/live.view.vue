@@ -422,13 +422,16 @@ const LivePage = defineComponent({
       }, delay);
     },
     handleScrollSolutionToggle(checked: boolean) {
-      const query = { ...this.$route.query };
-      if (checked) {
-        query.scrollSolution = '1';
-      } else {
-        delete query.scrollSolution;
-      }
-      this.$router.replace({ path: this.$route.path, query });
+      window.setTimeout(() => {
+        const searchParams = new URLSearchParams(window.location.search);
+        if (checked) {
+          searchParams.append('scrollSolution', '1');
+          window.location.search = searchParams.toString();
+        } else {
+          searchParams.delete('scrollSolution');
+          window.location.search = searchParams.toString();
+        }
+      }, 250);
     },
   },
 });

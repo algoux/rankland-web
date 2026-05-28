@@ -64,6 +64,20 @@ async function readRanklandWebSocketUrls(page: Page) {
   );
 }
 
+async function installBeforeUnloadCounter(page: Page) {
+  await page.addInitScript(() => {
+    window.addEventListener('beforeunload', () => {
+      const key = '__ranklandLiveBeforeUnloadCount';
+      const currentCount = Number(window.sessionStorage.getItem(key) || '0');
+      window.sessionStorage.setItem(key, String(currentCount + 1));
+    });
+  });
+}
+
+async function readBeforeUnloadCount(page: Page) {
+  return page.evaluate(() => Number(window.sessionStorage.getItem('__ranklandLiveBeforeUnloadCount') || '0'));
+}
+
 async function stubClipboard(page: Page) {
   await page.addInitScript(() => {
     Object.defineProperty(navigator, 'clipboard', {
@@ -865,24 +879,24 @@ test.describe('/live/:id full-chain route', () => {
     expect(liveRanklistRequests).toHaveLength(0);
   });
 
-  test('disables scroll-solution mode, preserves other queries, and closes the WebSocket', async ({ page, request }) => {
+  test('reloads the page when disabling scroll-solution mode and preserves other queries', async ({
+    page,
+    request,
+  }) => {
     await denyExternalCalls(page);
     await stubWebSocket(page);
+    await installBeforeUnloadCounter(page);
     await request.post(`${mockBaseURL}/__reset`);
 
     await page.goto('/live/live-test-key?token=t0&scrollSolution=1&focus=yes');
 
-    const wsUrl = `ws://127.0.0.1:${mockPort}/ranking/record/live-rid-1?token=t0`;
     await expect(page.locator('[data-id="live-scroll-solution-status"]')).toHaveText('connected');
+    expect(await readBeforeUnloadCount(page)).toBe(0);
     await page.locator('[data-id="live-scroll-solution-toggle"]').click();
 
     await expect(page).toHaveURL(/\/live\/live-test-key\?token=t0&focus=yes$/);
     await expect(page.locator('[data-id="live-scroll-solution"]')).toBeHidden();
-    await expect
-      .poll(async () =>
-        page.evaluate(() => (window as unknown as { __ranklandWsClosedUrls?: string[] }).__ranklandWsClosedUrls || []),
-      )
-      .toContain(wsUrl);
+    await expect.poll(async () => readBeforeUnloadCount(page)).toBe(1);
   });
 
   test('reconnects after unexpected WebSocket close while keeping the ranklist visible', async ({

@@ -62,7 +62,7 @@ git status --short --branch
 备注：
 
 ```text
-2026-05-28 最新记录：App site-switch dropdown product-class parity 已通过 focused RED/GREEN、完整默认 `test:migration` 与 `git diff --check`。RED 复现站点切换下拉 title/subtitle 段落仍带 Vue-only `app-site-switch-title` / `app-site-switch-subtitle` 类；GREEN 验证下拉内容保留旧版直接 `p.mb-0` 精确 class list，不再带 Vue-only 产品类，同时保留链接和副标题样式。完整 gate 使用 Node `v24.11.1`、pnpm `8.15.9`，`gen:client-router` 生成 6 条 client route，`test:migration` 通过 build、37 个 unit 文件 / 157 个 unit tests、1 个 SSR smoke test、1 个 shallow Playwright test、61 passed / 1 skipped full-chain Playwright tests。
+2026-05-28 最新记录：Live scroll-solution reload parity 已通过 focused RED/GREEN、完整默认 `test:migration` 与 `git diff --check`。RED 复现 Live scroll-solution 开关仅通过 SPA `$router.replace` 改 URL、不触发 `beforeunload`；GREEN 验证关闭 scroll-solution 时保留 `token` / `focus`，隐藏滚动提交 UI，并触发旧版整页导航语义。完整 gate 使用 Node `v24.11.1`、pnpm `8.15.9`，`gen:client-router` 生成 6 条 client route，`test:migration` 通过 build、37 个 unit 文件 / 157 个 unit tests、1 个 SSR smoke test、1 个 shallow Playwright test、61 passed / 1 skipped full-chain Playwright tests。
 ```
 
 ## 全局外壳与跨路由行为
@@ -503,7 +503,7 @@ App shell Ant Design Vue Layout/Menu/Dropdown/Button、旧版根布局 `layout` 
 - `[x]` 同屏多条实时事件按旧 Toastify `newestOnTop={false}` 保持 oldest-first 可见顺序
 - `[x]` scroll-solution 模式可以关闭
 - `[x]` 关闭 scroll-solution 时保留其他 query 参数
-- `[x]` 关闭 scroll-solution 时 WebSocket 会关闭
+- `[x]` 关闭 scroll-solution 时触发旧版 250ms `window.location.search` 整页导航语义
 - `[x]` WebSocket 异常关闭时展示实时错误，同时保留榜单可见
 - `[x]` loaded live 外层布局不添加 Vue-only route padding、`1280px` max-width 或自动居中
 - `[x]` scroll-solution 模式下 live 内容区保留旧版 `250px` 左偏移且不添加额外右外边距
@@ -528,7 +528,7 @@ App shell Ant Design Vue Layout/Menu/Dropdown/Button、旧版根布局 `layout` 
 备注：
 
 ```text
-2026-05-28 复核：live full-chain 使用 mock backend 和 stub WebSocket 覆盖 CSR hydration、旧 React Head 无 canonical link 行为、hydration marker 视觉隐藏、query 保留、loaded content 旧版普通 `DIV` wrapper、精确 `mt-8 mb-8` class list、无 Vue-only `live-content` / `live-content-with-scroll-solution` product classes、32px 间距、旧版 inline `250px` scroll-solution 左偏移、移动端 realtime content-left `250px`、loaded root 旧版普通 `DIV` 且无 Vue-only `live-page` class / 无 route-local `70vh` min-height、polling、loaded live 外层无 Vue-only padding/max-width/auto-centering、scroll-solution 旧版 250px 左偏移且无额外右外边距、WebSocket setup/reconnect/close、Toastify/scroll-solution、旧 React Toastify `DIV` container + direct visible `DIV` toast row DOM 且无 `ul` / `li` product structure、旧 Toastify `newestOnTop={false}` oldest-first 可见行顺序、scroll-solution 开关旧版 4px 间距、旧版 14px 和 light `rgba(0, 0, 0, 0.85)` 文字样式、移动端旧版不渲染 scroll-solution 开关 DOM、未知实时结果旧版 `--` fallback 与无 `result-unknown` class、no-meta header action 旧版工具类和导出按钮不带 `pl-2 border-l`、用户弹窗 rank-time 旧版 chart-only `mt-4` 外壳类名、plain rank-time curve/G2 容器无 Vue-only 产品 class、curve 外层无 Vue-only `data-chart-status` 生命周期属性、G2 图表、Not Found、普通/实时桌面移动端截图和 bounds。
+2026-05-28 复核：live full-chain 使用 mock backend 和 stub WebSocket 覆盖 CSR hydration、旧 React Head 无 canonical link 行为、hydration marker 视觉隐藏、query 保留、loaded content 旧版普通 `DIV` wrapper、精确 `mt-8 mb-8` class list、无 Vue-only `live-content` / `live-content-with-scroll-solution` product classes、32px 间距、旧版 inline `250px` scroll-solution 左偏移、移动端 realtime content-left `250px`、loaded root 旧版普通 `DIV` 且无 Vue-only `live-page` class / 无 route-local `70vh` min-height、polling、loaded live 外层无 Vue-only padding/max-width/auto-centering、scroll-solution 旧版 250px 左偏移且无额外右外边距、WebSocket setup/reconnect/close、Toastify/scroll-solution、旧 React Toastify `DIV` container + direct visible `DIV` toast row DOM 且无 `ul` / `li` product structure、旧 Toastify `newestOnTop={false}` oldest-first 可见行顺序、scroll-solution 开关旧版 4px 间距、旧版 250ms `URLSearchParams(window.location.search)` + `window.location.search` 整页导航语义与 `beforeunload` 覆盖、旧版 14px 和 light `rgba(0, 0, 0, 0.85)` 文字样式、移动端旧版不渲染 scroll-solution 开关 DOM、未知实时结果旧版 `--` fallback 与无 `result-unknown` class、no-meta header action 旧版工具类和导出按钮不带 `pl-2 border-l`、用户弹窗 rank-time 旧版 chart-only `mt-4` 外壳类名、plain rank-time curve/G2 容器无 Vue-only 产品 class、curve 外层无 Vue-only `data-chart-status` 生命周期属性、G2 图表、Not Found、普通/实时桌面移动端截图和 bounds。
 ```
 
 ## API 与数据行为
