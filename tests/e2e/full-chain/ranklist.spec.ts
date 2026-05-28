@@ -1317,8 +1317,31 @@ test.describe('/ranklist/:id full-chain route', () => {
     });
     const segmentLabel = userModal.locator('[data-id="rankland-user-modal-segment-label"]');
     await expect(segmentLabel).toHaveText('Gold');
-    await expect(segmentLabel).toHaveClass(/bg-segment-gold/);
-    await expect(segmentLabel).toHaveClass(/(^|\s)user-modal-segment-label(\s|$)/);
+    await expect(segmentLabel).toHaveClass(/^user-modal-segment-label bg-segment-gold$/);
+    expect(await segmentLabel.evaluate((element) => Array.from(element.classList))).not.toContain(
+      'rankland-user-modal-segment-label',
+    );
+    const segmentLabelStyle = await segmentLabel.evaluate((element) => {
+      const style = window.getComputedStyle(element);
+      return {
+        display: style.display,
+        paddingTop: style.paddingTop,
+        paddingRight: style.paddingRight,
+        paddingBottom: style.paddingBottom,
+        paddingLeft: style.paddingLeft,
+        borderRadius: style.borderRadius,
+        color: style.color,
+      };
+    });
+    expect(segmentLabelStyle).toMatchObject({
+      display: 'inline-block',
+      paddingTop: '4px',
+      paddingRight: '4px',
+      paddingBottom: '4px',
+      paddingLeft: '4px',
+      borderRadius: '4px',
+      color: 'rgb(255, 255, 255)',
+    });
     const slogan = userModal.locator('[data-id="rankland-user-modal-slogan"]');
     await expect(slogan).toHaveText('Keep moving forward');
     await expect(photoWrapper.locator('[data-id="rankland-user-modal-slogan"]')).toHaveText('Keep moving forward');
