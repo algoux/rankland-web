@@ -266,7 +266,7 @@ async function getRanklistLinkColors(page: Page) {
 async function getUserModalBodyColor(page: Page) {
   return page.evaluate(() => {
     const modalBody = document.querySelector<HTMLElement>(
-      '[data-id="rankland-ranklist-user-modal"] .rankland-user-modal-body',
+      '[data-id="rankland-ranklist-user-modal"] .user-modal',
     );
     if (!modalBody) {
       throw new Error('Missing rankland user modal body');
@@ -1147,7 +1147,12 @@ test.describe('/ranklist/:id full-chain route', () => {
       ]),
     );
     await expect(userModal.locator('.srk-modal-title')).toHaveText('Team Alpha');
-    await expect(userModal.locator('.user-modal')).toBeVisible();
+    const userModalBody = userModal.locator('.user-modal');
+    await expect(userModalBody).toBeVisible();
+    await expect(userModalBody).toHaveClass(/^user-modal$/);
+    expect(await userModalBody.evaluate((element) => Array.from(element.classList))).not.toContain(
+      'rankland-user-modal-body',
+    );
     await expect(userModal.locator('[data-id="rankland-user-modal-name"]')).toHaveCount(0);
     const organizationLine = userModal.locator('[data-id="rankland-user-modal-organization"]');
     await expect(organizationLine).toHaveText('Org A');
@@ -1294,7 +1299,7 @@ test.describe('/ranklist/:id full-chain route', () => {
       };
     });
     const photoModalBodyWidth = await photo.evaluate((element) => {
-      const modalBody = element.closest('.rankland-user-modal-body');
+      const modalBody = element.closest('.user-modal');
       return modalBody ? window.getComputedStyle(modalBody).width : '';
     });
     expect(photoStyle).toMatchObject({

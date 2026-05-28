@@ -5,9 +5,9 @@ This file is the quick global dashboard for the RankLand migration. Update it at
 ## Current Focus
 
 - Active branch: `migration/live-page-foundation`
-- Current slice: user modal rank-time panel product class parity
-- Latest slice commit: `fix: 还原用户排名曲线外壳类名`
-- Last recorded full gate: passed on 2026-05-28 for user modal rank-time panel product class parity; focused RED reproduced the migrated rank-time panel still exposing Vue-only `rankland-rank-time-panel`, focused GREEN verified the panel now renders exact old React `mt-4` class while preserving stable `data-id`, chart-only chrome, zero unit/summary/event nodes, 16px top margin, zero padding/border, G2 metadata, canvas, and curve height, live full-chain 11 tests passed, Node `v24.11.1`, pnpm `8.15.9`, `gen:client-router` generated 6 client routes, `test:migration` passed with build, 36 unit files / 154 unit tests, 1 SSR smoke test, 1 shallow Playwright test, and 60 passed / 1 skipped full-chain Playwright tests; `git diff --check` passed.
+- Current slice: user modal body product class parity
+- Latest slice commit: `fix: 还原用户弹窗正文根类名`
+- Last recorded full gate: passed on 2026-05-28 for user modal body product class parity; focused RED reproduced the migrated user modal body still exposing Vue-only `rankland-user-modal-body`, focused GREEN verified the body now renders exact old React `user-modal` class while preserving modal title, no duplicate body name, child DOM/data-id hooks, photo width calculation, and modal body text color selector coverage; ranklist full-chain 9 tests passed; full gate used Node `v24.11.1` and pnpm `8.15.9`, `gen:client-router` generated 6 client routes, `test:migration` passed with build, 36 unit files / 154 unit tests, 1 SSR smoke test, 1 shallow Playwright test, and 60 passed / 1 skipped full-chain Playwright tests; `git diff --check` passed.
 - Next recommended focus: product-review-driven SRK lower-level table pixel parity or route polish
 
 ## Route Progress
@@ -61,7 +61,7 @@ This file is the quick global dashboard for the RankLand migration. Update it at
 - SRK table area now renders the old React `div.mt-6` spacer DOM before the table wrapper without the Vue-only `.rankland-ranklist-table-spacer` product class while preserving the verified 24px controls-to-table visual gap.
 - SRK table wrapper now preserves the old React class-attribute contract: ranklist/live render exact `class="ml-4"` from `tableClass`, while collection/playground keep the stable `data-id` test hook without emitting a Vue-only class attribute.
 - SRK user and solution modal wrapper nodes now render inside the table wrapper like old React `StyledRanklistRenderer`, while the footer remains after the table wrapper.
-- User modal body now also carries the old React `.user-modal` root class while preserving the migrated `.rankland-user-modal-body` hook.
+- User modal body now renders the old React exact `.user-modal` root class without the Vue-only body class while preserving child hooks and dark text color coverage.
 - User modal organization line now renders the old React exact `mb-0` class token without Vue-only organization-line classes while preserving the stable `data-id` hook and computed zero-margin coverage.
 - User modal team-members row now renders the old React exact `user-modal-info-team-members mt-2` class tokens without the Vue-only team-members row class while preserving the stable `data-id` hook, item-level entry spans, raw separator text, opacity, padding, and computed spacing coverage.
 - User modal team-members separator now renders the old React exact `user-modal-info-team-members-slash` class token without the Vue-only separator class while preserving stable `data-id`, raw ` / ` text, normalized slash text, item-level member entry DOM, and separator style coverage.

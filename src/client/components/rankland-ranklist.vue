@@ -230,7 +230,7 @@
             wrap-class-name="rankland-user-modal"
             @close="handleUserModalClose"
           >
-            <div v-if="activeUserPayload" class="rankland-user-modal-body user-modal">
+            <div v-if="activeUserPayload" class="user-modal">
               <p
                 data-id="rankland-user-modal-organization"
                 class="mb-0"
@@ -1127,7 +1127,7 @@ span.ml-5.inline-flex.items-center .mr-1 {
   margin-top: 4px;
 }
 
-.rankland-user-modal-body {
+[data-id='rankland-ranklist-user-modal'] .user-modal {
   color: var(--rankland-legacy-text-color);
 }
 
