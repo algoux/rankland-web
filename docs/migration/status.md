@@ -5,9 +5,9 @@ This file is the quick global dashboard for the RankLand migration. Update it at
 ## Current Focus
 
 - Active branch: `migration/live-page-foundation`
-- Current slice: SRK footer wrapper product class parity
-- Latest slice commit: `fix: 还原 SRK 页脚外壳类名`
-- Last recorded full gate: passed on 2026-05-28 for SRK footer wrapper product class parity with Node `v24.11.1`, pnpm `8.15.9`, generated 6 client routes, build, 36 unit files / 154 unit tests, 1 SSR smoke test, 1 shallow Playwright test, and 60 passed / 1 skipped default full-chain Playwright tests with the conditional beian spec skipped outside `cnn`; focused RED reproduced the migrated footer root still exposing Vue-only `rankland-ranklist-footer`, focused GREEN verified the footer root now renders exact old React `text-center mt-8` while preserving footer spacing, text, links, ContactUs trigger, and ranklist full-chain 9 tests passed; `git diff --check` also passed.
+- Current slice: user modal organization line product class parity
+- Latest slice commit: `fix: 还原用户组织行类名`
+- Last recorded full gate: passed on 2026-05-28 for user modal organization line product class parity with Node `v24.11.1`, pnpm `8.15.9`, generated 6 client routes, build, 36 unit files / 154 unit tests, 1 SSR smoke test, 1 shallow Playwright test, and 60 passed / 1 skipped default full-chain Playwright tests with the conditional beian spec skipped outside `cnn`; focused RED reproduced the migrated organization line still exposing Vue-only `rankland-user-modal-line` and `rankland-user-modal-organization`, focused GREEN verified the line now renders exact old React `mb-0` while preserving text and zero margins, and ranklist full-chain 9 tests passed; `git diff --check` also passed.
 - Next recommended focus: product-review-driven SRK lower-level table pixel parity or route polish
 
 ## Route Progress
@@ -62,7 +62,7 @@ This file is the quick global dashboard for the RankLand migration. Update it at
 - SRK table wrapper now preserves the old React class-attribute contract: ranklist/live render exact `class="ml-4"` from `tableClass`, while collection/playground keep the stable `data-id` test hook without emitting a Vue-only class attribute.
 - SRK user and solution modal wrapper nodes now render inside the table wrapper like old React `StyledRanklistRenderer`, while the footer remains after the table wrapper.
 - User modal body now also carries the old React `.user-modal` root class while preserving the migrated `.rankland-user-modal-body` hook.
-- User modal organization line now also carries the old React `mb-0` class token while preserving the migrated `.rankland-user-modal-organization` hook and existing computed zero-margin coverage.
+- User modal organization line now renders the old React exact `mb-0` class token without Vue-only organization-line classes while preserving the stable `data-id` hook and computed zero-margin coverage.
 - User modal team-members row now also carries the old React `mt-2` class token while preserving the migrated `.rankland-user-modal-team-members` hook and existing computed spacing coverage.
 - User modal team-members separator raw text is now covered as old React ` / ` while preserving normalized slash text and existing separator style coverage.
 - User modal team members now render old React item-level outer `span` entries, preserving the migrated member/separator hooks while avoiding Vue-only flattened children.

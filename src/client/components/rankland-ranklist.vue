@@ -233,7 +233,7 @@
             <div v-if="activeUserPayload" class="rankland-user-modal-body user-modal">
               <p
                 data-id="rankland-user-modal-organization"
-                class="rankland-user-modal-line rankland-user-modal-organization mb-0"
+                class="mb-0"
               >
                 {{ activeUserOrganization }}
               </p>
@@ -1135,7 +1135,7 @@ span.ml-5.inline-flex.items-center .mr-1 {
   margin: 4px 0;
 }
 
-.rankland-user-modal-organization {
+[data-id='rankland-user-modal-organization'].mb-0 {
   margin: 0;
 }
 

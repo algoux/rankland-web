@@ -1151,7 +1151,13 @@ test.describe('/ranklist/:id full-chain route', () => {
     await expect(userModal.locator('[data-id="rankland-user-modal-name"]')).toHaveCount(0);
     const organizationLine = userModal.locator('[data-id="rankland-user-modal-organization"]');
     await expect(organizationLine).toHaveText('Org A');
-    await expect(organizationLine).toHaveClass(/(^|\s)mb-0(\s|$)/);
+    await expect(organizationLine).toHaveClass(/^mb-0$/);
+    expect(await organizationLine.evaluate((element) => Array.from(element.classList))).not.toContain(
+      'rankland-user-modal-line',
+    );
+    expect(await organizationLine.evaluate((element) => Array.from(element.classList))).not.toContain(
+      'rankland-user-modal-organization',
+    );
     const organizationLineStyle = await organizationLine.evaluate((element) => {
       const style = window.getComputedStyle(element);
       return {
