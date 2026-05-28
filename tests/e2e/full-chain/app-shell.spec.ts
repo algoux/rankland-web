@@ -384,6 +384,13 @@ test.describe('app shell full-chain behavior', () => {
     expect(html).toContain('<meta property="og:locale" content="zh_CN"');
     expect(html).toContain('<meta name="twitter:card" content="summary_large_image"');
     expect(html).toContain('<title>RankLand</title>');
+    const inlineBodyBootstrapStyle =
+      '<style>body{margin:0;background-color:#f0f2f5;opacity:0;transition:opacity 0.7s cubic-bezier(0.22, 0.61, 0.36, 1);}@media(prefers-color-scheme:dark){body{background-color:#000;}}</style>';
+    expect(html).toContain(inlineBodyBootstrapStyle);
+    expect(html.indexOf(inlineBodyBootstrapStyle)).toBeLessThan(html.indexOf('<body'));
+    expect(html).toContain("const __darkReaderInjected = document.head.querySelector('.darkreader');");
+    expect(html).toContain('__darkReaderInjected && __darkReaderInjected.remove();');
+    expect(html.indexOf('__darkReaderInjected')).toBeLessThan(html.indexOf('<div id="app"'));
     const bootstrapIndex = html.indexOf('data-rankland-theme-bootstrap');
     expect(bootstrapIndex).toBeGreaterThan(-1);
     expect(bootstrapIndex).toBeLessThan(html.indexOf('<body'));
@@ -401,6 +408,7 @@ test.describe('app shell full-chain behavior', () => {
     await expect(page.locator('html')).toHaveClass('dark');
     await expect(page.locator('body')).toHaveClass(/optimize-decrease-effects/);
     await expect(page.locator('body')).toHaveCSS('color', 'rgba(255, 255, 255, 0.85)');
+    await expect(page.locator('body')).toHaveCSS('opacity', '1');
     const bodyTypography = await getBodyTypography(page);
     expect(bodyTypography.fontSize).toBe('14px');
     expect(bodyTypography.fontFamily).toContain('system-ui');
