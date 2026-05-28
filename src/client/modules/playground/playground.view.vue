@@ -116,6 +116,7 @@ import demoRanklist from './assets/demo-ranklist.srk.json';
 import RanklandRanklist from '@client/components/rankland-ranklist.vue';
 import { formatTitle } from '@client/utils/title-format.util';
 import { parsePlaygroundSrkSource, type PlaygroundSrkParseState } from './playground-srk';
+import { syncPlaygroundPreviewSource } from './playground-preview-sync';
 import {
   configurePlaygroundMonacoLoader,
   VueMonacoEditor,
@@ -175,7 +176,9 @@ const PlaygroundPage = defineComponent({
     this.setupRemainingHeightObservers();
     this.setupThemeObserver();
     this.syncEditorSource = throttle((value: string) => {
-      this.draftSource = value || '';
+      const nextState = syncPlaygroundPreviewSource(value);
+      this.draftSource = nextState.draftSource;
+      this.parseState = nextState.parseState;
     }, 250);
   },
   beforeUnmount() {
@@ -189,7 +192,9 @@ const PlaygroundPage = defineComponent({
   methods: {
     previewSource() {
       this.syncDraftSourceFromEditor();
-      this.parseState = parsePlaygroundSrkSource(this.draftSource);
+      const nextState = syncPlaygroundPreviewSource(this.draftSource);
+      this.draftSource = nextState.draftSource;
+      this.parseState = nextState.parseState;
     },
     handleMonacoBeforeMount(monacoApi: PlaygroundMonacoApi) {
       this.editorLoadingStage = 'configuring';
@@ -219,8 +224,9 @@ const PlaygroundPage = defineComponent({
         __ranklandPreviewPlaygroundSource?: (source: string) => void;
       };
       win.__ranklandPreviewPlaygroundSource = (source: string) => {
-        this.draftSource = source;
-        this.parseState = parsePlaygroundSrkSource(source);
+        const nextState = syncPlaygroundPreviewSource(source);
+        this.draftSource = nextState.draftSource;
+        this.parseState = nextState.parseState;
       };
     },
     cleanupE2EHooks() {
