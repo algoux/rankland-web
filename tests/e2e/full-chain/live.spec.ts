@@ -154,6 +154,22 @@ async function getRouteContentSpacing(page: Page, selector: string) {
   }, selector);
 }
 
+async function getLiveStateWrapperPresentation(page: Page, selector: string) {
+  return page.evaluate((selector) => {
+    const element = document.querySelector<HTMLElement>(selector);
+    if (!element) {
+      throw new Error(`Missing live state element: ${selector}`);
+    }
+
+    return {
+      tagName: element.tagName,
+      classList: Array.from(element.classList),
+      isAntSpinRoot: element.classList.contains('ant-spin'),
+      antSpinDescendantCount: element.querySelectorAll('.ant-spin').length,
+    };
+  }, selector);
+}
+
 async function getLiveWrapperChrome(page: Page) {
   return page.evaluate(() => {
     const pageElement = document.querySelector<HTMLElement>('[data-id="live-page"]');
@@ -814,7 +830,13 @@ test.describe('/live/:id full-chain route', () => {
 
     expect(response).not.toBeNull();
     expect(response?.ok()).toBe(true);
-    await expect(page.locator('[data-id="live-loading"].ant-spin')).toBeVisible();
+    await expect(page.locator('[data-id="live-loading"] .ant-spin')).toBeVisible();
+    expect(await getLiveStateWrapperPresentation(page, '[data-id="live-loading"]')).toMatchObject({
+      tagName: 'DIV',
+      classList: ['mt-16', 'text-center'],
+      isAntSpinRoot: false,
+      antSpinDescendantCount: 1,
+    });
     await expect(page.locator('[data-id="live-loading"]')).toHaveClass(/(^|\s)mt-16(\s|$)/);
     await expect(page.locator('[data-id="live-loading"]')).toHaveClass(/(^|\s)text-center(\s|$)/);
     expect(await getRouteContentSpacing(page, '[data-id="live-loading"]')).toMatchObject({
@@ -835,6 +857,10 @@ test.describe('/live/:id full-chain route', () => {
     expect(response?.ok()).toBe(true);
     await expect(page).toHaveTitle('Not Found | RankLand');
     await expect(page.locator('[data-id="live-not-found"]')).toBeVisible();
+    expect(await getLiveStateWrapperPresentation(page, '[data-id="live-not-found"]')).toMatchObject({
+      tagName: 'DIV',
+      classList: ['mt-16', 'text-center'],
+    });
     await expect(page.locator('[data-id="live-not-found"]')).toHaveClass(/(^|\s)mt-16(\s|$)/);
     await expect(page.locator('[data-id="live-not-found"]')).toHaveClass(/(^|\s)text-center(\s|$)/);
     await expect(page.locator('[data-id="live-not-found"] h3')).toHaveText('Ranklist Not Found');
@@ -863,6 +889,10 @@ test.describe('/live/:id full-chain route', () => {
     await expect(page).toHaveTitle('Live | RankLand');
     await expect(page.locator('[data-id="live-error"]')).toBeVisible();
     await expect(page.locator('[data-id="live-error"] p')).toHaveText('An error occurred while loading data');
+    expect(await getLiveStateWrapperPresentation(page, '[data-id="live-error"]')).toMatchObject({
+      tagName: 'DIV',
+      classList: ['mt-16', 'text-center'],
+    });
     await expect(page.locator('[data-id="live-error"]')).toHaveClass(/(^|\s)mt-16(\s|$)/);
     await expect(page.locator('[data-id="live-error"]')).toHaveClass(/(^|\s)text-center(\s|$)/);
     await expect(page.locator('[data-id="live-error"]')).toHaveCSS('text-align', 'center');

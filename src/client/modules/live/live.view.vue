@@ -5,21 +5,23 @@
       <meta property="og:title" :content="pageTitle">
     </Head>
 
-    <section v-if="isNotFound" data-id="live-not-found" class="live-state mt-16 text-center">
+    <div v-if="isNotFound" data-id="live-not-found" class="mt-16 text-center">
       <h3 class="mb-4">Ranklist Not Found</h3>
       <router-link to="/" data-id="live-not-found-home-link">
         <a-button type="primary" size="small">Back to Home</a-button>
       </router-link>
-    </section>
+    </div>
 
-    <section v-else-if="hasGenericError" data-id="live-error" class="live-state mt-16 text-center">
+    <div v-else-if="hasGenericError" data-id="live-error" class="mt-16 text-center">
       <p>An error occurred while loading data</p>
       <a-button data-id="live-refresh" type="primary" size="small" @click="refresh">
         Refresh
       </a-button>
-    </section>
+    </div>
 
-    <a-spin v-else-if="!ranklist" data-id="live-loading" class="live-state mt-16 text-center" />
+    <div v-else-if="!ranklist" data-id="live-loading" class="mt-16 text-center">
+      <a-spin />
+    </div>
 
     <div
       v-else
@@ -440,21 +442,6 @@ export default routeView(LivePage, '/live/:id', LiveRPO);
 </script>
 
 <style lang="less" scoped>
-.live-state {
-  margin-right: 0;
-  margin-left: 0;
-}
-
-.live-state {
-  margin-top: 64px;
-  margin-bottom: 32px;
-  text-align: center;
-}
-
-.live-state h3 {
-  margin: 0 0 16px;
-}
-
 .mt-16 {
   margin-top: 64px;
 }
