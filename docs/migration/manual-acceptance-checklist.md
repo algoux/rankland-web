@@ -62,7 +62,7 @@ git status --short --branch
 备注：
 
 ```text
-2026-05-28 最新记录：Legacy query serialization parity 已通过 focused RED/GREEN、完整默认 `test:migration` 与 `git diff --check`。RED 复现共享 route builder 的 query 空格仍输出 `%20`，不符合旧 React `urlcat` 的 `+` 语义；GREEN 验证 query 空格输出 `+`、空字符串保留为 `key=`、未传值仍省略。Search full-chain 同时覆盖空白搜索提交与空搜索提交 URL。完整 gate 使用 Node `v24.11.1`、pnpm `8.15.9`，`gen:client-router` 生成 6 条 client route，`test:migration` 通过 build、37 个 unit 文件 / 157 个 unit tests、1 个 SSR smoke test、1 个 shallow Playwright test、61 passed / 1 skipped full-chain Playwright tests。
+2026-05-28 最新记录：App site-switch current URL parity 已通过 focused RED/GREEN、完整默认 `test:migration` 与 `git diff --check`。RED 复现站点切换 href 仍把旧 React `useCurrentUrl()` 会过滤的 `focus` / `聚焦` 控制参数和 hash 带到跨站链接；GREEN 验证站点切换当前地址保留普通 query、过滤 `focus` / `聚焦` 并去掉 hash。完整 gate 使用 Node `v24.11.1`、pnpm `8.15.9`，`gen:client-router` 生成 6 条 client route，`test:migration` 通过 build、37 个 unit 文件 / 157 个 unit tests、1 个 SSR smoke test、1 个 shallow Playwright test、61 passed / 1 skipped full-chain Playwright tests。
 ```
 
 ## 全局外壳与跨路由行为
@@ -77,6 +77,7 @@ git status --short --branch
 - `[x]` 主导航选中态颜色和下划线与旧版 dark primary 色一致
 - `[x]` 站点切换行为可接受
 - `[x]` 站点切换链接保留旧版 `target="_blank"` 且无 `rel` 的 DOM/referrer 语义
+- `[x]` 站点切换当前地址保留旧版 `useCurrentUrl()` 语义：过滤 `focus` / `聚焦` 控制参数，并不携带 hash
 - `[x]` 站点切换中国站点下拉内容保留旧版 `word-break: keep-all`、`mb-0`、`opacity-60 text-xs` class/样式语义
 - `[x]` 站点切换按钮保留旧版 `px-2` class token 和 8px 水平 padding 语义
 - `[x]` App shell 根布局、header 内层和 logo 保留旧版 `layout`、`flex justify-between`、`logo` class/DOM 语义
@@ -111,7 +112,7 @@ git status --short --branch
 ```text
 macOS Blink 优化 class 已由 `tests/e2e/full-chain/app-shell.spec.ts` 和 `tests/unit/app-shell-srk-style.spec.ts` 覆盖。
 直达页面标题由各 route full-chain 覆盖；前端跳转后的标题由 app-shell CSR navigation full-chain 覆盖。标题分隔符已还原旧 React `Title | RankLand`。
-App shell Ant Design Vue Layout/Menu/Dropdown/Button、旧版根布局 `layout` class、header 内层 `flex justify-between` class 与 `space-between` 计算样式、内层 `.logo` 64px box、40px logo image、旧版全局 body light/dark 文本色、旧版全局 body 14px/system-font/tabular-nums/1.5715 line-height 排版、旧版 body inline 防闪烁样式、Dark Reader 清理脚本、app CSS 后 `body` opacity 恢复为 1、旧版联系弹窗 Ant Design Modal 深色 surface/title/close/body padding、旧版联系弹窗 QQ 群图片 `w-full` 类名、主导航旧版 46px line-height、主导航 dark primary `#f6ac06` 选中态/下划线、站点切换 ArrowRight icon、站点切换按钮旧版 `px-2` class token 与 8px 水平 padding、站点切换链接旧版 `target="_blank"` 且无 `rel`、站点切换中国站点下拉旧版 `word-break: keep-all` / `mb-0` / `opacity-60 text-xs` 内容 class/style 语义、站点切换旧版 32px button height/0px min-height/2px radius/8px 水平 padding、桌面旧版 50px header padding、无居中 max-width/无内层 gap、移动端旧版 20px header padding/无内层 padding/无内层 gap、64px header/logo 容器、40px logo 图片、16px nav item padding、8px 站点切换 padding、focus mode、theme bootstrap/sync、analytics pageview、legacy title separator、fallback 404 和桌面/移动端 bounds 已有 full-chain 覆盖。
+App shell Ant Design Vue Layout/Menu/Dropdown/Button、旧版根布局 `layout` class、header 内层 `flex justify-between` class 与 `space-between` 计算样式、内层 `.logo` 64px box、40px logo image、旧版全局 body light/dark 文本色、旧版全局 body 14px/system-font/tabular-nums/1.5715 line-height 排版、旧版 body inline 防闪烁样式、Dark Reader 清理脚本、app CSS 后 `body` opacity 恢复为 1、旧版联系弹窗 Ant Design Modal 深色 surface/title/close/body padding、旧版联系弹窗 QQ 群图片 `w-full` 类名、主导航旧版 46px line-height、主导航 dark primary `#f6ac06` 选中态/下划线、站点切换 ArrowRight icon、站点切换按钮旧版 `px-2` class token 与 8px 水平 padding、站点切换链接旧版 `target="_blank"` 且无 `rel`、站点切换当前地址旧版过滤 `focus` / `聚焦` 且不携带 hash、站点切换中国站点下拉旧版 `word-break: keep-all` / `mb-0` / `opacity-60 text-xs` 内容 class/style 语义、站点切换旧版 32px button height/0px min-height/2px radius/8px 水平 padding、桌面旧版 50px header padding、无居中 max-width/无内层 gap、移动端旧版 20px header padding/无内层 padding/无内层 gap、64px header/logo 容器、40px logo 图片、16px nav item padding、8px 站点切换 padding、focus mode、theme bootstrap/sync、analytics pageview、legacy title separator、fallback 404 和桌面/移动端 bounds 已有 full-chain 覆盖。
 ```
 
 ## 首页 `/`

@@ -294,7 +294,7 @@ test.describe('app shell full-chain behavior', () => {
     await denyExternalCalls(page);
     await request.post(`${mockBaseURL}/__reset`);
 
-    const response = await page.goto('/search?kw=Test%202024');
+    const response = await page.goto('/search?kw=Test%202024&focus=no&%E8%81%9A%E7%84%A6=否#scoreboard');
 
     expect(response).not.toBeNull();
     expect(response?.ok()).toBe(true);

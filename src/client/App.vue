@@ -99,6 +99,25 @@ type ThemeMediaQuery = MediaQueryList & {
   removeListener?: (listener: (event: MediaQueryListEvent | MediaQueryList) => void) => void;
 };
 
+function buildLegacySiteSwitchPath(fullPath: string): string {
+  const [withoutHash] = fullPath.split('#');
+  const [path, queryString] = withoutHash.split('?');
+  if (!queryString) {
+    return path;
+  }
+
+  const query = queryString
+    .split('&')
+    .filter((segment) => {
+      const [rawKey] = segment.split('=');
+      const key = decodeURIComponent(rawKey.replace(/\+/g, ' '));
+      return key !== 'focus' && key !== '聚焦';
+    })
+    .join('&');
+
+  return query ? `${path}?${query}` : path;
+}
+
 const navItems = [
   { path: ranklandRoutes.search.build(), label: '探索' },
   { path: ranklandRoutes.collection.build({ id: 'official' }), label: '榜单合集' },
@@ -131,7 +150,7 @@ export default defineComponent({
         ? process.env.RANKLAND_HOST_GLOBAL || process.env.HOST_GLOBAL || 'rl.algoux.org'
         : process.env.RANKLAND_HOST_CN || process.env.HOST_CN || 'rl.algoux.cn';
 
-      return `//${host}${this.$route.fullPath}`;
+      return `//${host}${buildLegacySiteSwitchPath(this.$route.fullPath)}`;
     },
     siteAlias(): string | undefined {
       return process.env.RANKLAND_SITE_ALIAS || process.env.SITE_ALIAS;
