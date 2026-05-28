@@ -310,7 +310,7 @@
               <div
                 v-if="activeUserRankTimeData"
                 data-id="rankland-rank-time-panel"
-                class="rankland-rank-time-panel mt-4"
+                class="mt-4"
               >
                 <RanklandRankTimeChart :rank-time-data="activeUserRankTimeData" />
               </div>
@@ -1250,7 +1250,7 @@ span.ml-5.inline-flex.items-center .mr-1 {
   content: 'SLOGAN';
 }
 
-.rankland-rank-time-panel {
+[data-id='rankland-rank-time-panel'].mt-4 {
   margin-top: 16px;
 }
 

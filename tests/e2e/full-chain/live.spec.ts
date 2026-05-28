@@ -386,7 +386,10 @@ test.describe('/live/:id full-chain route', () => {
     );
     const rankTimePanel = userModal.locator('[data-id="rankland-rank-time-panel"]');
     await expect(rankTimePanel).toBeVisible();
-    await expect(rankTimePanel).toHaveClass(/(^|\s)mt-4(\s|$)/);
+    await expect(rankTimePanel).toHaveClass(/^mt-4$/);
+    expect(await rankTimePanel.evaluate((element) => Array.from(element.classList))).not.toContain(
+      'rankland-rank-time-panel',
+    );
     await expect(userModal.locator('[data-id="rankland-rank-time-unit"]')).toHaveCount(0);
     await expect(userModal.locator('[data-id="rankland-rank-time-summary"]')).toHaveCount(0);
     await expect(userModal.locator('[data-id="rankland-rank-time-event"]')).toHaveCount(0);
