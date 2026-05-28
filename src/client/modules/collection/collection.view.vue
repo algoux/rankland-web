@@ -502,11 +502,6 @@ export default routeView(CollectionPage, '/collection/:id', CollectionRPO, undef
 </script>
 
 <style lang="less" scoped>
-.srk-collection-container {
-  position: relative;
-  min-height: 70vh;
-}
-
 .srk-collection-nav {
   position: fixed;
   top: 64px;
