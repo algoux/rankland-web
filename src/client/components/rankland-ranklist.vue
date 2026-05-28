@@ -290,7 +290,7 @@
                   {{ activeUserSegment.segmentTitle }}
                 </span>
               </p>
-              <div class="rankland-user-modal-photo mt-4">
+              <div class="mt-4">
                 <SrkAssetImage
                   v-if="activeUserPhotoSrc"
                   data-id="rankland-user-modal-photo"
@@ -1228,13 +1228,12 @@ span.ml-5.inline-flex.items-center .mr-1 {
   background-color: var(--srk-color-iron);
 }
 
-.rankland-user-modal-photo {
+[data-id='rankland-ranklist-user-modal'] .user-modal > .mt-4 {
   margin-top: 16px;
+}
 
-  img {
-    width: 100%;
-    max-width: 100%;
-  }
+[data-id='rankland-ranklist-user-modal'] .user-modal > .mt-4 img {
+  max-width: 100%;
 }
 
 [data-id='rankland-user-modal-slogan'].slogan {

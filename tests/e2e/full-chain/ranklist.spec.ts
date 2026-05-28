@@ -1280,8 +1280,11 @@ test.describe('/ranklist/:id full-chain route', () => {
     await expect(photo).toHaveAttribute('alt', '选手照片');
     const photoInlineStyle = (await photo.getAttribute('style')) || '';
     expect(photoInlineStyle.replace(/\s+/g, ' ')).toContain('width: 100%');
-    const photoWrapper = userModal.locator('.rankland-user-modal-photo');
-    await expect(photoWrapper).toHaveClass(/(^|\s)mt-4(\s|$)/);
+    const photoWrapper = photo.locator('xpath=..');
+    await expect(photoWrapper).toHaveClass(/^mt-4$/);
+    expect(await photoWrapper.evaluate((element) => Array.from(element.classList))).not.toContain(
+      'rankland-user-modal-photo',
+    );
     const photoWrapperStyle = await photoWrapper.evaluate((element) => {
       const style = window.getComputedStyle(element);
       return {
@@ -1362,7 +1365,7 @@ test.describe('/ranklist/:id full-chain route', () => {
         const sloganElement = modal.querySelector('[data-id="rankland-user-modal-slogan"]');
         return (
           photoElement?.parentElement === sloganElement?.parentElement &&
-          !!sloganElement?.parentElement?.classList.contains('rankland-user-modal-photo')
+          sloganElement?.parentElement?.className === 'mt-4'
         );
       }),
     ).toBe(true);
@@ -1417,9 +1420,12 @@ test.describe('/ranklist/:id full-chain route', () => {
       marginTop: '16px',
       marginBottom: '0px',
     });
-    const betaPhotoWrapper = userModal.locator('.rankland-user-modal-photo');
+    const betaPhotoWrapper = userModal.locator('.user-modal > div.mt-4');
     await expect(betaPhotoWrapper).toHaveCount(1);
-    await expect(betaPhotoWrapper).toHaveClass(/(^|\s)mt-4(\s|$)/);
+    await expect(betaPhotoWrapper).toHaveClass(/^mt-4$/);
+    expect(await betaPhotoWrapper.evaluate((element) => Array.from(element.classList))).not.toContain(
+      'rankland-user-modal-photo',
+    );
     await expect(betaPhotoWrapper.locator('[data-id="rankland-user-modal-photo"]')).toHaveCount(0);
     await expect(betaPhotoWrapper.locator('[data-id="rankland-user-modal-slogan"]')).toHaveCount(0);
     const betaPhotoWrapperStyle = await betaPhotoWrapper.evaluate((element) => {
