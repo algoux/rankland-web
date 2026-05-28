@@ -257,7 +257,7 @@
                   <span
                     v-if="memberIndex > 0"
                     data-id="rankland-user-modal-team-separator"
-                    class="rankland-user-modal-team-separator user-modal-info-team-members-slash"
+                    class="user-modal-info-team-members-slash"
                   >
                     {{ ' / ' }}
                   </span>
@@ -1150,7 +1150,7 @@ span.ml-5.inline-flex.items-center .mr-1 {
   opacity: 0.8;
 }
 
-.rankland-user-modal-team-separator {
+[data-id='rankland-user-modal-team-separator'].user-modal-info-team-members-slash {
   color: inherit;
   font-size: 80%;
   opacity: 0.5;

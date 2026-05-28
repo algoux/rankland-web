@@ -1178,6 +1178,10 @@ test.describe('/ranklist/:id full-chain route', () => {
     const teamSeparator = teamMembers.locator('[data-id="rankland-user-modal-team-separator"]');
     await expect(teamSeparator).toHaveText('/');
     expect(await teamSeparator.evaluate((element) => element.textContent)).toBe(' / ');
+    await expect(teamSeparator).toHaveClass(/^user-modal-info-team-members-slash$/);
+    expect(await teamSeparator.evaluate((element) => Array.from(element.classList))).not.toContain(
+      'rankland-user-modal-team-separator',
+    );
     const teamMemberStyle = await teamMembers.evaluate((element) => {
       const style = window.getComputedStyle(element);
       return {
