@@ -240,7 +240,7 @@
               <p
                 v-if="activeUserPayload.user.official === false"
                 data-id="rankland-user-modal-unofficial"
-                class="rankland-user-modal-unofficial mt-4 mb-0"
+                class="mt-4 mb-0"
               >
                 ＊ 非正式参加者
               </p>
@@ -1139,7 +1139,7 @@ span.ml-5.inline-flex.items-center .mr-1 {
   margin: 0;
 }
 
-.rankland-user-modal-unofficial {
+[data-id='rankland-user-modal-unofficial'].mt-4.mb-0 {
   margin: 16px 0 0;
 }
 
