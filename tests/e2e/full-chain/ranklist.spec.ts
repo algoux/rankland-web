@@ -1291,8 +1291,13 @@ test.describe('/ranklist/:id full-chain route', () => {
     });
     const segmentLine = userModal.locator('[data-id="rankland-user-modal-segment"]');
     await expect(segmentLine).toContainText('所在奖区（Rank）：');
-    await expect(segmentLine).toHaveClass(/(^|\s)mt-4(\s|$)/);
-    await expect(segmentLine).toHaveClass(/(^|\s)mb-0(\s|$)/);
+    await expect(segmentLine).toHaveClass(/^mt-4 mb-0$/);
+    expect(await segmentLine.evaluate((element) => Array.from(element.classList))).not.toContain(
+      'rankland-user-modal-line',
+    );
+    expect(await segmentLine.evaluate((element) => Array.from(element.classList))).not.toContain(
+      'rankland-user-modal-segment',
+    );
     const segmentLineStyle = await segmentLine.evaluate((element) => {
       const style = window.getComputedStyle(element);
       return {
