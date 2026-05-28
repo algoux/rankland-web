@@ -71,7 +71,7 @@ export function normalizeRanklandShareUrl(fullUrl: string): string {
   url.searchParams.delete('\u805a\u7126');
 
   const search = url.searchParams.toString();
-  return `${url.protocol}//${url.host}${url.pathname}${search ? `?${search}` : ''}${url.hash}`;
+  return `${url.protocol}//${url.host}${url.pathname}${search ? `?${search}` : ''}`;
 }
 
 export function buildRanklandEmbedCode(opts: { origin: string; kind: RanklandEmbedKind; id: string }): string {

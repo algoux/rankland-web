@@ -1135,6 +1135,19 @@ test.describe('/ranklist/:id full-chain route', () => {
       await page.evaluate(() => (window as unknown as { __ranklandClipboardText?: string }).__ranklandClipboardText),
     ).toBe(`http://127.0.0.1:${process.env.FULL_CHAIN_APP_PORT || '3100'}/ranklist/test-key`);
 
+    await page.evaluate(() => {
+      window.history.replaceState(
+        null,
+        '',
+        '/ranklist/test-key?token=t0&focus=yes&%E8%81%9A%E7%84%A6=yes#scoreboard',
+      );
+    });
+    await page.locator('[data-id="rankland-ranklist-share-menu-button"]').hover();
+    await page.locator('[data-id="rankland-ranklist-copy-link-action"]').click();
+    expect(
+      await page.evaluate(() => (window as unknown as { __ranklandClipboardText?: string }).__ranklandClipboardText),
+    ).toBe(`http://127.0.0.1:${process.env.FULL_CHAIN_APP_PORT || '3100'}/ranklist/test-key?token=t0`);
+
     await page.locator('[data-id="rankland-ranklist-share-menu-button"]').hover();
     await page.locator('[data-id="rankland-ranklist-copy-embed-action"]').click();
     await expectNotificationMessage(page, '嵌入代码已复制');

@@ -59,9 +59,9 @@ describe('rankland ranklist browser actions', () => {
     expect(workbook.Sheets.Main.A1.v).toBe('Rank');
   });
 
-  it('removes focus-only query keys from copied page links', () => {
+  it('removes focus-only query keys and fragments from copied page links', () => {
     const url = normalizeRanklandShareUrl(
-      'https://rl.algoux.org/live/live-test-key?token=t0&focus=yes&scrollSolution=1&%E8%81%9A%E7%84%A6=yes',
+      'https://rl.algoux.org/live/live-test-key?token=t0&focus=yes&scrollSolution=1&%E8%81%9A%E7%84%A6=yes#scoreboard',
     );
 
     expect(url).toBe('https://rl.algoux.org/live/live-test-key?token=t0&scrollSolution=1');
