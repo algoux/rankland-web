@@ -264,7 +264,7 @@
                   <span data-id="rankland-user-modal-team-member">{{ resolveTextValue(member.name) }}</span>
                 </span>
               </div>
-              <div v-if="activeUserMarkerLabels.length > 0" class="rankland-user-modal-markers user-modal-info-markers mt-2">
+              <div v-if="activeUserMarkerLabels.length > 0" class="user-modal-info-markers mt-2">
                 <span
                   v-for="marker in activeUserMarkerLabels"
                   :key="marker.id"
@@ -1156,7 +1156,7 @@ span.ml-5.inline-flex.items-center .mr-1 {
   opacity: 0.5;
 }
 
-.rankland-user-modal-markers {
+.user-modal-info-markers.mt-2 {
   display: block;
   margin-top: 8px;
 }

@@ -1221,7 +1221,10 @@ test.describe('/ranklist/:id full-chain route', () => {
       fontSize: '11.2px',
     });
     const markerRow = userModal.locator('.user-modal-info-markers');
-    await expect(markerRow).toHaveClass(/(^|\s)mt-2(\s|$)/);
+    await expect(markerRow).toHaveClass(/^user-modal-info-markers mt-2$/);
+    expect(await markerRow.evaluate((element) => Array.from(element.classList))).not.toContain(
+      'rankland-user-modal-markers',
+    );
     const markerRowStyle = await markerRow.evaluate((element) => {
       const style = window.getComputedStyle(element);
       return {

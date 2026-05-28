@@ -5,9 +5,9 @@ This file is the quick global dashboard for the RankLand migration. Update it at
 ## Current Focus
 
 - Active branch: `migration/live-page-foundation`
-- Current slice: user modal team members product class parity
-- Latest slice commit: `fix: 还原团队成员行类名`
-- Last recorded full gate: passed on 2026-05-28 for user modal team members product class parity; focused RED reproduced the migrated team-members row still exposing Vue-only `rankland-user-modal-team-members`, focused GREEN verified the row now renders exact old React `user-modal-info-team-members mt-2` while preserving member text, raw separator text, item-level entry spans, opacity, padding, and 8px top margin, ranklist full-chain 9 tests passed, Node `v24.11.1`, pnpm `8.15.9`, `gen:client-router` generated 6 client routes, `test:migration` passed with build, 36 unit files / 154 unit tests, 1 SSR smoke test, 1 shallow Playwright test, and 60 passed / 1 skipped full-chain Playwright tests; `git diff --check` passed.
+- Current slice: user modal markers product class parity
+- Latest slice commit: `fix: 还原用户标记行类名`
+- Last recorded full gate: passed on 2026-05-28 for user modal markers product class parity; focused RED reproduced the migrated marker row still exposing Vue-only `rankland-user-modal-markers`, focused GREEN verified the row now renders exact old React `user-modal-info-markers mt-2` while preserving marker labels, preset marker classes, label styling, and 8px top margin, ranklist full-chain 9 tests passed, Node `v24.11.1`, pnpm `8.15.9`, `gen:client-router` generated 6 client routes, `test:migration` passed with build, 36 unit files / 154 unit tests, 1 SSR smoke test, 1 shallow Playwright test, and 60 passed / 1 skipped full-chain Playwright tests; `git diff --check` passed.
 - Next recommended focus: product-review-driven SRK lower-level table pixel parity or route polish
 
 ## Route Progress
@@ -66,7 +66,7 @@ This file is the quick global dashboard for the RankLand migration. Update it at
 - User modal team-members row now renders the old React exact `user-modal-info-team-members mt-2` class tokens without the Vue-only team-members row class while preserving the stable `data-id` hook, item-level entry spans, raw separator text, opacity, padding, and computed spacing coverage.
 - User modal team-members separator raw text is now covered as old React ` / ` while preserving normalized slash text and existing separator style coverage.
 - User modal team members now render old React item-level outer `span` entries, preserving the migrated member/separator hooks while avoiding Vue-only flattened children.
-- User modal markers row now also carries the old React `mt-2` class token while preserving the migrated `.rankland-user-modal-markers` hook, old `.user-modal-info-markers` hook, and existing computed spacing coverage.
+- User modal markers row now renders the old React exact `user-modal-info-markers mt-2` class tokens without the Vue-only marker-row class while preserving marker labels, preset marker classes, label styling, and computed spacing coverage.
 - User modal unofficial line now renders the old React exact `mt-4 mb-0` class tokens without the Vue-only unofficial-line class while preserving the stable `data-id` hook and computed spacing coverage.
 - User modal segment line now renders the old React exact `mt-4 mb-0` class tokens without Vue-only segment-line classes while preserving the stable `data-id` hook, segment label, and computed spacing coverage.
 - User modal segment label now also carries the old React `.user-modal-segment-label` class while preserving the migrated `.rankland-user-modal-segment-label` hook and existing `bg-segment-*` coverage.
