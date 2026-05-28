@@ -558,8 +558,27 @@ async function getControlsUtilityClasses(page: Page) {
     if (!controls || !organizationFilter || !officialWrapper || !officialText || !markerFilter) {
       throw new Error('Missing ranklist controls utility class targets');
     }
+    const controlsChildren = Array.from(controls.children).map((child) => {
+      if (!(child instanceof HTMLElement)) {
+        return {
+          tagName: child.tagName,
+          dataId: null,
+          classList: [],
+          text: child.textContent?.trim() || '',
+        };
+      }
+
+      return {
+        tagName: child.tagName,
+        dataId: child.dataset.id || null,
+        classList: Array.from(child.classList),
+        text: child.textContent?.trim() || '',
+      };
+    });
+
     return {
       controlsClasses: Array.from(controls.classList),
+      controlsChildren,
       organizationFilterClasses: Array.from(organizationFilter.classList),
       officialWrapperClasses: Array.from(officialWrapper.classList),
       officialTextClasses: Array.from(officialText.classList),
@@ -1688,6 +1707,18 @@ test.describe('/ranklist/:id full-chain route', () => {
         'items-center',
       ]),
     });
+    expect(controlsUtilityClasses.controlsChildren).toEqual([
+      expect.objectContaining({
+        tagName: 'DIV',
+        dataId: 'rankland-ranklist-filters',
+      }),
+      {
+        tagName: 'DIV',
+        dataId: 'rankland-ranklist-extra-action',
+        classList: [],
+        text: '',
+      },
+    ]);
     expect(controlsUtilityClasses.controlsClasses).not.toContain('rankland-ranklist-controls');
     expect(controlsUtilityClasses.organizationFilterClasses).not.toContain('rankland-ranklist-select');
     expect(controlsUtilityClasses.officialWrapperClasses).not.toContain('rankland-ranklist-checkbox');

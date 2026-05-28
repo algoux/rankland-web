@@ -201,8 +201,8 @@
           </a-radio-group>
         </div>
 
-        <div v-if="hasExtraAction" data-id="rankland-ranklist-extra-action">
-          <slot name="extra-action" :ranklist="ranklist" />
+        <div data-id="rankland-ranklist-extra-action">
+          <slot v-if="hasExtraAction" name="extra-action" :ranklist="ranklist" />
         </div>
       </div>
 
