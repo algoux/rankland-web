@@ -222,6 +222,7 @@ test.describe('/live/:id full-chain route', () => {
     expect(response).not.toBeNull();
     expect(response?.ok()).toBe(true);
     await expect(page).toHaveTitle('Live: Test Contest 2024 | RankLand');
+    await expect(page.locator('head link[rel="canonical"]')).toHaveCount(0);
     await expect(
       page.locator(
         '[data-id="live-ranklist-content"][data-ranklist-id="live-test-key"][data-live-id="live-rid-1"][data-row-count="2"][data-focus="yes"]',

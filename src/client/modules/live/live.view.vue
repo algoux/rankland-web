@@ -3,7 +3,6 @@
     <Head>
       <title>{{ pageTitle }}</title>
       <meta property="og:title" :content="pageTitle">
-      <link rel="canonical" :href="canonicalUrl">
     </Head>
 
     <section v-if="isNotFound" data-id="live-not-found" class="live-state mt-16 text-center">
@@ -185,9 +184,6 @@ const LivePage = defineComponent({
         return formatTitle('Not Found');
       }
       return formatTitle(this.ranklistTitle === 'Live' ? 'Live' : `Live: ${this.ranklistTitle}`);
-    },
-    canonicalUrl(): string {
-      return `/live/${encodeURIComponent(this.id)}`;
     },
     isNotFound(): boolean {
       return this.loadError?.kind === 'not-found';
