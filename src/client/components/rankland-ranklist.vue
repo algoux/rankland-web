@@ -247,7 +247,7 @@
               <div
                 v-if="activeUserTeamMembers.length > 0"
                 data-id="rankland-user-modal-team-members"
-                class="rankland-user-modal-team-members user-modal-info-team-members mt-2"
+                class="user-modal-info-team-members mt-2"
               >
                 <span
                   v-for="(member, memberIndex) in activeUserTeamMembers"
@@ -1143,7 +1143,7 @@ span.ml-5.inline-flex.items-center .mr-1 {
   margin: 16px 0 0;
 }
 
-.rankland-user-modal-team-members {
+[data-id='rankland-user-modal-team-members'].user-modal-info-team-members.mt-2 {
   display: block;
   margin-top: 8px;
   padding-top: 6px;
