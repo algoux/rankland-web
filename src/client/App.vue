@@ -52,8 +52,8 @@
                     <ArrowRightOutlined :rotate="-45" />
                   </template>
                   <template v-else>
-                    <p class="app-site-switch-title mb-0">中国站点</p>
-                    <p class="app-site-switch-subtitle mb-0">
+                    <p class="mb-0">中国站点</p>
+                    <p class="mb-0">
                       <span class="opacity-60 text-xs">特别速度优化</span>
                       <ArrowRightOutlined :rotate="-45" />
                     </p>

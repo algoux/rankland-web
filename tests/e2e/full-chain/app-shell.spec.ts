@@ -202,8 +202,8 @@ async function getSiteSwitchButtonPresentation(page: Page) {
 async function getSiteSwitchMenuContentPresentation(page: Page) {
   return page.evaluate(() => {
     const link = document.querySelector<HTMLElement>('[data-id="app-site-switch-link"]');
-    const title = link?.querySelector<HTMLElement>('.app-site-switch-title');
-    const subtitle = link?.querySelector<HTMLElement>('.app-site-switch-subtitle');
+    const title = link?.querySelector<HTMLElement>(':scope > p.mb-0:first-of-type');
+    const subtitle = link?.querySelector<HTMLElement>(':scope > p.mb-0:nth-of-type(2)');
     const subtitleText = subtitle?.querySelector<HTMLElement>('span');
     if (!link || !title || !subtitle || !subtitleText) {
       throw new Error('Missing site-switch menu content');
@@ -217,9 +217,11 @@ async function getSiteSwitchMenuContentPresentation(page: Page) {
       linkInlineWordBreak: link.style.wordBreak,
       linkWordBreak: linkStyle.wordBreak,
       titleClassList: Array.from(title.classList),
+      titleProductClassCount: link.querySelectorAll('.app-site-switch-title').length,
       titleMarginBottom: titleStyle.marginBottom,
       titleText: title.textContent?.trim(),
       subtitleClassList: Array.from(subtitle.classList),
+      subtitleProductClassCount: link.querySelectorAll('.app-site-switch-subtitle').length,
       subtitleMarginBottom: subtitleStyle.marginBottom,
       subtitleText: subtitleText.textContent?.trim(),
       subtitleTextClassList: Array.from(subtitleText.classList),
@@ -348,10 +350,12 @@ test.describe('app shell full-chain behavior', () => {
     expect(await getSiteSwitchMenuContentPresentation(page)).toMatchObject({
       linkInlineWordBreak: 'keep-all',
       linkWordBreak: 'keep-all',
-      titleClassList: expect.arrayContaining(['app-site-switch-title', 'mb-0']),
+      titleClassList: ['mb-0'],
+      titleProductClassCount: 0,
       titleMarginBottom: '0px',
       titleText: '中国站点',
-      subtitleClassList: expect.arrayContaining(['app-site-switch-subtitle', 'mb-0']),
+      subtitleClassList: ['mb-0'],
+      subtitleProductClassCount: 0,
       subtitleMarginBottom: '0px',
       subtitleText: '特别速度优化',
       subtitleTextClassList: expect.arrayContaining(['opacity-60', 'text-xs']),
