@@ -140,6 +140,20 @@ async function getCollectionLoadedWrapperDom(page: Page) {
   });
 }
 
+async function getCollectionStateWrapperPresentation(page: Page, selector: string) {
+  return page.evaluate((selector) => {
+    const element = document.querySelector<HTMLElement>(selector);
+    if (!element) {
+      throw new Error(`Missing collection state element: ${selector}`);
+    }
+
+    return {
+      tagName: element.tagName,
+      classList: Array.from(element.classList),
+    };
+  }, selector);
+}
+
 async function getCollectionHiddenTitleStyle(page: Page) {
   return page.locator('.srk-collection-hidden-header h3.mb-0').evaluate((element) => {
     const htmlElement = element as HTMLElement;
@@ -263,6 +277,10 @@ test.describe('/collection/:id full-chain route', () => {
     await expect(page.locator('[data-id="collection-ranklist-error"] p')).toHaveText(
       'An error occurred while loading data',
     );
+    expect(await getCollectionStateWrapperPresentation(page, '[data-id="collection-ranklist-error"]')).toMatchObject({
+      tagName: 'DIV',
+      classList: ['pt-16', 'text-center'],
+    });
     await expect(page.locator('[data-id="collection-ranklist-error"]')).toHaveClass(/(^|\s)pt-16(\s|$)/);
     await expect(page.locator('[data-id="collection-ranklist-error"]')).toHaveClass(/(^|\s)text-center(\s|$)/);
     await expect(page.locator('[data-id="collection-ranklist-error"]')).toHaveCSS('padding-top', '64px');
@@ -455,6 +473,10 @@ test.describe('/collection/:id full-chain route', () => {
     expect(response?.ok()).toBe(true);
     await expect(page).toHaveTitle('Not Found | RankLand');
     await expect(page.locator('[data-id="collection-not-found"]')).toBeVisible();
+    expect(await getCollectionStateWrapperPresentation(page, '[data-id="collection-not-found"]')).toMatchObject({
+      tagName: 'DIV',
+      classList: ['pt-16', 'text-center'],
+    });
     await expect(page.locator('[data-id="collection-not-found"]')).toHaveClass(/(^|\s)pt-16(\s|$)/);
     await expect(page.locator('[data-id="collection-not-found"]')).toHaveClass(/(^|\s)text-center(\s|$)/);
     await expect(page.locator('[data-id="collection-not-found"] h3')).toHaveText('Collection Not Found');
@@ -487,6 +509,10 @@ test.describe('/collection/:id full-chain route', () => {
     await expect(page).toHaveTitle('RankLand');
     await expect(page.locator('[data-id="collection-error"]')).toBeVisible();
     await expect(page.locator('[data-id="collection-error"] p')).toHaveText('An error occurred while loading data');
+    expect(await getCollectionStateWrapperPresentation(page, '[data-id="collection-error"]')).toMatchObject({
+      tagName: 'DIV',
+      classList: ['pt-16', 'text-center'],
+    });
     await expect(page.locator('[data-id="collection-error"]')).toHaveClass(/(^|\s)pt-16(\s|$)/);
     await expect(page.locator('[data-id="collection-error"]')).toHaveClass(/(^|\s)text-center(\s|$)/);
     await expect(page.locator('[data-id="collection-error"]')).toHaveCSS('padding-top', '64px');

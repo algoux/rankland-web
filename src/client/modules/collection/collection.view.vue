@@ -7,21 +7,23 @@
       <link rel="canonical" :href="canonicalUrl">
     </Head>
 
-    <section v-if="isNotFound" data-id="collection-not-found" class="collection-state pt-16 text-center">
+    <div v-if="isNotFound" data-id="collection-not-found" class="pt-16 text-center">
       <h3 class="mb-4">Collection Not Found</h3>
       <router-link to="/" data-id="collection-not-found-home-link">
         <a-button type="primary" size="small">Back to Home</a-button>
       </router-link>
-    </section>
+    </div>
 
-    <section v-else-if="hasCollectionError" data-id="collection-error" class="collection-state pt-16 text-center">
+    <div v-else-if="hasCollectionError" data-id="collection-error" class="pt-16 text-center">
       <p>{{ collectionLoadError?.message }}</p>
       <a-button data-id="collection-refresh" type="primary" size="small" @click="refresh">
         Refresh
       </a-button>
-    </section>
+    </div>
 
-    <a-spin v-else-if="!collection" data-id="collection-loading" class="collection-state pt-16 text-center" />
+    <div v-else-if="!collection" data-id="collection-loading" class="pt-16 text-center">
+      <a-spin />
+    </div>
 
     <div
       v-else
@@ -86,14 +88,16 @@
           {{ hydrated ? 'hydrated' : 'ssr' }}
         </div>
 
-        <div v-if="ranklistLoadError" data-id="collection-ranklist-error" class="collection-state pt-16 text-center">
+        <div v-if="ranklistLoadError" data-id="collection-ranklist-error" class="pt-16 text-center">
           <p>{{ ranklistLoadError.message }}</p>
           <a-button data-id="collection-ranklist-refresh" type="primary" size="small" @click="refresh">
             Refresh
           </a-button>
         </div>
 
-        <a-spin v-else-if="isRanklistSwitching" data-id="collection-ranklist-loading" class="collection-state pt-16 text-center" />
+        <div v-else-if="isRanklistSwitching" data-id="collection-ranklist-loading" class="pt-16 text-center">
+          <a-spin />
+        </div>
 
         <div
           v-else-if="ranklist"
@@ -595,18 +599,9 @@ html.dark .srk-collection-nav {
   padding-bottom: 32px;
 }
 
-.collection-state {
-  padding: 64px 16px;
-  text-align: center;
-}
-
 .collection-empty-state {
   padding: 0;
   text-align: center;
-}
-
-.collection-state h3 {
-  margin: 0 0 16px;
 }
 
 .pt-16 {
