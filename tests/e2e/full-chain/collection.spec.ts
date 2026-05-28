@@ -169,6 +169,31 @@ async function getCollectionHiddenTitleStyle(page: Page) {
   });
 }
 
+async function getCollectionCollapseButtonWrapperDom(page: Page) {
+  return page.evaluate(() => {
+    const nav = document.querySelector<HTMLElement>('[data-id="collection-nav"]');
+    const button = document.querySelector<HTMLElement>('[data-id="collection-collapse-button"]');
+    if (!nav || !button || !(button.parentElement instanceof HTMLElement)) {
+      throw new Error('Missing collection nav collapse button DOM');
+    }
+
+    const firstChild = nav.firstElementChild as HTMLElement | null;
+    if (!firstChild) {
+      throw new Error('Missing collection nav first child');
+    }
+
+    return {
+      firstChildTagName: firstChild.tagName,
+      firstChildClassList: Array.from(firstChild.classList),
+      firstChildStyle: firstChild.getAttribute('style'),
+      buttonParentTagName: button.parentElement.tagName,
+      buttonParentClassList: Array.from(button.parentElement.classList),
+      buttonParentStyle: button.parentElement.getAttribute('style'),
+      buttonParentIsFirstChild: button.parentElement === firstChild,
+    };
+  });
+}
+
 test.describe('/collection/:id full-chain route', () => {
   test('renders selected ranklist through SSR, hydration, RanklandApiService, and the mock backend', async ({
     page,
@@ -321,6 +346,15 @@ test.describe('/collection/:id full-chain route', () => {
     await expect(page.locator('[data-id="collection-nav-menu"]')).toHaveClass(/ant-menu-inline/);
     await expect(page.locator('[data-id="collection-collapse-button"]')).toHaveClass(/ant-btn/);
     await expect(page.locator('[data-id="collection-collapse-button"] .anticon-menu-fold')).toBeVisible();
+    expect(await getCollectionCollapseButtonWrapperDom(page)).toMatchObject({
+      firstChildTagName: 'DIV',
+      firstChildClassList: [],
+      firstChildStyle: null,
+      buttonParentTagName: 'DIV',
+      buttonParentClassList: [],
+      buttonParentStyle: null,
+      buttonParentIsFirstChild: true,
+    });
     await expect(page.locator('.srk-collection-hidden-header')).toBeVisible();
     await expect(page.locator('.srk-collection-hidden-header h3.mb-0')).toHaveText('榜单合集');
     const expandedHiddenTitleStyle = await getCollectionHiddenTitleStyle(page);

@@ -37,19 +37,21 @@
         :data-remaining-height="remainingHeight"
         :style="navStyle"
       >
-        <a-button
-          data-id="collection-collapse-button"
-          class="collection-collapse-button"
-          size="large"
-          :style="collapseButtonStyle"
-          @click="toggleCollapsed"
-        >
-          <MenuUnfoldOutlined v-if="collapsed" />
-          <template v-else>
-            <MenuFoldOutlined />
-            <span>折叠</span>
-          </template>
-        </a-button>
+        <div>
+          <a-button
+            data-id="collection-collapse-button"
+            class="collection-collapse-button"
+            size="large"
+            :style="collapseButtonStyle"
+            @click="toggleCollapsed"
+          >
+            <MenuUnfoldOutlined v-if="collapsed" />
+            <template v-else>
+              <MenuFoldOutlined />
+              <span>折叠</span>
+            </template>
+          </a-button>
+        </div>
 
         <ClientOnly>
           <a-menu
