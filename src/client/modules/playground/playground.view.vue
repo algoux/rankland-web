@@ -8,74 +8,76 @@
 
     <div data-id="playground-hydrated" class="playground-hydrated">{{ hydrated ? 'hydrated' : 'csr' }}</div>
 
-    <div class="srk-playground-container" :style="{ height: `${remainingHeight}px` }">
-      <div class="playground-editor-pane">
-        <div data-id="playground-editor-ready" class="playground-editor-ready">
-          {{ editorReady ? 'ready' : editorLoadingStage }}
-        </div>
-        <div
-          data-id="playground-editor"
-          class="playground-editor"
-          data-editor-language="json"
-          data-editor-diagnostics="srk-schema"
-          :data-editor-theme="editorTheme"
-          :style="{ height: `${remainingHeight}px` }"
-        >
-          <VueMonacoEditor
-            v-model:value="draftSource"
-            language="json"
-            path="playground.srk.json"
-            :theme="editorTheme"
-            :height="`${remainingHeight}px`"
-            :options="monacoEditorOptions"
-            @beforeMount="handleMonacoBeforeMount"
-            @mount="handleMonacoMount"
-            @change="handleMonacoChange"
+    <div>
+      <div class="srk-playground-container" :style="{ height: `${remainingHeight}px` }">
+        <div class="playground-editor-pane">
+          <div data-id="playground-editor-ready" class="playground-editor-ready">
+            {{ editorReady ? 'ready' : editorLoadingStage }}
+          </div>
+          <div
+            data-id="playground-editor"
+            class="playground-editor"
+            data-editor-language="json"
+            data-editor-diagnostics="srk-schema"
+            :data-editor-theme="editorTheme"
+            :style="{ height: `${remainingHeight}px` }"
           >
-            <template #default>
-              <div class="playground-editor-loading">
-                {{ editorLoadingStage }}
-              </div>
-            </template>
-            <template #failure>
-              <div data-id="playground-editor-error" class="playground-editor-loading">
-                Failed to load Monaco editor
-              </div>
-            </template>
-          </VueMonacoEditor>
-        </div>
-      </div>
-
-      <div class="playground-preview-pane srk-playground-preview">
-        <div class="absolute right-4 top-4">
-          <a
-            data-id="playground-docs-link"
-            href="https://srk.algoux.org/zh/"
-            target="_blank"
-          >
-            <QuestionCircleOutlined /> srk 文档
-          </a>
-        </div>
-
-        <div v-if="editorErrorMessage" data-id="playground-editor-error" class="playground-state playground-state-error">
-          <h3>Failed to load Monaco editor</h3>
-          <pre>{{ editorErrorMessage }}</pre>
+            <VueMonacoEditor
+              v-model:value="draftSource"
+              language="json"
+              path="playground.srk.json"
+              :theme="editorTheme"
+              :height="`${remainingHeight}px`"
+              :options="monacoEditorOptions"
+              @beforeMount="handleMonacoBeforeMount"
+              @mount="handleMonacoMount"
+              @change="handleMonacoChange"
+            >
+              <template #default>
+                <div class="playground-editor-loading">
+                  {{ editorLoadingStage }}
+                </div>
+              </template>
+              <template #failure>
+                <div data-id="playground-editor-error" class="playground-editor-loading">
+                  Failed to load Monaco editor
+                </div>
+              </template>
+            </VueMonacoEditor>
+          </div>
         </div>
 
-        <div v-else-if="!editorReady" data-id="playground-editor-loading" class="playground-state">
-          <h3>Loading editor...</h3>
-        </div>
+        <div class="playground-preview-pane srk-playground-preview">
+          <div class="absolute right-4 top-4">
+            <a
+              data-id="playground-docs-link"
+              href="https://srk.algoux.org/zh/"
+              target="_blank"
+            >
+              <QuestionCircleOutlined /> srk 文档
+            </a>
+          </div>
 
-        <div v-else-if="parseState.kind === 'invalid'" data-id="playground-invalid-json" class="playground-state">
-          <h3 class="mt-16 text-center">
-            Input valid srk JSON and press
-            <a-tag color="blue" class="playground-shortcut-tag mr-0">Ctrl/Cmd + S</a-tag>
-            to preview
-          </h3>
-        </div>
+          <div v-if="editorErrorMessage" data-id="playground-editor-error" class="playground-state playground-state-error">
+            <h3>Failed to load Monaco editor</h3>
+            <pre>{{ editorErrorMessage }}</pre>
+          </div>
 
-        <div v-else data-id="playground-preview" class="mt-8 mb-8">
-          <RanklandRanklist :ranklist="parseState.data" name="playground" show-header show-filter />
+          <div v-else-if="!editorReady" data-id="playground-editor-loading" class="playground-state">
+            <h3>Loading editor...</h3>
+          </div>
+
+          <div v-else-if="parseState.kind === 'invalid'" data-id="playground-invalid-json" class="playground-state">
+            <h3 class="mt-16 text-center">
+              Input valid srk JSON and press
+              <a-tag color="blue" class="playground-shortcut-tag mr-0">Ctrl/Cmd + S</a-tag>
+              to preview
+            </h3>
+          </div>
+
+          <div v-else data-id="playground-preview" class="mt-8 mb-8">
+            <RanklandRanklist :ranklist="parseState.data" name="playground" show-header show-filter />
+          </div>
         </div>
       </div>
     </div>

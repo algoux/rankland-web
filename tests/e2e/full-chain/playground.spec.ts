@@ -42,6 +42,20 @@ async function getPlaygroundShellChrome(page: Page) {
 
     const pageStyle = window.getComputedStyle(pageElement);
     const containerStyle = window.getComputedStyle(container);
+    const routeChildren = Array.from(pageElement.children)
+      .filter((child) => child instanceof HTMLElement)
+      .map((child) => {
+        const element = child as HTMLElement;
+        return {
+          classes: Array.from(element.classList),
+          dataId: element.dataset.id || '',
+          firstElementClasses: element.firstElementChild instanceof HTMLElement
+            ? Array.from(element.firstElementChild.classList)
+            : [],
+          firstElementTagName: element.firstElementChild?.tagName || '',
+          tagName: element.tagName,
+        };
+      });
     return {
       pageTagName: pageElement.tagName,
       pageClasses: Array.from(pageElement.classList),
@@ -49,6 +63,7 @@ async function getPlaygroundShellChrome(page: Page) {
       containerTagName: container.tagName,
       containerClasses: Array.from(container.classList),
       containerDisplay: containerStyle.display,
+      routeChildren,
     };
   });
 }
@@ -181,6 +196,20 @@ test.describe('/playground full-chain route', () => {
       containerTagName: 'DIV',
       containerClasses: ['srk-playground-container'],
       containerDisplay: 'flex',
+      routeChildren: [
+        {
+          classes: ['playground-hydrated'],
+          dataId: 'playground-hydrated',
+          tagName: 'DIV',
+        },
+        {
+          classes: [],
+          dataId: '',
+          firstElementClasses: ['srk-playground-container'],
+          firstElementTagName: 'DIV',
+          tagName: 'DIV',
+        },
+      ],
     });
     await expect(page.locator('.srk-playground-container')).toHaveCSS('display', 'flex');
     await expect(page.locator('.srk-playground-container')).toHaveCSS('max-width', 'none');

@@ -439,6 +439,8 @@ App shell Ant Design Vue Layout/Menu/Dropdown/Button、旧版根布局 `layout` 
 - `[x]` 预览区右上角 `srk 文档` 入口保留旧版 `target="_blank"` 且无 `rel` 的 DOM/referrer 语义
 - `[x]` 欢迎弹窗使用旧版“点击右上角 QuestionCircle 图标”的 srk 文档提示，不展示迁移版“页面中的 srk 文档入口”文案
 - `[x]` Playground route wrapper 保留旧版普通 `DIV`，不渲染 Vue-only `.playground-page` class 或 route-local `70vh` min-height
+- `[x]` Playground route root 在隐藏 hydration marker 后保留旧版无 class 客户端承载 `DIV`
+- `[x]` Playground 旧版无 class 客户端承载层直接包含 `DIV.srk-playground-container`
 - `[x]` Playground 核心容器保留旧版精确 `div.srk-playground-container` DOM/class，不渲染 Vue-only `.playground-layout`
 - `[x]` Playground 根布局和预览 pane 保留旧版 `.srk-playground-container` / `.srk-playground-preview` 类名
 - `[x]` 有效 SRK 预览外壳保留旧版 `div.mt-8.mb-8` DOM/class token 和 32px 顶部/底部间距
@@ -454,7 +456,7 @@ App shell Ant Design Vue Layout/Menu/Dropdown/Button、旧版根布局 `layout` 
 备注：
 
 ```text
-2026-05-28 复核：`tests/e2e/full-chain/playground.spec.ts` 覆盖旧 React route wrapper 普通 `DIV`、无 Vue-only `.playground-page` class、无 route-local `70vh` min-height、核心容器精确 `DIV.srk-playground-container` 且无 Vue-only `.playground-layout`、旧 React `.srk-playground-preview` 外壳类名、桌面 flex 布局、500px 编辑器、自适应预览区、Monaco minimap/default option chrome（`.minimap` 可见且宽度大于 0，Playground 仅保留旧版 `selectOnLineNumbers: true` option）、有效 SRK 预览外壳旧版 `div.mt-8.mb-8` DOM/class token 和 32px 间距、编辑器外壳无旧版不存在的额外边框/圆角、旧 React 不存在的 `Playground` 顶部标题栏和可见 `Preview` 按钮已移除、hydration marker 和 editor-ready marker 视觉隐藏、欢迎弹窗旧版右上角 `QuestionCircleOutlined` 文档提示语和图标、invalid JSON 标题旧版 `h3.mt-16.text-center` 类名、invalid JSON 快捷键 Tag 旧版 `mr-0` class token 和 0px 右/左间距、旧 React 预览区右上角 `div.absolute.right-4.top-4` 外壳及精确类名 `absolute right-4 top-4`、plain no-class `QuestionCircleOutlined` srk 文档锚点、入口位置、图标、地址、`target="_blank"` 和无 `rel` DOM/referrer 语义，以及结构非法 object JSON 的旧版 SRK checker-error `div.ml-8 > h3 + pre` DOM。
+2026-05-28 复核：`tests/e2e/full-chain/playground.spec.ts` 覆盖旧 React route wrapper 普通 `DIV`、无 Vue-only `.playground-page` class、无 route-local `70vh` min-height、route root 在隐藏 hydration marker 后保留旧版无 class 客户端承载 `DIV`、该承载层直接包含核心容器 `DIV.srk-playground-container`、核心容器无 Vue-only `.playground-layout`、旧 React `.srk-playground-preview` 外壳类名、桌面 flex 布局、500px 编辑器、自适应预览区、Monaco minimap/default option chrome（`.minimap` 可见且宽度大于 0，Playground 仅保留旧版 `selectOnLineNumbers: true` option）、有效 SRK 预览外壳旧版 `div.mt-8.mb-8` DOM/class token 和 32px 间距、编辑器外壳无旧版不存在的额外边框/圆角、旧 React 不存在的 `Playground` 顶部标题栏和可见 `Preview` 按钮已移除、hydration marker 和 editor-ready marker 视觉隐藏、欢迎弹窗旧版右上角 `QuestionCircleOutlined` 文档提示语和图标、invalid JSON 标题旧版 `h3.mt-16.text-center` 类名、invalid JSON 快捷键 Tag 旧版 `mr-0` class token 和 0px 右/左间距、旧 React 预览区右上角 `div.absolute.right-4.top-4` 外壳及精确类名 `absolute right-4 top-4`、plain no-class `QuestionCircleOutlined` srk 文档锚点、入口位置、图标、地址、`target="_blank"` 和无 `rel` DOM/referrer 语义，以及结构非法 object JSON 的旧版 SRK checker-error `div.ml-8 > h3 + pre` DOM。
 ```
 
 ## 实时榜单页 `/live/:id`
