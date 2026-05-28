@@ -162,7 +162,7 @@ const SearchPage = defineComponent({
     },
     submitSearch(value?: string) {
       const keyword = typeof value === 'string' ? value : this.inputKeyword;
-      const target = ranklandRoutes.search.build({ kw: keyword || undefined });
+      const target = ranklandRoutes.search.build({ kw: keyword });
       if (target !== this.$route.fullPath) {
         this.$router.push(target);
       }

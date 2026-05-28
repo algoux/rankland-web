@@ -3,10 +3,15 @@ function encodePathValue(value: string) {
 }
 
 function buildQuery(params: Record<string, string | undefined>) {
-  const query = Object.entries(params)
-    .filter(([, value]) => value !== undefined && value !== '')
-    .map(([key, value]) => `${encodeURIComponent(key)}=${encodeURIComponent(value as string)}`)
-    .join('&');
+  const queryParams = new URLSearchParams();
+
+  Object.entries(params).forEach(([key, value]) => {
+    if (value !== undefined) {
+      queryParams.append(key, value);
+    }
+  });
+
+  const query = queryParams.toString();
 
   return query ? `?${query}` : '';
 }

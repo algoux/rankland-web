@@ -16,9 +16,9 @@ describe('ranklandRoutes', () => {
     expect(ranklandRoutes.playground.build()).toBe('/playground');
   });
 
-  it('builds encoded search route and omits empty query', () => {
-    expect(ranklandRoutes.search.build({ kw: 'hello world' })).toBe('/search?kw=hello%20world');
-    expect(ranklandRoutes.search.build({ kw: '' })).toBe('/search');
+  it('builds encoded search route with legacy urlcat query serialization', () => {
+    expect(ranklandRoutes.search.build({ kw: 'hello world' })).toBe('/search?kw=hello+world');
+    expect(ranklandRoutes.search.build({ kw: '' })).toBe('/search?kw=');
     expect(ranklandRoutes.search.build({})).toBe('/search');
   });
 
@@ -29,7 +29,7 @@ describe('ranklandRoutes', () => {
 
   it('builds collection route with optional rankId', () => {
     expect(ranklandRoutes.collection.build({ id: 'official', rankId: 'test key' })).toBe(
-      '/collection/official?rankId=test%20key',
+      '/collection/official?rankId=test+key',
     );
     expect(ranklandRoutes.collection.build({ id: 'official space' })).toBe('/collection/official%20space');
   });
@@ -43,7 +43,7 @@ describe('ranklandRoutes', () => {
         scrollSolution: '1',
         focus: 'yes',
       }),
-    ).toBe('/live/live%20id?token=t%200&scrollSolution=1&focus=yes');
+    ).toBe('/live/live%20id?token=t+0&scrollSolution=1&focus=yes');
   });
 
   it('marks SSR metadata for public routes', () => {

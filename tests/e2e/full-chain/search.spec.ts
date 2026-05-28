@@ -365,8 +365,15 @@ test.describe('/search full-chain route', () => {
     const searchInput = page.locator('[data-id="search-input"]');
     await searchInput.fill(' Test 2024 ');
     await page.locator('.ant-input-search-button').click();
-    await expect(page).toHaveURL(/\/search\?kw=%20Test%202024%20$/);
+    await expect(page).toHaveURL(/\/search\?kw=\+Test\+2024\+$/);
     await expect(page.locator('[data-id="search-input"].ant-input')).toHaveValue(' Test 2024 ');
+
+    await searchInput.fill('');
+    await page.locator('.ant-input-search-button').click();
+    await expect(page).toHaveURL(/\/search\?kw=$/);
+    await expect(page.locator('[data-id="search-input"].ant-input')).toHaveValue('');
+    await expect(page.locator('[data-id="search-recent-section"]')).toBeVisible();
+    await expect(page.locator('[data-id="search-result-section"]')).toHaveCount(0);
 
     const requests = await readRequests(request);
     expect(requests.filter((requestRecord) => requestRecord.path === '/rank/listall')).toHaveLength(2);

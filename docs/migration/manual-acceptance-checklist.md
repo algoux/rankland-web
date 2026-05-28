@@ -62,7 +62,7 @@ git status --short --branch
 备注：
 
 ```text
-2026-05-28 最新记录：Hydration probe product-neutrality parity 已通过 focused RED/GREEN、完整默认 `test:migration` 与 `git diff --check`。RED 复现 Search hydration probe 缺少 `aria-hidden` 且仍在产品 DOM/layout 语义中；GREEN 验证 Search probe 保持 Playwright 可读，同时变为 `position:absolute` 和 `aria-hidden="true"`。完整 gate 使用 Node `v24.11.1`、pnpm `8.15.9`，`gen:client-router` 生成 6 条 client route，`test:migration` 通过 build、37 个 unit 文件 / 157 个 unit tests、1 个 SSR smoke test、1 个 shallow Playwright test、61 passed / 1 skipped full-chain Playwright tests。
+2026-05-28 最新记录：Legacy query serialization parity 已通过 focused RED/GREEN、完整默认 `test:migration` 与 `git diff --check`。RED 复现共享 route builder 的 query 空格仍输出 `%20`，不符合旧 React `urlcat` 的 `+` 语义；GREEN 验证 query 空格输出 `+`、空字符串保留为 `key=`、未传值仍省略。Search full-chain 同时覆盖空白搜索提交与空搜索提交 URL。完整 gate 使用 Node `v24.11.1`、pnpm `8.15.9`，`gen:client-router` 生成 6 条 client route，`test:migration` 通过 build、37 个 unit 文件 / 157 个 unit tests、1 个 SSR smoke test、1 个 shallow Playwright test、61 passed / 1 skipped full-chain Playwright tests。
 ```
 
 ## 全局外壳与跨路由行为
@@ -180,6 +180,7 @@ App shell Ant Design Vue Layout/Menu/Dropdown/Button、旧版根布局 `layout` 
 - `[x]` 空 `kw` 按最近榜单状态处理
 - `[x]` Search Head 保持旧 React 无 canonical link 行为，只保留页面 title 和 `og:title`
 - `[x]` `kw` 查询和提交搜索保留旧版首尾空白语义，不在 route normalize、Fuse search 或 URL build 前裁剪
+- `[x]` `kw` 查询提交保留旧版 `urlcat` 查询串序列化：空格编码为 `+`，空字符串保留为 `/search?kw=`
 - `[x]` 页面外壳保留旧版 `div.normal-content > div` DOM，不渲染 Vue-only `.search-page`、`section.search-panel` 或 route-local `min-height: 70vh`
 - `[x]` 页面标题保留旧版精确 `h3.mb-6` class，不渲染 Vue-only `.search-heading`
 - `[x]` 搜索框保留旧版无页面自定义 class DOM，不渲染 Vue-only `.search-input`
@@ -208,7 +209,7 @@ App shell Ant Design Vue Layout/Menu/Dropdown/Button、旧版根布局 `layout` 
 备注：
 
 ```text
-2026-05-28 复核：search full-chain 覆盖旧 React Head 无 canonical link 行为、CSR listAll、旧版 `div.normal-content > div` 外壳 DOM、无 Vue-only `.search-page` / `section.search-panel` / root `min-height: 70vh`、标题旧版精确 `h3.mb-6` class、无 Vue-only `.search-heading`、搜索框旧版无页面自定义 class DOM、无 Vue-only `.search-input`、loading/error/result/recent 状态外层旧版 `mt-10` DOM/class 合同、result/recent `DIV` wrapper、无 Vue-only `.search-state` / `.search-section`、result/recent 标题旧版 `div.opacity-70`、结果数旧版纯文本 `搜索到 N 个结果`、无 Vue-only `[data-id="search-result-count"]` span、section `data-result-count` 保留、关键词空白旧版 passthrough 语义，route `kw`、提交 URL 和 Fuse search 均不 trim，空白-only `kw` 仍为结果状态、list 旧版 `div.mt-2 > .ant-list` wrapper、recent empty 旧版 `div.mt-2`、无 Vue-only `.search-section-title` / `.search-list` / `.search-empty-state`、result/recent 列表项容器旧版无页面自定义 class、无 Vue-only `.search-list-item`、Ant Design list item `display:flex`、result/recent 行内容旧版 `p.mb-0` / `span.ml-2.opacity-70` / `p.mb-0.opacity-50.text-sm` 精确类名、无 Vue-only `.search-row-title` / `.search-view-count` / `.search-created-at`、错误消息内层旧版精确 `div.text-red-500` class、无 Vue-only `.search-error-message`、hydration marker 保持测试可读但为 1px/transparent/absolute/`aria-hidden`、Fuse 本地搜索、空 kw、zero-result summary-only、Ant Design Input.Search/List/Spin、旧版 boolean `enterButton` 默认 SearchOutlined 图标按钮、初始化失败状态旧版文案、外层 40px 顶部间距和内层 `text-red-500` 颜色/工具类 DOM、loading 旧版 `mt-10` 工具类、最近榜单空状态旧版 `mt-2` 间距和暗色正文色、搜索结果/最近榜单旧版工具类 token、网络请求无非预期 upstream/external call。
+2026-05-28 复核：search full-chain 覆盖旧 React Head 无 canonical link 行为、CSR listAll、旧版 `div.normal-content > div` 外壳 DOM、无 Vue-only `.search-page` / `section.search-panel` / root `min-height: 70vh`、标题旧版精确 `h3.mb-6` class、无 Vue-only `.search-heading`、搜索框旧版无页面自定义 class DOM、无 Vue-only `.search-input`、loading/error/result/recent 状态外层旧版 `mt-10` DOM/class 合同、result/recent `DIV` wrapper、无 Vue-only `.search-state` / `.search-section`、result/recent 标题旧版 `div.opacity-70`、结果数旧版纯文本 `搜索到 N 个结果`、无 Vue-only `[data-id="search-result-count"]` span、section `data-result-count` 保留、关键词空白旧版 passthrough 语义，route `kw`、提交输入值和 Fuse search 均不 trim，提交 URL 使用旧 `urlcat` 查询串序列化，空格编码为 `+`，空字符串保留为 `/search?kw=` 且回到最近榜单状态，空白-only `kw` 仍为结果状态、list 旧版 `div.mt-2 > .ant-list` wrapper、recent empty 旧版 `div.mt-2`、无 Vue-only `.search-section-title` / `.search-list` / `.search-empty-state`、result/recent 列表项容器旧版无页面自定义 class、无 Vue-only `.search-list-item`、Ant Design list item `display:flex`、result/recent 行内容旧版 `p.mb-0` / `span.ml-2.opacity-70` / `p.mb-0.opacity-50.text-sm` 精确类名、无 Vue-only `.search-row-title` / `.search-view-count` / `.search-created-at`、错误消息内层旧版精确 `div.text-red-500` class、无 Vue-only `.search-error-message`、hydration marker 保持测试可读但为 1px/transparent/absolute/`aria-hidden`、Fuse 本地搜索、空 kw、zero-result summary-only、Ant Design Input.Search/List/Spin、旧版 boolean `enterButton` 默认 SearchOutlined 图标按钮、初始化失败状态旧版文案、外层 40px 顶部间距和内层 `text-red-500` 颜色/工具类 DOM、loading 旧版 `mt-10` 工具类、最近榜单空状态旧版 `mt-2` 间距和暗色正文色、搜索结果/最近榜单旧版工具类 token、网络请求无非预期 upstream/external call。
 ```
 
 ## 榜单详情页 `/ranklist/:id`
