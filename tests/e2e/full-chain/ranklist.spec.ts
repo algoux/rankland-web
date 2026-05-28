@@ -830,6 +830,13 @@ test.describe('/ranklist/:id full-chain route', () => {
     await expect(page.locator('[data-id="rankland-ranklist-ref-links"] a').first()).toHaveAttribute('rel', 'noopener');
     await expect(page.locator('[data-id="rankland-ranklist-ref-link-extra-action"]')).toHaveText('and 1 more');
     await expect(page.locator('[data-id="rankland-ranklist-ref-link-extra-action"] .anticon-caret-down')).toBeVisible();
+    await expect(page.locator('[data-id="rankland-ranklist-ref-link-extra-action"]')).not.toHaveClass(
+      /(^|\s)rankland-ranklist-ref-link-extra-action(\s|$)/,
+    );
+    await expect(page.locator('[data-id="rankland-ranklist-ref-link-extra-action"]')).toHaveClass(
+      /(^|\s)ant-dropdown-trigger(\s|$)/,
+    );
+    await expect(page.locator('[data-id="rankland-ranklist-ref-link-extra-action"]')).toHaveCSS('cursor', 'pointer');
     await expect(page.locator('[data-id="rankland-ranklist-ref-link-extra-action"]')).toHaveCSS(
       'margin-left',
       '0px',

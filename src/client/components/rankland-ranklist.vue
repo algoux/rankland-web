@@ -128,7 +128,7 @@
               :trigger="['hover']"
               placement="bottom"
             >
-              <span data-id="rankland-ranklist-ref-link-extra-action" class="rankland-ranklist-ref-link-extra-action">
+              <span data-id="rankland-ranklist-ref-link-extra-action">
                 and {{ extraRefLinks.length }} more <CaretDownOutlined />
               </span>
               <template #overlay>
@@ -977,7 +977,7 @@ a:hover,
   font-size: 14px;
 }
 
-.rankland-ranklist-ref-link-extra-action {
+[data-id='rankland-ranklist-ref-link-extra-action'] {
   cursor: pointer;
 }
 
