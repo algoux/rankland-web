@@ -134,6 +134,7 @@ import type { AsyncDataOptions } from '@client/typings';
 import { formatTitle } from '@client/utils/title-format.util';
 import RanklandRanklist from '@client/components/rankland-ranklist.vue';
 import logo from '@client/assets/logo.png';
+import { buildHomeAbsoluteUrl } from '@client/modules/home/home-site';
 import {
   getAncestorDirectoryKeys,
   isRanklistInCollection,
@@ -305,10 +306,12 @@ const CollectionPage = defineComponent({
       return formatTitle('榜单合集');
     },
     canonicalUrl(): string {
-      return ranklandRoutes.collection.build({
-        id: this.id,
-        rankId: this.rankId && !this.ranklistIdInvalid ? this.rankId : undefined,
-      });
+      return buildHomeAbsoluteUrl(
+        ranklandRoutes.collection.build({
+          id: this.id,
+          rankId: this.rankId && !this.ranklistIdInvalid ? this.rankId : undefined,
+        }),
+      );
     },
   },
   mounted() {

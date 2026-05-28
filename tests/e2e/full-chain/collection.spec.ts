@@ -169,6 +169,19 @@ test.describe('/collection/:id full-chain route', () => {
     expect(response?.ok()).toBe(true);
     expect(await response!.text()).toContain('Test Contest 2024');
     await expect(page).toHaveTitle('Test Contest 2024 - 榜单合集 | RankLand');
+    const expectedCollectionCanonicalUrl = 'https://rl.algoux.org/collection/official?rankId=test-key';
+    await expect(page.locator('head meta[property="og:title"]')).toHaveAttribute(
+      'content',
+      'Test Contest 2024 - 榜单合集 | RankLand',
+    );
+    await expect(page.locator('head meta[property="og:url"]')).toHaveAttribute(
+      'content',
+      expectedCollectionCanonicalUrl,
+    );
+    await expect(page.locator('head link[rel="canonical"]')).toHaveAttribute(
+      'href',
+      expectedCollectionCanonicalUrl,
+    );
     await expect(page.locator('[data-id="collection-nav"]')).toBeVisible();
     await expect(
       page.locator('[data-id="collection-ranklist-content"][data-ranklist-id="test-key"][data-row-count="2"]'),
