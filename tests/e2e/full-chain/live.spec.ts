@@ -249,6 +249,8 @@ test.describe('/live/:id full-chain route', () => {
       contentMarginRight: '0px',
     });
     await expect(page.locator('[data-id="live-hydrated"]')).toHaveText('hydrated');
+    await expect(page.locator('[data-id="live-hydrated"]')).toHaveAttribute('aria-hidden', 'true');
+    await expect(page.locator('[data-id="live-hydrated"]')).toHaveCSS('position', 'absolute');
     await expect(page.locator('[data-id="live-hydrated"]')).toHaveCSS('width', '1px');
     await expect(page.locator('[data-id="live-hydrated"]')).toHaveCSS('height', '1px');
     await expect(page.locator('[data-id="live-hydrated"]')).toHaveCSS('overflow', 'hidden');

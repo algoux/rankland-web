@@ -7,7 +7,7 @@
           这里是一个由算法竞赛爱好者们自发维护的、专注于托管和分享任何竞赛榜单的宝地，你可以轻松查阅 ICPC、CCPC
           等赛事的历史榜单。
         </p>
-        <div data-id="home-hydrated" class="home-hydrated">{{ hydrated ? 'hydrated' : 'ssr' }}</div>
+        <div data-id="home-hydrated" class="home-hydrated" aria-hidden="true">{{ hydrated ? 'hydrated' : 'ssr' }}</div>
       </section>
 
       <div data-id="home-recommendations" class="block home-section">
@@ -290,6 +290,7 @@ export default routeView(HomePage, '/', undefined, undefined, {
 }
 
 .home-hydrated {
+  position: absolute;
   width: 1px;
   height: 1px;
   overflow: hidden;

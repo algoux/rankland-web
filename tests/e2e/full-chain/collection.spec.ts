@@ -213,6 +213,8 @@ test.describe('/collection/:id full-chain route', () => {
     await expect(page.locator('.srk-user-cell', { hasText: 'Team Alpha' })).toBeVisible();
     await expect(page.locator('.srk-user-cell', { hasText: 'Team Beta' })).toBeVisible();
     await expect(page.locator('[data-id="collection-hydrated"]')).toHaveText('hydrated');
+    await expect(page.locator('[data-id="collection-hydrated"]')).toHaveAttribute('aria-hidden', 'true');
+    await expect(page.locator('[data-id="collection-hydrated"]')).toHaveCSS('position', 'absolute');
     await expect(page.locator('[data-id="collection-hydrated"]')).toHaveCSS('width', '1px');
     await expect(page.locator('[data-id="collection-hydrated"]')).toHaveCSS('height', '1px');
     await expect(page.locator('[data-id="collection-hydrated"]')).toHaveCSS('overflow', 'hidden');

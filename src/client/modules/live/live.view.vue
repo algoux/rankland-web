@@ -31,7 +31,7 @@
       :data-focus="focusQuery"
       :style="{ marginLeft: scrollSolutionEnabled ? '250px' : undefined }"
     >
-      <div data-id="live-hydrated" class="live-hydrated">{{ hydrated ? 'hydrated' : 'csr' }}</div>
+      <div data-id="live-hydrated" class="live-hydrated" aria-hidden="true">{{ hydrated ? 'hydrated' : 'csr' }}</div>
 
       <LiveScrollSolution
         v-if="scrollSolutionEnabled"
@@ -465,6 +465,7 @@ export default routeView(LivePage, '/live/:id', LiveRPO);
 }
 
 .live-hydrated {
+  position: absolute;
   width: 1px;
   height: 1px;
   overflow: hidden;

@@ -774,6 +774,8 @@ test.describe('/ranklist/:id full-chain route', () => {
     await expect(page.locator('.srk-user-cell', { hasText: 'Team Alpha' })).toBeVisible();
     await expect(page.locator('.srk-user-cell', { hasText: 'Team Beta' })).toBeVisible();
     await expect(page.locator('[data-id="ranklist-hydrated"]')).toHaveText('hydrated');
+    await expect(page.locator('[data-id="ranklist-hydrated"]')).toHaveAttribute('aria-hidden', 'true');
+    await expect(page.locator('[data-id="ranklist-hydrated"]')).toHaveCSS('position', 'absolute');
     await expect(page.locator('[data-id="ranklist-hydrated"]')).toHaveCSS('width', '1px');
     await expect(page.locator('[data-id="ranklist-hydrated"]')).toHaveCSS('height', '1px');
     await expect(page.locator('[data-id="ranklist-hydrated"]')).toHaveCSS('overflow', 'hidden');

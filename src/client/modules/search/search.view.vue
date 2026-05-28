@@ -6,7 +6,7 @@
     </Head>
 
     <div>
-      <div data-id="search-hydrated" class="search-hydrated">{{ hydrated ? 'hydrated' : 'csr' }}</div>
+      <div data-id="search-hydrated" class="search-hydrated" aria-hidden="true">{{ hydrated ? 'hydrated' : 'csr' }}</div>
       <h3 class="mb-6">在榜单数据库中探索</h3>
 
       <a-input-search
@@ -193,6 +193,7 @@ export default routeView(SearchPage, '/search');
 }
 
 .search-hydrated {
+  position: absolute;
   width: 1px;
   height: 1px;
   overflow: hidden;

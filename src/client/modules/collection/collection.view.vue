@@ -82,7 +82,9 @@
         class="srk-collection-ranklist"
         :style="ranklistPanelStyle"
       >
-        <div data-id="collection-hydrated" class="collection-hydrated">{{ hydrated ? 'hydrated' : 'ssr' }}</div>
+        <div data-id="collection-hydrated" class="collection-hydrated" aria-hidden="true">
+          {{ hydrated ? 'hydrated' : 'ssr' }}
+        </div>
 
         <div v-if="ranklistLoadError" data-id="collection-ranklist-error" class="collection-state pt-16 text-center">
           <p>{{ ranklistLoadError.message }}</p>
@@ -620,6 +622,7 @@ html.dark .srk-collection-nav {
 }
 
 .collection-hydrated {
+  position: absolute;
   width: 1px;
   height: 1px;
   overflow: hidden;

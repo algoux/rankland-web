@@ -5,12 +5,14 @@
       <meta property="og:title" :content="pageTitle">
     </Head>
 
-    <div data-id="playground-hydrated" class="playground-hydrated">{{ hydrated ? 'hydrated' : 'csr' }}</div>
+    <div data-id="playground-hydrated" class="playground-hydrated" aria-hidden="true">
+      {{ hydrated ? 'hydrated' : 'csr' }}
+    </div>
 
     <div>
       <div class="srk-playground-container" :style="{ height: `${remainingHeight}px` }">
         <div class="playground-editor-pane">
-          <div data-id="playground-editor-ready" class="playground-editor-ready">
+          <div data-id="playground-editor-ready" class="playground-editor-ready" aria-hidden="true">
             {{ editorReady ? 'ready' : editorLoadingStage }}
           </div>
           <div

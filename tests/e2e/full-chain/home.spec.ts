@@ -489,6 +489,12 @@ test.describe('/ full-chain route', () => {
       expect(await link.getAttribute('rel')).toBeNull();
     }
     await expect(page.locator('[data-id="home-hydrated"]')).toHaveText('hydrated');
+    await expect(page.locator('[data-id="home-hydrated"]')).toHaveAttribute('aria-hidden', 'true');
+    await expect(page.locator('[data-id="home-hydrated"]')).toHaveCSS('position', 'absolute');
+    await expect(page.locator('[data-id="home-hydrated"]')).toHaveCSS('width', '1px');
+    await expect(page.locator('[data-id="home-hydrated"]')).toHaveCSS('height', '1px');
+    await expect(page.locator('[data-id="home-hydrated"]')).toHaveCSS('overflow', 'hidden');
+    await expect(page.locator('[data-id="home-hydrated"]')).toHaveCSS('color', 'rgba(0, 0, 0, 0)');
     const homeContactTrigger = page.locator('[data-id="home-contact"] [data-id="contact-us-trigger"]');
     await expect(homeContactTrigger).toHaveText('与我们联系');
     await expect(homeContactTrigger).toHaveJSProperty('tagName', 'A');
@@ -598,6 +604,8 @@ test.describe('/ full-chain route', () => {
     await expect(page.locator('[data-id="home-total-srk-count"]')).toHaveText('-');
     await expect(page.locator('[data-id="home-total-view-count"]')).toHaveText('-');
     await expect(page.locator('[data-id="home-hydrated"]')).toHaveText('hydrated');
+    await expect(page.locator('[data-id="home-hydrated"]')).toHaveAttribute('aria-hidden', 'true');
+    await expect(page.locator('[data-id="home-hydrated"]')).toHaveCSS('position', 'absolute');
 
     const requestsResponse = await request.get(`${mockBaseURL}/__requests`);
     const requests = (await requestsResponse.json()) as Array<{ path: string }>;

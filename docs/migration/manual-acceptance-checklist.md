@@ -62,7 +62,7 @@ git status --short --branch
 备注：
 
 ```text
-2026-05-28 最新记录：Rank-time chart status attribute parity 已通过 focused RED/GREEN、完整默认 `test:migration` 与 `git diff --check`。RED 复现用户弹窗 rank-time curve 外层仍带 Vue-only `data-chart-status="loading"` 生命周期属性；GREEN 验证旧版 RankCurve 外层不再把 chart status 反射到产品 DOM，同时保留 classless wrapper/G2 容器、G2 metadata、canvas、relative wrapper 和 400px 图表高度。完整 gate 使用 Node `v24.11.1`、pnpm `8.15.9`，`gen:client-router` 生成 6 条 client route，`test:migration` 通过 build、36 个 unit 文件 / 154 个 unit tests、1 个 SSR smoke test、1 个 shallow Playwright test、60 passed / 1 skipped full-chain Playwright tests。
+2026-05-28 最新记录：Hydration probe product-neutrality parity 已通过 focused RED/GREEN、完整默认 `test:migration` 与 `git diff --check`。RED 复现 Search hydration probe 缺少 `aria-hidden` 且仍在产品 DOM/layout 语义中；GREEN 验证 Search probe 保持 Playwright 可读，同时变为 `position:absolute` 和 `aria-hidden="true"`。完整 gate 使用 Node `v24.11.1`、pnpm `8.15.9`，`gen:client-router` 生成 6 条 client route，`test:migration` 通过 build、37 个 unit 文件 / 157 个 unit tests、1 个 SSR smoke test、1 个 shallow Playwright test、61 passed / 1 skipped full-chain Playwright tests。
 ```
 
 ## 全局外壳与跨路由行为
@@ -99,6 +99,7 @@ git status --short --branch
 - `[x]` 直接刷新公开路由 URL 可正常工作
 - `[x]` 旧 RankLand 不存在的脚手架 `/about` 和 `/demo/detail/:id` 不再作为公开路由暴露，直接访问返回旧版 fallback 404
 - `[x]` 公开资源缺失时的 Not Found 行为可接受
+- `[x]` 公开路由测试用 hydration/editor-ready 探针保留测试可读性，但不进入正常布局流或无障碍树
 
 需要决策：
 
@@ -174,7 +175,7 @@ App shell Ant Design Vue Layout/Menu/Dropdown/Button、旧版根布局 `layout` 
 检查项：
 
 - `[x]` 空查询展示最近榜单
-- `[x]` 测试用 hydration marker 不作为可见产品文本展示
+- `[x]` 测试用 hydration marker 不作为可见产品文本、布局占位或无障碍节点展示
 - `[x]` `kw` 查询展示匹配结果
 - `[x]` 空 `kw` 按最近榜单状态处理
 - `[x]` Search Head 保持旧 React 无 canonical link 行为，只保留页面 title 和 `og:title`
@@ -207,7 +208,7 @@ App shell Ant Design Vue Layout/Menu/Dropdown/Button、旧版根布局 `layout` 
 备注：
 
 ```text
-2026-05-28 复核：search full-chain 覆盖旧 React Head 无 canonical link 行为、CSR listAll、旧版 `div.normal-content > div` 外壳 DOM、无 Vue-only `.search-page` / `section.search-panel` / root `min-height: 70vh`、标题旧版精确 `h3.mb-6` class、无 Vue-only `.search-heading`、搜索框旧版无页面自定义 class DOM、无 Vue-only `.search-input`、loading/error/result/recent 状态外层旧版 `mt-10` DOM/class 合同、result/recent `DIV` wrapper、无 Vue-only `.search-state` / `.search-section`、result/recent 标题旧版 `div.opacity-70`、结果数旧版纯文本 `搜索到 N 个结果`、无 Vue-only `[data-id="search-result-count"]` span、section `data-result-count` 保留、关键词空白旧版 passthrough 语义，route `kw`、提交 URL 和 Fuse search 均不 trim，空白-only `kw` 仍为结果状态、list 旧版 `div.mt-2 > .ant-list` wrapper、recent empty 旧版 `div.mt-2`、无 Vue-only `.search-section-title` / `.search-list` / `.search-empty-state`、result/recent 列表项容器旧版无页面自定义 class、无 Vue-only `.search-list-item`、Ant Design list item `display:flex`、result/recent 行内容旧版 `p.mb-0` / `span.ml-2.opacity-70` / `p.mb-0.opacity-50.text-sm` 精确类名、无 Vue-only `.search-row-title` / `.search-view-count` / `.search-created-at`、错误消息内层旧版精确 `div.text-red-500` class、无 Vue-only `.search-error-message`、hydration marker 视觉隐藏、Fuse 本地搜索、空 kw、zero-result summary-only、Ant Design Input.Search/List/Spin、旧版 boolean `enterButton` 默认 SearchOutlined 图标按钮、初始化失败状态旧版文案、外层 40px 顶部间距和内层 `text-red-500` 颜色/工具类 DOM、loading 旧版 `mt-10` 工具类、最近榜单空状态旧版 `mt-2` 间距和暗色正文色、搜索结果/最近榜单旧版工具类 token、网络请求无非预期 upstream/external call。
+2026-05-28 复核：search full-chain 覆盖旧 React Head 无 canonical link 行为、CSR listAll、旧版 `div.normal-content > div` 外壳 DOM、无 Vue-only `.search-page` / `section.search-panel` / root `min-height: 70vh`、标题旧版精确 `h3.mb-6` class、无 Vue-only `.search-heading`、搜索框旧版无页面自定义 class DOM、无 Vue-only `.search-input`、loading/error/result/recent 状态外层旧版 `mt-10` DOM/class 合同、result/recent `DIV` wrapper、无 Vue-only `.search-state` / `.search-section`、result/recent 标题旧版 `div.opacity-70`、结果数旧版纯文本 `搜索到 N 个结果`、无 Vue-only `[data-id="search-result-count"]` span、section `data-result-count` 保留、关键词空白旧版 passthrough 语义，route `kw`、提交 URL 和 Fuse search 均不 trim，空白-only `kw` 仍为结果状态、list 旧版 `div.mt-2 > .ant-list` wrapper、recent empty 旧版 `div.mt-2`、无 Vue-only `.search-section-title` / `.search-list` / `.search-empty-state`、result/recent 列表项容器旧版无页面自定义 class、无 Vue-only `.search-list-item`、Ant Design list item `display:flex`、result/recent 行内容旧版 `p.mb-0` / `span.ml-2.opacity-70` / `p.mb-0.opacity-50.text-sm` 精确类名、无 Vue-only `.search-row-title` / `.search-view-count` / `.search-created-at`、错误消息内层旧版精确 `div.text-red-500` class、无 Vue-only `.search-error-message`、hydration marker 保持测试可读但为 1px/transparent/absolute/`aria-hidden`、Fuse 本地搜索、空 kw、zero-result summary-only、Ant Design Input.Search/List/Spin、旧版 boolean `enterButton` 默认 SearchOutlined 图标按钮、初始化失败状态旧版文案、外层 40px 顶部间距和内层 `text-red-500` 颜色/工具类 DOM、loading 旧版 `mt-10` 工具类、最近榜单空状态旧版 `mt-2` 间距和暗色正文色、搜索结果/最近榜单旧版工具类 token、网络请求无非预期 upstream/external call。
 ```
 
 ## 榜单详情页 `/ranklist/:id`
@@ -222,7 +223,7 @@ App shell Ant Design Vue Layout/Menu/Dropdown/Button、旧版根布局 `layout` 
 
 - `[x]` SSR 首屏可以看到榜单内容
 - `[x]` Hydration 后榜单内容保持正常
-- `[x]` 测试用 hydration marker 不作为可见产品文本展示
+- `[x]` 测试用 hydration marker 不作为可见产品文本、布局占位或无障碍节点展示
 - `[x]` loaded Ranklist Head 保留旧 React `og:title`、absolute `og:url` 和 absolute canonical URL 行为
 - `[x]` loaded route root 保留旧版普通 `DIV`，不渲染 Vue-only `main`
 - `[x]` loaded content wrapper 保留旧版普通 `DIV`，不渲染 Vue-only `section`
@@ -374,7 +375,7 @@ App shell Ant Design Vue Layout/Menu/Dropdown/Button、旧版根布局 `layout` 
 - `[x]` SSR 首屏可以看到合集内容
 - `[x]` Hydration 后选中榜单内容保持正常
 - `[x]` loaded Collection Head 保留旧 React absolute `og:url` 和 absolute canonical URL 行为
-- `[x]` 测试用 hydration marker 不作为可见产品文本展示
+- `[x]` 测试用 hydration marker 不作为可见产品文本、布局占位或无障碍节点展示
 - `[x]` 没有 `rankId` 时的默认合集状态可接受
 - `[x]` 空合集选择标题保留旧版 `h3.pt-16.text-center` DOM/class token
 - `[x]` 有效 `rankId` 可以渲染选中榜单
@@ -433,7 +434,7 @@ App shell Ant Design Vue Layout/Menu/Dropdown/Button、旧版根布局 `layout` 
 - `[x]` CSR 页面加载正常，且不依赖上游数据调用
 - `[x]` 页面不展示旧 React 不存在的 `Playground` 顶部标题栏
 - `[x]` 页面不展示旧 React 不存在的可见 `Preview` 按钮
-- `[x]` 测试用 hydration marker 不作为可见产品文本展示
+- `[x]` 测试用 hydration marker 不作为可见产品文本、布局占位或无障碍节点展示
 - `[x]` 测试用 editor-ready marker 不作为可见产品文本展示
 - `[x]` 编辑器外壳不展示旧 React 不存在的额外边框和圆角
 - `[x]` 内置 demo SRK 可以预览
@@ -487,7 +488,7 @@ App shell Ant Design Vue Layout/Menu/Dropdown/Button、旧版根布局 `layout` 
 检查项：
 
 - `[x]` CSR 页面加载和 hydration 正常
-- `[x]` 测试用 hydration marker 不作为可见产品文本展示
+- `[x]` 测试用 hydration marker 不作为可见产品文本、布局占位或无障碍节点展示
 - `[x]` query 参数按预期保留
 - `[x]` Live Head 保持旧 React 无 canonical link 行为，只保留页面 title 和 loaded 状态的 `og:title`
 - `[x]` loaded content wrapper 保留旧版 `mt-8 mb-8` class token 和 32px 顶部/底部间距

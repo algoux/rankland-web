@@ -165,6 +165,7 @@ test.describe('/playground full-chain route', () => {
     await expect(page.locator('head link[rel="canonical"]')).toHaveCount(0);
     await expect(page.locator('[data-id="playground-page"]')).toBeVisible();
     await expect(page.locator('[data-id="playground-hydrated"]')).toHaveText('hydrated');
+    await expect(page.locator('[data-id="playground-hydrated"]')).toHaveAttribute('aria-hidden', 'true');
     await expect(page.locator('[data-id="playground-hydrated"]')).toHaveCSS('width', '1px');
     await expect(page.locator('[data-id="playground-hydrated"]')).toHaveCSS('height', '1px');
     await expect(page.locator('[data-id="playground-hydrated"]')).toHaveCSS('overflow', 'hidden');
@@ -175,6 +176,7 @@ test.describe('/playground full-chain route', () => {
     await expectMonacoReady(page);
     const editorReadyMarker = page.locator('[data-id="playground-editor-ready"]');
     await expect(editorReadyMarker).toHaveText('ready');
+    await expect(editorReadyMarker).toHaveAttribute('aria-hidden', 'true');
     await expect(editorReadyMarker).toHaveCSS('position', 'absolute');
     await expect(editorReadyMarker).toHaveCSS('width', '1px');
     await expect(editorReadyMarker).toHaveCSS('height', '1px');
