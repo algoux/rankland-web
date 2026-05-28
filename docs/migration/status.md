@@ -5,9 +5,9 @@ This file is the quick global dashboard for the RankLand migration. Update it at
 ## Current Focus
 
 - Active branch: `migration/live-page-foundation`
-- Current slice: SRK controls wrapper product class parity
-- Latest slice commit: `fix: 还原 SRK 控制栏外壳类名`
-- Last recorded full gate: passed on 2026-05-28 for SRK controls wrapper product class parity with Node `v24.11.1`, pnpm `8.15.9`, generated 6 client routes, build, 36 unit files / 154 unit tests, 1 SSR smoke test, 1 shallow Playwright test, and 60 passed / 1 skipped default full-chain Playwright tests with the conditional beian spec skipped outside `cnn`; focused RED reproduced the migrated controls root still exposing Vue-only `rankland-ranklist-controls`, focused GREEN verified the controls root now renders exact old React `mt-3 mx-4 flex justify-between items-center` while preserving computed flex layout and normal gaps, and combined Ranklist/Live full-chain 20 tests passed; `git diff --check` also passed.
+- Current slice: SRK footer wrapper product class parity
+- Latest slice commit: `fix: 还原 SRK 页脚外壳类名`
+- Last recorded full gate: passed on 2026-05-28 for SRK footer wrapper product class parity with Node `v24.11.1`, pnpm `8.15.9`, generated 6 client routes, build, 36 unit files / 154 unit tests, 1 SSR smoke test, 1 shallow Playwright test, and 60 passed / 1 skipped default full-chain Playwright tests with the conditional beian spec skipped outside `cnn`; focused RED reproduced the migrated footer root still exposing Vue-only `rankland-ranklist-footer`, focused GREEN verified the footer root now renders exact old React `text-center mt-8` while preserving footer spacing, text, links, ContactUs trigger, and ranklist full-chain 9 tests passed; `git diff --check` also passed.
 - Next recommended focus: product-review-driven SRK lower-level table pixel parity or route polish
 
 ## Route Progress
@@ -48,6 +48,7 @@ This file is the quick global dashboard for the RankLand migration. Update it at
 - SRK header metadata product classes now match old React more closely: contributors render exact `mb-0`, ref-links render no class, and contest time renders exact `text-center mb-0`, with the stable `data-id` hooks preserving scoped styling and full-chain assertions.
 - SRK progress wrapper now matches old React more closely: the wrapper renders exact `mx-4` without the Vue-only `rankland-ranklist-progress` product class, while stable `data-id` scoped styles preserve the 16px horizontal margins and mobile ProgressBar wrapping behavior.
 - SRK controls root now matches old React more closely: the wrapper renders exact `mt-3 mx-4 flex justify-between items-center` without the Vue-only `rankland-ranklist-controls` product class, while stable `data-id` scoped styles preserve flex display, centered alignment, space-between justification, 12px top margin, 16px horizontal margins, and normal row/column gaps.
+- SRK footer root now matches old React more closely: the wrapper renders exact `text-center mt-8` without the Vue-only `rankland-ranklist-footer` product class, while stable `data-id` scoped styles preserve footer spacing, paragraph margins, footer link colors, ContactUs trigger behavior, and conditional beian behavior.
 - SRK header view-count now follows old React `meta && meta.viewCnt || '-'` behavior: metadata responses without `viewCnt` still render the Eye icon and `-` fallback, while routes that do not pass metadata continue to omit the view-count block.
 - SRK header view-count now renders the old React exact `mr-2` class list while preserving the migrated `data-id="rankland-ranklist-view-count"` test hook and no longer emits Vue-only `.rankland-ranklist-view-count`.
 - SRK hidden reference-link trigger now preserves old React's zero CSS left margin while keeping the pointer cursor, caret icon, inherited header text color, and hover dropdown behavior.

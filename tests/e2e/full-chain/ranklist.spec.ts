@@ -727,7 +727,7 @@ test.describe('/ranklist/:id full-chain route', () => {
       {
         tagName: 'FOOTER',
         dataId: 'rankland-ranklist-footer',
-        classList: ['rankland-ranklist-footer', 'text-center', 'mt-8'],
+        classList: ['text-center', 'mt-8'],
       },
     ]);
     await expect(page.locator('.srk-user-cell', { hasText: 'Team Alpha' })).toBeVisible();
@@ -952,7 +952,7 @@ test.describe('/ranklist/:id full-chain route', () => {
       { marginTop: '4px', marginBottom: '0px' },
     ]);
     expect(await getFooterUtilityClasses(page)).toMatchObject({
-      footerClasses: expect.arrayContaining(['rankland-ranklist-footer', 'text-center', 'mt-8']),
+      footerClasses: ['text-center', 'mt-8'],
       paragraphClasses: [
         expect.arrayContaining(['mb-0']),
         expect.arrayContaining(['mt-1', 'mb-0']),
@@ -961,6 +961,7 @@ test.describe('/ranklist/:id full-chain route', () => {
         expect.arrayContaining(['mt-1', 'mb-0']),
       ],
     });
+    expect((await getFooterUtilityClasses(page)).footerClasses).not.toContain('rankland-ranklist-footer');
     await expect(page.locator('[data-id="rankland-ranklist-beian"]')).toHaveCount(0);
     const footerContactTrigger = page.locator('[data-id="rankland-ranklist-footer"] [data-id="contact-us-trigger"]');
     await expect(footerContactTrigger).toHaveText('联系我们');

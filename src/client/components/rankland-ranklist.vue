@@ -331,7 +331,7 @@
         </div>
       </div>
 
-      <footer v-if="showFooter" data-id="rankland-ranklist-footer" class="rankland-ranklist-footer text-center mt-8">
+      <footer v-if="showFooter" data-id="rankland-ranklist-footer" class="text-center mt-8">
         <p class="mb-0">© 2022-present algoUX. All Rights Reserved.</p>
         <p class="mt-1 mb-0">
           Find us on <a href="https://github.com/algoux" target="_blank">GitHub</a>
@@ -931,12 +931,12 @@ export default defineComponent({
 }
 
 a,
-.rankland-ranklist-footer :deep(.contact-us-trigger) {
+[data-id='rankland-ranklist-footer'].text-center.mt-8 :deep(.contact-us-trigger) {
   color: var(--rankland-link-color);
 }
 
 a:hover,
-.rankland-ranklist-footer :deep(.contact-us-trigger:hover) {
+[data-id='rankland-ranklist-footer'].text-center.mt-8 :deep(.contact-us-trigger:hover) {
   color: var(--rankland-link-hover-color);
 }
 
@@ -1114,16 +1114,16 @@ span.ml-5.inline-flex.items-center .mr-1 {
   margin-left: 32px;
 }
 
-.rankland-ranklist-footer {
+[data-id='rankland-ranklist-footer'].text-center.mt-8 {
   margin-top: 32px;
   text-align: center;
 }
 
-.rankland-ranklist-footer p {
+[data-id='rankland-ranklist-footer'].text-center.mt-8 p {
   margin: 0;
 }
 
-.rankland-ranklist-footer p + p {
+[data-id='rankland-ranklist-footer'].text-center.mt-8 p + p {
   margin-top: 4px;
 }
 
