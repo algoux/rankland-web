@@ -269,7 +269,7 @@
                   v-for="marker in activeUserMarkerLabels"
                   :key="marker.id"
                   data-id="rankland-user-modal-marker"
-                  class="rankland-user-modal-marker user-modal-info-marker"
+                  class="user-modal-info-marker"
                   :class="marker.className"
                   :style="marker.style"
                 >
@@ -1161,7 +1161,7 @@ span.ml-5.inline-flex.items-center .mr-1 {
   margin-top: 8px;
 }
 
-.rankland-user-modal-marker {
+[data-id='rankland-user-modal-marker'].user-modal-info-marker {
   display: inline-block;
   padding: 2px;
   border: 1px solid transparent;
@@ -1169,7 +1169,7 @@ span.ml-5.inline-flex.items-center .mr-1 {
   font-size: 12px;
 }
 
-.rankland-user-modal-marker:not(:last-of-type) {
+[data-id='rankland-user-modal-marker'].user-modal-info-marker:not(:last-of-type) {
   margin-right: 4px;
 }
 

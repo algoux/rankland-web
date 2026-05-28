@@ -1242,8 +1242,10 @@ test.describe('/ranklist/:id full-chain route', () => {
     });
     const marker = userModal.locator('[data-id="rankland-user-modal-marker"]').first();
     await expect(marker).toHaveText('Gold Group');
-    await expect(marker).toHaveClass(/user-modal-info-marker/);
-    await expect(marker).toHaveClass(/srk-preset-marker-yellow/);
+    await expect(marker).toHaveClass(/^user-modal-info-marker srk-preset-marker-yellow$/);
+    expect(await marker.evaluate((element) => Array.from(element.classList))).not.toContain(
+      'rankland-user-modal-marker',
+    );
     const markerStyle = await marker.evaluate((element) => {
       const style = window.getComputedStyle(element);
       return {
