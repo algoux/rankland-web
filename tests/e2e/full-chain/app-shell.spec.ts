@@ -366,6 +366,24 @@ test.describe('app shell full-chain behavior', () => {
 
     expect(response.ok()).toBe(true);
     const html = await response.text();
+    expect(html).toContain('lang="zh-Hans"');
+    expect(html).toContain(
+      '<meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=0.5,maximum-scale=1.0,user-scalable=yes"',
+    );
+    expect(html).toContain(
+      '<meta name="description" content="专业的算法竞赛榜单平台，收录 ICPC、CCPC 等各类赛事的榜单。"',
+    );
+    expect(html).toContain(
+      '<meta name="keywords" content="RankLand,programming,algorithm,ranklist,standings,编程,算法,竞赛,程序设计,ICPC,CCPC,榜单,排名"',
+    );
+    expect(html).toContain('<meta name="color-scheme" content="dark light"');
+    expect(html).toContain('<meta name="darkreader-lock"');
+    expect(html).toContain('<meta property="og:site_name" content="RankLand"');
+    expect(html).toContain('<meta property="og:description" content="RankLand: 专业算竞榜单平台"');
+    expect(html).toContain('<meta property="og:type" content="website"');
+    expect(html).toContain('<meta property="og:locale" content="zh_CN"');
+    expect(html).toContain('<meta name="twitter:card" content="summary_large_image"');
+    expect(html).toContain('<title>RankLand</title>');
     const bootstrapIndex = html.indexOf('data-rankland-theme-bootstrap');
     expect(bootstrapIndex).toBeGreaterThan(-1);
     expect(bootstrapIndex).toBeLessThan(html.indexOf('<body'));
