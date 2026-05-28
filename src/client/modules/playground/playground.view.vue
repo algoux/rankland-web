@@ -3,7 +3,6 @@
     <Head>
       <title>{{ pageTitle }}</title>
       <meta property="og:title" :content="pageTitle">
-      <link rel="canonical" href="/playground">
     </Head>
 
     <div data-id="playground-hydrated" class="playground-hydrated">{{ hydrated ? 'hydrated' : 'csr' }}</div>

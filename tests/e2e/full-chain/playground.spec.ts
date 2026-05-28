@@ -162,6 +162,7 @@ test.describe('/playground full-chain route', () => {
     expect(response).not.toBeNull();
     expect(response?.ok()).toBe(true);
     await expect(page).toHaveTitle('Playground | RankLand', { timeout: 15_000 });
+    await expect(page.locator('head link[rel="canonical"]')).toHaveCount(0);
     await expect(page.locator('[data-id="playground-page"]')).toBeVisible();
     await expect(page.locator('[data-id="playground-hydrated"]')).toHaveText('hydrated');
     await expect(page.locator('[data-id="playground-hydrated"]')).toHaveCSS('width', '1px');
