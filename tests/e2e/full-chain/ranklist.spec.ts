@@ -1561,6 +1561,19 @@ test.describe('/ranklist/:id full-chain route', () => {
     await expect.poll(async () => photo.evaluate((element) => window.getComputedStyle(element).display)).toBe('none');
   });
 
+  test('renders old React problem alias fallback for null status cells', async ({ page, request }) => {
+    await request.post(`${mockBaseURL}/__reset`);
+    await denyExternalCalls(page);
+
+    const response = await page.goto('/ranklist/null-status-key?focus=yes');
+
+    expect(response?.status()).toBe(200);
+    await expect(page.locator('[data-id="rankland-ranklist-title"]')).toHaveText('Test Contest 2024');
+    const nullStatusCell = page.locator('tr', { hasText: 'Team Beta' }).locator('td').last();
+    await expect(nullStatusCell).toHaveText('B');
+    expect(await nullStatusCell.getAttribute('class')).toBeNull();
+  });
+
   test('uses the legacy responsive width for the user info modal on mobile', async ({ page, request }) => {
     await denyExternalCalls(page);
     await request.post(`${mockBaseURL}/__reset`);

@@ -219,7 +219,16 @@
           :format-srk-asset-url="formatRanklistAssetUrl"
           @user-click="handleUserClick"
           @solution-click="handleSolutionClick"
-        />
+        >
+          <template #status-cell="{ status, problem, problemIndex, onClick }">
+            <RanklandStatusCell
+              :status="status"
+              :problem="problem"
+              :problem-index="problemIndex"
+              :on-cell-click="onClick"
+            />
+          </template>
+        </Ranklist>
 
         <div data-id="rankland-ranklist-user-modal">
           <Modal
@@ -389,6 +398,7 @@ import { notification } from 'ant-design-vue';
 import '@algoux/standard-ranklist-renderer-component-styles';
 import ContactUs from './contact-us.vue';
 import RanklandRankTimeChart from './rankland-rank-time-chart.vue';
+import RanklandStatusCell from './rankland-status-cell.vue';
 import SrkAssetImage from './srk-asset-image.vue';
 import { createRanklandFooterSiteState } from './rankland-footer-site';
 import { createRanklandRanklistState, type RanklandRanklistFilterState } from './rankland-ranklist-state';
@@ -479,6 +489,7 @@ export default defineComponent({
     ProgressBar,
     Ranklist,
     RanklandRankTimeChart,
+    RanklandStatusCell,
     ShareAltOutlined,
     SrkAssetImage,
   },

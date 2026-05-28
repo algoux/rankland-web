@@ -25,6 +25,16 @@ let appProcess;
 let cleanupWatcherProcess;
 let shuttingDown = false;
 
+function createNullStatusSrk() {
+  const clonedSrk = JSON.parse(JSON.stringify(srk));
+  clonedSrk.rows[1].statuses[1] = {
+    result: null,
+    tries: 0,
+    solutions: [],
+  };
+  return clonedSrk;
+}
+
 function ok(data) {
   return { code: 0, message: 'success', data };
 }
@@ -155,11 +165,25 @@ function routeRequest(req, res) {
       return;
     }
 
+    if (url.pathname === '/rank/null-status-key') {
+      sendJson(res, 200, ok({
+        ...ranklistInfo,
+        uniqueKey: 'null-status-key',
+        fileID: 'file-null-status-1',
+      }));
+      return;
+    }
+
     sendJson(res, 200, ok(ranklistInfo));
     return;
   }
 
   if (method === 'GET' && url.pathname === '/file/download') {
+    if (url.searchParams.get('id') === 'file-null-status-1') {
+      sendJson(res, 200, createNullStatusSrk());
+      return;
+    }
+
     sendJson(res, 200, srk);
     return;
   }
