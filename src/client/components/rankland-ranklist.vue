@@ -107,7 +107,7 @@
           <p
             v-if="headerContributors.length > 0"
             data-id="rankland-ranklist-contributors"
-            class="rankland-ranklist-contributors mb-0"
+            class="mb-0"
           >
             贡献者：<template v-for="(contributor, contributorIndex) in headerContributors" :key="contributor.key">
               <span>
@@ -117,7 +117,7 @@
               </span>
             </template>
           </p>
-          <span v-if="mainRefLinks.length > 0" data-id="rankland-ranklist-ref-links" class="rankland-ranklist-ref-links">
+          <span v-if="mainRefLinks.length > 0" data-id="rankland-ranklist-ref-links">
             相关链接：<template v-for="(refLink, refLinkIndex) in mainRefLinks" :key="refLink.key">
               <span>
                 {{ refLinkIndex > 0 ? ', ' : '' }}<a :href="refLink.href" target="_blank" rel="noopener">{{ refLink.label }}</a>
@@ -148,7 +148,7 @@
             </a-dropdown>
           </span>
         </div>
-      <p data-id="rankland-ranklist-time" class="rankland-ranklist-time text-center mb-0">{{ contestTimeRange }}</p>
+      <p data-id="rankland-ranklist-time" class="text-center mb-0">{{ contestTimeRange }}</p>
     </template>
 
       <div v-if="showProgress" data-id="rankland-ranklist-progress" class="rankland-ranklist-progress mx-4">
@@ -970,8 +970,8 @@ a:hover,
   color: var(--rankland-legacy-text-color);
 }
 
-.rankland-ranklist-contributors,
-.rankland-ranklist-ref-links {
+[data-id='rankland-ranklist-contributors'].mb-0,
+[data-id='rankland-ranklist-ref-links'] {
   margin: 0;
   color: var(--rankland-legacy-text-color);
   font-size: 14px;
@@ -1030,7 +1030,7 @@ a:hover,
   border-left-color: #9ca3af;
 }
 
-.rankland-ranklist-time {
+[data-id='rankland-ranklist-time'].text-center.mb-0 {
   margin: 0;
   color: var(--rankland-legacy-text-color);
   font-size: 14px;

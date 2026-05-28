@@ -194,8 +194,9 @@ async function getHeaderUtilityClasses(page: Page) {
     const title = document.querySelector<HTMLElement>('[data-id="rankland-ranklist-title"]');
     const meta = document.querySelector<HTMLElement>('[data-id="rankland-ranklist-header-meta"]');
     const contributors = document.querySelector<HTMLElement>('[data-id="rankland-ranklist-contributors"]');
+    const refLinks = document.querySelector<HTMLElement>('[data-id="rankland-ranklist-ref-links"]');
     const time = document.querySelector<HTMLElement>('[data-id="rankland-ranklist-time"]');
-    if (!banner || !bannerWrap || !title || !meta || !contributors || !time) {
+    if (!banner || !bannerWrap || !title || !meta || !contributors || !refLinks || !time) {
       throw new Error('Missing ranklist header utility class targets');
     }
     const bannerWrapStyle = window.getComputedStyle(bannerWrap);
@@ -212,6 +213,7 @@ async function getHeaderUtilityClasses(page: Page) {
       titleClasses: Array.from(title.classList),
       metaClasses: Array.from(meta.classList),
       contributorsClasses: Array.from(contributors.classList),
+      refLinksClasses: Array.from(refLinks.classList),
       timeClasses: Array.from(time.classList),
     };
   });
@@ -700,7 +702,7 @@ test.describe('/ranklist/:id full-chain route', () => {
       {
         tagName: 'P',
         dataId: 'rankland-ranklist-time',
-        classList: ['rankland-ranklist-time', 'text-center', 'mb-0'],
+        classList: ['text-center', 'mb-0'],
       },
       {
         tagName: 'DIV',
@@ -755,8 +757,6 @@ test.describe('/ranklist/:id full-chain route', () => {
       bannerWrapMarginBottom: '0px',
       bannerMarginBottom: '8px',
       titleClasses: expect.arrayContaining(['text-center', 'mb-1']),
-      contributorsClasses: expect.arrayContaining(['rankland-ranklist-contributors', 'mb-0']),
-      timeClasses: expect.arrayContaining(['rankland-ranklist-time', 'text-center', 'mb-0']),
     });
     expect(headerUtilityClasses.bannerWrapClasses).not.toContain('rankland-ranklist-banner-wrap');
     expect(headerUtilityClasses.bannerClasses).toEqual(['mb-2']);
@@ -765,6 +765,12 @@ test.describe('/ranklist/:id full-chain route', () => {
     expect(headerUtilityClasses.bannerInlineStyle.replace(/\s+/g, '')).toContain('max-height:40vh');
     expect(headerUtilityClasses.metaClasses).toEqual(['text-center', 'mt-1']);
     expect(headerUtilityClasses.metaClasses).not.toContain('rankland-ranklist-header-meta');
+    expect(headerUtilityClasses.contributorsClasses).toEqual(['mb-0']);
+    expect(headerUtilityClasses.contributorsClasses).not.toContain('rankland-ranklist-contributors');
+    expect(headerUtilityClasses.refLinksClasses).toEqual([]);
+    expect(headerUtilityClasses.refLinksClasses).not.toContain('rankland-ranklist-ref-links');
+    expect(headerUtilityClasses.timeClasses).toEqual(['text-center', 'mb-0']);
+    expect(headerUtilityClasses.timeClasses).not.toContain('rankland-ranklist-time');
     expect(await getRanklistHeaderTextSizes(page)).toMatchObject({
       viewCountFontSize: '14px',
       contributorsFontSize: '14px',
