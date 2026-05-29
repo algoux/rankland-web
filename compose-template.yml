@@ -8,12 +8,9 @@ services:
     environment:
       - SERVER_HOST=127.0.0.1
       - SERVER_PORT=3000
-      - NODE_WORKERS=1
-      - MONGO_HOST=127.0.0.1
-      - MONGO_PORT=27017
-      - MONGO_DB=rankland
-      - MONGO_USER=
-      - MONGO_PASS=
+      - MYSQL_HOST=127.0.0.1
+      - MYSQL_PORT=3306
+      - MYSQL_DB=rankland
+      - MYSQL_USER=blue
+      - MYSQL_PASS=test
       - AUTH_TOKEN=your-auth-token
-    volumes:
-      - /your-logs-path/rankland-web:/root/.pm2/logs

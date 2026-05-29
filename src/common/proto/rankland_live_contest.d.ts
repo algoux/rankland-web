@@ -1,227 +1,4 @@
 import * as $protobuf from "protobufjs";
-/** Namespace rankland_live_contest_client. */
-export namespace rankland_live_contest_client {
-
-    /** Properties of a ClientEvent. */
-    interface IClientEvent {
-
-        /** ClientEvent eventId */
-        eventId?: (number|null);
-
-        /** ClientEvent type */
-        type?: (rankland_live_contest_common.EventType|null);
-
-        /** ClientEvent newSolutionData */
-        newSolutionData?: (rankland_live_contest_common.INewSolutionEvent|null);
-
-        /** ClientEvent solutionOnProgressData */
-        solutionOnProgressData?: (rankland_live_contest_common.ISolutionOnProgressEvent|null);
-
-        /** ClientEvent solutionOnResultSettleData */
-        solutionOnResultSettleData?: (rankland_live_contest_common.ISolutionOnResultSettleEvent|null);
-
-        /** ClientEvent solutionOnResultChangeData */
-        solutionOnResultChangeData?: (rankland_live_contest_common.ISolutionOnResultChangeEvent|null);
-
-        /** ClientEvent contestConfigChangeData */
-        contestConfigChangeData?: (rankland_live_contest_common.IContestConfigChangeEvent|null);
-    }
-
-    /** Represents a ClientEvent. */
-    class ClientEvent implements IClientEvent {
-
-        /**
-         * Constructs a new ClientEvent.
-         * @param [properties] Properties to set
-         */
-        constructor(properties?: rankland_live_contest_client.IClientEvent);
-
-        /** ClientEvent eventId. */
-        public eventId: number;
-
-        /** ClientEvent type. */
-        public type: rankland_live_contest_common.EventType;
-
-        /** ClientEvent newSolutionData. */
-        public newSolutionData?: (rankland_live_contest_common.INewSolutionEvent|null);
-
-        /** ClientEvent solutionOnProgressData. */
-        public solutionOnProgressData?: (rankland_live_contest_common.ISolutionOnProgressEvent|null);
-
-        /** ClientEvent solutionOnResultSettleData. */
-        public solutionOnResultSettleData?: (rankland_live_contest_common.ISolutionOnResultSettleEvent|null);
-
-        /** ClientEvent solutionOnResultChangeData. */
-        public solutionOnResultChangeData?: (rankland_live_contest_common.ISolutionOnResultChangeEvent|null);
-
-        /** ClientEvent contestConfigChangeData. */
-        public contestConfigChangeData?: (rankland_live_contest_common.IContestConfigChangeEvent|null);
-
-        /** ClientEvent data. */
-        public data?: ("newSolutionData"|"solutionOnProgressData"|"solutionOnResultSettleData"|"solutionOnResultChangeData"|"contestConfigChangeData");
-
-        /**
-         * Creates a new ClientEvent instance using the specified properties.
-         * @param [properties] Properties to set
-         * @returns ClientEvent instance
-         */
-        public static create(properties?: rankland_live_contest_client.IClientEvent): rankland_live_contest_client.ClientEvent;
-
-        /**
-         * Encodes the specified ClientEvent message. Does not implicitly {@link rankland_live_contest_client.ClientEvent.verify|verify} messages.
-         * @param message ClientEvent message or plain object to encode
-         * @param [writer] Writer to encode to
-         * @returns Writer
-         */
-        public static encode(message: rankland_live_contest_client.IClientEvent, writer?: $protobuf.Writer): $protobuf.Writer;
-
-        /**
-         * Encodes the specified ClientEvent message, length delimited. Does not implicitly {@link rankland_live_contest_client.ClientEvent.verify|verify} messages.
-         * @param message ClientEvent message or plain object to encode
-         * @param [writer] Writer to encode to
-         * @returns Writer
-         */
-        public static encodeDelimited(message: rankland_live_contest_client.IClientEvent, writer?: $protobuf.Writer): $protobuf.Writer;
-
-        /**
-         * Decodes a ClientEvent message from the specified reader or buffer.
-         * @param reader Reader or buffer to decode from
-         * @param [length] Message length if known beforehand
-         * @returns ClientEvent
-         * @throws {Error} If the payload is not a reader or valid buffer
-         * @throws {$protobuf.util.ProtocolError} If required fields are missing
-         */
-        public static decode(reader: ($protobuf.Reader|Uint8Array), length?: number): rankland_live_contest_client.ClientEvent;
-
-        /**
-         * Decodes a ClientEvent message from the specified reader or buffer, length delimited.
-         * @param reader Reader or buffer to decode from
-         * @returns ClientEvent
-         * @throws {Error} If the payload is not a reader or valid buffer
-         * @throws {$protobuf.util.ProtocolError} If required fields are missing
-         */
-        public static decodeDelimited(reader: ($protobuf.Reader|Uint8Array)): rankland_live_contest_client.ClientEvent;
-
-        /**
-         * Verifies a ClientEvent message.
-         * @param message Plain object to verify
-         * @returns `null` if valid, otherwise the reason why it is not
-         */
-        public static verify(message: { [k: string]: any }): (string|null);
-
-        /**
-         * Creates a ClientEvent message from a plain object. Also converts values to their respective internal types.
-         * @param object Plain object
-         * @returns ClientEvent
-         */
-        public static fromObject(object: { [k: string]: any }): rankland_live_contest_client.ClientEvent;
-
-        /**
-         * Creates a plain object from a ClientEvent message. Also converts values to other types if specified.
-         * @param message ClientEvent
-         * @param [options] Conversion options
-         * @returns Plain object
-         */
-        public static toObject(message: rankland_live_contest_client.ClientEvent, options?: $protobuf.IConversionOptions): { [k: string]: any };
-
-        /**
-         * Converts this ClientEvent to JSON.
-         * @returns JSON object
-         */
-        public toJSON(): { [k: string]: any };
-    }
-
-    /** Properties of a BatchClientEvent. */
-    interface IBatchClientEvent {
-
-        /** BatchClientEvent events */
-        events?: (rankland_live_contest_client.IClientEvent[]|null);
-    }
-
-    /** Represents a BatchClientEvent. */
-    class BatchClientEvent implements IBatchClientEvent {
-
-        /**
-         * Constructs a new BatchClientEvent.
-         * @param [properties] Properties to set
-         */
-        constructor(properties?: rankland_live_contest_client.IBatchClientEvent);
-
-        /** BatchClientEvent events. */
-        public events: rankland_live_contest_client.IClientEvent[];
-
-        /**
-         * Creates a new BatchClientEvent instance using the specified properties.
-         * @param [properties] Properties to set
-         * @returns BatchClientEvent instance
-         */
-        public static create(properties?: rankland_live_contest_client.IBatchClientEvent): rankland_live_contest_client.BatchClientEvent;
-
-        /**
-         * Encodes the specified BatchClientEvent message. Does not implicitly {@link rankland_live_contest_client.BatchClientEvent.verify|verify} messages.
-         * @param message BatchClientEvent message or plain object to encode
-         * @param [writer] Writer to encode to
-         * @returns Writer
-         */
-        public static encode(message: rankland_live_contest_client.IBatchClientEvent, writer?: $protobuf.Writer): $protobuf.Writer;
-
-        /**
-         * Encodes the specified BatchClientEvent message, length delimited. Does not implicitly {@link rankland_live_contest_client.BatchClientEvent.verify|verify} messages.
-         * @param message BatchClientEvent message or plain object to encode
-         * @param [writer] Writer to encode to
-         * @returns Writer
-         */
-        public static encodeDelimited(message: rankland_live_contest_client.IBatchClientEvent, writer?: $protobuf.Writer): $protobuf.Writer;
-
-        /**
-         * Decodes a BatchClientEvent message from the specified reader or buffer.
-         * @param reader Reader or buffer to decode from
-         * @param [length] Message length if known beforehand
-         * @returns BatchClientEvent
-         * @throws {Error} If the payload is not a reader or valid buffer
-         * @throws {$protobuf.util.ProtocolError} If required fields are missing
-         */
-        public static decode(reader: ($protobuf.Reader|Uint8Array), length?: number): rankland_live_contest_client.BatchClientEvent;
-
-        /**
-         * Decodes a BatchClientEvent message from the specified reader or buffer, length delimited.
-         * @param reader Reader or buffer to decode from
-         * @returns BatchClientEvent
-         * @throws {Error} If the payload is not a reader or valid buffer
-         * @throws {$protobuf.util.ProtocolError} If required fields are missing
-         */
-        public static decodeDelimited(reader: ($protobuf.Reader|Uint8Array)): rankland_live_contest_client.BatchClientEvent;
-
-        /**
-         * Verifies a BatchClientEvent message.
-         * @param message Plain object to verify
-         * @returns `null` if valid, otherwise the reason why it is not
-         */
-        public static verify(message: { [k: string]: any }): (string|null);
-
-        /**
-         * Creates a BatchClientEvent message from a plain object. Also converts values to their respective internal types.
-         * @param object Plain object
-         * @returns BatchClientEvent
-         */
-        public static fromObject(object: { [k: string]: any }): rankland_live_contest_client.BatchClientEvent;
-
-        /**
-         * Creates a plain object from a BatchClientEvent message. Also converts values to other types if specified.
-         * @param message BatchClientEvent
-         * @param [options] Conversion options
-         * @returns Plain object
-         */
-        public static toObject(message: rankland_live_contest_client.BatchClientEvent, options?: $protobuf.IConversionOptions): { [k: string]: any };
-
-        /**
-         * Converts this BatchClientEvent to JSON.
-         * @returns JSON object
-         */
-        public toJSON(): { [k: string]: any };
-    }
-}
-
 /** Namespace rankland_live_contest_common. */
 export namespace rankland_live_contest_common {
 
@@ -1074,6 +851,379 @@ export namespace rankland_live_contest_producer {
 
         /**
          * Converts this BatchProducerEvent to JSON.
+         * @returns JSON object
+         */
+        public toJSON(): { [k: string]: any };
+    }
+}
+
+/** Namespace rankland_live_contest_client. */
+export namespace rankland_live_contest_client {
+
+    /** Properties of a ClientEvent. */
+    interface IClientEvent {
+
+        /** ClientEvent eventId */
+        eventId?: (number|null);
+
+        /** ClientEvent type */
+        type?: (rankland_live_contest_common.EventType|null);
+
+        /** ClientEvent newSolutionData */
+        newSolutionData?: (rankland_live_contest_common.INewSolutionEvent|null);
+
+        /** ClientEvent solutionOnProgressData */
+        solutionOnProgressData?: (rankland_live_contest_common.ISolutionOnProgressEvent|null);
+
+        /** ClientEvent solutionOnResultSettleData */
+        solutionOnResultSettleData?: (rankland_live_contest_common.ISolutionOnResultSettleEvent|null);
+
+        /** ClientEvent solutionOnResultChangeData */
+        solutionOnResultChangeData?: (rankland_live_contest_common.ISolutionOnResultChangeEvent|null);
+
+        /** ClientEvent contestConfigChangeData */
+        contestConfigChangeData?: (rankland_live_contest_common.IContestConfigChangeEvent|null);
+    }
+
+    /** Represents a ClientEvent. */
+    class ClientEvent implements IClientEvent {
+
+        /**
+         * Constructs a new ClientEvent.
+         * @param [properties] Properties to set
+         */
+        constructor(properties?: rankland_live_contest_client.IClientEvent);
+
+        /** ClientEvent eventId. */
+        public eventId: number;
+
+        /** ClientEvent type. */
+        public type: rankland_live_contest_common.EventType;
+
+        /** ClientEvent newSolutionData. */
+        public newSolutionData?: (rankland_live_contest_common.INewSolutionEvent|null);
+
+        /** ClientEvent solutionOnProgressData. */
+        public solutionOnProgressData?: (rankland_live_contest_common.ISolutionOnProgressEvent|null);
+
+        /** ClientEvent solutionOnResultSettleData. */
+        public solutionOnResultSettleData?: (rankland_live_contest_common.ISolutionOnResultSettleEvent|null);
+
+        /** ClientEvent solutionOnResultChangeData. */
+        public solutionOnResultChangeData?: (rankland_live_contest_common.ISolutionOnResultChangeEvent|null);
+
+        /** ClientEvent contestConfigChangeData. */
+        public contestConfigChangeData?: (rankland_live_contest_common.IContestConfigChangeEvent|null);
+
+        /** ClientEvent data. */
+        public data?: ("newSolutionData"|"solutionOnProgressData"|"solutionOnResultSettleData"|"solutionOnResultChangeData"|"contestConfigChangeData");
+
+        /**
+         * Creates a new ClientEvent instance using the specified properties.
+         * @param [properties] Properties to set
+         * @returns ClientEvent instance
+         */
+        public static create(properties?: rankland_live_contest_client.IClientEvent): rankland_live_contest_client.ClientEvent;
+
+        /**
+         * Encodes the specified ClientEvent message. Does not implicitly {@link rankland_live_contest_client.ClientEvent.verify|verify} messages.
+         * @param message ClientEvent message or plain object to encode
+         * @param [writer] Writer to encode to
+         * @returns Writer
+         */
+        public static encode(message: rankland_live_contest_client.IClientEvent, writer?: $protobuf.Writer): $protobuf.Writer;
+
+        /**
+         * Encodes the specified ClientEvent message, length delimited. Does not implicitly {@link rankland_live_contest_client.ClientEvent.verify|verify} messages.
+         * @param message ClientEvent message or plain object to encode
+         * @param [writer] Writer to encode to
+         * @returns Writer
+         */
+        public static encodeDelimited(message: rankland_live_contest_client.IClientEvent, writer?: $protobuf.Writer): $protobuf.Writer;
+
+        /**
+         * Decodes a ClientEvent message from the specified reader or buffer.
+         * @param reader Reader or buffer to decode from
+         * @param [length] Message length if known beforehand
+         * @returns ClientEvent
+         * @throws {Error} If the payload is not a reader or valid buffer
+         * @throws {$protobuf.util.ProtocolError} If required fields are missing
+         */
+        public static decode(reader: ($protobuf.Reader|Uint8Array), length?: number): rankland_live_contest_client.ClientEvent;
+
+        /**
+         * Decodes a ClientEvent message from the specified reader or buffer, length delimited.
+         * @param reader Reader or buffer to decode from
+         * @returns ClientEvent
+         * @throws {Error} If the payload is not a reader or valid buffer
+         * @throws {$protobuf.util.ProtocolError} If required fields are missing
+         */
+        public static decodeDelimited(reader: ($protobuf.Reader|Uint8Array)): rankland_live_contest_client.ClientEvent;
+
+        /**
+         * Verifies a ClientEvent message.
+         * @param message Plain object to verify
+         * @returns `null` if valid, otherwise the reason why it is not
+         */
+        public static verify(message: { [k: string]: any }): (string|null);
+
+        /**
+         * Creates a ClientEvent message from a plain object. Also converts values to their respective internal types.
+         * @param object Plain object
+         * @returns ClientEvent
+         */
+        public static fromObject(object: { [k: string]: any }): rankland_live_contest_client.ClientEvent;
+
+        /**
+         * Creates a plain object from a ClientEvent message. Also converts values to other types if specified.
+         * @param message ClientEvent
+         * @param [options] Conversion options
+         * @returns Plain object
+         */
+        public static toObject(message: rankland_live_contest_client.ClientEvent, options?: $protobuf.IConversionOptions): { [k: string]: any };
+
+        /**
+         * Converts this ClientEvent to JSON.
+         * @returns JSON object
+         */
+        public toJSON(): { [k: string]: any };
+    }
+
+    /** Properties of a BatchClientEvent. */
+    interface IBatchClientEvent {
+
+        /** BatchClientEvent events */
+        events?: (rankland_live_contest_client.IClientEvent[]|null);
+    }
+
+    /** Represents a BatchClientEvent. */
+    class BatchClientEvent implements IBatchClientEvent {
+
+        /**
+         * Constructs a new BatchClientEvent.
+         * @param [properties] Properties to set
+         */
+        constructor(properties?: rankland_live_contest_client.IBatchClientEvent);
+
+        /** BatchClientEvent events. */
+        public events: rankland_live_contest_client.IClientEvent[];
+
+        /**
+         * Creates a new BatchClientEvent instance using the specified properties.
+         * @param [properties] Properties to set
+         * @returns BatchClientEvent instance
+         */
+        public static create(properties?: rankland_live_contest_client.IBatchClientEvent): rankland_live_contest_client.BatchClientEvent;
+
+        /**
+         * Encodes the specified BatchClientEvent message. Does not implicitly {@link rankland_live_contest_client.BatchClientEvent.verify|verify} messages.
+         * @param message BatchClientEvent message or plain object to encode
+         * @param [writer] Writer to encode to
+         * @returns Writer
+         */
+        public static encode(message: rankland_live_contest_client.IBatchClientEvent, writer?: $protobuf.Writer): $protobuf.Writer;
+
+        /**
+         * Encodes the specified BatchClientEvent message, length delimited. Does not implicitly {@link rankland_live_contest_client.BatchClientEvent.verify|verify} messages.
+         * @param message BatchClientEvent message or plain object to encode
+         * @param [writer] Writer to encode to
+         * @returns Writer
+         */
+        public static encodeDelimited(message: rankland_live_contest_client.IBatchClientEvent, writer?: $protobuf.Writer): $protobuf.Writer;
+
+        /**
+         * Decodes a BatchClientEvent message from the specified reader or buffer.
+         * @param reader Reader or buffer to decode from
+         * @param [length] Message length if known beforehand
+         * @returns BatchClientEvent
+         * @throws {Error} If the payload is not a reader or valid buffer
+         * @throws {$protobuf.util.ProtocolError} If required fields are missing
+         */
+        public static decode(reader: ($protobuf.Reader|Uint8Array), length?: number): rankland_live_contest_client.BatchClientEvent;
+
+        /**
+         * Decodes a BatchClientEvent message from the specified reader or buffer, length delimited.
+         * @param reader Reader or buffer to decode from
+         * @returns BatchClientEvent
+         * @throws {Error} If the payload is not a reader or valid buffer
+         * @throws {$protobuf.util.ProtocolError} If required fields are missing
+         */
+        public static decodeDelimited(reader: ($protobuf.Reader|Uint8Array)): rankland_live_contest_client.BatchClientEvent;
+
+        /**
+         * Verifies a BatchClientEvent message.
+         * @param message Plain object to verify
+         * @returns `null` if valid, otherwise the reason why it is not
+         */
+        public static verify(message: { [k: string]: any }): (string|null);
+
+        /**
+         * Creates a BatchClientEvent message from a plain object. Also converts values to their respective internal types.
+         * @param object Plain object
+         * @returns BatchClientEvent
+         */
+        public static fromObject(object: { [k: string]: any }): rankland_live_contest_client.BatchClientEvent;
+
+        /**
+         * Creates a plain object from a BatchClientEvent message. Also converts values to other types if specified.
+         * @param message BatchClientEvent
+         * @param [options] Conversion options
+         * @returns Plain object
+         */
+        public static toObject(message: rankland_live_contest_client.BatchClientEvent, options?: $protobuf.IConversionOptions): { [k: string]: any };
+
+        /**
+         * Converts this BatchClientEvent to JSON.
+         * @returns JSON object
+         */
+        public toJSON(): { [k: string]: any };
+    }
+
+    /** Properties of a GetContestEventsResponse. */
+    interface IGetContestEventsResponse {
+
+        /** GetContestEventsResponse uk */
+        uk?: (string|null);
+
+        /** GetContestEventsResponse fromEventId */
+        fromEventId?: (number|null);
+
+        /** GetContestEventsResponse toEventId */
+        toEventId?: (number|null);
+
+        /** GetContestEventsResponse checkpointEventId */
+        checkpointEventId?: (number|null);
+
+        /** GetContestEventsResponse latestEventId */
+        latestEventId?: (number|null);
+
+        /** GetContestEventsResponse streamRevision */
+        streamRevision?: (number|null);
+
+        /** GetContestEventsResponse hasMore */
+        hasMore?: (boolean|null);
+
+        /** GetContestEventsResponse resetRequired */
+        resetRequired?: (boolean|null);
+
+        /** GetContestEventsResponse resetReason */
+        resetReason?: (string|null);
+
+        /** GetContestEventsResponse events */
+        events?: (rankland_live_contest_client.IClientEvent[]|null);
+    }
+
+    /** Represents a GetContestEventsResponse. */
+    class GetContestEventsResponse implements IGetContestEventsResponse {
+
+        /**
+         * Constructs a new GetContestEventsResponse.
+         * @param [properties] Properties to set
+         */
+        constructor(properties?: rankland_live_contest_client.IGetContestEventsResponse);
+
+        /** GetContestEventsResponse uk. */
+        public uk: string;
+
+        /** GetContestEventsResponse fromEventId. */
+        public fromEventId?: (number|null);
+
+        /** GetContestEventsResponse toEventId. */
+        public toEventId?: (number|null);
+
+        /** GetContestEventsResponse checkpointEventId. */
+        public checkpointEventId: number;
+
+        /** GetContestEventsResponse latestEventId. */
+        public latestEventId: number;
+
+        /** GetContestEventsResponse streamRevision. */
+        public streamRevision: number;
+
+        /** GetContestEventsResponse hasMore. */
+        public hasMore: boolean;
+
+        /** GetContestEventsResponse resetRequired. */
+        public resetRequired: boolean;
+
+        /** GetContestEventsResponse resetReason. */
+        public resetReason: string;
+
+        /** GetContestEventsResponse events. */
+        public events: rankland_live_contest_client.IClientEvent[];
+
+        /** GetContestEventsResponse _fromEventId. */
+        public _fromEventId?: "fromEventId";
+
+        /** GetContestEventsResponse _toEventId. */
+        public _toEventId?: "toEventId";
+
+        /**
+         * Creates a new GetContestEventsResponse instance using the specified properties.
+         * @param [properties] Properties to set
+         * @returns GetContestEventsResponse instance
+         */
+        public static create(properties?: rankland_live_contest_client.IGetContestEventsResponse): rankland_live_contest_client.GetContestEventsResponse;
+
+        /**
+         * Encodes the specified GetContestEventsResponse message. Does not implicitly {@link rankland_live_contest_client.GetContestEventsResponse.verify|verify} messages.
+         * @param message GetContestEventsResponse message or plain object to encode
+         * @param [writer] Writer to encode to
+         * @returns Writer
+         */
+        public static encode(message: rankland_live_contest_client.IGetContestEventsResponse, writer?: $protobuf.Writer): $protobuf.Writer;
+
+        /**
+         * Encodes the specified GetContestEventsResponse message, length delimited. Does not implicitly {@link rankland_live_contest_client.GetContestEventsResponse.verify|verify} messages.
+         * @param message GetContestEventsResponse message or plain object to encode
+         * @param [writer] Writer to encode to
+         * @returns Writer
+         */
+        public static encodeDelimited(message: rankland_live_contest_client.IGetContestEventsResponse, writer?: $protobuf.Writer): $protobuf.Writer;
+
+        /**
+         * Decodes a GetContestEventsResponse message from the specified reader or buffer.
+         * @param reader Reader or buffer to decode from
+         * @param [length] Message length if known beforehand
+         * @returns GetContestEventsResponse
+         * @throws {Error} If the payload is not a reader or valid buffer
+         * @throws {$protobuf.util.ProtocolError} If required fields are missing
+         */
+        public static decode(reader: ($protobuf.Reader|Uint8Array), length?: number): rankland_live_contest_client.GetContestEventsResponse;
+
+        /**
+         * Decodes a GetContestEventsResponse message from the specified reader or buffer, length delimited.
+         * @param reader Reader or buffer to decode from
+         * @returns GetContestEventsResponse
+         * @throws {Error} If the payload is not a reader or valid buffer
+         * @throws {$protobuf.util.ProtocolError} If required fields are missing
+         */
+        public static decodeDelimited(reader: ($protobuf.Reader|Uint8Array)): rankland_live_contest_client.GetContestEventsResponse;
+
+        /**
+         * Verifies a GetContestEventsResponse message.
+         * @param message Plain object to verify
+         * @returns `null` if valid, otherwise the reason why it is not
+         */
+        public static verify(message: { [k: string]: any }): (string|null);
+
+        /**
+         * Creates a GetContestEventsResponse message from a plain object. Also converts values to their respective internal types.
+         * @param object Plain object
+         * @returns GetContestEventsResponse
+         */
+        public static fromObject(object: { [k: string]: any }): rankland_live_contest_client.GetContestEventsResponse;
+
+        /**
+         * Creates a plain object from a GetContestEventsResponse message. Also converts values to other types if specified.
+         * @param message GetContestEventsResponse
+         * @param [options] Conversion options
+         * @returns Plain object
+         */
+        public static toObject(message: rankland_live_contest_client.GetContestEventsResponse, options?: $protobuf.IConversionOptions): { [k: string]: any };
+
+        /**
+         * Converts this GetContestEventsResponse to JSON.
          * @returns JSON object
          */
         public toJSON(): { [k: string]: any };

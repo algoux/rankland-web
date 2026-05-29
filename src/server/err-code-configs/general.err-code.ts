@@ -8,8 +8,8 @@ registerErrCodeConfigs({
   [ErrCode.Unauthorized]: '未授权的操作',
   [ErrCode.InvalidAuthInfo]: '未能授权，因为提供的信息错误',
 
-  // LiveContest
-  [ErrCode.LiveContestExisted]: '该比赛已存在',
-  [ErrCode.LiveContestNotFound]: '该比赛未找到',
-  [ErrCode.LiveContestMemberNotFound]: '该比赛成员未找到',
+  // Contest
+  [ErrCode.ContestExisted]: '该比赛已存在',
+  [ErrCode.ContestNotFound]: '该比赛未找到',
+  [ErrCode.ContestUserNotFound]: '该比赛用户未找到',
 });

@@ -6,6 +6,7 @@
 
 import { AllowedRequestMethod, IBwcxApiRequestAdaptorArgs, AbstractResponseParser } from 'bwcx-api-client';
 import { configure as configureUrlcat } from 'urlcat-fork';
+import { CreateContestReqDTO, CreateContestRespDTO, UpdateContestReqDTO, ResetContestEventsReqDTO, AppendContestEventsReqDTO, AppendContestEventsRespDTO, GetContestEventsReqDTO, GetContestEventsRespDTO, GetContestStreamStateReqDTO, GetContestStreamStateRespDTO, ReleaseContestProducerReqDTO, GetContestReqDTO, GetContestRespDTO, GetPublicContestReqDTO, GetPublicContestRespDTO, GetPublicContestUsersReqDTO, GetPublicContestUsersRespDTO, GetPublicContestUserReqDTO, GetPublicContestUserRespDTO, GetContestUsersReqDTO, GetContestUsersRespDTO, GetContestUserReqDTO, GetContestUserRespDTO, UpdateContestUserReqDTO } from '../modules/contest/contest.dto';
 import { DemoGetReqDTO, DemoGetRespDTO } from '../modules/demo/demo.dto';
 
 const urlcat = configureUrlcat({ arrayFormat: 'repeat' });
@@ -23,6 +24,160 @@ export class ApiClient<T = undefined> {
   }
 
   /**
+   * 创建实时比赛
+   *
+   * @param {CreateContestReqDTO} req The request data (compatible with ReqDTO).
+   * @param {T} opts Extra request options.
+   * @returns {CreateContestRespDTO} The response data (RespDTO).
+   */
+  public async createContest(req: CreateContestReqDTO, opts?: T): Promise<CreateContestRespDTO> {
+    return this._r(this._rArgs.a(req, opts)).then((resp) => this._rp.pat(CreateContestRespDTO, resp));
+  }
+
+  /**
+   * 更新实时比赛
+   *
+   * @param {UpdateContestReqDTO} req The request data (compatible with ReqDTO).
+   * @param {T} opts Extra request options.
+   * @returns {null} The response data (RespDTO).
+   */
+  public async updateContest(req: UpdateContestReqDTO, opts?: T): Promise<null> {
+    return this._r(this._rArgs.b(req, opts)).then((resp) => this._rp.pat(null, resp));
+  }
+
+  /**
+   * 重置实时比赛事件流
+   *
+   * @param {ResetContestEventsReqDTO} req The request data (compatible with ReqDTO).
+   * @param {T} opts Extra request options.
+   * @returns {null} The response data (RespDTO).
+   */
+  public async resetContestEvents(req: ResetContestEventsReqDTO, opts?: T): Promise<null> {
+    return this._r(this._rArgs.c(req, opts)).then((resp) => this._rp.pat(null, resp));
+  }
+
+  /**
+   * 追加实时比赛事件
+   *
+   * @param {AppendContestEventsReqDTO} req The request data (compatible with ReqDTO).
+   * @param {T} opts Extra request options.
+   * @returns {AppendContestEventsRespDTO} The response data (RespDTO).
+   */
+  public async appendContestEvents(req: AppendContestEventsReqDTO, opts?: T): Promise<AppendContestEventsRespDTO> {
+    return this._r(this._rArgs.d(req, opts)).then((resp) => this._rp.pat(AppendContestEventsRespDTO, resp));
+  }
+
+  /**
+   * 查询实时比赛事件
+   *
+   * @param {GetContestEventsReqDTO} req The request data (compatible with ReqDTO).
+   * @param {T} opts Extra request options.
+   * @returns {GetContestEventsRespDTO} The response data (RespDTO).
+   */
+  public async getContestEvents(req: GetContestEventsReqDTO, opts?: T): Promise<GetContestEventsRespDTO> {
+    return this._r(this._rArgs.e(req, opts)).then((resp) => this._rp.pat(GetContestEventsRespDTO, resp));
+  }
+
+  /**
+   * 查询实时比赛事件流状态
+   *
+   * @param {GetContestStreamStateReqDTO} req The request data (compatible with ReqDTO).
+   * @param {T} opts Extra request options.
+   * @returns {GetContestStreamStateRespDTO} The response data (RespDTO).
+   */
+  public async getContestStreamState(req: GetContestStreamStateReqDTO, opts?: T): Promise<GetContestStreamStateRespDTO> {
+    return this._r(this._rArgs.f(req, opts)).then((resp) => this._rp.pat(GetContestStreamStateRespDTO, resp));
+  }
+
+  /**
+   * 释放实时比赛生产者锁
+   *
+   * @param {ReleaseContestProducerReqDTO} req The request data (compatible with ReqDTO).
+   * @param {T} opts Extra request options.
+   * @returns {GetContestStreamStateRespDTO} The response data (RespDTO).
+   */
+  public async releaseContestProducer(req: ReleaseContestProducerReqDTO, opts?: T): Promise<GetContestStreamStateRespDTO> {
+    return this._r(this._rArgs.g(req, opts)).then((resp) => this._rp.pat(GetContestStreamStateRespDTO, resp));
+  }
+
+  /**
+   * 查询实时比赛
+   *
+   * @param {GetContestReqDTO} req The request data (compatible with ReqDTO).
+   * @param {T} opts Extra request options.
+   * @returns {GetContestRespDTO} The response data (RespDTO).
+   */
+  public async getContest(req: GetContestReqDTO, opts?: T): Promise<GetContestRespDTO> {
+    return this._r(this._rArgs.h(req, opts)).then((resp) => this._rp.pat(GetContestRespDTO, resp));
+  }
+
+  /**
+   * 公开查询实时比赛
+   *
+   * @param {GetPublicContestReqDTO} req The request data (compatible with ReqDTO).
+   * @param {T} opts Extra request options.
+   * @returns {GetPublicContestRespDTO} The response data (RespDTO).
+   */
+  public async getPublicContest(req: GetPublicContestReqDTO, opts?: T): Promise<GetPublicContestRespDTO> {
+    return this._r(this._rArgs.i(req, opts)).then((resp) => this._rp.pat(GetPublicContestRespDTO, resp));
+  }
+
+  /**
+   * 公开查询实时比赛用户
+   *
+   * @param {GetPublicContestUsersReqDTO} req The request data (compatible with ReqDTO).
+   * @param {T} opts Extra request options.
+   * @returns {GetPublicContestUsersRespDTO} The response data (RespDTO).
+   */
+  public async getPublicContestUsers(req: GetPublicContestUsersReqDTO, opts?: T): Promise<GetPublicContestUsersRespDTO> {
+    return this._r(this._rArgs.j(req, opts)).then((resp) => this._rp.pat(GetPublicContestUsersRespDTO, resp));
+  }
+
+  /**
+   * 公开查询实时比赛用户详情
+   *
+   * @param {GetPublicContestUserReqDTO} req The request data (compatible with ReqDTO).
+   * @param {T} opts Extra request options.
+   * @returns {GetPublicContestUserRespDTO} The response data (RespDTO).
+   */
+  public async getPublicContestUser(req: GetPublicContestUserReqDTO, opts?: T): Promise<GetPublicContestUserRespDTO> {
+    return this._r(this._rArgs.k(req, opts)).then((resp) => this._rp.pat(GetPublicContestUserRespDTO, resp));
+  }
+
+  /**
+   * 查询实时比赛用户
+   *
+   * @param {GetContestUsersReqDTO} req The request data (compatible with ReqDTO).
+   * @param {T} opts Extra request options.
+   * @returns {GetContestUsersRespDTO} The response data (RespDTO).
+   */
+  public async getContestUsers(req: GetContestUsersReqDTO, opts?: T): Promise<GetContestUsersRespDTO> {
+    return this._r(this._rArgs.l(req, opts)).then((resp) => this._rp.pat(GetContestUsersRespDTO, resp));
+  }
+
+  /**
+   * 查询实时比赛用户详情
+   *
+   * @param {GetContestUserReqDTO} req The request data (compatible with ReqDTO).
+   * @param {T} opts Extra request options.
+   * @returns {GetContestUserRespDTO} The response data (RespDTO).
+   */
+  public async getContestUser(req: GetContestUserReqDTO, opts?: T): Promise<GetContestUserRespDTO> {
+    return this._r(this._rArgs.m(req, opts)).then((resp) => this._rp.pat(GetContestUserRespDTO, resp));
+  }
+
+  /**
+   * 更新实时比赛用户
+   *
+   * @param {UpdateContestUserReqDTO} req The request data (compatible with ReqDTO).
+   * @param {T} opts Extra request options.
+   * @returns {null} The response data (RespDTO).
+   */
+  public async updateContestUser(req: UpdateContestUserReqDTO, opts?: T): Promise<null> {
+    return this._r(this._rArgs.n(req, opts)).then((resp) => this._rp.pat(null, resp));
+  }
+
+  /**
    * 一个示例接口
    *
    * @param {DemoGetReqDTO} req The request data (compatible with ReqDTO).
@@ -30,11 +185,338 @@ export class ApiClient<T = undefined> {
    * @returns {DemoGetRespDTO} The response data (RespDTO).
    */
   public async demoGet(req: DemoGetReqDTO, opts?: T): Promise<DemoGetRespDTO> {
-    return this._r(this._rArgs.a(req, opts)).then((resp) => this._rp.pat(DemoGetRespDTO, resp));
+    return this._r(this._rArgs.o(req, opts)).then((resp) => this._rp.pat(DemoGetRespDTO, resp));
   }
 
   private _rArgs = {
-    a: (req: DemoGetReqDTO, opts?: any) => {
+    a: (req: CreateContestReqDTO, opts?: any) => {
+      return {
+        method: 'POST' as AllowedRequestMethod,
+        url: this._uf('/api/v2/contests', {
+          param: {},
+          query: {},
+        }),
+        data: {
+          uk: req.uk,
+          name: req.name,
+          contest: req.contest,
+          problems: req.problems,
+          users: req.users,
+          markers: req.markers,
+          series: req.series,
+          sorter: req.sorter,
+          contributors: req.contributors,
+        },
+        extraOpts: opts,
+        metadata: {
+          name: 'createContest',
+          method: 'POST',
+          path: '/api/v2/contests',
+          req: CreateContestReqDTO,
+          resp: CreateContestRespDTO,
+        },
+      };
+    },
+    b: (req: UpdateContestReqDTO, opts?: any) => {
+      return {
+        method: 'POST' as AllowedRequestMethod,
+        url: this._uf('/api/v2/contests/:uk', {
+          param: {
+            uk: req.uk,
+          },
+          query: {},
+        }),
+        data: {
+          name: req.name,
+          contest: req.contest,
+          problems: req.problems,
+          users: req.users,
+          markers: req.markers,
+          series: req.series,
+          sorter: req.sorter,
+          contributors: req.contributors,
+        },
+        extraOpts: opts,
+        metadata: {
+          name: 'updateContest',
+          method: 'POST',
+          path: '/api/v2/contests/:uk',
+          req: UpdateContestReqDTO,
+          resp: null as null,
+        },
+      };
+    },
+    c: (req: ResetContestEventsReqDTO, opts?: any) => {
+      return {
+        method: 'POST' as AllowedRequestMethod,
+        url: this._uf('/api/v2/contests/:uk/events/reset', {
+          param: {
+            uk: req.uk,
+          },
+          query: {},
+        }),
+        data: {},
+        extraOpts: opts,
+        metadata: {
+          name: 'resetContestEvents',
+          method: 'POST',
+          path: '/api/v2/contests/:uk/events/reset',
+          req: ResetContestEventsReqDTO,
+          resp: null as null,
+        },
+      };
+    },
+    d: (req: AppendContestEventsReqDTO, opts?: any) => {
+      return {
+        method: 'POST' as AllowedRequestMethod,
+        url: this._uf('/api/v2/contests/:uk/events', {
+          param: {
+            uk: req.uk,
+          },
+          query: {},
+        }),
+        data: {
+          events: req.events,
+        },
+        extraOpts: opts,
+        metadata: {
+          name: 'appendContestEvents',
+          method: 'POST',
+          path: '/api/v2/contests/:uk/events',
+          req: AppendContestEventsReqDTO,
+          resp: AppendContestEventsRespDTO,
+        },
+      };
+    },
+    e: (req: GetContestEventsReqDTO, opts?: any) => {
+      return {
+        method: 'GET' as AllowedRequestMethod,
+        url: this._uf('/api/v2/contests/:uk/events', {
+          param: {
+            uk: req.uk,
+          },
+          query: {
+            afterEventId: req.afterEventId,
+            limit: req.limit,
+            streamRevision: req.streamRevision,
+            compactProgress: req.compactProgress,
+          },
+        }),
+        data: {},
+        extraOpts: opts,
+        metadata: {
+          name: 'getContestEvents',
+          method: 'GET',
+          path: '/api/v2/contests/:uk/events',
+          req: GetContestEventsReqDTO,
+          resp: GetContestEventsRespDTO,
+        },
+      };
+    },
+    f: (req: GetContestStreamStateReqDTO, opts?: any) => {
+      return {
+        method: 'GET' as AllowedRequestMethod,
+        url: this._uf('/api/v2/contests/:uk/stream', {
+          param: {
+            uk: req.uk,
+          },
+          query: {},
+        }),
+        data: {},
+        extraOpts: opts,
+        metadata: {
+          name: 'getContestStreamState',
+          method: 'GET',
+          path: '/api/v2/contests/:uk/stream',
+          req: GetContestStreamStateReqDTO,
+          resp: GetContestStreamStateRespDTO,
+        },
+      };
+    },
+    g: (req: ReleaseContestProducerReqDTO, opts?: any) => {
+      return {
+        method: 'POST' as AllowedRequestMethod,
+        url: this._uf('/api/v2/contests/:uk/producer/release', {
+          param: {
+            uk: req.uk,
+          },
+          query: {},
+        }),
+        data: {},
+        extraOpts: opts,
+        metadata: {
+          name: 'releaseContestProducer',
+          method: 'POST',
+          path: '/api/v2/contests/:uk/producer/release',
+          req: ReleaseContestProducerReqDTO,
+          resp: GetContestStreamStateRespDTO,
+        },
+      };
+    },
+    h: (req: GetContestReqDTO, opts?: any) => {
+      return {
+        method: 'GET' as AllowedRequestMethod,
+        url: this._uf('/api/v2/contests/:uk', {
+          param: {
+            uk: req.uk,
+          },
+          query: {},
+        }),
+        data: {},
+        extraOpts: opts,
+        metadata: {
+          name: 'getContest',
+          method: 'GET',
+          path: '/api/v2/contests/:uk',
+          req: GetContestReqDTO,
+          resp: GetContestRespDTO,
+        },
+      };
+    },
+    i: (req: GetPublicContestReqDTO, opts?: any) => {
+      return {
+        method: 'GET' as AllowedRequestMethod,
+        url: this._uf('/api/v2/public/contests/:uk', {
+          param: {
+            uk: req.uk,
+          },
+          query: {},
+        }),
+        data: {},
+        extraOpts: opts,
+        metadata: {
+          name: 'getPublicContest',
+          method: 'GET',
+          path: '/api/v2/public/contests/:uk',
+          req: GetPublicContestReqDTO,
+          resp: GetPublicContestRespDTO,
+        },
+      };
+    },
+    j: (req: GetPublicContestUsersReqDTO, opts?: any) => {
+      return {
+        method: 'GET' as AllowedRequestMethod,
+        url: this._uf('/api/v2/public/contests/:uk/users', {
+          param: {
+            uk: req.uk,
+          },
+          query: {
+            userId: req.userId,
+            name: req.name,
+            organization: req.organization,
+            location: req.location,
+            markerId: req.markerId,
+            official: req.official,
+            teamMemberName: req.teamMemberName,
+            banned: req.banned,
+          },
+        }),
+        data: {},
+        extraOpts: opts,
+        metadata: {
+          name: 'getPublicContestUsers',
+          method: 'GET',
+          path: '/api/v2/public/contests/:uk/users',
+          req: GetPublicContestUsersReqDTO,
+          resp: GetPublicContestUsersRespDTO,
+        },
+      };
+    },
+    k: (req: GetPublicContestUserReqDTO, opts?: any) => {
+      return {
+        method: 'GET' as AllowedRequestMethod,
+        url: this._uf('/api/v2/public/contests/:uk/users/:userId', {
+          param: {
+            uk: req.uk,
+            userId: req.userId,
+          },
+          query: {},
+        }),
+        data: {},
+        extraOpts: opts,
+        metadata: {
+          name: 'getPublicContestUser',
+          method: 'GET',
+          path: '/api/v2/public/contests/:uk/users/:userId',
+          req: GetPublicContestUserReqDTO,
+          resp: GetPublicContestUserRespDTO,
+        },
+      };
+    },
+    l: (req: GetContestUsersReqDTO, opts?: any) => {
+      return {
+        method: 'GET' as AllowedRequestMethod,
+        url: this._uf('/api/v2/contests/:uk/users', {
+          param: {
+            uk: req.uk,
+          },
+          query: {},
+        }),
+        data: {},
+        extraOpts: opts,
+        metadata: {
+          name: 'getContestUsers',
+          method: 'GET',
+          path: '/api/v2/contests/:uk/users',
+          req: GetContestUsersReqDTO,
+          resp: GetContestUsersRespDTO,
+        },
+      };
+    },
+    m: (req: GetContestUserReqDTO, opts?: any) => {
+      return {
+        method: 'GET' as AllowedRequestMethod,
+        url: this._uf('/api/v2/contests/:uk/users/:userId', {
+          param: {
+            uk: req.uk,
+            userId: req.userId,
+          },
+          query: {},
+        }),
+        data: {},
+        extraOpts: opts,
+        metadata: {
+          name: 'getContestUser',
+          method: 'GET',
+          path: '/api/v2/contests/:uk/users/:userId',
+          req: GetContestUserReqDTO,
+          resp: GetContestUserRespDTO,
+        },
+      };
+    },
+    n: (req: UpdateContestUserReqDTO, opts?: any) => {
+      return {
+        method: 'POST' as AllowedRequestMethod,
+        url: this._uf('/api/v2/contests/:uk/users/:userId', {
+          param: {
+            uk: req.uk,
+            userId: req.userId,
+          },
+          query: {},
+        }),
+        data: {
+          name: req.name,
+          official: req.official,
+          avatar: req.avatar,
+          photo: req.photo,
+          organization: req.organization,
+          location: req.location,
+          teamMembers: req.teamMembers,
+          markers: req.markers,
+          banned: req.banned,
+          broadcasterToken: req.broadcasterToken,
+        },
+        extraOpts: opts,
+        metadata: {
+          name: 'updateContestUser',
+          method: 'POST',
+          path: '/api/v2/contests/:uk/users/:userId',
+          req: UpdateContestUserReqDTO,
+          resp: null as null,
+        },
+      };
+    },
+    o: (req: DemoGetReqDTO, opts?: any) => {
       return {
         method: 'GET' as AllowedRequestMethod,
         url: this._uf('/api/demoGet/:id', {

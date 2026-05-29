@@ -1,4 +1,4 @@
-import { FromBody, FromQuery } from 'bwcx-common';
+import { FromBody, FromParam, FromQuery } from 'bwcx-common';
 import { Transform, Type } from 'class-transformer';
 import {
   ArrayMaxSize,
@@ -182,12 +182,12 @@ export class MarkerDTO {
 
 // #endregion Nested DTOs
 
-export class CreateLiveContestReqDTO {
+export class CreateContestReqDTO {
   @FromBody()
   @IsString()
   @IsNotEmpty()
   @Length(3, 32)
-  public alias: string;
+  public uk: string;
 
   @FromBody()
   @IsString()
@@ -210,7 +210,7 @@ export class CreateLiveContestReqDTO {
   @IsArray()
   @ValidateNested({ each: true })
   @Type(() => UserDTO)
-  public members: UserDTO[];
+  public users: UserDTO[];
 
   @FromBody()
   @IsArray()
@@ -235,15 +235,15 @@ export class CreateLiveContestReqDTO {
   public contributors?: srk.Contributor[];
 }
 
-export class CreateLiveContestRespDTO {
+export class CreateContestRespDTO {
   public _id: string;
 }
 
-export class UpdateLiveContestReqDTO {
-  @FromBody()
+export class UpdateContestReqDTO {
+  @FromParam()
   @IsString()
   @IsNotEmpty()
-  public alias: string;
+  public uk: string;
 
   @FromBody()
   @IsOptional()
@@ -270,7 +270,7 @@ export class UpdateLiveContestReqDTO {
   @IsArray()
   @ValidateNested({ each: true })
   @Type(() => UserDTO)
-  public members?: UserDTO[];
+  public users?: UserDTO[];
 
   @FromBody()
   @IsOptional()
@@ -297,58 +297,148 @@ export class UpdateLiveContestReqDTO {
   public contributors?: srk.Contributor[];
 }
 
-export class DropLiveContestEventsReqDTO {
+export class ResetContestEventsReqDTO {
+  @FromParam()
+  @IsString()
+  @IsNotEmpty()
+  public uk: string;
+}
+
+export class AppendContestEventsReqDTO {
+  @FromParam()
+  @IsString()
+  @IsNotEmpty()
+  public uk: string;
+
   @FromBody()
-  @IsString()
-  @IsNotEmpty()
-  public alias: string;
+  @IsArray()
+  @ArrayMinSize(1)
+  public events: any[];
 }
 
-export class GetLiveContestReqDTO {
+export class AppendContestEventsRespDTO {
+  public acceptedEventIds: number[];
+  public duplicateEventIds: number[];
+  public lastEventId: number;
+  public expectedNextEventId: number;
+  public streamRevision: number;
+}
+
+export class GetContestEventsReqDTO {
+  @FromParam()
+  @IsString()
+  @IsNotEmpty()
+  public uk: string;
+
   @FromQuery()
-  @IsString()
-  @IsNotEmpty()
-  public alias: string;
+  @IsOptional()
+  @Type(() => Number)
+  public afterEventId?: number;
+
+  @FromQuery()
+  @IsOptional()
+  @Type(() => Number)
+  public limit?: number;
+
+  @FromQuery()
+  @IsOptional()
+  @Type(() => Number)
+  public streamRevision?: number;
+
+  @FromQuery()
+  @IsOptional()
+  @Type(() => String)
+  @Transform(({ value }) => (value === 'false' ? false : value === 'true' ? true : undefined))
+  public compactProgress?: boolean;
 }
 
-export class GetLiveContestRespDTO {
+export class GetContestEventsRespDTO {
+  public uk: string;
+  public fromEventId: number | null;
+  public toEventId: number | null;
+  public checkpointEventId: number;
+  public latestEventId: number;
+  public streamRevision: number;
+  public hasMore: boolean;
+  public events: any[];
+  public resetRequired: boolean;
+  public resetReason?: string;
+}
+
+export class GetContestStreamStateReqDTO {
+  @FromParam()
+  @IsString()
+  @IsNotEmpty()
+  public uk: string;
+}
+
+export class GetContestStreamStateRespDTO {
+  public contestId: string;
+  public uk: string;
+  public lastEventId: number;
+  public streamRevision: number;
+  public producerId?: string | null;
+}
+
+export class ReleaseContestProducerReqDTO {
+  @FromParam()
+  @IsString()
+  @IsNotEmpty()
+  public uk: string;
+}
+
+export class RawContestEventsReqDTO {
+  @FromParam()
+  @IsString()
+  @IsNotEmpty()
+  public uk: string;
+}
+
+export class GetContestReqDTO {
+  @FromParam()
+  @IsString()
+  @IsNotEmpty()
+  public uk: string;
+}
+
+export class GetContestRespDTO {
   public _id: string;
-  public alias: string;
+  public uk: string;
   public name: string;
   public contest: ContestDTO;
   public problems: ProblemDTO[];
-  public members: AdminUserDTO[];
+  public users: AdminUserDTO[];
   public markers: srk.Marker[];
   public series: srk.RankSeries[];
   public sorter?: srk.Sorter;
   public contributors?: string[];
 }
 
-export class GetPublicLiveContestReqDTO {
-  @FromQuery()
+export class GetPublicContestReqDTO {
+  @FromParam()
   @IsString()
   @IsNotEmpty()
-  public alias: string;
+  public uk: string;
 }
 
-export class GetPublicLiveContestRespDTO {
+export class GetPublicContestRespDTO {
   public _id: string;
-  public alias: string;
+  public uk: string;
   public name: string;
   public contest: ContestDTO;
   public problems: ProblemDTO[];
-  public members: UserDTO[];
+  public users: UserDTO[];
   public markers: srk.Marker[];
   public series: srk.RankSeries[];
   public sorter?: srk.Sorter;
   public contributors?: string[];
 }
 
-export class GetPublicContestMembersReqDTO {
-  @FromQuery()
+export class GetPublicContestUsersReqDTO {
+  @FromParam()
   @IsString()
   @IsNotEmpty()
-  public alias: string;
+  public uk: string;
 
   @FromQuery()
   @IsString()
@@ -393,23 +483,23 @@ export class GetPublicContestMembersReqDTO {
   public banned?: boolean;
 }
 
-export class GetPublicContestMembersRespDTO {
-  public members: srk.User[];
+export class GetPublicContestUsersRespDTO {
+  public users: srk.User[];
 }
 
-export class GetPublicContestMemberReqDTO {
-  @FromQuery()
+export class GetPublicContestUserReqDTO {
+  @FromParam()
   @IsString()
   @IsNotEmpty()
-  public alias: string;
+  public uk: string;
 
-  @FromQuery()
+  @FromParam()
   @IsString()
   @IsNotEmpty()
   public userId: string;
 }
 
-export class GetPublicContestMemberRespDTO implements srk.User {
+export class GetPublicContestUserRespDTO implements srk.User {
   public id: string;
   public name: srk.Text;
   public official?: boolean;
@@ -423,15 +513,15 @@ export class GetPublicContestMemberRespDTO implements srk.User {
   public banned?: boolean;
 }
 
-export class GetContestMembersReqDTO {
-  @FromQuery()
+export class GetContestUsersReqDTO {
+  @FromParam()
   @IsString()
   @IsNotEmpty()
-  public alias: string;
+  public uk: string;
 }
 
-export class GetContestMembersRespDTO {
-  public members: Array<
+export class GetContestUsersRespDTO {
+  public users: Array<
     srk.User & {
       banned: boolean;
       broadcasterToken?: string;
@@ -439,19 +529,19 @@ export class GetContestMembersRespDTO {
   >;
 }
 
-export class GetContestMemberReqDTO {
-  @FromQuery()
+export class GetContestUserReqDTO {
+  @FromParam()
   @IsString()
   @IsNotEmpty()
-  public alias: string;
+  public uk: string;
 
-  @FromQuery()
+  @FromParam()
   @IsString()
   @IsNotEmpty()
   public userId: string;
 }
 
-export class GetContestMemberRespDTO {
+export class GetContestUserRespDTO {
   public id: string;
   public name: srk.Text;
   public official?: boolean;
@@ -465,13 +555,13 @@ export class GetContestMemberRespDTO {
   public broadcasterToken?: string;
 }
 
-export class UpdateContestMemberReqDTO {
-  @FromBody()
+export class UpdateContestUserReqDTO {
+  @FromParam()
   @IsString()
   @IsNotEmpty()
-  public alias: string;
+  public uk: string;
 
-  @FromBody()
+  @FromParam()
   @IsString()
   @IsNotEmpty()
   public userId: string;

@@ -1,4 +1,5 @@
 /* eslint-disable @typescript-eslint/no-require-imports */
+import 'reflect-metadata';
 
 const isProd = process.env.NODE_ENV === 'production';
 const moduleAlias = require('module-alias');
@@ -23,8 +24,8 @@ import DefaultResponseHandler from '@server/response-handlers/default.response-h
 import { IPageRenderer } from './lib/page-renderer.interface';
 import { BwcxClientVueClientRoutesMapId } from 'bwcx-client-vue/server';
 import { clientRoutesMap } from '@common/router/client-routes';
-import MongoClient from './lib/mongo-client';
-import SocketIOServer from './modules/socket-io/socket-io';
+import TypeOrmClient from './database/typeorm-client';
+import ContestEventMiddleware from './modules/contest/contest-event.middleware';
 
 export default class OurApp extends App {
   protected baseDir = path.join(__dirname, '..');
@@ -32,6 +33,9 @@ export default class OurApp extends App {
   protected scanGlobs = [
     './server/**/*.(j|t)s',
     '!./server/**/*.d.ts',
+    '!./server/**/__tests__/**',
+    '!./server/**/*.test.(j|t)s',
+    '!./server/**/*.spec.(j|t)s',
     './common/**/*.(j|t)s',
     '!./common/**/*.d.ts',
     '!./common/api/**',
@@ -87,6 +91,13 @@ export default class OurApp extends App {
         }),
       ),
     );
+
+    const contestEventMiddleware = getDependency<ContestEventMiddleware>(
+      ContestEventMiddleware,
+      this.container,
+    );
+    this.instance.use(contestEventMiddleware.getMiddleware());
+
     // SSR
     this.pageRenderer = getDependency<IPageRenderer>(IPageRenderer, this.container);
     const renderMiddleware = await this.pageRenderer.init?.();
@@ -104,8 +115,8 @@ export default class OurApp extends App {
       }
     });
 
-    const mongoClient = getDependency<MongoClient>(MongoClient, this.container);
-    await mongoClient.init();
+    const typeOrmClient = getDependency<TypeOrmClient>(TypeOrmClient, this.container);
+    await typeOrmClient.init();
   }
 
   protected async afterStart() {
@@ -132,10 +143,8 @@ export default class OurApp extends App {
 const app = new OurApp();
 app.scan();
 app.bootstrap().then(async () => {
-  const socketIOServer = getDependency<SocketIOServer>(SocketIOServer, app.container);
   await app.startManually(async () => {
     const httpServer = http.createServer(app.instance.callback());
-    socketIOServer.init(httpServer);
     const listenPromise = new Promise((resolve, _reject) => {
       httpServer.listen(app.port, app.hostname, () => {
         resolve(true);
