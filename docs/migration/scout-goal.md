@@ -1,30 +1,37 @@
-# Codex Scout Goal — RankLand 迁移复刻 TODO 清单侦察
+# Codex Scout/Review Goal — RankLand 迁移复刻剩余风险复核
 
-Created: 2026-05-31 11:59:37 +0800
+Updated: 2026-05-31 18:56:47 +0800
 Controller: Echo / Hermes
 
 ## Mission
 
-Run the **first goal only** for RankLand migration restoration: produce a comprehensive, evidence-backed TODO/backlog for remaining migration-parity work between:
+Run a controlled **Scout/Review pass**, not a Builder pass, for the remaining non-ready migration backlog items after Batch `BLD-2026-05-31-02`.
+
+Current repo:
 
 - old reference frontend: `/Users/cooper/Projects/RankLand/rankland-fe`
 - new migration target: `/Users/cooper/Projects/RankLand/rankland-web`
-- current branch: `migration/live-page-foundation`
+- branch: `migration/live-page-foundation`
+- canonical backlog: `docs/migration/parity-backlog.md`
 
-This is a **Scout / audit goal**, not a build goal.
+Current situation:
 
-Your output will be used by a later, separate Builder goal. Therefore the most important deliverable is a clear, executable TODO list, not code changes.
+- `ready = 0`
+- `PAR-006A/B/C` are done
+- the next step is to turn remaining uncertainty into either `done`, `wontfix`, `blocked`, or concrete child `ready` tickets
+
+This goal must preserve Cooper/Echo's control loop: Scout discovers and structures; Builder fixes later.
+
+## Batch SRV-2026-05-31-01
+
+Review only these backlog items:
+
+1. `PAR-001 — SRK production fixture lower-level table pixel audit`
+2. `PAR-003 — Playground real Monaco editing E2E gap`
 
 ## Hard boundaries
 
 You MUST NOT fix product code in this goal.
-
-Allowed changes:
-
-- `docs/migration/parity-backlog.md`
-- `docs/migration/scout-report-2026-05-31.md`
-- `docs/migration/evidence/*.md`
-- optionally this file only if you need to append a scout run note
 
 Forbidden changes:
 
@@ -34,128 +41,151 @@ Forbidden changes:
 - generated router outputs
 - any production implementation file
 
-If you discover a bug/difference, record it. Do not fix it.
+Allowed committed changes:
 
-## Primary deliverables
+- `docs/migration/scout-goal.md`
+- `docs/migration/parity-backlog.md`
+- `docs/migration/scout-review-report-2026-05-31.md`
+- `docs/migration/evidence/PAR-001-*.md`
+- `docs/migration/evidence/PAR-003-*.md`
+- new `docs/migration/evidence/PAR-001A-*.md`, `PAR-001B-*.md`, `PAR-003A-*.md`, etc. if concrete child items are discovered
+- `docs/migration/status.md` only if this review changes concrete migration status
 
-Create or update these files:
+Allowed uncommitted/generated evidence artifacts:
 
-1. `docs/migration/parity-backlog.md`
-   - the canonical TODO list for later Builder goal
-   - include every actionable remaining parity item you can find with concrete evidence
+- screenshots or logs under `test-results/scout-review-2026-05-31/`
 
-2. `docs/migration/scout-report-2026-05-31.md`
-   - short report summarizing scope audited, methods used, counts by status/priority/surface, and recommended first Builder batch
+Do not commit generated screenshots unless the repository already tracks comparable artifacts and they are clearly intended to be committed. Prefer linking paths from evidence docs.
 
-3. `docs/migration/evidence/PAR-XXX-*.md`
-   - one evidence note per non-trivial TODO
-   - use stable IDs such as `PAR-001`, `PAR-002`, etc.
+If you need to run local servers, tests, scripts, or Playwright, use them only to inspect current state. Do not modify implementation code or tests.
 
-## Backlog schema
+## PAR-001 review instructions
 
-Each backlog item must use this shape:
+Goal: determine whether SRK lower-level rendering still has concrete old/new parity differences that warrant Builder work.
 
-```md
-### PAR-001 — <short title>
+Review old/new SRK behavior across a small but meaningful fixture/case corpus. Focus on user-visible renderer details such as:
 
-- status: discovered | ready | blocked | done | wontfix
-- priority: P0 | P1 | P2
-- surface: AppShell | Home | Search | Ranklist | Collection | Playground | Live | SRK | SSR | Routing | Analytics | Docs | Other
-- risk: low | medium | high
-- old reference: <file path / route / component / selector / fixture>
-- new target: <file path / route / component / selector / fixture>
-- difference: <specific DOM/class/visual/interaction/API/SSR difference>
-- evidence: <link to docs/migration/evidence/PAR-XXX-*.md or inline snippet>
-- suggested test: <unit/SSR/Playwright/manual check that can verify it>
-- acceptance: <what Builder must make true>
-- notes: <optional>
-```
+- dense tables and many problem columns
+- long participant/team names
+- medal/rank/marker presentation
+- remarks or banners
+- null/unknown statuses
+- frozen/penalty/status edge cases if available
+- modal/detail interactions if already supported by existing fixtures
+
+Use existing project fixtures, existing full-chain tests, docs, screenshots, source comparison, or lightweight Playwright-assisted inspection. Do not invent new product requirements.
+
+Outcome must be one of:
+
+A. No concrete high-confidence lower-level SRK differences found:
+   - mark `PAR-001` as `done`
+   - update its evidence note with audited cases and limits
+
+B. Concrete differences found:
+   - keep `PAR-001` as parent/audit item, or mark it done as an audit if appropriate
+   - create child tickets `PAR-001A`, `PAR-001B`, ...
+   - mark a child as `ready` only when it has exact old/new evidence, route/fixture, selectors or DOM/CSS source, suggested verification, and no product/design decision needed
+   - do not fix the child ticket
+
+C. Evidence insufficient or tool/harness limitation blocks the audit:
+   - leave `PAR-001` as `discovered` or mark `blocked` with a specific blocker and next manual step
+
+## PAR-003 review instructions
+
+Goal: decide whether the Playground real Monaco editing E2E gap is actionable, a harness limitation, or a product behavior issue.
+
+Review:
+
+- old `rankland-fe` Playground editing path and expectations
+- new `rankland-web` Playground Monaco integration and preview sync
+- existing E2E hook-based coverage and any documented hang around `editor.setValue()`
+- whether a stable user-like edit path exists in the current harness without changing product/test files
+
+Outcome must be one of:
+
+A. A stable real Monaco editing E2E path is clearly feasible:
+   - create `PAR-003A` as a `ready` test/harness ticket with exact steps, selectors/API, suggested test, and acceptance
+   - do not implement the test
+
+B. The gap is only a current harness limitation with existing product coverage acceptable:
+   - mark `PAR-003` as `wontfix` or `blocked` as appropriate
+   - document the manual check or reason in the evidence file
+
+C. A real product behavior difference is discovered:
+   - create a concrete child `ready` ticket with reproduction and acceptance
+   - do not fix it
+
+## Backlog status rules
 
 `ready` is allowed only if all are true:
 
-- old/new comparison is concrete
+- old/new evidence is concrete
 - reproduction path is clear
 - expected behavior is specific
 - suggested test or acceptance path is executable
 - risk is not high
 - no product/design decision is required
 
-Use `discovered` when evidence is promising but not enough for direct execution. Use `blocked` when human product judgment is needed.
+Use `discovered` for plausible but not yet directly executable work. Use `blocked` when human judgment or external setup is needed. Use `wontfix` only for explicitly accepted gaps or documented harness limitations that should not drive Builder work.
 
-## Audit scope
+Keep status counts at the top of `docs/migration/parity-backlog.md` consistent with the items.
 
-Perform a broad but disciplined pass over the remaining migration surface, biased toward user-visible parity and release-blocking polish:
+## Required deliverables
 
-1. Read existing migration docs first:
-   - `docs/migration/status.md`
-   - `docs/migration/manual-acceptance-checklist.md`
-   - `docs/migration/final-integration-review.md`
-   - `docs/migration/playbook.md`
-   - relevant `docs/superpowers/specs/*migration*` and `docs/superpowers/plans/*migration*`
+Before stopping, update/create:
 
-2. Compare old `rankland-fe` and new `rankland-web` for public routes and major surfaces:
-   - App shell/header/footer/site switch
-   - Home
-   - Search
-   - Ranklist detail / SRK renderer
-   - Collection
-   - Playground
-   - Live
-   - SSR/head/canonical/hydration-sensitive output
-   - route compatibility and analytics/fallbacks where relevant
+1. `docs/migration/scout-review-report-2026-05-31.md`
+   - scope audited
+   - methods used
+   - findings for PAR-001 and PAR-003
+   - status changes
+   - new child tickets, if any
+   - recommended next action: Builder, another Scout, or Cooper/Echo decision
 
-3. Prefer concrete checks:
-   - source-level old/new component comparison
-   - existing tests and snapshots
-   - DOM/class/attribute comparison where possible
-   - documented known caveats from migration status/review files
-   - minimal local inspection commands that do not modify product code
+2. Relevant evidence files:
+   - `docs/migration/evidence/PAR-001-srk-production-fixture-pixel-audit.md`
+   - `docs/migration/evidence/PAR-003-playground-real-editor-e2e-gap.md`
+   - child evidence files if child tickets are created
 
-4. Record already-done evidence only briefly. Do not duplicate the huge final review. Focus on actionable remaining TODOs and confidence gaps.
+3. `docs/migration/parity-backlog.md`
+   - status/count updates
+   - child tickets if created
+   - no stale recommendation that says to start already-completed PAR-006 work
 
-## What counts as a TODO
+## Verification and finalization
 
-Include an item if it is one of:
+Before final response:
 
-- a concrete old/new parity difference
-- an unverified but important parity risk with a clear verification plan
-- a release acceptance gap
-- a missing regression test for an important restored behavior
-- a lower-level SRK/table/detail polish gap mentioned by existing docs
-
-Do NOT include vague items like “make it look better” unless you can attach exact evidence and acceptance.
-
-## Execution rules
-
-- Do not start the second/Builder goal.
-- Do not fix anything.
-- Do not invent differences without source evidence.
-- If you run tests or scripts, only use them to inspect/verify current state.
-- Keep output compact enough that the next Builder goal can consume it directly.
-- If no concrete remaining issue is found for a surface, mark that surface as `no high-confidence TODO found` in the scout report.
-
-## Finalization
-
-Before stopping:
-
-1. Ensure only allowed docs files changed.
-2. Run `git diff --check`.
-3. If docs are coherent, create one docs-only commit:
+1. Ensure no forbidden files changed:
 
 ```bash
-git add docs/migration/scout-goal.md docs/migration/parity-backlog.md docs/migration/scout-report-2026-05-31.md docs/migration/evidence
-git commit -m "docs: 生成迁移复刻待办清单"
+git status --short
 ```
 
-4. Stop. Do not proceed to Builder execution.
+2. Run:
+
+```bash
+git diff --check
+```
+
+3. If only allowed docs changed and they are coherent, create one docs-only commit:
+
+```bash
+git add docs/migration/scout-goal.md docs/migration/parity-backlog.md docs/migration/scout-review-report-2026-05-31.md docs/migration/evidence docs/migration/status.md
+git commit -m "docs: 复核迁移复刻剩余风险"
+```
+
+If there are no substantive docs changes beyond this goal file, explain why and stop without inventing a commit.
 
 ## Final response shape inside Codex
 
-End with a short summary containing:
+End with a concise Chinese status panel:
 
-- backlog path
-- report path
-- total TODO count by status and priority
-- recommended first Builder batch
-- whether docs-only commit was created
-- any blocker that requires Cooper/Echo decision
+- reviewed items
+- final status of `PAR-001` and `PAR-003`
+- any new child tickets and their status
+- whether a docs-only commit was created
+- verification run and result
+- current worktree state
+- recommended next action: Builder / another Scout / Cooper-Echo decision
+- blockers requiring Cooper/Echo decision
