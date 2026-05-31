@@ -9,14 +9,16 @@ This backlog records remaining migration-parity work with evidence. It intention
 
 | status | count |
 | --- | ---: |
-| discovered | 3 |
+| ready | 2 |
+| discovered | 2 |
+| done | 2 |
 | blocked | 2 |
 | wontfix | 1 |
 
 | priority | count |
 | --- | ---: |
 | P0 | 0 |
-| P1 | 3 |
+| P1 | 6 |
 | P2 | 3 |
 
 ## Recommended First Builder Batch
@@ -99,7 +101,7 @@ This backlog records remaining migration-parity work with evidence. It intention
 
 ### PAR-006 — Final manual old/new route visual review
 
-- status: discovered
+- status: done
 - priority: P1
 - surface: Other
 - risk: medium
@@ -109,4 +111,46 @@ This backlog records remaining migration-parity work with evidence. It intention
 - evidence: `docs/migration/evidence/PAR-006-final-manual-route-visual-review.md`
 - suggested test: manual or Playwright-assisted old/new screenshot review at desktop `1440x900` and mobile `390x844`, plus focused DOM inspection for any observed mismatch.
 - acceptance: every audited surface is either marked `no high-confidence TODO found` or produces a child `ready` PAR with concrete old/new selectors, reproduction path, screenshots, suggested test, and acceptance criteria.
-- notes: this is the recommended first Builder-adjacent batch because it decides whether there are any real route-polish fixes left.
+- notes: Builder review on 2026-05-31 captured old/new screenshots for `/`, `/search`, `/ranklist/test-key?focus=yes`, `/collection/official?rankId=test-key`, `/playground`, and `/live/live-test-key?token=t0` at `1440x900` and `390x844`. It promoted `PAR-006B` and `PAR-006C` as ready follow-up fixes and completed `PAR-006A`.
+
+### PAR-006A — App shell logo asset parity
+
+- status: done
+- priority: P1
+- surface: AppShell
+- risk: low
+- old reference: `/Users/cooper/Projects/RankLand/rankland-fe/src/assets/logo.png`
+- new target: `src/client/assets/logo.png`, `tests/unit/app-logo-asset.spec.ts`
+- difference: old React renders the legacy `RL` RankLand logo asset, while the migrated Vue app rendered the newer orange algoUX-style mark in the shared header.
+- evidence: `docs/migration/evidence/PAR-006A-app-logo-asset-parity.md`
+- suggested test: unit baseline asserting `src/client/assets/logo.png` has the legacy old React SHA-256 and `128x128` PNG dimensions.
+- acceptance: shared app header image uses the old `RL` RankLand asset while existing header sizing tests continue to enforce the 40px rendered logo image contract.
+- notes: implemented in this Builder window with `tests/unit/app-logo-asset.spec.ts`.
+
+### PAR-006B — Ant Design primary color visual parity
+
+- status: ready
+- priority: P1
+- surface: AppShell / Search / SRK
+- risk: medium
+- old reference: old React Ant Design 4 light primary controls in `/search`, `/ranklist/:id`, `/collection/:id`, and `/live/:id`
+- new target: Ant Design Vue primary/search/radio/switch control styling in `src/client`
+- difference: old React primary controls render orange (`#ff8104` family), while the migrated Vue app still shows Ant Design Vue default blue on visible route controls such as the Search button and active SRK filter buttons.
+- evidence: `docs/migration/evidence/PAR-006B-ant-primary-color-parity.md`
+- suggested test: focused full-chain assertions for `/search` Search button and shared SRK filter controls comparing computed primary background/border/text colors in light mode.
+- acceptance: visible primary controls on reviewed routes use the old orange primary color family without regressing dark-mode documented primary colors or existing layout bounds.
+- notes: ready because the mismatch is concrete and reproducible, but implementation should be scoped carefully because primary styling is shared.
+
+### PAR-006C — Collection category logo size parity
+
+- status: ready
+- priority: P1
+- surface: Collection
+- risk: low
+- old reference: `/Users/cooper/Projects/RankLand/rankland-fe/src/pages/collection/[id].tsx` collection nav menu category icons
+- new target: `src/client/modules/collection/collection.view.vue` and collection nav styles
+- difference: old React collection category icons render as small menu icons; the migrated Vue collection nav displays oversized category logo images that overlap menu text and consume the left rail.
+- evidence: `docs/migration/evidence/PAR-006C-collection-category-logo-size-parity.md`
+- suggested test: focused collection full-chain assertion for category logo bounding boxes and menu title text overlap at desktop and mobile viewports.
+- acceptance: ICPC/CCPC/category logo images render within the old menu icon footprint, menu labels remain readable, and existing collection collapse/open-key/bounds tests stay green.
+- notes: ready, isolated to collection nav visual parity.

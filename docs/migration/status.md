@@ -5,10 +5,10 @@ This file is the quick global dashboard for the RankLand migration. Update it at
 ## Current Focus
 
 - Active branch: `migration/live-page-foundation`
-- Current slice: Collection menu open keys interaction parity coverage
-- Latest slice commit: `test: 覆盖 Collection 菜单展开交互`
-- Last recorded full gate: passed on 2026-05-28 for Collection menu open keys interaction parity coverage; focused coverage verified `/collection/official?rankId=test-key` auto-opens the selected `dir-icpc` submenu, user click can manually close that selected-path submenu, the selected leaf becomes hidden, and the URL remains `/collection/official?rankId=test-key`; because the focused assertion passed immediately, no production code change was needed. Focused collection menu/mobile/bounds verification passed with 3 full-chain tests; full gate used Node `v24.11.1` and pnpm `8.15.9`, `gen:client-router` generated 6 client routes, `test:migration` passed with build, 38 unit files / 158 unit tests, 1 SSR smoke test, 1 shallow Playwright test, and 61 passed / 1 skipped full-chain Playwright tests; `git diff --check` passed.
-- Next recommended focus: route-level product polish
+- Current slice: PAR-006 final visual review / app logo asset parity
+- Latest slice commit: `fix: 还原应用 Logo 资产`
+- Last recorded full gate: passed on 2026-05-31 for PAR-006 final visual review / app logo asset parity; old/new route visual review promoted `PAR-006B` and `PAR-006C` as ready follow-ups, `PAR-006A` replaced the shared app logo with the old React `RL` asset, and app-shell overflow coverage was stabilized to wait for async shell styles. Gate used Node `v24.11.1` and pnpm `8.15.9`; `git diff --check` passed, `gen:client-router` generated 6 client routes, `test:migration` passed with build, 39 unit files / 159 unit tests, 1 SSR smoke test, 1 shallow Playwright test, and 61 passed / 1 skipped full-chain Playwright tests.
+- Next recommended focus: `PAR-006B` Ant Design primary color visual parity, then `PAR-006C` Collection category logo size parity
 
 ## Route Progress
 
