@@ -1,31 +1,42 @@
 # Codex Builder Goal — RankLand 迁移复刻清单执行
 
-Created: 2026-05-31 13:05:56 +0800
+Updated: 2026-05-31 16:01:48 +0800
 Controller: Echo / Hermes
 
 ## Mission
 
-Run the **second goal** for RankLand migration restoration: consume the TODO backlog created by the Scout goal and move the migration toward closure in a controlled, auditable way.
+Run the next controlled **Builder batch** for RankLand migration restoration. Consume only `ready` tickets from the Scout/Builder backlog, implement minimal parity fixes, verify, commit, update migration docs, and stop at the budget/risk boundary.
 
 Primary inputs:
 
 - Backlog: `docs/migration/parity-backlog.md`
-- Scout report: `docs/migration/scout-report-2026-05-31.md`
-- Evidence notes: `docs/migration/evidence/PAR-*.md`
+- Builder report: `docs/migration/builder-report-2026-05-31.md`
+- Evidence notes:
+  - `docs/migration/evidence/PAR-006B-ant-primary-color-parity.md`
+  - `docs/migration/evidence/PAR-006C-collection-category-logo-size-parity.md`
 - Old reference frontend: `/Users/cooper/Projects/RankLand/rankland-fe`
 - New migration target: `/Users/cooper/Projects/RankLand/rankland-web`
 - Current branch: `migration/live-page-foundation`
 
-Important: the Scout backlog currently has no direct `ready` implementation tickets. Therefore this Builder window starts by executing `PAR-006` as a Builder-adjacent verification batch: perform the final old/new route visual review and promote only concrete, reproducible differences into new child `ready` PAR items. If safe child `ready` items are produced, you may implement a small number of them in the same goal window under the limits below.
+## Batch BLD-2026-05-31-02
+
+This batch is intentionally narrow and queue-like.
+
+Allowed ticket queue, in order:
+
+1. `PAR-006B — Ant Design primary color visual parity`
+2. `PAR-006C — Collection category logo size parity`
+
+You must complete and commit `PAR-006B` before starting `PAR-006C`.
 
 ## Autopilot budget
 
 Stop when any one condition is met:
 
-- 120 minutes elapsed
-- 5 tickets/review items completed or updated
-- 20 commits created
-- full gate fails and cannot be fixed with one focused retry
+- 90 minutes elapsed
+- 2 tickets completed
+- 10 commits created
+- a required verification gate fails and cannot be fixed with one focused retry
 - a change would require product/design judgment
 - a fix would touch broad architecture or unrelated surfaces
 - worktree is dirty and you cannot explain/resolve it cleanly
@@ -33,92 +44,90 @@ Stop when any one condition is met:
 
 ## Hard boundaries
 
-Do not touch `PAR-002` (Monaco version), `PAR-004` (mobile old overflow), or `PAR-005` (release/cutover) unless this file is explicitly updated by Echo/Cooper. They are blocked/wontfix decision items.
+Do not implement or modify these items:
 
-Do not do broad redesign or opportunistic refactors. Do not fix issues outside the backlog. If you discover a new issue, record it as a child PAR item first.
+- `PAR-001` except for incidental evidence/status references if directly relevant
+- `PAR-002` — blocked Monaco version decision
+- `PAR-003` — discovered Playground real Monaco E2E gap
+- `PAR-004` — wontfix mobile overflow decision
+- `PAR-005` — blocked release/cutover decision
+
+Do not discover-and-fix opportunistic issues. If a new issue is found, record it in backlog/evidence only and do not fix it in this batch unless Echo/Cooper explicitly authorizes a later batch.
 
 Protect generated router files. Do not hand-edit generated route outputs under `src/client/router` or `src/common/router`.
 
-## Allowed first batch
+## Ticket rules
 
-### Batch BLD-2026-05-31-01
+For each allowed ticket:
 
-1. Execute `PAR-006 — Final manual old/new route visual review`.
-2. Compare old/new public routes:
-   - `/`
-   - `/search`
-   - `/ranklist/:id` using existing deterministic test fixtures/routes where possible
-   - `/collection/:id` or `/collection/official?rankId=test-key` where supported by existing tests
-   - `/playground`
-   - `/live/:id` using existing deterministic test fixture routes where possible
-3. Review both desktop `1440x900` and mobile `390x844` where the project harness supports it.
-4. Prefer existing Playwright/full-chain fixtures and existing screenshots/test helpers over inventing new infrastructure.
-5. If you find a concrete mismatch, create a child backlog item such as `PAR-006A`, `PAR-006B`, etc. with:
-   - status: `ready` if it has exact evidence and does not need product judgment
-   - old/new URL or fixture
-   - selectors/classes/DOM snippets and screenshot path if available
-   - suggested focused regression test
-   - acceptance criteria
-6. If no concrete mismatches are found, mark `PAR-006` done and update its evidence note.
+1. Read its backlog row and evidence file.
+2. Confirm the old reference behavior from old source, existing screenshots, or computed evidence before changing code.
+3. Add or update the smallest feasible regression coverage first.
+4. Implement the minimal parity fix.
+5. Run a focused verification for that ticket.
+6. Update:
+   - `docs/migration/parity-backlog.md`
+   - the relevant `docs/migration/evidence/PAR-006*.md`
+   - `docs/migration/builder-report-2026-05-31.md`
+   - `docs/migration/status.md` only if it already tracks this concrete status
+7. Commit the ticket independently with a Chinese Conventional Commit message.
+8. Continue to the next ticket only if the commit is clean, verification is green, scope stayed narrow, and budget remains.
 
-## Implementation rules for child ready items
+## PAR-006B specific guardrails
 
-Only after the review creates or identifies concrete `ready` items:
+- First locate the old orange primary color source and the new Ant Design Vue primary styling source. Do not choose a color by visual guess alone.
+- Prefer Ant Design Vue theme tokens, CSS variables, or a small global style hook over rewriting individual components.
+- Acceptance: visible light-mode primary controls on reviewed routes use the old RankLand orange primary color family.
+- Existing documented dark-mode primary behavior must remain green.
+- Stop if the fix requires broad component rewrites or a design/product decision.
 
-1. Claim the highest-priority safe `ready` item.
-2. Add or update regression coverage first when feasible.
-3. Implement the minimal parity fix.
-4. Run the closest focused verification.
-5. Commit the item with a Chinese Conventional Commit message.
-6. Update `docs/migration/parity-backlog.md` and the relevant evidence file.
-7. Continue only if the worktree is clean and budget remains.
+Suggested focused coverage:
 
-Do not implement more than 3 child ready items in this window.
+- `/search`: computed color assertions for `.ant-input-search-button.ant-btn-primary`.
+- `/ranklist/test-key?focus=yes`: computed color/border assertions for checked marker filter controls.
+- Optionally reuse the shared SRK assertion on `/collection/official?rankId=test-key` or `/live/live-test-key?token=t0` if the theme hook is global.
 
-## Verification gates
+## PAR-006C specific guardrails
 
-At minimum before final stop:
+- Keep the fix isolated to Collection nav category icon presentation.
+- Do not restructure Collection data loading, routing, or menu state logic.
+- Acceptance: category logos render at the old small menu-icon scale; ICPC/CCPC/category labels remain readable; collapse/open-key/mobile behavior remains unchanged.
+- Stop if the fix requires a Collection menu architecture rewrite.
+
+Suggested focused coverage:
+
+- Extend `tests/e2e/full-chain/collection.spec.ts` or the closest existing collection full-chain helper to assert category logo bounding boxes and no label overlap on desktop and mobile.
+
+## Required final verification gates
+
+For any product-code or test change, before final stop run:
 
 ```bash
-git status --short --branch
 git diff --check
 corepack pnpm run gen:client-router
 corepack pnpm test:migration
 ```
 
-If the work is docs-only review with no production/test changes, you may still run `git diff --check`; run runtime gates only if safe and relevant. If runtime gates are skipped, state why explicitly.
-
-For any product-code or test change, `gen:client-router`, `test:migration`, and `git diff --check` are required before the final checkpoint.
-
-## Documentation updates
-
-Update as appropriate:
-
-- `docs/migration/parity-backlog.md`
-- `docs/migration/evidence/PAR-006-final-manual-route-visual-review.md`
-- new `docs/migration/evidence/PAR-006A-*.md` child evidence notes if mismatches are found
-- `docs/migration/builder-report-2026-05-31.md`
-- `docs/migration/status.md` only if a concrete migration status changes materially
+Also run focused tests while implementing each ticket when practical.
 
 ## Commit policy
 
-Create commits at clean checkpoints:
+Create clean commits at ticket boundaries:
 
-- docs-only review result: `docs: 完成迁移复刻视觉复核`
-- concrete fix: `fix: <中文说明>`
-- test-only coverage: `test: <中文说明>`
+- `fix: 还原 Ant Design 主色视觉表现`
+- `fix: 还原集合分类图标尺寸`
 
-If no implementation is safe because no ready item exists, commit the docs-only review result and stop.
+If you choose a different message, keep it Conventional Commit style and semantically precise.
 
 ## Final response shape inside Codex
 
-End with a concise status panel:
+End with a concise Chinese status panel:
 
-- completed items
-- created/promoted child ready items
-- implemented fixes, if any
+- completed tickets
+- skipped tickets and why
+- implemented fixes
 - verification gates run and results
 - commits created
 - current worktree state
-- recommended next Builder action
+- recommended next action: Builder, Scout/Review, or decision by Cooper/Echo
 - blockers requiring Cooper/Echo decision
