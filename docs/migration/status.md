@@ -5,10 +5,10 @@ This file is the quick global dashboard for the RankLand migration. Update it at
 ## Current Focus
 
 - Active branch: `migration/live-page-foundation`
-- Current slice: SRV-2026-05-31-01 Scout/Review remaining parity risks
-- Latest slice commit: `docs: 复核迁移复刻剩余风险`
-- Last recorded full gate: passed on 2026-05-31 for Batch `BLD-2026-05-31-02`; `PAR-006B` restored Ant Design primary controls to the old React light orange `#ff8104` / dark green `#f6ac06` family, and `PAR-006C` restored Collection category logo rendering to the old `32x32` menu-icon scale. Gate used Node `v24.11.1` and pnpm `8.15.9`; `git diff --check` passed, `gen:client-router` generated 6 client routes, `test:migration` passed with build, 39 unit files / 159 unit tests, 1 SSR smoke test, 1 shallow Playwright test, and 61 passed / 1 skipped full-chain Playwright tests.
-- Next recommended focus: Cooper/Echo decision; no ready Builder implementation item remains in `docs/migration/parity-backlog.md`. `PAR-001` is blocked on an approved production SRK corpus for lower-level pixel audit, and `PAR-003` is blocked on whether to accept hook/unit coverage as `wontfix` or authorize a Monaco harness spike.
+- Current slice: Final hardening / migration readiness checkpoint
+- Latest slice commit: `docs: 记录最终硬化验证`
+- Last recorded full gate: passed on 2026-05-31 for the final hardening checkpoint. Gate used Node `v24.11.1` and pnpm `8.15.9`; `git diff --check` passed, `gen:client-router` generated 6 client routes, and `test:migration` passed with build, 39 unit files / 159 unit tests, 1 SSR smoke test, 1 shallow Playwright test, and 61 passed / 1 skipped full-chain Playwright tests.
+- Next recommended focus: Cooper/Echo decision checkpoint, not automatic Builder. No ready Builder implementation item remains in `docs/migration/parity-backlog.md`; `PAR-001`, `PAR-002`, `PAR-003`, and `PAR-005` remain blocked on corpus/product/harness/release decisions.
 
 ## Route Progress
 
