@@ -35,4 +35,16 @@ Extend `tests/e2e/full-chain/collection.spec.ts` with a focused assertion that:
 
 ## Current Classification
 
-`ready`: concrete, isolated to Collection nav presentation, and suitable for a focused Builder implementation slice.
+`done`: implemented in Batch `BLD-2026-05-31-02`.
+
+## Builder Implementation
+
+- Confirmed the old React source uses `.srk-collection-menu-icon img` with Tailwind `w-8 h-8`, i.e. `32x32` rendered category logos.
+- Root cause in the migrated Vue page: the existing scoped `.srk-collection-menu-icon img` rule did not pierce Ant Design Vue Menu icon slot DOM, so the `192x192` source images rendered at natural size.
+- Fixed `src/client/modules/collection/collection.view.vue` by applying the existing icon container and image rules through `:deep`, without changing Collection data loading, routing, menu item construction, open-key behavior, or mobile collapse state.
+- Extended `tests/e2e/full-chain/collection.spec.ts` to assert ICPC/CCPC category image bounding boxes, icon footprint, label visibility, and icon/label non-overlap on desktop and mobile-expanded navigation.
+
+## Verification
+
+- RED: `corepack pnpm exec playwright test -c playwright.full-chain.config.ts tests/e2e/full-chain/collection.spec.ts -g "renders the legacy Ant Design collection menu|uses the legacy mobile nav collapse behavior"` failed before the fix with `192x192` rendered category images.
+- GREEN: the same focused command passed after the fix: 2 passed.

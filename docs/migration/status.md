@@ -5,10 +5,10 @@ This file is the quick global dashboard for the RankLand migration. Update it at
 ## Current Focus
 
 - Active branch: `migration/live-page-foundation`
-- Current slice: PAR-006B Ant Design primary color visual parity
-- Latest slice commit: `fix: 还原 Ant Design 主色视觉表现`
-- Last recorded full gate: passed on 2026-05-31 for PAR-006 final visual review / app logo asset parity; old/new route visual review promoted `PAR-006B` and `PAR-006C` as ready follow-ups, `PAR-006A` replaced the shared app logo with the old React `RL` asset, and app-shell overflow coverage was stabilized to wait for async shell styles. Gate used Node `v24.11.1` and pnpm `8.15.9`; `git diff --check` passed, `gen:client-router` generated 6 client routes, `test:migration` passed with build, 39 unit files / 159 unit tests, 1 SSR smoke test, 1 shallow Playwright test, and 61 passed / 1 skipped full-chain Playwright tests.
-- Next recommended focus: `PAR-006C` Collection category logo size parity
+- Current slice: PAR-006C Collection category logo size parity
+- Latest slice commit: `fix: 还原集合分类图标尺寸`
+- Last recorded full gate: passed on 2026-05-31 for Batch `BLD-2026-05-31-02`; `PAR-006B` restored Ant Design primary controls to the old React light orange `#ff8104` / dark green `#f6ac06` family, and `PAR-006C` restored Collection category logo rendering to the old `32x32` menu-icon scale. Gate used Node `v24.11.1` and pnpm `8.15.9`; `git diff --check` passed, `gen:client-router` generated 6 client routes, `test:migration` passed with build, 39 unit files / 159 unit tests, 1 SSR smoke test, 1 shallow Playwright test, and 61 passed / 1 skipped full-chain Playwright tests.
+- Next recommended focus: Scout/Review pass; no ready Builder implementation item remains in `docs/migration/parity-backlog.md`
 
 ## Route Progress
 

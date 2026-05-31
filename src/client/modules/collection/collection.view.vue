@@ -561,13 +561,13 @@ html.dark .srk-collection-nav {
   border-inline-end: 0;
 }
 
-.srk-collection-menu-icon {
+:deep(.srk-collection-menu-icon) {
   display: inline-flex;
   align-items: center;
   justify-content: center;
 }
 
-.srk-collection-menu-icon img {
+:deep(.srk-collection-menu-icon img) {
   width: 32px;
   height: 32px;
 }

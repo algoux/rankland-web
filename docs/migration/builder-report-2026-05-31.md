@@ -71,3 +71,28 @@ No further ready items were implemented in this window.
 - Focused verification:
   - RED: `corepack pnpm exec playwright test -c playwright.full-chain.config.ts tests/e2e/full-chain/search.spec.ts tests/e2e/full-chain/ranklist.spec.ts -g "shows recent ranklists|renders legacy Ant Design filter controls|passes the RankLand dark theme"` failed before the product fix with default blue / non-primary control colors.
   - GREEN: same command passed after the fix: 3 passed.
+
+### PAR-006C — Collection category logo size parity
+
+- Status: implemented and focused-verified.
+- Old source confirmed:
+  - `/Users/cooper/Projects/RankLand/rankland-fe/src/pages/collection/[id].tsx` renders category logos through `span.srk-collection-menu-icon`.
+  - `/Users/cooper/Projects/RankLand/rankland-fe/src/pages/collection/collection-page.less` applies `w-8 h-8` to those images, i.e. `32x32`.
+- New implementation:
+  - Updated `src/client/modules/collection/collection.view.vue` so the existing category icon container and image size rules use `:deep` and apply inside Ant Design Vue Menu slot DOM.
+  - Extended `tests/e2e/full-chain/collection.spec.ts` to verify ICPC/CCPC category logo dimensions, menu-icon footprint, label visibility, and no icon/label overlap on desktop and mobile-expanded nav.
+- Focused verification:
+  - RED: `corepack pnpm exec playwright test -c playwright.full-chain.config.ts tests/e2e/full-chain/collection.spec.ts -g "renders the legacy Ant Design collection menu|uses the legacy mobile nav collapse behavior"` failed before the product fix with `192x192` category images.
+  - GREEN: same command passed after the fix: 2 passed.
+
+### Final Verification
+
+- Environment: Node `v24.11.1`, pnpm `8.15.9`.
+- `git diff --check`: passed.
+- `corepack pnpm run gen:client-router`: passed, generated 6 client routes.
+- `corepack pnpm test:migration`: passed with build, 39 unit files / 159 unit tests, 1 SSR smoke test, 1 shallow Playwright test, and 61 passed / 1 skipped full-chain Playwright tests.
+
+### Batch Stop
+
+- Completed both allowed ready tickets in order: `PAR-006B`, then `PAR-006C`.
+- No ready Builder implementation item remains in `docs/migration/parity-backlog.md`.

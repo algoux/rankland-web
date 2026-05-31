@@ -9,9 +9,9 @@ This backlog records remaining migration-parity work with evidence. It intention
 
 | status | count |
 | --- | ---: |
-| ready | 1 |
+| ready | 0 |
 | discovered | 2 |
-| done | 3 |
+| done | 4 |
 | blocked | 2 |
 | wontfix | 1 |
 
@@ -143,7 +143,7 @@ This backlog records remaining migration-parity work with evidence. It intention
 
 ### PAR-006C — Collection category logo size parity
 
-- status: ready
+- status: done
 - priority: P1
 - surface: Collection
 - risk: low
@@ -153,4 +153,4 @@ This backlog records remaining migration-parity work with evidence. It intention
 - evidence: `docs/migration/evidence/PAR-006C-collection-category-logo-size-parity.md`
 - suggested test: focused collection full-chain assertion for category logo bounding boxes and menu title text overlap at desktop and mobile viewports.
 - acceptance: ICPC/CCPC/category logo images render within the old menu icon footprint, menu labels remain readable, and existing collection collapse/open-key/bounds tests stay green.
-- notes: ready, isolated to collection nav visual parity.
+- notes: implemented in Batch `BLD-2026-05-31-02` by making the existing Collection nav category icon size rules pierce Ant Design Vue Menu slot DOM with `:deep`. Focused full-chain coverage verifies ICPC/CCPC category images render at `32x32`, icon boxes remain within the old menu footprint, labels remain visible without overlap, and existing desktop/mobile collapse behavior remains green.

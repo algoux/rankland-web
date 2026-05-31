@@ -234,6 +234,45 @@ async function getCollectionMenuSubmenuState(page: Page, collectionKey: string) 
   }, collectionKey);
 }
 
+async function getCollectionCategoryIconMetrics(page: Page, collectionKey: string) {
+  return page.evaluate((collectionKey) => {
+    const icon = document.querySelector<HTMLElement>(`[data-id="collection-category-icon-${collectionKey}"]`);
+    const label = document.querySelector<HTMLElement>(`[data-id="collection-menu-item-${collectionKey}"]`);
+    const img = icon?.querySelector<HTMLImageElement>('img');
+    if (!icon || !label || !img) {
+      throw new Error(`Missing collection category icon metrics target: ${collectionKey}`);
+    }
+
+    const iconBox = icon.getBoundingClientRect();
+    const imgBox = img.getBoundingClientRect();
+    const labelBox = label.getBoundingClientRect();
+
+    return {
+      iconHeight: Math.round(iconBox.height),
+      iconRight: Math.round(iconBox.right),
+      iconWidth: Math.round(iconBox.width),
+      imageHeight: Math.round(imgBox.height),
+      imageWidth: Math.round(imgBox.width),
+      labelLeft: Math.round(labelBox.left),
+      labelText: label.textContent?.trim() || '',
+    };
+  }, collectionKey);
+}
+
+async function expectLegacyCollectionCategoryIconMetrics(page: Page) {
+  for (const collectionKey of ['dir-icpc', 'dir-ccpc']) {
+    const metrics = await getCollectionCategoryIconMetrics(page, collectionKey);
+    expect(metrics).toMatchObject({
+      imageHeight: 32,
+      imageWidth: 32,
+    });
+    expect(metrics.iconHeight).toBeLessThanOrEqual(40);
+    expect(metrics.iconWidth).toBeLessThanOrEqual(40);
+    expect(metrics.labelText.length).toBeGreaterThan(0);
+    expect(metrics.labelLeft - metrics.iconRight).toBeGreaterThanOrEqual(4);
+  }
+}
+
 test.describe('/collection/:id full-chain route', () => {
   test('renders selected ranklist through SSR, hydration, RanklandApiService, and the mock backend', async ({
     page,
@@ -406,6 +445,7 @@ test.describe('/collection/:id full-chain route', () => {
     );
     await expect(page.locator('[data-id="collection-category-icon-dir-icpc"] img')).toHaveAttribute('alt', 'ICPC');
     await expect(page.locator('[data-id="collection-category-icon-dir-ccpc"] img')).toHaveAttribute('alt', 'CCPC');
+    await expectLegacyCollectionCategoryIconMetrics(page);
     expect(await getCollectionMenuLabelDom(page, '[data-id="collection-menu-item-dir-icpc"]')).toMatchObject({
       tagName: 'SPAN',
       dataCollectionKey: 'dir-icpc',
@@ -478,6 +518,7 @@ test.describe('/collection/:id full-chain route', () => {
     await page.locator('[data-id="collection-collapse-button"]').click();
 
     await expect(page.locator('[data-id="collection-collapse-button"] .anticon-menu-fold')).toBeVisible();
+    await expectLegacyCollectionCategoryIconMetrics(page);
     await expect(page.locator('[data-id="collection-ranklist-panel"]')).toBeHidden();
 
     await page.locator('[data-id="collection-menu-item-another-key"]').click();
