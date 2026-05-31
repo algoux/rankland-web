@@ -491,6 +491,12 @@ test.describe('app shell full-chain behavior', () => {
     await expect(page.locator('html')).toHaveClass('dark');
     await expect(page.locator('body')).toHaveClass(/optimize-decrease-effects/);
     await expect(page.locator('body')).toHaveCSS('color', 'rgba(255, 255, 255, 0.85)');
+    await expect(page.locator('body')).toHaveCSS('background-color', 'rgb(20, 23, 28)');
+    await expect(page.locator('[data-id="app-shell"]')).toHaveCSS('color', 'rgba(255, 255, 255, 0.85)');
+    await expect(page.locator('[data-id="app-shell"]')).toHaveCSS('background-color', 'rgb(20, 23, 28)');
+    await expect(page.locator('.ant-layout-content')).toHaveCSS('color', 'rgba(255, 255, 255, 0.85)');
+    await expect(page.locator('.ant-input')).toHaveCSS('background-color', 'rgb(20, 20, 20)');
+    await expect(page.locator('.ant-input')).toHaveCSS('color', 'rgba(255, 255, 255, 0.85)');
     await expect(page.locator('body')).toHaveCSS('opacity', '1');
     const bodyTypography = await getBodyTypography(page);
     expect(bodyTypography.fontSize).toBe('14px');

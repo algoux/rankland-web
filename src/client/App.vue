@@ -91,6 +91,7 @@
 <script lang="ts">
 import { defineComponent } from 'vue';
 import { ArrowRightOutlined } from '@ant-design/icons-vue';
+import { theme as antTheme } from 'ant-design-vue';
 import type { ThemeConfig } from 'ant-design-vue/es/config-provider/context';
 import { ranklandRoutes } from '@common/rankland-router';
 import {
@@ -183,6 +184,7 @@ export default defineComponent({
     },
     antDesignTheme(): ThemeConfig {
       return {
+        algorithm: this.currentTheme === 'dark' ? antTheme.darkAlgorithm : antTheme.defaultAlgorithm,
         token: ranklandThemeTokens[this.currentTheme],
       };
     },
