@@ -46,6 +46,16 @@ async function expectNoHorizontalDocumentOverflow(page: Page) {
   expect(overflow.documentScrollWidth).toBeLessThanOrEqual(overflow.viewportWidth + 1);
 }
 
+async function getSearchPrimaryButtonStyle(page: Page) {
+  return page.locator('.ant-input-search-button.ant-btn-primary').evaluate((element) => {
+    const style = window.getComputedStyle(element as HTMLElement);
+    return {
+      backgroundColor: style.backgroundColor,
+      borderTopColor: style.borderTopColor,
+    };
+  });
+}
+
 test.describe('/search full-chain route', () => {
   test('shows recent ranklists for an empty query through CSR and listAllRanklists', async ({ page, request }) => {
     await denyExternalCalls(page);
@@ -85,6 +95,10 @@ test.describe('/search full-chain route', () => {
     await expect(page.locator('.search-input')).toHaveCount(0);
     await expect(page.locator('[data-id="search-input"].ant-input')).toBeVisible();
     await expect(page.locator('.ant-input-search-button.ant-btn-primary')).toBeVisible();
+    expect(await getSearchPrimaryButtonStyle(page)).toMatchObject({
+      backgroundColor: 'rgb(255, 129, 4)',
+      borderTopColor: 'rgb(255, 129, 4)',
+    });
     await expect(page.locator('.ant-input-search-button .anticon-search')).toBeVisible();
     await expect(page.locator('.ant-input-search-button')).toHaveText('');
     await expect(page.locator('[data-id="search-recent-section"]')).toBeVisible();

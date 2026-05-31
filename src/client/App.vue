@@ -1,94 +1,97 @@
 <template>
-  <router-view v-if="isFocusMode" v-slot="{ Component }">
-    <Suspense>
-      <component :is="Component" />
-    </Suspense>
-  </router-view>
+  <a-config-provider :theme="antDesignTheme">
+    <router-view v-if="isFocusMode" v-slot="{ Component }">
+      <Suspense>
+        <component :is="Component" />
+      </Suspense>
+    </router-view>
 
-  <a-layout v-else data-id="app-shell" class="app-shell layout">
-    <a-layout-header data-id="app-header" class="app-header">
-      <div class="app-header-inner flex justify-between">
-        <router-link data-id="app-logo-link" class="app-logo" to="/" aria-label="RankLand">
-          <div class="logo app-logo-box">
-            <img :src="logo" alt="RankLand">
-          </div>
-        </router-link>
+    <a-layout v-else data-id="app-shell" class="app-shell layout">
+      <a-layout-header data-id="app-header" class="app-header">
+        <div class="app-header-inner flex justify-between">
+          <router-link data-id="app-logo-link" class="app-logo" to="/" aria-label="RankLand">
+            <div class="logo app-logo-box">
+              <img :src="logo" alt="RankLand">
+            </div>
+          </router-link>
 
-        <div style="flex: 1; min-width: 0;">
-          <ClientOnly>
-            <a-menu
-              data-id="app-nav"
-              class="app-nav nav-menu"
-              mode="horizontal"
-              disabled-overflow
-              :selected-keys="[selectedNavKey]"
-            >
-              <a-menu-item v-for="item in navItems" :key="item.path">
-                <router-link
-                  data-id="app-nav-link"
-                  :aria-current="isNavActive(item.path) ? 'page' : undefined"
-                  :to="item.path"
-                >
-                  {{ item.label }}
-                </router-link>
-              </a-menu-item>
-            </a-menu>
-          </ClientOnly>
-        </div>
-
-        <div>
-          <a-dropdown placement="bottomRight">
-            <a-button data-id="app-site-switch" class="app-site-switch px-2" type="text">
-              切换
-            </a-button>
-            <template #overlay>
-              <a-menu>
-                <a-menu-item key="site-switch">
-                  <a
-                    data-id="app-site-switch-link"
-                    :href="siteSwitchHref"
-                    target="_blank"
-                    :style="siteSwitchLinkStyle"
+          <div style="flex: 1; min-width: 0;">
+            <ClientOnly>
+              <a-menu
+                data-id="app-nav"
+                class="app-nav nav-menu"
+                mode="horizontal"
+                disabled-overflow
+                :selected-keys="[selectedNavKey]"
+              >
+                <a-menu-item v-for="item in navItems" :key="item.path">
+                  <router-link
+                    data-id="app-nav-link"
+                    :aria-current="isNavActive(item.path) ? 'page' : undefined"
+                    :to="item.path"
                   >
-                    <template v-if="siteAlias === 'cnn'">
-                      全球站点
-                      <ArrowRightOutlined :rotate="-45" />
-                    </template>
-                    <template v-else>
-                      <p class="mb-0">中国站点</p>
-                      <p class="mb-0">
-                        <span class="opacity-60 text-xs">特别速度优化</span>
-                        <ArrowRightOutlined :rotate="-45" />
-                      </p>
-                    </template>
-                  </a>
+                    {{ item.label }}
+                  </router-link>
                 </a-menu-item>
               </a-menu>
-            </template>
-          </a-dropdown>
+            </ClientOnly>
+          </div>
+
+          <div>
+            <a-dropdown placement="bottomRight">
+              <a-button data-id="app-site-switch" class="app-site-switch px-2" type="text">
+                切换
+              </a-button>
+              <template #overlay>
+                <a-menu>
+                  <a-menu-item key="site-switch">
+                    <a
+                      data-id="app-site-switch-link"
+                      :href="siteSwitchHref"
+                      target="_blank"
+                      :style="siteSwitchLinkStyle"
+                    >
+                      <template v-if="siteAlias === 'cnn'">
+                        全球站点
+                        <ArrowRightOutlined :rotate="-45" />
+                      </template>
+                      <template v-else>
+                        <p class="mb-0">中国站点</p>
+                        <p class="mb-0">
+                          <span class="opacity-60 text-xs">特别速度优化</span>
+                          <ArrowRightOutlined :rotate="-45" />
+                        </p>
+                      </template>
+                    </a>
+                  </a-menu-item>
+                </a-menu>
+              </template>
+            </a-dropdown>
+          </div>
         </div>
-      </div>
-    </a-layout-header>
+      </a-layout-header>
 
-    <a-layout-content>
-      <router-view v-slot="{ Component }">
-        <Suspense>
-          <component :is="Component" />
-        </Suspense>
-      </router-view>
-    </a-layout-content>
+      <a-layout-content>
+        <router-view v-slot="{ Component }">
+          <Suspense>
+            <component :is="Component" />
+          </Suspense>
+        </router-view>
+      </a-layout-content>
 
-    <a-back-top
-      data-id="app-back-top"
-      class="app-back-top ant-back-top"
-      :visibility-height="240"
-    />
-  </a-layout>
+      <a-back-top
+        data-id="app-back-top"
+        class="app-back-top ant-back-top"
+        :visibility-height="240"
+      />
+    </a-layout>
+  </a-config-provider>
 </template>
 
 <script lang="ts">
 import { defineComponent } from 'vue';
 import { ArrowRightOutlined } from '@ant-design/icons-vue';
+import type { ThemeConfig } from 'ant-design-vue/es/config-provider/context';
 import { ranklandRoutes } from '@common/rankland-router';
 import {
   buildRanklandAnalyticsPage,
@@ -128,6 +131,21 @@ const navItems = [
   { path: ranklandRoutes.playground.build(), label: '演练场' },
 ];
 
+const ranklandThemeTokens = {
+  light: {
+    colorLink: '#ff8104',
+    colorLinkActive: '#d96500',
+    colorLinkHover: '#ff9d2e',
+    colorPrimary: '#ff8104',
+  },
+  dark: {
+    colorLink: '#f6ac06',
+    colorLinkActive: '#e8b52b',
+    colorLinkHover: '#a7770b',
+    colorPrimary: '#f6ac06',
+  },
+};
+
 export default defineComponent({
   name: 'App',
   components: {
@@ -137,6 +155,7 @@ export default defineComponent({
     return {
       logo,
       navItems,
+      currentTheme: 'light' as 'light' | 'dark',
       themeMediaQuery: undefined as ThemeMediaQuery | undefined,
       analyticsPageviewTimer: undefined as ReturnType<typeof setTimeout> | undefined,
       lastAnalyticsPage: '',
@@ -161,6 +180,11 @@ export default defineComponent({
     },
     siteAlias(): string | undefined {
       return process.env.RANKLAND_SITE_ALIAS || process.env.SITE_ALIAS;
+    },
+    antDesignTheme(): ThemeConfig {
+      return {
+        token: ranklandThemeTokens[this.currentTheme],
+      };
     },
     selectedNavKey(): string {
       const activeItem = this.navItems.find((item) => this.isNavActive(item.path));
@@ -209,7 +233,8 @@ export default defineComponent({
       }
     },
     applySystemTheme(event: MediaQueryListEvent | MediaQueryList) {
-      document.documentElement.className = event.matches ? 'dark' : 'light';
+      this.currentTheme = event.matches ? 'dark' : 'light';
+      document.documentElement.className = this.currentTheme;
     },
     setupPlatformOptimizations() {
       const userAgent = window.navigator.userAgent;

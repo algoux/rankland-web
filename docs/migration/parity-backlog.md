@@ -9,9 +9,9 @@ This backlog records remaining migration-parity work with evidence. It intention
 
 | status | count |
 | --- | ---: |
-| ready | 2 |
+| ready | 1 |
 | discovered | 2 |
-| done | 2 |
+| done | 3 |
 | blocked | 2 |
 | wontfix | 1 |
 
@@ -129,7 +129,7 @@ This backlog records remaining migration-parity work with evidence. It intention
 
 ### PAR-006B — Ant Design primary color visual parity
 
-- status: ready
+- status: done
 - priority: P1
 - surface: AppShell / Search / SRK
 - risk: medium
@@ -139,7 +139,7 @@ This backlog records remaining migration-parity work with evidence. It intention
 - evidence: `docs/migration/evidence/PAR-006B-ant-primary-color-parity.md`
 - suggested test: focused full-chain assertions for `/search` Search button and shared SRK filter controls comparing computed primary background/border/text colors in light mode.
 - acceptance: visible primary controls on reviewed routes use the old orange primary color family without regressing dark-mode documented primary colors or existing layout bounds.
-- notes: ready because the mismatch is concrete and reproducible, but implementation should be scoped carefully because primary styling is shared.
+- notes: implemented in Batch `BLD-2026-05-31-02` with a shared Ant Design Vue ConfigProvider token plus a small global primary button / checked radio style hook. Focused full-chain coverage verifies `/search` primary Search button light-mode orange, `/ranklist/test-key?focus=yes` checked marker filter light-mode orange, and existing ranklist dark-mode primary green.
 
 ### PAR-006C — Collection category logo size parity
 

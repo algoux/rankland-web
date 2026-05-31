@@ -53,3 +53,21 @@ Stopped after completing/updating 5 review/ticket items in this Builder window:
 5. `PAR-006A` implemented and verified.
 
 No further ready items were implemented in this window.
+
+## Batch BLD-2026-05-31-02
+
+### PAR-006B — Ant Design primary color visual parity
+
+- Status: implemented and focused-verified.
+- Old source confirmed:
+  - `/Users/cooper/Projects/RankLand/rankland-fe/src/styles/antd.light.less` sets `@primary-color: #ff8104`.
+  - `/Users/cooper/Projects/RankLand/rankland-fe/src/styles/antd.dark.less` sets `@primary-color: #f6ac06`.
+  - Old compiled Ant Design 4 CSS uses those colors for `.ant-btn-primary` and checked `.ant-radio-button-wrapper`.
+- New implementation:
+  - Added global Ant Design Vue `ConfigProvider` theme tokens in `src/client/App.vue`.
+  - Registered `ConfigProvider` in `src/client/main.ts`.
+  - Added a focused global style hook in `src/client/index.less` to restore old computed primary button and checked radio styles where Ant Design Vue 4 token output differs from old Ant Design 4 Less output.
+  - Added full-chain computed-style coverage in `tests/e2e/full-chain/search.spec.ts` and `tests/e2e/full-chain/ranklist.spec.ts`.
+- Focused verification:
+  - RED: `corepack pnpm exec playwright test -c playwright.full-chain.config.ts tests/e2e/full-chain/search.spec.ts tests/e2e/full-chain/ranklist.spec.ts -g "shows recent ranklists|renders legacy Ant Design filter controls|passes the RankLand dark theme"` failed before the product fix with default blue / non-primary control colors.
+  - GREEN: same command passed after the fix: 3 passed.

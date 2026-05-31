@@ -290,6 +290,20 @@ async function getUserModalBodyColor(page: Page) {
   });
 }
 
+async function getCheckedMarkerFilterStyle(page: Page) {
+  return page
+    .locator('[data-id="rankland-ranklist-marker-filter"] .ant-radio-button-wrapper-checked')
+    .first()
+    .evaluate((element) => {
+      const style = window.getComputedStyle(element as HTMLElement);
+      return {
+        backgroundColor: style.backgroundColor,
+        borderTopColor: style.borderTopColor,
+        color: style.color,
+      };
+    });
+}
+
 async function getUserModalTeamMemberEntryDom(page: Page) {
   return page.evaluate(() => {
     const row = document.querySelector<HTMLElement>('[data-id="rankland-user-modal-team-members"]');
@@ -1701,6 +1715,11 @@ test.describe('/ranklist/:id full-chain route', () => {
       'Gold Group',
       'Silver Group',
     ]);
+    expect(await getCheckedMarkerFilterStyle(page)).toMatchObject({
+      backgroundColor: 'rgb(255, 255, 255)',
+      borderTopColor: 'rgb(255, 129, 4)',
+      color: 'rgb(255, 129, 4)',
+    });
     expect(await getFilterControlSpacing(page)).toMatchObject({
       filtersColumnGap: '0px',
       organizationFilterMarginLeft: '8px',
@@ -1830,6 +1849,10 @@ test.describe('/ranklist/:id full-chain route', () => {
     expect(response?.ok()).toBe(true);
     await expect(page.locator('html')).toHaveClass('dark');
     await expect(page.locator('[data-id="rankland-ranklist-title"]')).toHaveText('Test Contest 2024');
+    expect(await getCheckedMarkerFilterStyle(page)).toMatchObject({
+      borderTopColor: 'rgb(246, 172, 6)',
+      color: 'rgb(246, 172, 6)',
+    });
     await expect.poll(() => getRanklistLinkColors(page)).toMatchObject({
       refLinkColor: 'rgb(246, 172, 6)',
       extraRefLinkTriggerColor: 'rgba(255, 255, 255, 0.85)',

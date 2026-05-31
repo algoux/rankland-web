@@ -34,6 +34,55 @@ html.dark body {
   background: #14171c;
 }
 
+// Ant Design Vue 4 token 派生色不完全等同旧 React 的 Ant Design 4 Less 输出，这里补齐主色控件计算样式。
+.ant-btn-primary:not(:disabled) {
+  border-color: var(--rankland-primary-color) !important;
+  background: var(--rankland-primary-color) !important;
+}
+
+.ant-btn-primary:not(:disabled):hover,
+.ant-btn-primary:not(:disabled):focus {
+  border-color: var(--rankland-link-hover-color) !important;
+  background: var(--rankland-link-hover-color) !important;
+}
+
+.ant-btn-primary:not(:disabled):active {
+  border-color: var(--rankland-link-active-color) !important;
+  background: var(--rankland-link-active-color) !important;
+}
+
+.ant-radio-button-wrapper-checked:not(.ant-radio-button-wrapper-disabled) {
+  color: var(--rankland-primary-color) !important;
+  background: #fff !important;
+  border-color: var(--rankland-primary-color) !important;
+}
+
+html.dark .ant-radio-button-wrapper-checked:not(.ant-radio-button-wrapper-disabled) {
+  background: transparent !important;
+}
+
+.ant-radio-button-wrapper-checked:not(.ant-radio-button-wrapper-disabled)::before {
+  background-color: var(--rankland-primary-color) !important;
+}
+
+.ant-radio-button-wrapper-checked:not(.ant-radio-button-wrapper-disabled):hover {
+  color: var(--rankland-link-hover-color) !important;
+  border-color: var(--rankland-link-hover-color) !important;
+}
+
+.ant-radio-button-wrapper-checked:not(.ant-radio-button-wrapper-disabled):hover::before {
+  background-color: var(--rankland-link-hover-color) !important;
+}
+
+.ant-radio-button-wrapper-checked:not(.ant-radio-button-wrapper-disabled):active {
+  color: var(--rankland-link-active-color) !important;
+  border-color: var(--rankland-link-active-color) !important;
+}
+
+.ant-radio-button-wrapper-checked:not(.ant-radio-button-wrapper-disabled):active::before {
+  background-color: var(--rankland-link-active-color) !important;
+}
+
 body.optimize-decrease-effects .srk-main {
   --srk-table-head-backdrop-filter: none;
   --srk-table-head-bg: rgba(255, 255, 255, 1);
