@@ -111,12 +111,34 @@ Catch-up compaction is enabled by default. If a recovery range contains later se
 
 Live realtime delivery does not carry event payloads and is never compacted.
 
+## Transport: content negotiation, protobuf & SSE
+
+Request parsing and response wrapping are handled by generic, business-agnostic infrastructure; controllers
+only declare capabilities through decorators and return plain objects.
+
+- Capability decorators (metadata only): `@ProtobufContract(ReqMessage | null, RespMessage | null)` and `@Sse()`.
+- Global middlewares (run before bwcx validation):
+  - `ContentNegotiationMiddleware` resolves the response content type from `Accept` + the route's supported
+    types and stores it on `ctx.state.respContentType`; strict (protobuf/SSE-capable) routes return `406`
+    when nothing acceptable matches, plain routes fall back to JSON. Default prefers JSON on tie/no priority.
+  - `ProtobufMiddleware` decodes protobuf request bodies via the declared request message (`415` for other
+    binary types, `413` over 5 MiB, `400` for undecodable bytes) so the decoded body reaches DTO validation.
+  - `SseMiddleware` opens the event-stream response (headers, `ctx.respond = false`, `retry:`), then hands off.
+- `DefaultResponseHandler` wraps the success path by content type: JSON → `{ success, code, data }`; protobuf →
+  encode the route return with the declared response message + `X-RL-Resp-Success/Code` headers.
+- Exception handlers wrap the failure path by content type: JSON → `{ success, code, msg, ... }`; protobuf →
+  empty body + `X-RL-Resp-Success/Code/Msg` (and optional `X-RL-Resp-Meta`) headers.
+
+This keeps `application/protobuf` ⇄ JSON interchange a transport concern; the same controller serves both.
+
 ## SSE Protocol
 
 SSE endpoint:
 
 - `GET /api/v2/contests/:uk/events/stream`
 
+Implemented as a controller route marked `@Sse()`; the generic `SseMiddleware` handles the event-stream
+plumbing and the controller performs the business hookup (resolve stream state, register with the SSE hub).
 This endpoint is unauthenticated by current implementation. It carries no event payloads.
 
 The stream sends `events-available` events:

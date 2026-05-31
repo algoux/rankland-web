@@ -1,6 +1,6 @@
 # Contest Event Refactor Implementation Progress
 
-Updated: 2026-05-28
+Updated: 2026-05-29
 
 ## Decisions
 
@@ -55,11 +55,16 @@ Updated: 2026-05-28
   - `POST /api/v2/contests/:uk/producer/release` for admin lock release
   - `POST /api/v2/contests/:uk/events/reset` for stream reset
   - contest/user APIs now use MySQL and expose the `users` field
-- Added raw protobuf and SSE middleware:
-  - `POST /api/v2/contests/:uk/events`
-  - `GET /api/v2/contests/:uk/events/stream`
-  - raw protobuf accepts `application/x-protobuf` or `application/protobuf`, with a 5 MiB body limit
-  - raw/SSE paths map contest protocol errors to JSON status responses instead of generic 500s
+- Refactored the contest-specific protobuf/SSE middleware into generic, metadata-driven infrastructure:
+  - Capability decorators `@ProtobufContract(req?, resp?)` and `@Sse()` declare route capabilities as metadata.
+  - Global `ContentNegotiationMiddleware` resolves the response content type from `Accept` + supported types
+    onto `ctx.state.respContentType` (prefers JSON on tie/no priority; `406` for strict routes with no match).
+  - Global `ProtobufMiddleware` decodes protobuf request bodies before validation (`415`/`413`/`400`).
+  - Global `SseMiddleware` does generic SSE plumbing; the SSE business hookup is now a `@Sse()` controller route.
+  - `DefaultResponseHandler` wraps success generically (JSON `{success,code,data}` or protobuf-encode + `X-RL-*`);
+    exception handlers wrap failure generically (JSON body or empty protobuf body + `X-RL-*` headers).
+  - Removed `ContestEventMiddleware`, `contest-event-response.ts`, `binary-response.ts`, and the manual
+    `createContestEventBinaryResponse` wrapping; the events endpoints no longer carry protobuf-first logic.
 - Catch-up reads stream state and event page in one MySQL snapshot and filters by the same `streamRevision`.
 - Catch-up accepts optional `streamRevision`; a stale revision returns an empty reset envelope with `resetRequired: true`.
 - Default catch-up compaction now checks later settle/change events beyond the current page before dropping stale progress events.

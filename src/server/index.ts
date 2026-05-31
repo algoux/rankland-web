@@ -20,12 +20,14 @@ import koaStatic from 'koa-static';
 import cors from '@koa/cors';
 import UtilityHeaderMiddleware from './middlewares/utility-header.middleware';
 import LoggerMiddleware from './middlewares/logger.middleware';
+import ContentNegotiationMiddleware from './middlewares/content-negotiation.middleware';
+import ProtobufMiddleware from './middlewares/protobuf.middleware';
+import SseMiddleware from './middlewares/sse.middleware';
 import DefaultResponseHandler from '@server/response-handlers/default.response-handler';
 import { IPageRenderer } from './lib/page-renderer.interface';
 import { BwcxClientVueClientRoutesMapId } from 'bwcx-client-vue/server';
 import { clientRoutesMap } from '@common/router/client-routes';
 import TypeOrmClient from './database/typeorm-client';
-import ContestEventMiddleware from './modules/contest/contest-event.middleware';
 
 export default class OurApp extends App {
   protected baseDir = path.join(__dirname, '..');
@@ -47,7 +49,13 @@ export default class OurApp extends App {
 
   protected exitTimeout = 5000;
 
-  protected globalMiddlewares = [UtilityHeaderMiddleware, LoggerMiddleware];
+  protected globalMiddlewares = [
+    UtilityHeaderMiddleware,
+    LoggerMiddleware,
+    ContentNegotiationMiddleware,
+    ProtobufMiddleware,
+    SseMiddleware,
+  ];
 
   protected responseHandler = DefaultResponseHandler;
 
@@ -91,12 +99,6 @@ export default class OurApp extends App {
         }),
       ),
     );
-
-    const contestEventMiddleware = getDependency<ContestEventMiddleware>(
-      ContestEventMiddleware,
-      this.container,
-    );
-    this.instance.use(contestEventMiddleware.getMiddleware());
 
     // SSR
     this.pageRenderer = getDependency<IPageRenderer>(IPageRenderer, this.container);

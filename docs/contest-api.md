@@ -1,6 +1,6 @@
 # Contest v2 API
 
-Updated: 2026-05-28
+Updated: 2026-05-29
 
 本文档描述 contest 相关 HTTP/SSE API。接口、DTO、JSON 字段使用 camelCase；MySQL 表和列使用 snake_case，并由 TypeORM entity 显式映射。
 
@@ -12,27 +12,32 @@ Base path:
 /api/v2
 ```
 
-普通 bwcx controller 响应会被包装为：
+### 响应内容协商（content negotiation）
+
+响应的包装方式由请求 `Accept` 头与该端点声明支持的内容类型共同决定，业务代码不再手动拼装。规则：
+
+- 解析 `Accept` 的 q 值并按优先级排序，选择端点支持且优先级最高的类型。
+- 当未声明优先级，或多个支持类型优先级相同时，**优先 JSON**。
+- 端点不支持任何被请求的类型时返回 `406 Not Acceptable`。
+- 普通端点只支持 JSON，且为宽松模式（异常 `Accept` 不会 406，回退到 JSON）；只有声明了 protobuf 响应或 SSE 能力的端点才是严格模式。
+
+解析出的内容类型挂在 `ctx.state.respContentType` 上，响应处理器与异常处理器据此包装。
+
+### JSON 包装
+
+成功：
 
 ```json
-{
-  "success": true,
-  "code": 0,
-  "data": {}
-}
+{ "success": true, "code": 0, "data": {} }
 ```
 
-业务错误通常为：
+失败（body 非空，携带错误信息）：
 
 ```json
-{
-  "success": false,
-  "code": 100001,
-  "msg": "该比赛未找到"
-}
+{ "success": false, "code": 100001, "msg": "该比赛未找到" }
 ```
 
-raw protobuf middleware 使用字符串错误码：
+业务错误码可能是数字（如 `100001`）或字符串（如 `EVENT_ID_GAP`），失败时还可携带与错误相关的额外字段：
 
 ```json
 {
@@ -43,6 +48,41 @@ raw protobuf middleware 使用字符串错误码：
   "receivedEventId": 14
 }
 ```
+
+### Protobuf 包装
+
+当协商结果为 protobuf 时：
+
+- 成功：response body 为该端点声明的 protobuf 响应消息的二进制，响应头：
+  ```text
+  Content-Type: application/protobuf
+  X-RL-Resp-Success: true
+  X-RL-Resp-Code: 0
+  ```
+  成功响应不带 `X-RL-Resp-Msg`。
+- 失败：response body 为空，错误信息通过响应头表达：
+  ```text
+  X-RL-Resp-Success: false
+  X-RL-Resp-Code: <code>
+  X-RL-Resp-Msg: <url-encoded msg>
+  X-RL-Resp-Meta: <url-encoded json>   # 可选，仅错误可携带额外元数据
+  ```
+
+### 端点能力声明
+
+protobuf / SSE 能力通过路由方法上的装饰器声明为元数据，由通用中间件读取：
+
+- `@ProtobufContract(ReqMessage | null, RespMessage | null)`：`ReqMessage` 使端点可接收 protobuf 请求体，`RespMessage` 使端点可返回 protobuf 响应。
+- `@Sse()`：将端点标记为事件流端点。
+
+### 请求体解码
+
+对声明了 protobuf 请求消息的端点：
+
+- `application/protobuf` / `application/x-protobuf`：按声明的消息解码到请求体（在校验之前）。最大 5 MiB，超出返回 `413`。
+- `application/json`：交由 body parser 与 DTO 校验处理。
+- 其它显式类型（如 `application/octet-stream`）：返回 `415 Unsupported Media Type`。
+- 无法解码的 protobuf 字节：返回 `400 Bad Request`（业务层的批次校验失败仍为 `422`）。
 
 ## 鉴权
 
@@ -60,16 +100,10 @@ x-producer-id: <producer-id>
 
 公开读取接口、事件 catch-up 接口、SSE 接口当前不要求 `x-token`。
 
-普通 controller 鉴权失败由 `AuthGuard` 返回：
+所有需要鉴权的端点（含 protobuf 追加）都通过控制器上的 `AuthGuard` 鉴权，鉴权失败统一返回未授权信封（按内容协商包装；protobuf 请求则为空 body + `X-RL-*` 错误头）：
 
 ```json
 { "success": false, "code": -4, "msg": "未授权的操作" }
-```
-
-raw protobuf append 由 Koa middleware 处理，鉴权失败为 HTTP 403：
-
-```json
-{ "success": false, "code": "INVALID_AUTH_INFO", "msg": "Invalid authorization info" }
 ```
 
 ## Contest 对象
@@ -355,7 +389,7 @@ application/x-protobuf
 application/protobuf
 ```
 
-Body 是 `BatchProducerEvent` protobuf 原始 bytes，最大 5 MiB。`application/octet-stream` 不再作为 events protobuf content type 接受。响应 data 与 JSON 追加相同。
+该端点通过 `@ProtobufContract(BatchProducerEvent, null)` 声明可接收 protobuf 请求体，由通用 protobuf 中间件在校验前解码。Body 是 `BatchProducerEvent` protobuf 原始 bytes，最大 5 MiB（超出 `413`）。`application/octet-stream` 不被接受（`415`）。无法解码的字节返回 `400`。追加端点无 protobuf 响应消息，响应固定为 JSON（与 JSON 追加相同）。
 
 事件追加成功提交事务后，服务端才会发送 SSE 通知。
 
@@ -380,16 +414,17 @@ Query:
 
 Data:
 
-当 `Accept` 未声明、只声明通配类型，或 protobuf 类型优先级不低于 JSON 时，响应 body 为 `rankland_live_contest_client.GetContestEventsResponse` protobuf bytes，响应头携带：
+该端点通过 `@ProtobufContract(null, GetContestEventsResponse)` 声明可返回 protobuf，支持的响应类型为 `application/protobuf` 与 `application/json`，按[响应内容协商](#响应内容协商content-negotiation)决定（平局或未声明优先级时优先 JSON；都不接受时 `406`）。
+
+当协商结果为 protobuf 时，响应 body 为 `rankland_live_contest_client.GetContestEventsResponse` protobuf bytes，响应头携带：
 
 ```text
 Content-Type: application/protobuf
 X-RL-Resp-Success: true
 X-RL-Resp-Code: 0
-X-RL-Resp-Msg: OK
 ```
 
-当 `Accept: application/json` 且没有更高优先级 protobuf 类型时，响应仍使用普通 JSON wrapper：
+当协商结果为 JSON 时，响应使用普通 JSON wrapper：
 
 ```ts
 {
@@ -510,17 +545,18 @@ Data: `null`
 
 ## 事件错误码
 
-raw protobuf middleware 和事件流 service 可能返回：
+事件流 service 的业务错误码（字符串），失败时出现在 JSON body 的 `code` 或 protobuf 响应的 `X-RL-Resp-Code` 头：
 
 | code | HTTP | 含义 |
 | --- | ---: | --- |
-| `INVALID_EVENT_BATCH` | 422 | protobuf decode/verify 失败、batch 为空、eventId 非法、payload 与 type 不匹配等 |
+| `INVALID_EVENT_BATCH` | 422 | batch 为空、eventId 非法、payload 与 type 不匹配等业务校验失败 |
 | `PRODUCER_LOCKED` | 409 | 当前事件流已被另一个 producer 锁定 |
 | `EVENT_ID_GAP` | 409 | 收到的 eventId 没有接续当前高水位 |
 | `EVENT_ID_CONFLICT` | 409 | 同一个 eventId 已存在，但 payload hash 不同 |
 | `STREAM_REVISION_MISMATCH` | 409 | append 请求指定的事件流版本与服务端当前版本不一致 |
 | `CONTEST_NOT_FOUND` | 404 | `uk` 对应 contest 不存在 |
-| `PAYLOAD_TOO_LARGE` | 413 | raw protobuf body 超过 5 MiB |
+
+传输层失败由通用中间件以标准 HTTP 状态返回（不含业务字符串码）：`406` 无法协商响应类型；`415` 请求体类型不支持；`413` 请求体超过 5 MiB；`400` protobuf 请求字节无法解码。
 
 参数校验失败通常为 HTTP 422、数字错误码 `-3`。普通 contest 管理 API 的业务错误通常不额外显式设置 HTTP status，而是通过响应体中的数字错误码表达。
 

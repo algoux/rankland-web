@@ -28,6 +28,7 @@ import {
   GetContestUserRespDTO,
   ReleaseContestProducerReqDTO,
   UpdateContestUserReqDTO,
+  RawContestEventsReqDTO,
 } from '@common/modules/contest/contest.dto';
 import LogicException from '@server/exceptions/logic.exception';
 import { ErrCode } from '@common/enums/err-code.enum';
@@ -35,16 +36,15 @@ import ContestService from './contest.service';
 import ContestEventStreamService from './contest-event-stream.service';
 import ContestSseHub from './contest-sse-hub';
 import {
-  encodeGetContestEventsResponseBinary,
   getContestEventsResponseToJson,
   parseProducerBatchJson,
 } from './contest-event-codec';
+import { ProtobufContract } from '@server/decorators/protobuf-contract.decorator';
+import { Sse } from '@server/decorators/sse.decorator';
 import {
-  ContestEventResponseFormat,
-  createContestEventBinaryResponse,
-  negotiateContestEventResponseFormat,
-} from './contest-event-response';
-import HttpException from '@server/exceptions/http.exception';
+  rankland_live_contest_client,
+  rankland_live_contest_producer,
+} from '@common/proto/rankland_live_contest';
 
 @ApiController('/v2')
 export default class ContestController {
@@ -95,6 +95,7 @@ export default class ContestController {
   @Post('/contests/:uk/events')
   @UseGuards(AuthGuard)
   @Contract(AppendContestEventsReqDTO, AppendContestEventsRespDTO)
+  @ProtobufContract(rankland_live_contest_producer.BatchProducerEvent, null)
   public async appendContestEvents(
     @Data() data: AppendContestEventsReqDTO,
   ): Promise<AppendContestEventsRespDTO> {
@@ -116,6 +117,7 @@ export default class ContestController {
   @Api.Summary('查询实时比赛事件')
   @Get('/contests/:uk/events')
   @Contract(GetContestEventsReqDTO, GetContestEventsRespDTO)
+  @ProtobufContract(null, rankland_live_contest_client.GetContestEventsResponse)
   public async getContestEvents(@Data() data: GetContestEventsReqDTO): Promise<any> {
     const result = await this.eventStreamService.getClientEvents({
       uk: data.uk,
@@ -124,14 +126,24 @@ export default class ContestController {
       streamRevision: data.streamRevision,
       compactProgress: data.compactProgress,
     });
-    const responseFormat = negotiateContestEventResponseFormat(this.ctx.headers.accept);
-    if (responseFormat === ContestEventResponseFormat.Unsupported) {
-      throw new HttpException(406);
-    }
-    if (responseFormat === ContestEventResponseFormat.Protobuf) {
-      return createContestEventBinaryResponse(encodeGetContestEventsResponseBinary(result));
-    }
+    // Return a single serialization-ready object. The default response handler
+    // wraps it as JSON or encodes it to protobuf based on the negotiated type.
     return getContestEventsResponseToJson(result);
+  }
+
+  @Api.Summary('实时比赛事件流 SSE 通知')
+  @Get('/contests/:uk/events/stream')
+  @Sse()
+  @Contract(RawContestEventsReqDTO, null)
+  public async streamContestEvents(@Data() data: RawContestEventsReqDTO) {
+    // ContentNegotiation + SSE middleware have already opened the event stream
+    // (headers, ctx.respond = false). Here we only do the business hookup.
+    const stream = await this.eventStreamService.getStreamState(data.uk);
+    this.sseHub.addClient(data.uk, this.ctx.res, {
+      uk: data.uk,
+      latestEventId: stream.lastEventId,
+      streamRevision: stream.streamRevision,
+    });
   }
 
   @Api.Summary('查询实时比赛事件流状态')

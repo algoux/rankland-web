@@ -1,9 +1,8 @@
-import { Inject } from 'bwcx-core';
 import { ExceptionHandler } from 'bwcx-ljsm';
 import type { IBwcxExceptionHandler, RequestContext } from 'bwcx-ljsm';
 import statuses from 'statuses';
 import HttpException from '@server/exceptions/http.exception';
-import { tryWriteContestEventBinaryErrorResponse } from '@server/modules/contest/contest-event-response';
+import { writeErrorResponse } from '@server/http/rl-response';
 
 @ExceptionHandler(HttpException)
 export default class HttpExceptionHandler implements IBwcxExceptionHandler {
@@ -12,31 +11,16 @@ export default class HttpExceptionHandler implements IBwcxExceptionHandler {
           url: ${ctx.url}\n
           err: ${e.message}`);
 
-    ctx.status = e.code;
     const msg = e.code === 404 ? '请求地址不存在' : statuses[e.code] || 'Unknown Error';
-    if (
-      tryWriteContestEventBinaryErrorResponse(ctx, {
-        status: ctx.status,
+    if (ctx.url.indexOf('/api/') !== -1) {
+      writeErrorResponse(ctx, {
+        status: e.code,
         code: e.code,
         msg,
-      })
-    ) {
+      });
       return;
     }
-    if (ctx.url.indexOf('/api/') !== -1) {
-      if (e.code === 404) {
-        ctx.body = {
-          success: false,
-          code: e.code,
-          msg,
-        };
-      } else {
-        ctx.body = {
-          success: false,
-          code: e.code,
-          msg,
-        };
-      }
-    }
+    // Non-API routes (e.g. SSR pages) keep their default rendering; only the status is set.
+    ctx.status = e.code;
   }
 }
