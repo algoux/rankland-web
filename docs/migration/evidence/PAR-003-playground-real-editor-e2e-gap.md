@@ -2,7 +2,7 @@
 
 ## Finding
 
-The product code now syncs valid source changes through Monaco `@change`, but full-chain E2E still uses a private hook instead of synthetic real editor editing because the current harness hangs on `editor.setValue()`.
+The product code routes Monaco changes, `Ctrl/Cmd + S`, and the E2E hook through the same preview-sync helper, but full-chain E2E still uses a private hook instead of a stable real Monaco edit path. Scout batch `SRV-2026-05-31-01` found a partial real keyboard path for invalid JSON, but did not prove a stable valid-source replacement path.
 
 ## Evidence
 
@@ -11,6 +11,10 @@ The product code now syncs valid source changes through Monaco `@change`, but fu
 - `src/client/modules/playground/playground.view.vue` wires Monaco `@change`, `Ctrl/Cmd + S`, and the E2E hook through the shared `syncPlaygroundPreviewSource()` path.
 - `src/client/modules/playground/playground-preview-sync.ts` provides the shared parse/sync transition.
 - `docs/migration/final-integration-review.md` records synthetic Monaco editing as a harness limitation while noting product live preview sync is restored through Monaco `@change`.
+- Temporary full-chain probe, without file changes:
+  - real click + keyboard replacement with `{` made `[data-id="playground-invalid-json"]` visible;
+  - full valid SRK replacement through select-all plus `keyboard.type()` or `keyboard.insertText()` updated the Monaco model but did not stably return to `[data-id="playground-preview"]`;
+  - a `Ctrl/Cmd + S` probe after full-source replacement did not complete cleanly and was killed.
 
 ## Reproduction / Audit Path
 
@@ -21,4 +25,4 @@ The product code now syncs valid source changes through Monaco `@change`, but fu
 
 ## Current Classification
 
-`discovered`: this is a missing regression-test confidence path, not a currently reproduced product-code parity failure.
+`blocked`: this is a missing regression-test confidence path, not a high-confidence product-code parity failure. Cooper/Echo should decide whether to accept the existing hook/unit coverage as `wontfix` or authorize a focused harness spike for a stable real Monaco edit path.

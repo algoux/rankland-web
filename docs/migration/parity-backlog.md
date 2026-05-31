@@ -10,9 +10,9 @@ This backlog records remaining migration-parity work with evidence. It intention
 | status | count |
 | --- | ---: |
 | ready | 0 |
-| discovered | 2 |
+| discovered | 0 |
 | done | 4 |
-| blocked | 2 |
+| blocked | 4 |
 | wontfix | 1 |
 
 | priority | count |
@@ -21,27 +21,28 @@ This backlog records remaining migration-parity work with evidence. It intention
 | P1 | 6 |
 | P2 | 3 |
 
-## Recommended First Builder Batch
+## Recommended Next Action
 
-1. Start with `PAR-006` and complete one final manual old/new route visual review pass. Convert only newly observed concrete differences into new `ready` PAR items.
-2. If SRK table/detail differences are observed during that review, run `PAR-001` as the first implementation-oriented batch because SRK is shared by `/ranklist/:id`, `/collection/:id`, `/playground`, and `/live/:id`.
-3. Do not start `PAR-002`, `PAR-004`, or `PAR-005` until Cooper/Echo chooses whether those accepted differences or release actions are in scope for a Builder goal.
+1. No Builder-ready migration parity item remains after Scout batch `SRV-2026-05-31-01`.
+2. Cooper/Echo should decide whether to provide or approve a small production SRK corpus for `PAR-001`; without that corpus, the table pixel audit is blocked rather than actionable Builder work.
+3. Cooper/Echo should decide whether `PAR-003` should stay blocked for a future harness spike or be accepted as `wontfix` because existing hook/unit coverage is sufficient.
+4. Do not start `PAR-002`, `PAR-005`, `PAR-001`, or `PAR-003` as Builder work until the corresponding decision/blocker is cleared.
 
 ## Items
 
 ### PAR-001 — SRK production fixture lower-level table pixel audit
 
-- status: discovered
+- status: blocked
 - priority: P1
 - surface: SRK
 - risk: medium
 - old reference: `/Users/cooper/Projects/RankLand/rankland-fe/src/components/StyledRanklistRenderer.tsx`, `/Users/cooper/Projects/RankLand/rankland-fe/src/components/StyledRanklistRenderer.less`, production SRK fixtures
 - new target: `src/client/components/rankland-ranklist.vue`, `tests/e2e/full-chain/ranklist.spec.ts`, `tests/e2e/full-chain/live.spec.ts`
-- difference: current docs verify many wrapper/header/modal/table-adjacent details but explicitly do not claim every possible production SRK fixture has been pixel-reviewed against old React.
+- difference: current docs verify many wrapper/header/modal/table-adjacent details but explicitly do not claim every possible production SRK fixture has been pixel-reviewed against old React. Scout batch `SRV-2026-05-31-01` found no high-confidence concrete lower-level SRK mismatch in the existing repo fixtures, but the available fixture corpus is too small to close the audit.
 - evidence: `docs/migration/evidence/PAR-001-srk-production-fixture-pixel-audit.md`
 - suggested test: Playwright old/new screenshot and DOM/class comparison over a small production SRK fixture corpus covering dense tables, long names, many problems, medals/markers, remarks, banners, null statuses, frozen statuses, and modals.
-- acceptance: either no concrete lower-level SRK pixel differences are found and this item is marked done, or each concrete difference is split into a child `ready` PAR with exact old/new selectors, screenshots, and a focused regression test.
-- notes: this is not a license for broad SRK redesign. Keep any Builder slice isolated to one concrete visual difference.
+- acceptance: either Cooper/Echo provides or approves a production-like SRK corpus and no concrete lower-level pixel differences are found, or each concrete difference is split into a child `ready` PAR with exact old/new selectors, screenshots, and a focused regression test.
+- notes: blocked on corpus/visual evidence selection. This is not a license for broad SRK redesign. Keep any future Builder slice isolated to one concrete visual difference.
 
 ### PAR-002 — Playground Monaco exact package-version parity decision
 
@@ -59,17 +60,17 @@ This backlog records remaining migration-parity work with evidence. It intention
 
 ### PAR-003 — Playground real Monaco editing E2E gap
 
-- status: discovered
+- status: blocked
 - priority: P2
 - surface: Playground
 - risk: medium
 - old reference: `/Users/cooper/Projects/RankLand/rankland-fe/src/components/SrkPlayground.tsx`
 - new target: `src/client/modules/playground/playground.view.vue`, `src/client/modules/playground/playground-preview-sync.ts`, `tests/e2e/full-chain/playground.spec.ts`
-- difference: product live preview sync is covered through shared preview-sync logic and a stable E2E hook, but full-chain tests still avoid synthetic Monaco editing because `editor.setValue()` hangs in the current Vite 2 harness.
+- difference: product live preview sync is covered through shared preview-sync logic and a stable E2E hook, but full-chain tests still avoid synthetic Monaco editing because `editor.setValue()` hangs in the current Vite 2 harness. Scout batch `SRV-2026-05-31-01` found that a real keyboard edit can reach the invalid state, but a stable full-source valid replacement path was not proven in the current harness.
 - evidence: `docs/migration/evidence/PAR-003-playground-real-editor-e2e-gap.md`
 - suggested test: replace or supplement the E2E hook with a stable real Monaco edit path that types/pastes valid and invalid SRK JSON into the editor and observes preview/invalid state changes.
-- acceptance: full-chain coverage exercises the real editor interaction path without the private `window.__ranklandPreviewPlaygroundSource` hook, or the harness limitation is explicitly marked `wontfix` with a documented manual check.
-- notes: this is a test/harness parity gap, not currently proven product behavior failure.
+- acceptance: full-chain coverage exercises a stable real editor interaction path without the private `window.__ranklandPreviewPlaygroundSource` hook, or Cooper/Echo explicitly accepts the harness limitation as `wontfix` with the existing hook/unit coverage and a documented manual check.
+- notes: blocked on harness strategy or acceptance decision. This is still a test/harness parity gap, not a high-confidence product behavior failure.
 
 ### PAR-004 — Playground mobile old overflow behavior decision
 
