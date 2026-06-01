@@ -5,10 +5,10 @@ This file is the quick global dashboard for the RankLand migration. Update it at
 ## Current Focus
 
 - Active branch: `migration/live-page-foundation`
-- Current slice: Final hardening / migration readiness checkpoint
-- Latest slice commit: `docs: 记录最终硬化验证`
-- Last recorded full gate: passed on 2026-05-31 for the final hardening checkpoint. Gate used Node `v24.11.1` and pnpm `8.15.9`; `git diff --check` passed, `gen:client-router` generated 6 client routes, and `test:migration` passed with build, 39 unit files / 159 unit tests, 1 SSR smoke test, 1 shallow Playwright test, and 61 passed / 1 skipped full-chain Playwright tests.
-- Next recommended focus: Cooper/Echo decision checkpoint, not automatic Builder. No ready Builder implementation item remains in `docs/migration/parity-backlog.md`; `PAR-001`, `PAR-002`, `PAR-003`, and `PAR-005` remain blocked on corpus/product/harness/release decisions.
+- Current slice: Migration readiness / release-candidate checkpoint
+- Latest slice commit: `docs: 收口迁移 readiness 决策`
+- Last recorded full gate: passed on 2026-06-01 for the release-candidate checkpoint. Gate used Node `v24.11.1` and pnpm `8.15.9`; `git diff --check` passed, `gen:client-router` generated 6 client routes, and `test:migration` passed with build, 39 unit files / 159 unit tests, 1 SSR smoke test, 1 shallow Playwright test, and 61 passed / 1 skipped full-chain Playwright tests. See `docs/migration/release-readiness-checklist-2026-06-01.md`.
+- Next recommended focus: release/cutover decision, not automatic Builder. No ready Builder implementation item remains in `docs/migration/parity-backlog.md`; `PAR-002` and `PAR-003` are accepted as `wontfix`, while `PAR-001` remains corpus-blocked and `PAR-005` remains release-process blocked.
 
 ## Route Progress
 

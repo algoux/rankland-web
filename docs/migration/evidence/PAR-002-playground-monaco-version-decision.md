@@ -2,7 +2,7 @@
 
 ## Finding
 
-The old React app and migrated Vue app use different Monaco package baselines. The current migration explicitly accepts the newer Vue-compatible wrapper path, so this is blocked on product/dependency judgment rather than a direct Builder task.
+The old React app and migrated Vue app use different Monaco package baselines. The migration explicitly accepts the newer Vue-compatible wrapper path; exact old Monaco `0.34.x` package-version parity is not required for migration closure.
 
 ## Evidence
 
@@ -20,4 +20,4 @@ The old React app and migrated Vue app use different Monaco package baselines. T
 
 ## Current Classification
 
-`blocked`: the difference is concrete, but current docs already accept it. A Builder should not change dependencies without Cooper/Echo approval.
+`wontfix`: exact package-version parity is intentionally not preserved. Current product-compatible Monaco behavior remains the accepted migration contract; any future Monaco downgrade/proof should be a separate dependency spike, not Builder parity work.

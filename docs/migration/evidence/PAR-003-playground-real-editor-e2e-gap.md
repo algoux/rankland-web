@@ -2,7 +2,7 @@
 
 ## Finding
 
-The product code routes Monaco changes, `Ctrl/Cmd + S`, and the E2E hook through the same preview-sync helper, but full-chain E2E still uses a private hook instead of a stable real Monaco edit path. Scout batch `SRV-2026-05-31-01` found a partial real keyboard path for invalid JSON, but did not prove a stable valid-source replacement path.
+The product code routes Monaco changes, `Ctrl/Cmd + S`, and the E2E hook through the same preview-sync helper. Full-chain E2E still uses a private hook instead of a stable real Monaco edit path, and Scout batch `SRV-2026-05-31-01` only proved a partial real keyboard path for invalid JSON. This is accepted as a harness limitation for migration closure rather than a product parity blocker.
 
 ## Evidence
 
@@ -25,4 +25,4 @@ The product code routes Monaco changes, `Ctrl/Cmd + S`, and the E2E hook through
 
 ## Current Classification
 
-`blocked`: this is a missing regression-test confidence path, not a high-confidence product-code parity failure. Cooper/Echo should decide whether to accept the existing hook/unit coverage as `wontfix` or authorize a focused harness spike for a stable real Monaco edit path.
+`wontfix`: existing hook/unit coverage plus the documented manual invalid-edit probe is accepted for migration closure. A stable real Monaco edit E2E can be reopened later as a focused harness-quality spike if it becomes worth the cost.

@@ -12,8 +12,8 @@ This backlog records remaining migration-parity work with evidence. It intention
 | ready | 0 |
 | discovered | 0 |
 | done | 4 |
-| blocked | 4 |
-| wontfix | 1 |
+| blocked | 2 |
+| wontfix | 3 |
 
 | priority | count |
 | --- | ---: |
@@ -23,10 +23,10 @@ This backlog records remaining migration-parity work with evidence. It intention
 
 ## Recommended Next Action
 
-1. No Builder-ready migration parity item remains after Scout batch `SRV-2026-05-31-01`.
-2. Cooper/Echo should decide whether to provide or approve a small production SRK corpus for `PAR-001`; without that corpus, the table pixel audit is blocked rather than actionable Builder work.
-3. Cooper/Echo should decide whether `PAR-003` should stay blocked for a future harness spike or be accepted as `wontfix` because existing hook/unit coverage is sufficient.
-4. Do not start `PAR-002`, `PAR-005`, `PAR-001`, or `PAR-003` as Builder work until the corresponding decision/blocker is cleared.
+1. No Builder-ready migration parity item remains after Scout batch `SRV-2026-05-31-01` and the 2026-06-01 decision checkpoint.
+2. `PAR-002` is closed as `wontfix`: exact old Monaco `0.34.x` package-version parity is intentionally not required while the Vue-compatible Monaco path remains product-green.
+3. `PAR-003` is closed as `wontfix`: the current hook/unit coverage plus documented manual real-edit probe is accepted for migration closure; a future Monaco harness spike can be opened separately if needed.
+4. `PAR-001` remains blocked unless a small production-like SRK corpus is approved. `PAR-005` remains blocked because release/cutover/deployment is an explicit process decision, not automatic Builder work.
 
 ## Items
 
@@ -46,7 +46,7 @@ This backlog records remaining migration-parity work with evidence. It intention
 
 ### PAR-002 — Playground Monaco exact package-version parity decision
 
-- status: blocked
+- status: wontfix
 - priority: P2
 - surface: Playground
 - risk: medium
@@ -55,12 +55,12 @@ This backlog records remaining migration-parity work with evidence. It intention
 - difference: migrated Playground uses `@guolao/vue-monaco-editor@1.6.0` with `monaco-editor@0.43.0`; exact old Monaco `0.34.0` package parity is intentionally not preserved.
 - evidence: `docs/migration/evidence/PAR-002-playground-monaco-version-decision.md`
 - suggested test: package baseline unit test plus existing Playground full-chain Monaco readiness/minimap/theme tests, if Cooper chooses to revisit this decision.
-- acceptance: Cooper/Echo either marks exact Monaco version parity `wontfix`, or authorizes a Builder spike to prove a stable Vue-compatible Monaco `0.34.x` integration without regressing current Playground behavior.
-- notes: current docs accept the migrated editor as product-compatible; this remains blocked on product/dependency judgment.
+- acceptance: exact package-version parity is not required for migration closure. The accepted contract is product-compatible Playground behavior on the current Vue-compatible Monaco stack, guarded by existing unit/full-chain coverage.
+- notes: closed at the 2026-06-01 decision checkpoint. Revisit only as a separate dependency spike, not as migration Builder work.
 
 ### PAR-003 — Playground real Monaco editing E2E gap
 
-- status: blocked
+- status: wontfix
 - priority: P2
 - surface: Playground
 - risk: medium
@@ -69,8 +69,8 @@ This backlog records remaining migration-parity work with evidence. It intention
 - difference: product live preview sync is covered through shared preview-sync logic and a stable E2E hook, but full-chain tests still avoid synthetic Monaco editing because `editor.setValue()` hangs in the current Vite 2 harness. Scout batch `SRV-2026-05-31-01` found that a real keyboard edit can reach the invalid state, but a stable full-source valid replacement path was not proven in the current harness.
 - evidence: `docs/migration/evidence/PAR-003-playground-real-editor-e2e-gap.md`
 - suggested test: replace or supplement the E2E hook with a stable real Monaco edit path that types/pastes valid and invalid SRK JSON into the editor and observes preview/invalid state changes.
-- acceptance: full-chain coverage exercises a stable real editor interaction path without the private `window.__ranklandPreviewPlaygroundSource` hook, or Cooper/Echo explicitly accepts the harness limitation as `wontfix` with the existing hook/unit coverage and a documented manual check.
-- notes: blocked on harness strategy or acceptance decision. This is still a test/harness parity gap, not a high-confidence product behavior failure.
+- acceptance: existing hook/unit coverage plus documented manual real-edit probe is sufficient for migration closure. A stable visible-Monaco edit E2E can be reopened as a future harness-quality spike, not a parity blocker.
+- notes: closed as `wontfix` at the 2026-06-01 decision checkpoint because this is a harness confidence gap, not a high-confidence product behavior failure.
 
 ### PAR-004 — Playground mobile old overflow behavior decision
 
