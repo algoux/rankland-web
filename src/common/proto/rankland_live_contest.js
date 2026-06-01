@@ -9,6 +9,1089 @@ var $Reader = $protobuf.Reader, $Writer = $protobuf.Writer, $util = $protobuf.ut
 // Exported root namespace
 var $root = $protobuf.roots.rankland_live_contest_client || ($protobuf.roots.rankland_live_contest_client = {});
 
+$root.rankland_live_contest_client = (function() {
+
+    /**
+     * Namespace rankland_live_contest_client.
+     * @exports rankland_live_contest_client
+     * @namespace
+     */
+    var rankland_live_contest_client = {};
+
+    rankland_live_contest_client.ClientEvent = (function() {
+
+        /**
+         * Properties of a ClientEvent.
+         * @memberof rankland_live_contest_client
+         * @interface IClientEvent
+         * @property {number|null} [eventId] ClientEvent eventId
+         * @property {rankland_live_contest_common.EventType|null} [type] ClientEvent type
+         * @property {rankland_live_contest_common.INewSolutionEvent|null} [newSolutionData] ClientEvent newSolutionData
+         * @property {rankland_live_contest_common.ISolutionOnProgressEvent|null} [solutionOnProgressData] ClientEvent solutionOnProgressData
+         * @property {rankland_live_contest_common.ISolutionOnResultSettleEvent|null} [solutionOnResultSettleData] ClientEvent solutionOnResultSettleData
+         * @property {rankland_live_contest_common.ISolutionOnResultChangeEvent|null} [solutionOnResultChangeData] ClientEvent solutionOnResultChangeData
+         * @property {rankland_live_contest_common.IContestConfigChangeEvent|null} [contestConfigChangeData] ClientEvent contestConfigChangeData
+         */
+
+        /**
+         * Constructs a new ClientEvent.
+         * @memberof rankland_live_contest_client
+         * @classdesc Represents a ClientEvent.
+         * @implements IClientEvent
+         * @constructor
+         * @param {rankland_live_contest_client.IClientEvent=} [properties] Properties to set
+         */
+        function ClientEvent(properties) {
+            if (properties)
+                for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
+                    if (properties[keys[i]] != null)
+                        this[keys[i]] = properties[keys[i]];
+        }
+
+        /**
+         * ClientEvent eventId.
+         * @member {number} eventId
+         * @memberof rankland_live_contest_client.ClientEvent
+         * @instance
+         */
+        ClientEvent.prototype.eventId = 0;
+
+        /**
+         * ClientEvent type.
+         * @member {rankland_live_contest_common.EventType} type
+         * @memberof rankland_live_contest_client.ClientEvent
+         * @instance
+         */
+        ClientEvent.prototype.type = 0;
+
+        /**
+         * ClientEvent newSolutionData.
+         * @member {rankland_live_contest_common.INewSolutionEvent|null|undefined} newSolutionData
+         * @memberof rankland_live_contest_client.ClientEvent
+         * @instance
+         */
+        ClientEvent.prototype.newSolutionData = null;
+
+        /**
+         * ClientEvent solutionOnProgressData.
+         * @member {rankland_live_contest_common.ISolutionOnProgressEvent|null|undefined} solutionOnProgressData
+         * @memberof rankland_live_contest_client.ClientEvent
+         * @instance
+         */
+        ClientEvent.prototype.solutionOnProgressData = null;
+
+        /**
+         * ClientEvent solutionOnResultSettleData.
+         * @member {rankland_live_contest_common.ISolutionOnResultSettleEvent|null|undefined} solutionOnResultSettleData
+         * @memberof rankland_live_contest_client.ClientEvent
+         * @instance
+         */
+        ClientEvent.prototype.solutionOnResultSettleData = null;
+
+        /**
+         * ClientEvent solutionOnResultChangeData.
+         * @member {rankland_live_contest_common.ISolutionOnResultChangeEvent|null|undefined} solutionOnResultChangeData
+         * @memberof rankland_live_contest_client.ClientEvent
+         * @instance
+         */
+        ClientEvent.prototype.solutionOnResultChangeData = null;
+
+        /**
+         * ClientEvent contestConfigChangeData.
+         * @member {rankland_live_contest_common.IContestConfigChangeEvent|null|undefined} contestConfigChangeData
+         * @memberof rankland_live_contest_client.ClientEvent
+         * @instance
+         */
+        ClientEvent.prototype.contestConfigChangeData = null;
+
+        // OneOf field names bound to virtual getters and setters
+        var $oneOfFields;
+
+        /**
+         * ClientEvent data.
+         * @member {"newSolutionData"|"solutionOnProgressData"|"solutionOnResultSettleData"|"solutionOnResultChangeData"|"contestConfigChangeData"|undefined} data
+         * @memberof rankland_live_contest_client.ClientEvent
+         * @instance
+         */
+        Object.defineProperty(ClientEvent.prototype, "data", {
+            get: $util.oneOfGetter($oneOfFields = ["newSolutionData", "solutionOnProgressData", "solutionOnResultSettleData", "solutionOnResultChangeData", "contestConfigChangeData"]),
+            set: $util.oneOfSetter($oneOfFields)
+        });
+
+        /**
+         * Creates a new ClientEvent instance using the specified properties.
+         * @function create
+         * @memberof rankland_live_contest_client.ClientEvent
+         * @static
+         * @param {rankland_live_contest_client.IClientEvent=} [properties] Properties to set
+         * @returns {rankland_live_contest_client.ClientEvent} ClientEvent instance
+         */
+        ClientEvent.create = function create(properties) {
+            return new ClientEvent(properties);
+        };
+
+        /**
+         * Encodes the specified ClientEvent message. Does not implicitly {@link rankland_live_contest_client.ClientEvent.verify|verify} messages.
+         * @function encode
+         * @memberof rankland_live_contest_client.ClientEvent
+         * @static
+         * @param {rankland_live_contest_client.IClientEvent} message ClientEvent message or plain object to encode
+         * @param {$protobuf.Writer} [writer] Writer to encode to
+         * @returns {$protobuf.Writer} Writer
+         */
+        ClientEvent.encode = function encode(message, writer) {
+            if (!writer)
+                writer = $Writer.create();
+            if (message.eventId != null && Object.hasOwnProperty.call(message, "eventId"))
+                writer.uint32(/* id 1, wireType 0 =*/8).uint32(message.eventId);
+            if (message.type != null && Object.hasOwnProperty.call(message, "type"))
+                writer.uint32(/* id 2, wireType 0 =*/16).int32(message.type);
+            if (message.newSolutionData != null && Object.hasOwnProperty.call(message, "newSolutionData"))
+                $root.rankland_live_contest_common.NewSolutionEvent.encode(message.newSolutionData, writer.uint32(/* id 3, wireType 2 =*/26).fork()).ldelim();
+            if (message.solutionOnProgressData != null && Object.hasOwnProperty.call(message, "solutionOnProgressData"))
+                $root.rankland_live_contest_common.SolutionOnProgressEvent.encode(message.solutionOnProgressData, writer.uint32(/* id 4, wireType 2 =*/34).fork()).ldelim();
+            if (message.solutionOnResultSettleData != null && Object.hasOwnProperty.call(message, "solutionOnResultSettleData"))
+                $root.rankland_live_contest_common.SolutionOnResultSettleEvent.encode(message.solutionOnResultSettleData, writer.uint32(/* id 5, wireType 2 =*/42).fork()).ldelim();
+            if (message.solutionOnResultChangeData != null && Object.hasOwnProperty.call(message, "solutionOnResultChangeData"))
+                $root.rankland_live_contest_common.SolutionOnResultChangeEvent.encode(message.solutionOnResultChangeData, writer.uint32(/* id 6, wireType 2 =*/50).fork()).ldelim();
+            if (message.contestConfigChangeData != null && Object.hasOwnProperty.call(message, "contestConfigChangeData"))
+                $root.rankland_live_contest_common.ContestConfigChangeEvent.encode(message.contestConfigChangeData, writer.uint32(/* id 7, wireType 2 =*/58).fork()).ldelim();
+            return writer;
+        };
+
+        /**
+         * Encodes the specified ClientEvent message, length delimited. Does not implicitly {@link rankland_live_contest_client.ClientEvent.verify|verify} messages.
+         * @function encodeDelimited
+         * @memberof rankland_live_contest_client.ClientEvent
+         * @static
+         * @param {rankland_live_contest_client.IClientEvent} message ClientEvent message or plain object to encode
+         * @param {$protobuf.Writer} [writer] Writer to encode to
+         * @returns {$protobuf.Writer} Writer
+         */
+        ClientEvent.encodeDelimited = function encodeDelimited(message, writer) {
+            return this.encode(message, writer).ldelim();
+        };
+
+        /**
+         * Decodes a ClientEvent message from the specified reader or buffer.
+         * @function decode
+         * @memberof rankland_live_contest_client.ClientEvent
+         * @static
+         * @param {$protobuf.Reader|Uint8Array} reader Reader or buffer to decode from
+         * @param {number} [length] Message length if known beforehand
+         * @returns {rankland_live_contest_client.ClientEvent} ClientEvent
+         * @throws {Error} If the payload is not a reader or valid buffer
+         * @throws {$protobuf.util.ProtocolError} If required fields are missing
+         */
+        ClientEvent.decode = function decode(reader, length) {
+            if (!(reader instanceof $Reader))
+                reader = $Reader.create(reader);
+            var end = length === undefined ? reader.len : reader.pos + length, message = new $root.rankland_live_contest_client.ClientEvent();
+            while (reader.pos < end) {
+                var tag = reader.uint32();
+                switch (tag >>> 3) {
+                case 1:
+                    message.eventId = reader.uint32();
+                    break;
+                case 2:
+                    message.type = reader.int32();
+                    break;
+                case 3:
+                    message.newSolutionData = $root.rankland_live_contest_common.NewSolutionEvent.decode(reader, reader.uint32());
+                    break;
+                case 4:
+                    message.solutionOnProgressData = $root.rankland_live_contest_common.SolutionOnProgressEvent.decode(reader, reader.uint32());
+                    break;
+                case 5:
+                    message.solutionOnResultSettleData = $root.rankland_live_contest_common.SolutionOnResultSettleEvent.decode(reader, reader.uint32());
+                    break;
+                case 6:
+                    message.solutionOnResultChangeData = $root.rankland_live_contest_common.SolutionOnResultChangeEvent.decode(reader, reader.uint32());
+                    break;
+                case 7:
+                    message.contestConfigChangeData = $root.rankland_live_contest_common.ContestConfigChangeEvent.decode(reader, reader.uint32());
+                    break;
+                default:
+                    reader.skipType(tag & 7);
+                    break;
+                }
+            }
+            return message;
+        };
+
+        /**
+         * Decodes a ClientEvent message from the specified reader or buffer, length delimited.
+         * @function decodeDelimited
+         * @memberof rankland_live_contest_client.ClientEvent
+         * @static
+         * @param {$protobuf.Reader|Uint8Array} reader Reader or buffer to decode from
+         * @returns {rankland_live_contest_client.ClientEvent} ClientEvent
+         * @throws {Error} If the payload is not a reader or valid buffer
+         * @throws {$protobuf.util.ProtocolError} If required fields are missing
+         */
+        ClientEvent.decodeDelimited = function decodeDelimited(reader) {
+            if (!(reader instanceof $Reader))
+                reader = new $Reader(reader);
+            return this.decode(reader, reader.uint32());
+        };
+
+        /**
+         * Verifies a ClientEvent message.
+         * @function verify
+         * @memberof rankland_live_contest_client.ClientEvent
+         * @static
+         * @param {Object.<string,*>} message Plain object to verify
+         * @returns {string|null} `null` if valid, otherwise the reason why it is not
+         */
+        ClientEvent.verify = function verify(message) {
+            if (typeof message !== "object" || message === null)
+                return "object expected";
+            var properties = {};
+            if (message.eventId != null && message.hasOwnProperty("eventId"))
+                if (!$util.isInteger(message.eventId))
+                    return "eventId: integer expected";
+            if (message.type != null && message.hasOwnProperty("type"))
+                switch (message.type) {
+                default:
+                    return "type: enum value expected";
+                case 0:
+                case 1:
+                case 2:
+                case 3:
+                case 4:
+                    break;
+                }
+            if (message.newSolutionData != null && message.hasOwnProperty("newSolutionData")) {
+                properties.data = 1;
+                {
+                    var error = $root.rankland_live_contest_common.NewSolutionEvent.verify(message.newSolutionData);
+                    if (error)
+                        return "newSolutionData." + error;
+                }
+            }
+            if (message.solutionOnProgressData != null && message.hasOwnProperty("solutionOnProgressData")) {
+                if (properties.data === 1)
+                    return "data: multiple values";
+                properties.data = 1;
+                {
+                    var error = $root.rankland_live_contest_common.SolutionOnProgressEvent.verify(message.solutionOnProgressData);
+                    if (error)
+                        return "solutionOnProgressData." + error;
+                }
+            }
+            if (message.solutionOnResultSettleData != null && message.hasOwnProperty("solutionOnResultSettleData")) {
+                if (properties.data === 1)
+                    return "data: multiple values";
+                properties.data = 1;
+                {
+                    var error = $root.rankland_live_contest_common.SolutionOnResultSettleEvent.verify(message.solutionOnResultSettleData);
+                    if (error)
+                        return "solutionOnResultSettleData." + error;
+                }
+            }
+            if (message.solutionOnResultChangeData != null && message.hasOwnProperty("solutionOnResultChangeData")) {
+                if (properties.data === 1)
+                    return "data: multiple values";
+                properties.data = 1;
+                {
+                    var error = $root.rankland_live_contest_common.SolutionOnResultChangeEvent.verify(message.solutionOnResultChangeData);
+                    if (error)
+                        return "solutionOnResultChangeData." + error;
+                }
+            }
+            if (message.contestConfigChangeData != null && message.hasOwnProperty("contestConfigChangeData")) {
+                if (properties.data === 1)
+                    return "data: multiple values";
+                properties.data = 1;
+                {
+                    var error = $root.rankland_live_contest_common.ContestConfigChangeEvent.verify(message.contestConfigChangeData);
+                    if (error)
+                        return "contestConfigChangeData." + error;
+                }
+            }
+            return null;
+        };
+
+        /**
+         * Creates a ClientEvent message from a plain object. Also converts values to their respective internal types.
+         * @function fromObject
+         * @memberof rankland_live_contest_client.ClientEvent
+         * @static
+         * @param {Object.<string,*>} object Plain object
+         * @returns {rankland_live_contest_client.ClientEvent} ClientEvent
+         */
+        ClientEvent.fromObject = function fromObject(object) {
+            if (object instanceof $root.rankland_live_contest_client.ClientEvent)
+                return object;
+            var message = new $root.rankland_live_contest_client.ClientEvent();
+            if (object.eventId != null)
+                message.eventId = object.eventId >>> 0;
+            switch (object.type) {
+            case "NEW_SOLUTION":
+            case 0:
+                message.type = 0;
+                break;
+            case "SOLUTION_ON_PROGRESS":
+            case 1:
+                message.type = 1;
+                break;
+            case "SOLUTION_ON_RESULT_SETTLE":
+            case 2:
+                message.type = 2;
+                break;
+            case "SOLUTION_ON_RESULT_CHANGE":
+            case 3:
+                message.type = 3;
+                break;
+            case "CONTEST_CONFIG_CHANGE":
+            case 4:
+                message.type = 4;
+                break;
+            }
+            if (object.newSolutionData != null) {
+                if (typeof object.newSolutionData !== "object")
+                    throw TypeError(".rankland_live_contest_client.ClientEvent.newSolutionData: object expected");
+                message.newSolutionData = $root.rankland_live_contest_common.NewSolutionEvent.fromObject(object.newSolutionData);
+            }
+            if (object.solutionOnProgressData != null) {
+                if (typeof object.solutionOnProgressData !== "object")
+                    throw TypeError(".rankland_live_contest_client.ClientEvent.solutionOnProgressData: object expected");
+                message.solutionOnProgressData = $root.rankland_live_contest_common.SolutionOnProgressEvent.fromObject(object.solutionOnProgressData);
+            }
+            if (object.solutionOnResultSettleData != null) {
+                if (typeof object.solutionOnResultSettleData !== "object")
+                    throw TypeError(".rankland_live_contest_client.ClientEvent.solutionOnResultSettleData: object expected");
+                message.solutionOnResultSettleData = $root.rankland_live_contest_common.SolutionOnResultSettleEvent.fromObject(object.solutionOnResultSettleData);
+            }
+            if (object.solutionOnResultChangeData != null) {
+                if (typeof object.solutionOnResultChangeData !== "object")
+                    throw TypeError(".rankland_live_contest_client.ClientEvent.solutionOnResultChangeData: object expected");
+                message.solutionOnResultChangeData = $root.rankland_live_contest_common.SolutionOnResultChangeEvent.fromObject(object.solutionOnResultChangeData);
+            }
+            if (object.contestConfigChangeData != null) {
+                if (typeof object.contestConfigChangeData !== "object")
+                    throw TypeError(".rankland_live_contest_client.ClientEvent.contestConfigChangeData: object expected");
+                message.contestConfigChangeData = $root.rankland_live_contest_common.ContestConfigChangeEvent.fromObject(object.contestConfigChangeData);
+            }
+            return message;
+        };
+
+        /**
+         * Creates a plain object from a ClientEvent message. Also converts values to other types if specified.
+         * @function toObject
+         * @memberof rankland_live_contest_client.ClientEvent
+         * @static
+         * @param {rankland_live_contest_client.ClientEvent} message ClientEvent
+         * @param {$protobuf.IConversionOptions} [options] Conversion options
+         * @returns {Object.<string,*>} Plain object
+         */
+        ClientEvent.toObject = function toObject(message, options) {
+            if (!options)
+                options = {};
+            var object = {};
+            if (options.defaults) {
+                object.eventId = 0;
+                object.type = options.enums === String ? "NEW_SOLUTION" : 0;
+            }
+            if (message.eventId != null && message.hasOwnProperty("eventId"))
+                object.eventId = message.eventId;
+            if (message.type != null && message.hasOwnProperty("type"))
+                object.type = options.enums === String ? $root.rankland_live_contest_common.EventType[message.type] : message.type;
+            if (message.newSolutionData != null && message.hasOwnProperty("newSolutionData")) {
+                object.newSolutionData = $root.rankland_live_contest_common.NewSolutionEvent.toObject(message.newSolutionData, options);
+                if (options.oneofs)
+                    object.data = "newSolutionData";
+            }
+            if (message.solutionOnProgressData != null && message.hasOwnProperty("solutionOnProgressData")) {
+                object.solutionOnProgressData = $root.rankland_live_contest_common.SolutionOnProgressEvent.toObject(message.solutionOnProgressData, options);
+                if (options.oneofs)
+                    object.data = "solutionOnProgressData";
+            }
+            if (message.solutionOnResultSettleData != null && message.hasOwnProperty("solutionOnResultSettleData")) {
+                object.solutionOnResultSettleData = $root.rankland_live_contest_common.SolutionOnResultSettleEvent.toObject(message.solutionOnResultSettleData, options);
+                if (options.oneofs)
+                    object.data = "solutionOnResultSettleData";
+            }
+            if (message.solutionOnResultChangeData != null && message.hasOwnProperty("solutionOnResultChangeData")) {
+                object.solutionOnResultChangeData = $root.rankland_live_contest_common.SolutionOnResultChangeEvent.toObject(message.solutionOnResultChangeData, options);
+                if (options.oneofs)
+                    object.data = "solutionOnResultChangeData";
+            }
+            if (message.contestConfigChangeData != null && message.hasOwnProperty("contestConfigChangeData")) {
+                object.contestConfigChangeData = $root.rankland_live_contest_common.ContestConfigChangeEvent.toObject(message.contestConfigChangeData, options);
+                if (options.oneofs)
+                    object.data = "contestConfigChangeData";
+            }
+            return object;
+        };
+
+        /**
+         * Converts this ClientEvent to JSON.
+         * @function toJSON
+         * @memberof rankland_live_contest_client.ClientEvent
+         * @instance
+         * @returns {Object.<string,*>} JSON object
+         */
+        ClientEvent.prototype.toJSON = function toJSON() {
+            return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
+        };
+
+        return ClientEvent;
+    })();
+
+    rankland_live_contest_client.BatchClientEvent = (function() {
+
+        /**
+         * Properties of a BatchClientEvent.
+         * @memberof rankland_live_contest_client
+         * @interface IBatchClientEvent
+         * @property {Array.<rankland_live_contest_client.IClientEvent>|null} [events] BatchClientEvent events
+         */
+
+        /**
+         * Constructs a new BatchClientEvent.
+         * @memberof rankland_live_contest_client
+         * @classdesc Represents a BatchClientEvent.
+         * @implements IBatchClientEvent
+         * @constructor
+         * @param {rankland_live_contest_client.IBatchClientEvent=} [properties] Properties to set
+         */
+        function BatchClientEvent(properties) {
+            this.events = [];
+            if (properties)
+                for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
+                    if (properties[keys[i]] != null)
+                        this[keys[i]] = properties[keys[i]];
+        }
+
+        /**
+         * BatchClientEvent events.
+         * @member {Array.<rankland_live_contest_client.IClientEvent>} events
+         * @memberof rankland_live_contest_client.BatchClientEvent
+         * @instance
+         */
+        BatchClientEvent.prototype.events = $util.emptyArray;
+
+        /**
+         * Creates a new BatchClientEvent instance using the specified properties.
+         * @function create
+         * @memberof rankland_live_contest_client.BatchClientEvent
+         * @static
+         * @param {rankland_live_contest_client.IBatchClientEvent=} [properties] Properties to set
+         * @returns {rankland_live_contest_client.BatchClientEvent} BatchClientEvent instance
+         */
+        BatchClientEvent.create = function create(properties) {
+            return new BatchClientEvent(properties);
+        };
+
+        /**
+         * Encodes the specified BatchClientEvent message. Does not implicitly {@link rankland_live_contest_client.BatchClientEvent.verify|verify} messages.
+         * @function encode
+         * @memberof rankland_live_contest_client.BatchClientEvent
+         * @static
+         * @param {rankland_live_contest_client.IBatchClientEvent} message BatchClientEvent message or plain object to encode
+         * @param {$protobuf.Writer} [writer] Writer to encode to
+         * @returns {$protobuf.Writer} Writer
+         */
+        BatchClientEvent.encode = function encode(message, writer) {
+            if (!writer)
+                writer = $Writer.create();
+            if (message.events != null && message.events.length)
+                for (var i = 0; i < message.events.length; ++i)
+                    $root.rankland_live_contest_client.ClientEvent.encode(message.events[i], writer.uint32(/* id 1, wireType 2 =*/10).fork()).ldelim();
+            return writer;
+        };
+
+        /**
+         * Encodes the specified BatchClientEvent message, length delimited. Does not implicitly {@link rankland_live_contest_client.BatchClientEvent.verify|verify} messages.
+         * @function encodeDelimited
+         * @memberof rankland_live_contest_client.BatchClientEvent
+         * @static
+         * @param {rankland_live_contest_client.IBatchClientEvent} message BatchClientEvent message or plain object to encode
+         * @param {$protobuf.Writer} [writer] Writer to encode to
+         * @returns {$protobuf.Writer} Writer
+         */
+        BatchClientEvent.encodeDelimited = function encodeDelimited(message, writer) {
+            return this.encode(message, writer).ldelim();
+        };
+
+        /**
+         * Decodes a BatchClientEvent message from the specified reader or buffer.
+         * @function decode
+         * @memberof rankland_live_contest_client.BatchClientEvent
+         * @static
+         * @param {$protobuf.Reader|Uint8Array} reader Reader or buffer to decode from
+         * @param {number} [length] Message length if known beforehand
+         * @returns {rankland_live_contest_client.BatchClientEvent} BatchClientEvent
+         * @throws {Error} If the payload is not a reader or valid buffer
+         * @throws {$protobuf.util.ProtocolError} If required fields are missing
+         */
+        BatchClientEvent.decode = function decode(reader, length) {
+            if (!(reader instanceof $Reader))
+                reader = $Reader.create(reader);
+            var end = length === undefined ? reader.len : reader.pos + length, message = new $root.rankland_live_contest_client.BatchClientEvent();
+            while (reader.pos < end) {
+                var tag = reader.uint32();
+                switch (tag >>> 3) {
+                case 1:
+                    if (!(message.events && message.events.length))
+                        message.events = [];
+                    message.events.push($root.rankland_live_contest_client.ClientEvent.decode(reader, reader.uint32()));
+                    break;
+                default:
+                    reader.skipType(tag & 7);
+                    break;
+                }
+            }
+            return message;
+        };
+
+        /**
+         * Decodes a BatchClientEvent message from the specified reader or buffer, length delimited.
+         * @function decodeDelimited
+         * @memberof rankland_live_contest_client.BatchClientEvent
+         * @static
+         * @param {$protobuf.Reader|Uint8Array} reader Reader or buffer to decode from
+         * @returns {rankland_live_contest_client.BatchClientEvent} BatchClientEvent
+         * @throws {Error} If the payload is not a reader or valid buffer
+         * @throws {$protobuf.util.ProtocolError} If required fields are missing
+         */
+        BatchClientEvent.decodeDelimited = function decodeDelimited(reader) {
+            if (!(reader instanceof $Reader))
+                reader = new $Reader(reader);
+            return this.decode(reader, reader.uint32());
+        };
+
+        /**
+         * Verifies a BatchClientEvent message.
+         * @function verify
+         * @memberof rankland_live_contest_client.BatchClientEvent
+         * @static
+         * @param {Object.<string,*>} message Plain object to verify
+         * @returns {string|null} `null` if valid, otherwise the reason why it is not
+         */
+        BatchClientEvent.verify = function verify(message) {
+            if (typeof message !== "object" || message === null)
+                return "object expected";
+            if (message.events != null && message.hasOwnProperty("events")) {
+                if (!Array.isArray(message.events))
+                    return "events: array expected";
+                for (var i = 0; i < message.events.length; ++i) {
+                    var error = $root.rankland_live_contest_client.ClientEvent.verify(message.events[i]);
+                    if (error)
+                        return "events." + error;
+                }
+            }
+            return null;
+        };
+
+        /**
+         * Creates a BatchClientEvent message from a plain object. Also converts values to their respective internal types.
+         * @function fromObject
+         * @memberof rankland_live_contest_client.BatchClientEvent
+         * @static
+         * @param {Object.<string,*>} object Plain object
+         * @returns {rankland_live_contest_client.BatchClientEvent} BatchClientEvent
+         */
+        BatchClientEvent.fromObject = function fromObject(object) {
+            if (object instanceof $root.rankland_live_contest_client.BatchClientEvent)
+                return object;
+            var message = new $root.rankland_live_contest_client.BatchClientEvent();
+            if (object.events) {
+                if (!Array.isArray(object.events))
+                    throw TypeError(".rankland_live_contest_client.BatchClientEvent.events: array expected");
+                message.events = [];
+                for (var i = 0; i < object.events.length; ++i) {
+                    if (typeof object.events[i] !== "object")
+                        throw TypeError(".rankland_live_contest_client.BatchClientEvent.events: object expected");
+                    message.events[i] = $root.rankland_live_contest_client.ClientEvent.fromObject(object.events[i]);
+                }
+            }
+            return message;
+        };
+
+        /**
+         * Creates a plain object from a BatchClientEvent message. Also converts values to other types if specified.
+         * @function toObject
+         * @memberof rankland_live_contest_client.BatchClientEvent
+         * @static
+         * @param {rankland_live_contest_client.BatchClientEvent} message BatchClientEvent
+         * @param {$protobuf.IConversionOptions} [options] Conversion options
+         * @returns {Object.<string,*>} Plain object
+         */
+        BatchClientEvent.toObject = function toObject(message, options) {
+            if (!options)
+                options = {};
+            var object = {};
+            if (options.arrays || options.defaults)
+                object.events = [];
+            if (message.events && message.events.length) {
+                object.events = [];
+                for (var j = 0; j < message.events.length; ++j)
+                    object.events[j] = $root.rankland_live_contest_client.ClientEvent.toObject(message.events[j], options);
+            }
+            return object;
+        };
+
+        /**
+         * Converts this BatchClientEvent to JSON.
+         * @function toJSON
+         * @memberof rankland_live_contest_client.BatchClientEvent
+         * @instance
+         * @returns {Object.<string,*>} JSON object
+         */
+        BatchClientEvent.prototype.toJSON = function toJSON() {
+            return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
+        };
+
+        return BatchClientEvent;
+    })();
+
+    rankland_live_contest_client.GetContestEventsResponse = (function() {
+
+        /**
+         * Properties of a GetContestEventsResponse.
+         * @memberof rankland_live_contest_client
+         * @interface IGetContestEventsResponse
+         * @property {string|null} [uk] GetContestEventsResponse uk
+         * @property {number|null} [fromEventId] GetContestEventsResponse fromEventId
+         * @property {number|null} [toEventId] GetContestEventsResponse toEventId
+         * @property {number|null} [checkpointEventId] GetContestEventsResponse checkpointEventId
+         * @property {number|null} [latestEventId] GetContestEventsResponse latestEventId
+         * @property {number|null} [streamRevision] GetContestEventsResponse streamRevision
+         * @property {boolean|null} [hasMore] GetContestEventsResponse hasMore
+         * @property {boolean|null} [resetRequired] GetContestEventsResponse resetRequired
+         * @property {string|null} [resetReason] GetContestEventsResponse resetReason
+         * @property {Array.<rankland_live_contest_client.IClientEvent>|null} [events] GetContestEventsResponse events
+         */
+
+        /**
+         * Constructs a new GetContestEventsResponse.
+         * @memberof rankland_live_contest_client
+         * @classdesc Represents a GetContestEventsResponse.
+         * @implements IGetContestEventsResponse
+         * @constructor
+         * @param {rankland_live_contest_client.IGetContestEventsResponse=} [properties] Properties to set
+         */
+        function GetContestEventsResponse(properties) {
+            this.events = [];
+            if (properties)
+                for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
+                    if (properties[keys[i]] != null)
+                        this[keys[i]] = properties[keys[i]];
+        }
+
+        /**
+         * GetContestEventsResponse uk.
+         * @member {string} uk
+         * @memberof rankland_live_contest_client.GetContestEventsResponse
+         * @instance
+         */
+        GetContestEventsResponse.prototype.uk = "";
+
+        /**
+         * GetContestEventsResponse fromEventId.
+         * @member {number|null|undefined} fromEventId
+         * @memberof rankland_live_contest_client.GetContestEventsResponse
+         * @instance
+         */
+        GetContestEventsResponse.prototype.fromEventId = null;
+
+        /**
+         * GetContestEventsResponse toEventId.
+         * @member {number|null|undefined} toEventId
+         * @memberof rankland_live_contest_client.GetContestEventsResponse
+         * @instance
+         */
+        GetContestEventsResponse.prototype.toEventId = null;
+
+        /**
+         * GetContestEventsResponse checkpointEventId.
+         * @member {number} checkpointEventId
+         * @memberof rankland_live_contest_client.GetContestEventsResponse
+         * @instance
+         */
+        GetContestEventsResponse.prototype.checkpointEventId = 0;
+
+        /**
+         * GetContestEventsResponse latestEventId.
+         * @member {number} latestEventId
+         * @memberof rankland_live_contest_client.GetContestEventsResponse
+         * @instance
+         */
+        GetContestEventsResponse.prototype.latestEventId = 0;
+
+        /**
+         * GetContestEventsResponse streamRevision.
+         * @member {number} streamRevision
+         * @memberof rankland_live_contest_client.GetContestEventsResponse
+         * @instance
+         */
+        GetContestEventsResponse.prototype.streamRevision = 0;
+
+        /**
+         * GetContestEventsResponse hasMore.
+         * @member {boolean} hasMore
+         * @memberof rankland_live_contest_client.GetContestEventsResponse
+         * @instance
+         */
+        GetContestEventsResponse.prototype.hasMore = false;
+
+        /**
+         * GetContestEventsResponse resetRequired.
+         * @member {boolean} resetRequired
+         * @memberof rankland_live_contest_client.GetContestEventsResponse
+         * @instance
+         */
+        GetContestEventsResponse.prototype.resetRequired = false;
+
+        /**
+         * GetContestEventsResponse resetReason.
+         * @member {string} resetReason
+         * @memberof rankland_live_contest_client.GetContestEventsResponse
+         * @instance
+         */
+        GetContestEventsResponse.prototype.resetReason = "";
+
+        /**
+         * GetContestEventsResponse events.
+         * @member {Array.<rankland_live_contest_client.IClientEvent>} events
+         * @memberof rankland_live_contest_client.GetContestEventsResponse
+         * @instance
+         */
+        GetContestEventsResponse.prototype.events = $util.emptyArray;
+
+        // OneOf field names bound to virtual getters and setters
+        var $oneOfFields;
+
+        /**
+         * GetContestEventsResponse _fromEventId.
+         * @member {"fromEventId"|undefined} _fromEventId
+         * @memberof rankland_live_contest_client.GetContestEventsResponse
+         * @instance
+         */
+        Object.defineProperty(GetContestEventsResponse.prototype, "_fromEventId", {
+            get: $util.oneOfGetter($oneOfFields = ["fromEventId"]),
+            set: $util.oneOfSetter($oneOfFields)
+        });
+
+        /**
+         * GetContestEventsResponse _toEventId.
+         * @member {"toEventId"|undefined} _toEventId
+         * @memberof rankland_live_contest_client.GetContestEventsResponse
+         * @instance
+         */
+        Object.defineProperty(GetContestEventsResponse.prototype, "_toEventId", {
+            get: $util.oneOfGetter($oneOfFields = ["toEventId"]),
+            set: $util.oneOfSetter($oneOfFields)
+        });
+
+        /**
+         * Creates a new GetContestEventsResponse instance using the specified properties.
+         * @function create
+         * @memberof rankland_live_contest_client.GetContestEventsResponse
+         * @static
+         * @param {rankland_live_contest_client.IGetContestEventsResponse=} [properties] Properties to set
+         * @returns {rankland_live_contest_client.GetContestEventsResponse} GetContestEventsResponse instance
+         */
+        GetContestEventsResponse.create = function create(properties) {
+            return new GetContestEventsResponse(properties);
+        };
+
+        /**
+         * Encodes the specified GetContestEventsResponse message. Does not implicitly {@link rankland_live_contest_client.GetContestEventsResponse.verify|verify} messages.
+         * @function encode
+         * @memberof rankland_live_contest_client.GetContestEventsResponse
+         * @static
+         * @param {rankland_live_contest_client.IGetContestEventsResponse} message GetContestEventsResponse message or plain object to encode
+         * @param {$protobuf.Writer} [writer] Writer to encode to
+         * @returns {$protobuf.Writer} Writer
+         */
+        GetContestEventsResponse.encode = function encode(message, writer) {
+            if (!writer)
+                writer = $Writer.create();
+            if (message.uk != null && Object.hasOwnProperty.call(message, "uk"))
+                writer.uint32(/* id 1, wireType 2 =*/10).string(message.uk);
+            if (message.fromEventId != null && Object.hasOwnProperty.call(message, "fromEventId"))
+                writer.uint32(/* id 2, wireType 0 =*/16).uint32(message.fromEventId);
+            if (message.toEventId != null && Object.hasOwnProperty.call(message, "toEventId"))
+                writer.uint32(/* id 3, wireType 0 =*/24).uint32(message.toEventId);
+            if (message.checkpointEventId != null && Object.hasOwnProperty.call(message, "checkpointEventId"))
+                writer.uint32(/* id 4, wireType 0 =*/32).uint32(message.checkpointEventId);
+            if (message.latestEventId != null && Object.hasOwnProperty.call(message, "latestEventId"))
+                writer.uint32(/* id 5, wireType 0 =*/40).uint32(message.latestEventId);
+            if (message.streamRevision != null && Object.hasOwnProperty.call(message, "streamRevision"))
+                writer.uint32(/* id 6, wireType 0 =*/48).uint32(message.streamRevision);
+            if (message.hasMore != null && Object.hasOwnProperty.call(message, "hasMore"))
+                writer.uint32(/* id 7, wireType 0 =*/56).bool(message.hasMore);
+            if (message.resetRequired != null && Object.hasOwnProperty.call(message, "resetRequired"))
+                writer.uint32(/* id 8, wireType 0 =*/64).bool(message.resetRequired);
+            if (message.resetReason != null && Object.hasOwnProperty.call(message, "resetReason"))
+                writer.uint32(/* id 9, wireType 2 =*/74).string(message.resetReason);
+            if (message.events != null && message.events.length)
+                for (var i = 0; i < message.events.length; ++i)
+                    $root.rankland_live_contest_client.ClientEvent.encode(message.events[i], writer.uint32(/* id 10, wireType 2 =*/82).fork()).ldelim();
+            return writer;
+        };
+
+        /**
+         * Encodes the specified GetContestEventsResponse message, length delimited. Does not implicitly {@link rankland_live_contest_client.GetContestEventsResponse.verify|verify} messages.
+         * @function encodeDelimited
+         * @memberof rankland_live_contest_client.GetContestEventsResponse
+         * @static
+         * @param {rankland_live_contest_client.IGetContestEventsResponse} message GetContestEventsResponse message or plain object to encode
+         * @param {$protobuf.Writer} [writer] Writer to encode to
+         * @returns {$protobuf.Writer} Writer
+         */
+        GetContestEventsResponse.encodeDelimited = function encodeDelimited(message, writer) {
+            return this.encode(message, writer).ldelim();
+        };
+
+        /**
+         * Decodes a GetContestEventsResponse message from the specified reader or buffer.
+         * @function decode
+         * @memberof rankland_live_contest_client.GetContestEventsResponse
+         * @static
+         * @param {$protobuf.Reader|Uint8Array} reader Reader or buffer to decode from
+         * @param {number} [length] Message length if known beforehand
+         * @returns {rankland_live_contest_client.GetContestEventsResponse} GetContestEventsResponse
+         * @throws {Error} If the payload is not a reader or valid buffer
+         * @throws {$protobuf.util.ProtocolError} If required fields are missing
+         */
+        GetContestEventsResponse.decode = function decode(reader, length) {
+            if (!(reader instanceof $Reader))
+                reader = $Reader.create(reader);
+            var end = length === undefined ? reader.len : reader.pos + length, message = new $root.rankland_live_contest_client.GetContestEventsResponse();
+            while (reader.pos < end) {
+                var tag = reader.uint32();
+                switch (tag >>> 3) {
+                case 1:
+                    message.uk = reader.string();
+                    break;
+                case 2:
+                    message.fromEventId = reader.uint32();
+                    break;
+                case 3:
+                    message.toEventId = reader.uint32();
+                    break;
+                case 4:
+                    message.checkpointEventId = reader.uint32();
+                    break;
+                case 5:
+                    message.latestEventId = reader.uint32();
+                    break;
+                case 6:
+                    message.streamRevision = reader.uint32();
+                    break;
+                case 7:
+                    message.hasMore = reader.bool();
+                    break;
+                case 8:
+                    message.resetRequired = reader.bool();
+                    break;
+                case 9:
+                    message.resetReason = reader.string();
+                    break;
+                case 10:
+                    if (!(message.events && message.events.length))
+                        message.events = [];
+                    message.events.push($root.rankland_live_contest_client.ClientEvent.decode(reader, reader.uint32()));
+                    break;
+                default:
+                    reader.skipType(tag & 7);
+                    break;
+                }
+            }
+            return message;
+        };
+
+        /**
+         * Decodes a GetContestEventsResponse message from the specified reader or buffer, length delimited.
+         * @function decodeDelimited
+         * @memberof rankland_live_contest_client.GetContestEventsResponse
+         * @static
+         * @param {$protobuf.Reader|Uint8Array} reader Reader or buffer to decode from
+         * @returns {rankland_live_contest_client.GetContestEventsResponse} GetContestEventsResponse
+         * @throws {Error} If the payload is not a reader or valid buffer
+         * @throws {$protobuf.util.ProtocolError} If required fields are missing
+         */
+        GetContestEventsResponse.decodeDelimited = function decodeDelimited(reader) {
+            if (!(reader instanceof $Reader))
+                reader = new $Reader(reader);
+            return this.decode(reader, reader.uint32());
+        };
+
+        /**
+         * Verifies a GetContestEventsResponse message.
+         * @function verify
+         * @memberof rankland_live_contest_client.GetContestEventsResponse
+         * @static
+         * @param {Object.<string,*>} message Plain object to verify
+         * @returns {string|null} `null` if valid, otherwise the reason why it is not
+         */
+        GetContestEventsResponse.verify = function verify(message) {
+            if (typeof message !== "object" || message === null)
+                return "object expected";
+            var properties = {};
+            if (message.uk != null && message.hasOwnProperty("uk"))
+                if (!$util.isString(message.uk))
+                    return "uk: string expected";
+            if (message.fromEventId != null && message.hasOwnProperty("fromEventId")) {
+                properties._fromEventId = 1;
+                if (!$util.isInteger(message.fromEventId))
+                    return "fromEventId: integer expected";
+            }
+            if (message.toEventId != null && message.hasOwnProperty("toEventId")) {
+                properties._toEventId = 1;
+                if (!$util.isInteger(message.toEventId))
+                    return "toEventId: integer expected";
+            }
+            if (message.checkpointEventId != null && message.hasOwnProperty("checkpointEventId"))
+                if (!$util.isInteger(message.checkpointEventId))
+                    return "checkpointEventId: integer expected";
+            if (message.latestEventId != null && message.hasOwnProperty("latestEventId"))
+                if (!$util.isInteger(message.latestEventId))
+                    return "latestEventId: integer expected";
+            if (message.streamRevision != null && message.hasOwnProperty("streamRevision"))
+                if (!$util.isInteger(message.streamRevision))
+                    return "streamRevision: integer expected";
+            if (message.hasMore != null && message.hasOwnProperty("hasMore"))
+                if (typeof message.hasMore !== "boolean")
+                    return "hasMore: boolean expected";
+            if (message.resetRequired != null && message.hasOwnProperty("resetRequired"))
+                if (typeof message.resetRequired !== "boolean")
+                    return "resetRequired: boolean expected";
+            if (message.resetReason != null && message.hasOwnProperty("resetReason"))
+                if (!$util.isString(message.resetReason))
+                    return "resetReason: string expected";
+            if (message.events != null && message.hasOwnProperty("events")) {
+                if (!Array.isArray(message.events))
+                    return "events: array expected";
+                for (var i = 0; i < message.events.length; ++i) {
+                    var error = $root.rankland_live_contest_client.ClientEvent.verify(message.events[i]);
+                    if (error)
+                        return "events." + error;
+                }
+            }
+            return null;
+        };
+
+        /**
+         * Creates a GetContestEventsResponse message from a plain object. Also converts values to their respective internal types.
+         * @function fromObject
+         * @memberof rankland_live_contest_client.GetContestEventsResponse
+         * @static
+         * @param {Object.<string,*>} object Plain object
+         * @returns {rankland_live_contest_client.GetContestEventsResponse} GetContestEventsResponse
+         */
+        GetContestEventsResponse.fromObject = function fromObject(object) {
+            if (object instanceof $root.rankland_live_contest_client.GetContestEventsResponse)
+                return object;
+            var message = new $root.rankland_live_contest_client.GetContestEventsResponse();
+            if (object.uk != null)
+                message.uk = String(object.uk);
+            if (object.fromEventId != null)
+                message.fromEventId = object.fromEventId >>> 0;
+            if (object.toEventId != null)
+                message.toEventId = object.toEventId >>> 0;
+            if (object.checkpointEventId != null)
+                message.checkpointEventId = object.checkpointEventId >>> 0;
+            if (object.latestEventId != null)
+                message.latestEventId = object.latestEventId >>> 0;
+            if (object.streamRevision != null)
+                message.streamRevision = object.streamRevision >>> 0;
+            if (object.hasMore != null)
+                message.hasMore = Boolean(object.hasMore);
+            if (object.resetRequired != null)
+                message.resetRequired = Boolean(object.resetRequired);
+            if (object.resetReason != null)
+                message.resetReason = String(object.resetReason);
+            if (object.events) {
+                if (!Array.isArray(object.events))
+                    throw TypeError(".rankland_live_contest_client.GetContestEventsResponse.events: array expected");
+                message.events = [];
+                for (var i = 0; i < object.events.length; ++i) {
+                    if (typeof object.events[i] !== "object")
+                        throw TypeError(".rankland_live_contest_client.GetContestEventsResponse.events: object expected");
+                    message.events[i] = $root.rankland_live_contest_client.ClientEvent.fromObject(object.events[i]);
+                }
+            }
+            return message;
+        };
+
+        /**
+         * Creates a plain object from a GetContestEventsResponse message. Also converts values to other types if specified.
+         * @function toObject
+         * @memberof rankland_live_contest_client.GetContestEventsResponse
+         * @static
+         * @param {rankland_live_contest_client.GetContestEventsResponse} message GetContestEventsResponse
+         * @param {$protobuf.IConversionOptions} [options] Conversion options
+         * @returns {Object.<string,*>} Plain object
+         */
+        GetContestEventsResponse.toObject = function toObject(message, options) {
+            if (!options)
+                options = {};
+            var object = {};
+            if (options.arrays || options.defaults)
+                object.events = [];
+            if (options.defaults) {
+                object.uk = "";
+                object.checkpointEventId = 0;
+                object.latestEventId = 0;
+                object.streamRevision = 0;
+                object.hasMore = false;
+                object.resetRequired = false;
+                object.resetReason = "";
+            }
+            if (message.uk != null && message.hasOwnProperty("uk"))
+                object.uk = message.uk;
+            if (message.fromEventId != null && message.hasOwnProperty("fromEventId")) {
+                object.fromEventId = message.fromEventId;
+                if (options.oneofs)
+                    object._fromEventId = "fromEventId";
+            }
+            if (message.toEventId != null && message.hasOwnProperty("toEventId")) {
+                object.toEventId = message.toEventId;
+                if (options.oneofs)
+                    object._toEventId = "toEventId";
+            }
+            if (message.checkpointEventId != null && message.hasOwnProperty("checkpointEventId"))
+                object.checkpointEventId = message.checkpointEventId;
+            if (message.latestEventId != null && message.hasOwnProperty("latestEventId"))
+                object.latestEventId = message.latestEventId;
+            if (message.streamRevision != null && message.hasOwnProperty("streamRevision"))
+                object.streamRevision = message.streamRevision;
+            if (message.hasMore != null && message.hasOwnProperty("hasMore"))
+                object.hasMore = message.hasMore;
+            if (message.resetRequired != null && message.hasOwnProperty("resetRequired"))
+                object.resetRequired = message.resetRequired;
+            if (message.resetReason != null && message.hasOwnProperty("resetReason"))
+                object.resetReason = message.resetReason;
+            if (message.events && message.events.length) {
+                object.events = [];
+                for (var j = 0; j < message.events.length; ++j)
+                    object.events[j] = $root.rankland_live_contest_client.ClientEvent.toObject(message.events[j], options);
+            }
+            return object;
+        };
+
+        /**
+         * Converts this GetContestEventsResponse to JSON.
+         * @function toJSON
+         * @memberof rankland_live_contest_client.GetContestEventsResponse
+         * @instance
+         * @returns {Object.<string,*>} JSON object
+         */
+        GetContestEventsResponse.prototype.toJSON = function toJSON() {
+            return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
+        };
+
+        return GetContestEventsResponse;
+    })();
+
+    return rankland_live_contest_client;
+})();
+
 $root.rankland_live_contest_common = (function() {
 
     /**
@@ -2159,6 +3242,7 @@ $root.rankland_live_contest_producer = (function() {
          * @memberof rankland_live_contest_producer
          * @interface IBatchProducerEvent
          * @property {Array.<rankland_live_contest_producer.IProducerEvent>|null} [events] BatchProducerEvent events
+         * @property {number|null} [streamRevision] BatchProducerEvent streamRevision
          */
 
         /**
@@ -2184,6 +3268,14 @@ $root.rankland_live_contest_producer = (function() {
          * @instance
          */
         BatchProducerEvent.prototype.events = $util.emptyArray;
+
+        /**
+         * BatchProducerEvent streamRevision.
+         * @member {number} streamRevision
+         * @memberof rankland_live_contest_producer.BatchProducerEvent
+         * @instance
+         */
+        BatchProducerEvent.prototype.streamRevision = 0;
 
         /**
          * Creates a new BatchProducerEvent instance using the specified properties.
@@ -2212,6 +3304,8 @@ $root.rankland_live_contest_producer = (function() {
             if (message.events != null && message.events.length)
                 for (var i = 0; i < message.events.length; ++i)
                     $root.rankland_live_contest_producer.ProducerEvent.encode(message.events[i], writer.uint32(/* id 1, wireType 2 =*/10).fork()).ldelim();
+            if (message.streamRevision != null && Object.hasOwnProperty.call(message, "streamRevision"))
+                writer.uint32(/* id 2, wireType 0 =*/16).uint32(message.streamRevision);
             return writer;
         };
 
@@ -2250,6 +3344,9 @@ $root.rankland_live_contest_producer = (function() {
                     if (!(message.events && message.events.length))
                         message.events = [];
                     message.events.push($root.rankland_live_contest_producer.ProducerEvent.decode(reader, reader.uint32()));
+                    break;
+                case 2:
+                    message.streamRevision = reader.uint32();
                     break;
                 default:
                     reader.skipType(tag & 7);
@@ -2295,6 +3392,9 @@ $root.rankland_live_contest_producer = (function() {
                         return "events." + error;
                 }
             }
+            if (message.streamRevision != null && message.hasOwnProperty("streamRevision"))
+                if (!$util.isInteger(message.streamRevision))
+                    return "streamRevision: integer expected";
             return null;
         };
 
@@ -2320,6 +3420,8 @@ $root.rankland_live_contest_producer = (function() {
                     message.events[i] = $root.rankland_live_contest_producer.ProducerEvent.fromObject(object.events[i]);
                 }
             }
+            if (object.streamRevision != null)
+                message.streamRevision = object.streamRevision >>> 0;
             return message;
         };
 
@@ -2338,11 +3440,15 @@ $root.rankland_live_contest_producer = (function() {
             var object = {};
             if (options.arrays || options.defaults)
                 object.events = [];
+            if (options.defaults)
+                object.streamRevision = 0;
             if (message.events && message.events.length) {
                 object.events = [];
                 for (var j = 0; j < message.events.length; ++j)
                     object.events[j] = $root.rankland_live_contest_producer.ProducerEvent.toObject(message.events[j], options);
             }
+            if (message.streamRevision != null && message.hasOwnProperty("streamRevision"))
+                object.streamRevision = message.streamRevision;
             return object;
         };
 
@@ -2361,1089 +3467,6 @@ $root.rankland_live_contest_producer = (function() {
     })();
 
     return rankland_live_contest_producer;
-})();
-
-$root.rankland_live_contest_client = (function() {
-
-    /**
-     * Namespace rankland_live_contest_client.
-     * @exports rankland_live_contest_client
-     * @namespace
-     */
-    var rankland_live_contest_client = {};
-
-    rankland_live_contest_client.ClientEvent = (function() {
-
-        /**
-         * Properties of a ClientEvent.
-         * @memberof rankland_live_contest_client
-         * @interface IClientEvent
-         * @property {number|null} [eventId] ClientEvent eventId
-         * @property {rankland_live_contest_common.EventType|null} [type] ClientEvent type
-         * @property {rankland_live_contest_common.INewSolutionEvent|null} [newSolutionData] ClientEvent newSolutionData
-         * @property {rankland_live_contest_common.ISolutionOnProgressEvent|null} [solutionOnProgressData] ClientEvent solutionOnProgressData
-         * @property {rankland_live_contest_common.ISolutionOnResultSettleEvent|null} [solutionOnResultSettleData] ClientEvent solutionOnResultSettleData
-         * @property {rankland_live_contest_common.ISolutionOnResultChangeEvent|null} [solutionOnResultChangeData] ClientEvent solutionOnResultChangeData
-         * @property {rankland_live_contest_common.IContestConfigChangeEvent|null} [contestConfigChangeData] ClientEvent contestConfigChangeData
-         */
-
-        /**
-         * Constructs a new ClientEvent.
-         * @memberof rankland_live_contest_client
-         * @classdesc Represents a ClientEvent.
-         * @implements IClientEvent
-         * @constructor
-         * @param {rankland_live_contest_client.IClientEvent=} [properties] Properties to set
-         */
-        function ClientEvent(properties) {
-            if (properties)
-                for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
-                    if (properties[keys[i]] != null)
-                        this[keys[i]] = properties[keys[i]];
-        }
-
-        /**
-         * ClientEvent eventId.
-         * @member {number} eventId
-         * @memberof rankland_live_contest_client.ClientEvent
-         * @instance
-         */
-        ClientEvent.prototype.eventId = 0;
-
-        /**
-         * ClientEvent type.
-         * @member {rankland_live_contest_common.EventType} type
-         * @memberof rankland_live_contest_client.ClientEvent
-         * @instance
-         */
-        ClientEvent.prototype.type = 0;
-
-        /**
-         * ClientEvent newSolutionData.
-         * @member {rankland_live_contest_common.INewSolutionEvent|null|undefined} newSolutionData
-         * @memberof rankland_live_contest_client.ClientEvent
-         * @instance
-         */
-        ClientEvent.prototype.newSolutionData = null;
-
-        /**
-         * ClientEvent solutionOnProgressData.
-         * @member {rankland_live_contest_common.ISolutionOnProgressEvent|null|undefined} solutionOnProgressData
-         * @memberof rankland_live_contest_client.ClientEvent
-         * @instance
-         */
-        ClientEvent.prototype.solutionOnProgressData = null;
-
-        /**
-         * ClientEvent solutionOnResultSettleData.
-         * @member {rankland_live_contest_common.ISolutionOnResultSettleEvent|null|undefined} solutionOnResultSettleData
-         * @memberof rankland_live_contest_client.ClientEvent
-         * @instance
-         */
-        ClientEvent.prototype.solutionOnResultSettleData = null;
-
-        /**
-         * ClientEvent solutionOnResultChangeData.
-         * @member {rankland_live_contest_common.ISolutionOnResultChangeEvent|null|undefined} solutionOnResultChangeData
-         * @memberof rankland_live_contest_client.ClientEvent
-         * @instance
-         */
-        ClientEvent.prototype.solutionOnResultChangeData = null;
-
-        /**
-         * ClientEvent contestConfigChangeData.
-         * @member {rankland_live_contest_common.IContestConfigChangeEvent|null|undefined} contestConfigChangeData
-         * @memberof rankland_live_contest_client.ClientEvent
-         * @instance
-         */
-        ClientEvent.prototype.contestConfigChangeData = null;
-
-        // OneOf field names bound to virtual getters and setters
-        var $oneOfFields;
-
-        /**
-         * ClientEvent data.
-         * @member {"newSolutionData"|"solutionOnProgressData"|"solutionOnResultSettleData"|"solutionOnResultChangeData"|"contestConfigChangeData"|undefined} data
-         * @memberof rankland_live_contest_client.ClientEvent
-         * @instance
-         */
-        Object.defineProperty(ClientEvent.prototype, "data", {
-            get: $util.oneOfGetter($oneOfFields = ["newSolutionData", "solutionOnProgressData", "solutionOnResultSettleData", "solutionOnResultChangeData", "contestConfigChangeData"]),
-            set: $util.oneOfSetter($oneOfFields)
-        });
-
-        /**
-         * Creates a new ClientEvent instance using the specified properties.
-         * @function create
-         * @memberof rankland_live_contest_client.ClientEvent
-         * @static
-         * @param {rankland_live_contest_client.IClientEvent=} [properties] Properties to set
-         * @returns {rankland_live_contest_client.ClientEvent} ClientEvent instance
-         */
-        ClientEvent.create = function create(properties) {
-            return new ClientEvent(properties);
-        };
-
-        /**
-         * Encodes the specified ClientEvent message. Does not implicitly {@link rankland_live_contest_client.ClientEvent.verify|verify} messages.
-         * @function encode
-         * @memberof rankland_live_contest_client.ClientEvent
-         * @static
-         * @param {rankland_live_contest_client.IClientEvent} message ClientEvent message or plain object to encode
-         * @param {$protobuf.Writer} [writer] Writer to encode to
-         * @returns {$protobuf.Writer} Writer
-         */
-        ClientEvent.encode = function encode(message, writer) {
-            if (!writer)
-                writer = $Writer.create();
-            if (message.eventId != null && Object.hasOwnProperty.call(message, "eventId"))
-                writer.uint32(/* id 1, wireType 0 =*/8).uint32(message.eventId);
-            if (message.type != null && Object.hasOwnProperty.call(message, "type"))
-                writer.uint32(/* id 2, wireType 0 =*/16).int32(message.type);
-            if (message.newSolutionData != null && Object.hasOwnProperty.call(message, "newSolutionData"))
-                $root.rankland_live_contest_common.NewSolutionEvent.encode(message.newSolutionData, writer.uint32(/* id 3, wireType 2 =*/26).fork()).ldelim();
-            if (message.solutionOnProgressData != null && Object.hasOwnProperty.call(message, "solutionOnProgressData"))
-                $root.rankland_live_contest_common.SolutionOnProgressEvent.encode(message.solutionOnProgressData, writer.uint32(/* id 4, wireType 2 =*/34).fork()).ldelim();
-            if (message.solutionOnResultSettleData != null && Object.hasOwnProperty.call(message, "solutionOnResultSettleData"))
-                $root.rankland_live_contest_common.SolutionOnResultSettleEvent.encode(message.solutionOnResultSettleData, writer.uint32(/* id 5, wireType 2 =*/42).fork()).ldelim();
-            if (message.solutionOnResultChangeData != null && Object.hasOwnProperty.call(message, "solutionOnResultChangeData"))
-                $root.rankland_live_contest_common.SolutionOnResultChangeEvent.encode(message.solutionOnResultChangeData, writer.uint32(/* id 6, wireType 2 =*/50).fork()).ldelim();
-            if (message.contestConfigChangeData != null && Object.hasOwnProperty.call(message, "contestConfigChangeData"))
-                $root.rankland_live_contest_common.ContestConfigChangeEvent.encode(message.contestConfigChangeData, writer.uint32(/* id 7, wireType 2 =*/58).fork()).ldelim();
-            return writer;
-        };
-
-        /**
-         * Encodes the specified ClientEvent message, length delimited. Does not implicitly {@link rankland_live_contest_client.ClientEvent.verify|verify} messages.
-         * @function encodeDelimited
-         * @memberof rankland_live_contest_client.ClientEvent
-         * @static
-         * @param {rankland_live_contest_client.IClientEvent} message ClientEvent message or plain object to encode
-         * @param {$protobuf.Writer} [writer] Writer to encode to
-         * @returns {$protobuf.Writer} Writer
-         */
-        ClientEvent.encodeDelimited = function encodeDelimited(message, writer) {
-            return this.encode(message, writer).ldelim();
-        };
-
-        /**
-         * Decodes a ClientEvent message from the specified reader or buffer.
-         * @function decode
-         * @memberof rankland_live_contest_client.ClientEvent
-         * @static
-         * @param {$protobuf.Reader|Uint8Array} reader Reader or buffer to decode from
-         * @param {number} [length] Message length if known beforehand
-         * @returns {rankland_live_contest_client.ClientEvent} ClientEvent
-         * @throws {Error} If the payload is not a reader or valid buffer
-         * @throws {$protobuf.util.ProtocolError} If required fields are missing
-         */
-        ClientEvent.decode = function decode(reader, length) {
-            if (!(reader instanceof $Reader))
-                reader = $Reader.create(reader);
-            var end = length === undefined ? reader.len : reader.pos + length, message = new $root.rankland_live_contest_client.ClientEvent();
-            while (reader.pos < end) {
-                var tag = reader.uint32();
-                switch (tag >>> 3) {
-                case 1:
-                    message.eventId = reader.uint32();
-                    break;
-                case 2:
-                    message.type = reader.int32();
-                    break;
-                case 3:
-                    message.newSolutionData = $root.rankland_live_contest_common.NewSolutionEvent.decode(reader, reader.uint32());
-                    break;
-                case 4:
-                    message.solutionOnProgressData = $root.rankland_live_contest_common.SolutionOnProgressEvent.decode(reader, reader.uint32());
-                    break;
-                case 5:
-                    message.solutionOnResultSettleData = $root.rankland_live_contest_common.SolutionOnResultSettleEvent.decode(reader, reader.uint32());
-                    break;
-                case 6:
-                    message.solutionOnResultChangeData = $root.rankland_live_contest_common.SolutionOnResultChangeEvent.decode(reader, reader.uint32());
-                    break;
-                case 7:
-                    message.contestConfigChangeData = $root.rankland_live_contest_common.ContestConfigChangeEvent.decode(reader, reader.uint32());
-                    break;
-                default:
-                    reader.skipType(tag & 7);
-                    break;
-                }
-            }
-            return message;
-        };
-
-        /**
-         * Decodes a ClientEvent message from the specified reader or buffer, length delimited.
-         * @function decodeDelimited
-         * @memberof rankland_live_contest_client.ClientEvent
-         * @static
-         * @param {$protobuf.Reader|Uint8Array} reader Reader or buffer to decode from
-         * @returns {rankland_live_contest_client.ClientEvent} ClientEvent
-         * @throws {Error} If the payload is not a reader or valid buffer
-         * @throws {$protobuf.util.ProtocolError} If required fields are missing
-         */
-        ClientEvent.decodeDelimited = function decodeDelimited(reader) {
-            if (!(reader instanceof $Reader))
-                reader = new $Reader(reader);
-            return this.decode(reader, reader.uint32());
-        };
-
-        /**
-         * Verifies a ClientEvent message.
-         * @function verify
-         * @memberof rankland_live_contest_client.ClientEvent
-         * @static
-         * @param {Object.<string,*>} message Plain object to verify
-         * @returns {string|null} `null` if valid, otherwise the reason why it is not
-         */
-        ClientEvent.verify = function verify(message) {
-            if (typeof message !== "object" || message === null)
-                return "object expected";
-            var properties = {};
-            if (message.eventId != null && message.hasOwnProperty("eventId"))
-                if (!$util.isInteger(message.eventId))
-                    return "eventId: integer expected";
-            if (message.type != null && message.hasOwnProperty("type"))
-                switch (message.type) {
-                default:
-                    return "type: enum value expected";
-                case 0:
-                case 1:
-                case 2:
-                case 3:
-                case 4:
-                    break;
-                }
-            if (message.newSolutionData != null && message.hasOwnProperty("newSolutionData")) {
-                properties.data = 1;
-                {
-                    var error = $root.rankland_live_contest_common.NewSolutionEvent.verify(message.newSolutionData);
-                    if (error)
-                        return "newSolutionData." + error;
-                }
-            }
-            if (message.solutionOnProgressData != null && message.hasOwnProperty("solutionOnProgressData")) {
-                if (properties.data === 1)
-                    return "data: multiple values";
-                properties.data = 1;
-                {
-                    var error = $root.rankland_live_contest_common.SolutionOnProgressEvent.verify(message.solutionOnProgressData);
-                    if (error)
-                        return "solutionOnProgressData." + error;
-                }
-            }
-            if (message.solutionOnResultSettleData != null && message.hasOwnProperty("solutionOnResultSettleData")) {
-                if (properties.data === 1)
-                    return "data: multiple values";
-                properties.data = 1;
-                {
-                    var error = $root.rankland_live_contest_common.SolutionOnResultSettleEvent.verify(message.solutionOnResultSettleData);
-                    if (error)
-                        return "solutionOnResultSettleData." + error;
-                }
-            }
-            if (message.solutionOnResultChangeData != null && message.hasOwnProperty("solutionOnResultChangeData")) {
-                if (properties.data === 1)
-                    return "data: multiple values";
-                properties.data = 1;
-                {
-                    var error = $root.rankland_live_contest_common.SolutionOnResultChangeEvent.verify(message.solutionOnResultChangeData);
-                    if (error)
-                        return "solutionOnResultChangeData." + error;
-                }
-            }
-            if (message.contestConfigChangeData != null && message.hasOwnProperty("contestConfigChangeData")) {
-                if (properties.data === 1)
-                    return "data: multiple values";
-                properties.data = 1;
-                {
-                    var error = $root.rankland_live_contest_common.ContestConfigChangeEvent.verify(message.contestConfigChangeData);
-                    if (error)
-                        return "contestConfigChangeData." + error;
-                }
-            }
-            return null;
-        };
-
-        /**
-         * Creates a ClientEvent message from a plain object. Also converts values to their respective internal types.
-         * @function fromObject
-         * @memberof rankland_live_contest_client.ClientEvent
-         * @static
-         * @param {Object.<string,*>} object Plain object
-         * @returns {rankland_live_contest_client.ClientEvent} ClientEvent
-         */
-        ClientEvent.fromObject = function fromObject(object) {
-            if (object instanceof $root.rankland_live_contest_client.ClientEvent)
-                return object;
-            var message = new $root.rankland_live_contest_client.ClientEvent();
-            if (object.eventId != null)
-                message.eventId = object.eventId >>> 0;
-            switch (object.type) {
-            case "NEW_SOLUTION":
-            case 0:
-                message.type = 0;
-                break;
-            case "SOLUTION_ON_PROGRESS":
-            case 1:
-                message.type = 1;
-                break;
-            case "SOLUTION_ON_RESULT_SETTLE":
-            case 2:
-                message.type = 2;
-                break;
-            case "SOLUTION_ON_RESULT_CHANGE":
-            case 3:
-                message.type = 3;
-                break;
-            case "CONTEST_CONFIG_CHANGE":
-            case 4:
-                message.type = 4;
-                break;
-            }
-            if (object.newSolutionData != null) {
-                if (typeof object.newSolutionData !== "object")
-                    throw TypeError(".rankland_live_contest_client.ClientEvent.newSolutionData: object expected");
-                message.newSolutionData = $root.rankland_live_contest_common.NewSolutionEvent.fromObject(object.newSolutionData);
-            }
-            if (object.solutionOnProgressData != null) {
-                if (typeof object.solutionOnProgressData !== "object")
-                    throw TypeError(".rankland_live_contest_client.ClientEvent.solutionOnProgressData: object expected");
-                message.solutionOnProgressData = $root.rankland_live_contest_common.SolutionOnProgressEvent.fromObject(object.solutionOnProgressData);
-            }
-            if (object.solutionOnResultSettleData != null) {
-                if (typeof object.solutionOnResultSettleData !== "object")
-                    throw TypeError(".rankland_live_contest_client.ClientEvent.solutionOnResultSettleData: object expected");
-                message.solutionOnResultSettleData = $root.rankland_live_contest_common.SolutionOnResultSettleEvent.fromObject(object.solutionOnResultSettleData);
-            }
-            if (object.solutionOnResultChangeData != null) {
-                if (typeof object.solutionOnResultChangeData !== "object")
-                    throw TypeError(".rankland_live_contest_client.ClientEvent.solutionOnResultChangeData: object expected");
-                message.solutionOnResultChangeData = $root.rankland_live_contest_common.SolutionOnResultChangeEvent.fromObject(object.solutionOnResultChangeData);
-            }
-            if (object.contestConfigChangeData != null) {
-                if (typeof object.contestConfigChangeData !== "object")
-                    throw TypeError(".rankland_live_contest_client.ClientEvent.contestConfigChangeData: object expected");
-                message.contestConfigChangeData = $root.rankland_live_contest_common.ContestConfigChangeEvent.fromObject(object.contestConfigChangeData);
-            }
-            return message;
-        };
-
-        /**
-         * Creates a plain object from a ClientEvent message. Also converts values to other types if specified.
-         * @function toObject
-         * @memberof rankland_live_contest_client.ClientEvent
-         * @static
-         * @param {rankland_live_contest_client.ClientEvent} message ClientEvent
-         * @param {$protobuf.IConversionOptions} [options] Conversion options
-         * @returns {Object.<string,*>} Plain object
-         */
-        ClientEvent.toObject = function toObject(message, options) {
-            if (!options)
-                options = {};
-            var object = {};
-            if (options.defaults) {
-                object.eventId = 0;
-                object.type = options.enums === String ? "NEW_SOLUTION" : 0;
-            }
-            if (message.eventId != null && message.hasOwnProperty("eventId"))
-                object.eventId = message.eventId;
-            if (message.type != null && message.hasOwnProperty("type"))
-                object.type = options.enums === String ? $root.rankland_live_contest_common.EventType[message.type] : message.type;
-            if (message.newSolutionData != null && message.hasOwnProperty("newSolutionData")) {
-                object.newSolutionData = $root.rankland_live_contest_common.NewSolutionEvent.toObject(message.newSolutionData, options);
-                if (options.oneofs)
-                    object.data = "newSolutionData";
-            }
-            if (message.solutionOnProgressData != null && message.hasOwnProperty("solutionOnProgressData")) {
-                object.solutionOnProgressData = $root.rankland_live_contest_common.SolutionOnProgressEvent.toObject(message.solutionOnProgressData, options);
-                if (options.oneofs)
-                    object.data = "solutionOnProgressData";
-            }
-            if (message.solutionOnResultSettleData != null && message.hasOwnProperty("solutionOnResultSettleData")) {
-                object.solutionOnResultSettleData = $root.rankland_live_contest_common.SolutionOnResultSettleEvent.toObject(message.solutionOnResultSettleData, options);
-                if (options.oneofs)
-                    object.data = "solutionOnResultSettleData";
-            }
-            if (message.solutionOnResultChangeData != null && message.hasOwnProperty("solutionOnResultChangeData")) {
-                object.solutionOnResultChangeData = $root.rankland_live_contest_common.SolutionOnResultChangeEvent.toObject(message.solutionOnResultChangeData, options);
-                if (options.oneofs)
-                    object.data = "solutionOnResultChangeData";
-            }
-            if (message.contestConfigChangeData != null && message.hasOwnProperty("contestConfigChangeData")) {
-                object.contestConfigChangeData = $root.rankland_live_contest_common.ContestConfigChangeEvent.toObject(message.contestConfigChangeData, options);
-                if (options.oneofs)
-                    object.data = "contestConfigChangeData";
-            }
-            return object;
-        };
-
-        /**
-         * Converts this ClientEvent to JSON.
-         * @function toJSON
-         * @memberof rankland_live_contest_client.ClientEvent
-         * @instance
-         * @returns {Object.<string,*>} JSON object
-         */
-        ClientEvent.prototype.toJSON = function toJSON() {
-            return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
-        };
-
-        return ClientEvent;
-    })();
-
-    rankland_live_contest_client.BatchClientEvent = (function() {
-
-        /**
-         * Properties of a BatchClientEvent.
-         * @memberof rankland_live_contest_client
-         * @interface IBatchClientEvent
-         * @property {Array.<rankland_live_contest_client.IClientEvent>|null} [events] BatchClientEvent events
-         */
-
-        /**
-         * Constructs a new BatchClientEvent.
-         * @memberof rankland_live_contest_client
-         * @classdesc Represents a BatchClientEvent.
-         * @implements IBatchClientEvent
-         * @constructor
-         * @param {rankland_live_contest_client.IBatchClientEvent=} [properties] Properties to set
-         */
-        function BatchClientEvent(properties) {
-            this.events = [];
-            if (properties)
-                for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
-                    if (properties[keys[i]] != null)
-                        this[keys[i]] = properties[keys[i]];
-        }
-
-        /**
-         * BatchClientEvent events.
-         * @member {Array.<rankland_live_contest_client.IClientEvent>} events
-         * @memberof rankland_live_contest_client.BatchClientEvent
-         * @instance
-         */
-        BatchClientEvent.prototype.events = $util.emptyArray;
-
-        /**
-         * Creates a new BatchClientEvent instance using the specified properties.
-         * @function create
-         * @memberof rankland_live_contest_client.BatchClientEvent
-         * @static
-         * @param {rankland_live_contest_client.IBatchClientEvent=} [properties] Properties to set
-         * @returns {rankland_live_contest_client.BatchClientEvent} BatchClientEvent instance
-         */
-        BatchClientEvent.create = function create(properties) {
-            return new BatchClientEvent(properties);
-        };
-
-        /**
-         * Encodes the specified BatchClientEvent message. Does not implicitly {@link rankland_live_contest_client.BatchClientEvent.verify|verify} messages.
-         * @function encode
-         * @memberof rankland_live_contest_client.BatchClientEvent
-         * @static
-         * @param {rankland_live_contest_client.IBatchClientEvent} message BatchClientEvent message or plain object to encode
-         * @param {$protobuf.Writer} [writer] Writer to encode to
-         * @returns {$protobuf.Writer} Writer
-         */
-        BatchClientEvent.encode = function encode(message, writer) {
-            if (!writer)
-                writer = $Writer.create();
-            if (message.events != null && message.events.length)
-                for (var i = 0; i < message.events.length; ++i)
-                    $root.rankland_live_contest_client.ClientEvent.encode(message.events[i], writer.uint32(/* id 1, wireType 2 =*/10).fork()).ldelim();
-            return writer;
-        };
-
-        /**
-         * Encodes the specified BatchClientEvent message, length delimited. Does not implicitly {@link rankland_live_contest_client.BatchClientEvent.verify|verify} messages.
-         * @function encodeDelimited
-         * @memberof rankland_live_contest_client.BatchClientEvent
-         * @static
-         * @param {rankland_live_contest_client.IBatchClientEvent} message BatchClientEvent message or plain object to encode
-         * @param {$protobuf.Writer} [writer] Writer to encode to
-         * @returns {$protobuf.Writer} Writer
-         */
-        BatchClientEvent.encodeDelimited = function encodeDelimited(message, writer) {
-            return this.encode(message, writer).ldelim();
-        };
-
-        /**
-         * Decodes a BatchClientEvent message from the specified reader or buffer.
-         * @function decode
-         * @memberof rankland_live_contest_client.BatchClientEvent
-         * @static
-         * @param {$protobuf.Reader|Uint8Array} reader Reader or buffer to decode from
-         * @param {number} [length] Message length if known beforehand
-         * @returns {rankland_live_contest_client.BatchClientEvent} BatchClientEvent
-         * @throws {Error} If the payload is not a reader or valid buffer
-         * @throws {$protobuf.util.ProtocolError} If required fields are missing
-         */
-        BatchClientEvent.decode = function decode(reader, length) {
-            if (!(reader instanceof $Reader))
-                reader = $Reader.create(reader);
-            var end = length === undefined ? reader.len : reader.pos + length, message = new $root.rankland_live_contest_client.BatchClientEvent();
-            while (reader.pos < end) {
-                var tag = reader.uint32();
-                switch (tag >>> 3) {
-                case 1:
-                    if (!(message.events && message.events.length))
-                        message.events = [];
-                    message.events.push($root.rankland_live_contest_client.ClientEvent.decode(reader, reader.uint32()));
-                    break;
-                default:
-                    reader.skipType(tag & 7);
-                    break;
-                }
-            }
-            return message;
-        };
-
-        /**
-         * Decodes a BatchClientEvent message from the specified reader or buffer, length delimited.
-         * @function decodeDelimited
-         * @memberof rankland_live_contest_client.BatchClientEvent
-         * @static
-         * @param {$protobuf.Reader|Uint8Array} reader Reader or buffer to decode from
-         * @returns {rankland_live_contest_client.BatchClientEvent} BatchClientEvent
-         * @throws {Error} If the payload is not a reader or valid buffer
-         * @throws {$protobuf.util.ProtocolError} If required fields are missing
-         */
-        BatchClientEvent.decodeDelimited = function decodeDelimited(reader) {
-            if (!(reader instanceof $Reader))
-                reader = new $Reader(reader);
-            return this.decode(reader, reader.uint32());
-        };
-
-        /**
-         * Verifies a BatchClientEvent message.
-         * @function verify
-         * @memberof rankland_live_contest_client.BatchClientEvent
-         * @static
-         * @param {Object.<string,*>} message Plain object to verify
-         * @returns {string|null} `null` if valid, otherwise the reason why it is not
-         */
-        BatchClientEvent.verify = function verify(message) {
-            if (typeof message !== "object" || message === null)
-                return "object expected";
-            if (message.events != null && message.hasOwnProperty("events")) {
-                if (!Array.isArray(message.events))
-                    return "events: array expected";
-                for (var i = 0; i < message.events.length; ++i) {
-                    var error = $root.rankland_live_contest_client.ClientEvent.verify(message.events[i]);
-                    if (error)
-                        return "events." + error;
-                }
-            }
-            return null;
-        };
-
-        /**
-         * Creates a BatchClientEvent message from a plain object. Also converts values to their respective internal types.
-         * @function fromObject
-         * @memberof rankland_live_contest_client.BatchClientEvent
-         * @static
-         * @param {Object.<string,*>} object Plain object
-         * @returns {rankland_live_contest_client.BatchClientEvent} BatchClientEvent
-         */
-        BatchClientEvent.fromObject = function fromObject(object) {
-            if (object instanceof $root.rankland_live_contest_client.BatchClientEvent)
-                return object;
-            var message = new $root.rankland_live_contest_client.BatchClientEvent();
-            if (object.events) {
-                if (!Array.isArray(object.events))
-                    throw TypeError(".rankland_live_contest_client.BatchClientEvent.events: array expected");
-                message.events = [];
-                for (var i = 0; i < object.events.length; ++i) {
-                    if (typeof object.events[i] !== "object")
-                        throw TypeError(".rankland_live_contest_client.BatchClientEvent.events: object expected");
-                    message.events[i] = $root.rankland_live_contest_client.ClientEvent.fromObject(object.events[i]);
-                }
-            }
-            return message;
-        };
-
-        /**
-         * Creates a plain object from a BatchClientEvent message. Also converts values to other types if specified.
-         * @function toObject
-         * @memberof rankland_live_contest_client.BatchClientEvent
-         * @static
-         * @param {rankland_live_contest_client.BatchClientEvent} message BatchClientEvent
-         * @param {$protobuf.IConversionOptions} [options] Conversion options
-         * @returns {Object.<string,*>} Plain object
-         */
-        BatchClientEvent.toObject = function toObject(message, options) {
-            if (!options)
-                options = {};
-            var object = {};
-            if (options.arrays || options.defaults)
-                object.events = [];
-            if (message.events && message.events.length) {
-                object.events = [];
-                for (var j = 0; j < message.events.length; ++j)
-                    object.events[j] = $root.rankland_live_contest_client.ClientEvent.toObject(message.events[j], options);
-            }
-            return object;
-        };
-
-        /**
-         * Converts this BatchClientEvent to JSON.
-         * @function toJSON
-         * @memberof rankland_live_contest_client.BatchClientEvent
-         * @instance
-         * @returns {Object.<string,*>} JSON object
-         */
-        BatchClientEvent.prototype.toJSON = function toJSON() {
-            return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
-        };
-
-        return BatchClientEvent;
-    })();
-
-    rankland_live_contest_client.GetContestEventsResponse = (function() {
-
-        /**
-         * Properties of a GetContestEventsResponse.
-         * @memberof rankland_live_contest_client
-         * @interface IGetContestEventsResponse
-         * @property {string|null} [uk] GetContestEventsResponse uk
-         * @property {number|null} [fromEventId] GetContestEventsResponse fromEventId
-         * @property {number|null} [toEventId] GetContestEventsResponse toEventId
-         * @property {number|null} [checkpointEventId] GetContestEventsResponse checkpointEventId
-         * @property {number|null} [latestEventId] GetContestEventsResponse latestEventId
-         * @property {number|null} [streamRevision] GetContestEventsResponse streamRevision
-         * @property {boolean|null} [hasMore] GetContestEventsResponse hasMore
-         * @property {boolean|null} [resetRequired] GetContestEventsResponse resetRequired
-         * @property {string|null} [resetReason] GetContestEventsResponse resetReason
-         * @property {Array.<rankland_live_contest_client.IClientEvent>|null} [events] GetContestEventsResponse events
-         */
-
-        /**
-         * Constructs a new GetContestEventsResponse.
-         * @memberof rankland_live_contest_client
-         * @classdesc Represents a GetContestEventsResponse.
-         * @implements IGetContestEventsResponse
-         * @constructor
-         * @param {rankland_live_contest_client.IGetContestEventsResponse=} [properties] Properties to set
-         */
-        function GetContestEventsResponse(properties) {
-            this.events = [];
-            if (properties)
-                for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
-                    if (properties[keys[i]] != null)
-                        this[keys[i]] = properties[keys[i]];
-        }
-
-        /**
-         * GetContestEventsResponse uk.
-         * @member {string} uk
-         * @memberof rankland_live_contest_client.GetContestEventsResponse
-         * @instance
-         */
-        GetContestEventsResponse.prototype.uk = "";
-
-        /**
-         * GetContestEventsResponse fromEventId.
-         * @member {number|null|undefined} fromEventId
-         * @memberof rankland_live_contest_client.GetContestEventsResponse
-         * @instance
-         */
-        GetContestEventsResponse.prototype.fromEventId = null;
-
-        /**
-         * GetContestEventsResponse toEventId.
-         * @member {number|null|undefined} toEventId
-         * @memberof rankland_live_contest_client.GetContestEventsResponse
-         * @instance
-         */
-        GetContestEventsResponse.prototype.toEventId = null;
-
-        /**
-         * GetContestEventsResponse checkpointEventId.
-         * @member {number} checkpointEventId
-         * @memberof rankland_live_contest_client.GetContestEventsResponse
-         * @instance
-         */
-        GetContestEventsResponse.prototype.checkpointEventId = 0;
-
-        /**
-         * GetContestEventsResponse latestEventId.
-         * @member {number} latestEventId
-         * @memberof rankland_live_contest_client.GetContestEventsResponse
-         * @instance
-         */
-        GetContestEventsResponse.prototype.latestEventId = 0;
-
-        /**
-         * GetContestEventsResponse streamRevision.
-         * @member {number} streamRevision
-         * @memberof rankland_live_contest_client.GetContestEventsResponse
-         * @instance
-         */
-        GetContestEventsResponse.prototype.streamRevision = 0;
-
-        /**
-         * GetContestEventsResponse hasMore.
-         * @member {boolean} hasMore
-         * @memberof rankland_live_contest_client.GetContestEventsResponse
-         * @instance
-         */
-        GetContestEventsResponse.prototype.hasMore = false;
-
-        /**
-         * GetContestEventsResponse resetRequired.
-         * @member {boolean} resetRequired
-         * @memberof rankland_live_contest_client.GetContestEventsResponse
-         * @instance
-         */
-        GetContestEventsResponse.prototype.resetRequired = false;
-
-        /**
-         * GetContestEventsResponse resetReason.
-         * @member {string} resetReason
-         * @memberof rankland_live_contest_client.GetContestEventsResponse
-         * @instance
-         */
-        GetContestEventsResponse.prototype.resetReason = "";
-
-        /**
-         * GetContestEventsResponse events.
-         * @member {Array.<rankland_live_contest_client.IClientEvent>} events
-         * @memberof rankland_live_contest_client.GetContestEventsResponse
-         * @instance
-         */
-        GetContestEventsResponse.prototype.events = $util.emptyArray;
-
-        // OneOf field names bound to virtual getters and setters
-        var $oneOfFields;
-
-        /**
-         * GetContestEventsResponse _fromEventId.
-         * @member {"fromEventId"|undefined} _fromEventId
-         * @memberof rankland_live_contest_client.GetContestEventsResponse
-         * @instance
-         */
-        Object.defineProperty(GetContestEventsResponse.prototype, "_fromEventId", {
-            get: $util.oneOfGetter($oneOfFields = ["fromEventId"]),
-            set: $util.oneOfSetter($oneOfFields)
-        });
-
-        /**
-         * GetContestEventsResponse _toEventId.
-         * @member {"toEventId"|undefined} _toEventId
-         * @memberof rankland_live_contest_client.GetContestEventsResponse
-         * @instance
-         */
-        Object.defineProperty(GetContestEventsResponse.prototype, "_toEventId", {
-            get: $util.oneOfGetter($oneOfFields = ["toEventId"]),
-            set: $util.oneOfSetter($oneOfFields)
-        });
-
-        /**
-         * Creates a new GetContestEventsResponse instance using the specified properties.
-         * @function create
-         * @memberof rankland_live_contest_client.GetContestEventsResponse
-         * @static
-         * @param {rankland_live_contest_client.IGetContestEventsResponse=} [properties] Properties to set
-         * @returns {rankland_live_contest_client.GetContestEventsResponse} GetContestEventsResponse instance
-         */
-        GetContestEventsResponse.create = function create(properties) {
-            return new GetContestEventsResponse(properties);
-        };
-
-        /**
-         * Encodes the specified GetContestEventsResponse message. Does not implicitly {@link rankland_live_contest_client.GetContestEventsResponse.verify|verify} messages.
-         * @function encode
-         * @memberof rankland_live_contest_client.GetContestEventsResponse
-         * @static
-         * @param {rankland_live_contest_client.IGetContestEventsResponse} message GetContestEventsResponse message or plain object to encode
-         * @param {$protobuf.Writer} [writer] Writer to encode to
-         * @returns {$protobuf.Writer} Writer
-         */
-        GetContestEventsResponse.encode = function encode(message, writer) {
-            if (!writer)
-                writer = $Writer.create();
-            if (message.uk != null && Object.hasOwnProperty.call(message, "uk"))
-                writer.uint32(/* id 1, wireType 2 =*/10).string(message.uk);
-            if (message.fromEventId != null && Object.hasOwnProperty.call(message, "fromEventId"))
-                writer.uint32(/* id 2, wireType 0 =*/16).uint32(message.fromEventId);
-            if (message.toEventId != null && Object.hasOwnProperty.call(message, "toEventId"))
-                writer.uint32(/* id 3, wireType 0 =*/24).uint32(message.toEventId);
-            if (message.checkpointEventId != null && Object.hasOwnProperty.call(message, "checkpointEventId"))
-                writer.uint32(/* id 4, wireType 0 =*/32).uint32(message.checkpointEventId);
-            if (message.latestEventId != null && Object.hasOwnProperty.call(message, "latestEventId"))
-                writer.uint32(/* id 5, wireType 0 =*/40).uint32(message.latestEventId);
-            if (message.streamRevision != null && Object.hasOwnProperty.call(message, "streamRevision"))
-                writer.uint32(/* id 6, wireType 0 =*/48).uint32(message.streamRevision);
-            if (message.hasMore != null && Object.hasOwnProperty.call(message, "hasMore"))
-                writer.uint32(/* id 7, wireType 0 =*/56).bool(message.hasMore);
-            if (message.resetRequired != null && Object.hasOwnProperty.call(message, "resetRequired"))
-                writer.uint32(/* id 8, wireType 0 =*/64).bool(message.resetRequired);
-            if (message.resetReason != null && Object.hasOwnProperty.call(message, "resetReason"))
-                writer.uint32(/* id 9, wireType 2 =*/74).string(message.resetReason);
-            if (message.events != null && message.events.length)
-                for (var i = 0; i < message.events.length; ++i)
-                    $root.rankland_live_contest_client.ClientEvent.encode(message.events[i], writer.uint32(/* id 10, wireType 2 =*/82).fork()).ldelim();
-            return writer;
-        };
-
-        /**
-         * Encodes the specified GetContestEventsResponse message, length delimited. Does not implicitly {@link rankland_live_contest_client.GetContestEventsResponse.verify|verify} messages.
-         * @function encodeDelimited
-         * @memberof rankland_live_contest_client.GetContestEventsResponse
-         * @static
-         * @param {rankland_live_contest_client.IGetContestEventsResponse} message GetContestEventsResponse message or plain object to encode
-         * @param {$protobuf.Writer} [writer] Writer to encode to
-         * @returns {$protobuf.Writer} Writer
-         */
-        GetContestEventsResponse.encodeDelimited = function encodeDelimited(message, writer) {
-            return this.encode(message, writer).ldelim();
-        };
-
-        /**
-         * Decodes a GetContestEventsResponse message from the specified reader or buffer.
-         * @function decode
-         * @memberof rankland_live_contest_client.GetContestEventsResponse
-         * @static
-         * @param {$protobuf.Reader|Uint8Array} reader Reader or buffer to decode from
-         * @param {number} [length] Message length if known beforehand
-         * @returns {rankland_live_contest_client.GetContestEventsResponse} GetContestEventsResponse
-         * @throws {Error} If the payload is not a reader or valid buffer
-         * @throws {$protobuf.util.ProtocolError} If required fields are missing
-         */
-        GetContestEventsResponse.decode = function decode(reader, length) {
-            if (!(reader instanceof $Reader))
-                reader = $Reader.create(reader);
-            var end = length === undefined ? reader.len : reader.pos + length, message = new $root.rankland_live_contest_client.GetContestEventsResponse();
-            while (reader.pos < end) {
-                var tag = reader.uint32();
-                switch (tag >>> 3) {
-                case 1:
-                    message.uk = reader.string();
-                    break;
-                case 2:
-                    message.fromEventId = reader.uint32();
-                    break;
-                case 3:
-                    message.toEventId = reader.uint32();
-                    break;
-                case 4:
-                    message.checkpointEventId = reader.uint32();
-                    break;
-                case 5:
-                    message.latestEventId = reader.uint32();
-                    break;
-                case 6:
-                    message.streamRevision = reader.uint32();
-                    break;
-                case 7:
-                    message.hasMore = reader.bool();
-                    break;
-                case 8:
-                    message.resetRequired = reader.bool();
-                    break;
-                case 9:
-                    message.resetReason = reader.string();
-                    break;
-                case 10:
-                    if (!(message.events && message.events.length))
-                        message.events = [];
-                    message.events.push($root.rankland_live_contest_client.ClientEvent.decode(reader, reader.uint32()));
-                    break;
-                default:
-                    reader.skipType(tag & 7);
-                    break;
-                }
-            }
-            return message;
-        };
-
-        /**
-         * Decodes a GetContestEventsResponse message from the specified reader or buffer, length delimited.
-         * @function decodeDelimited
-         * @memberof rankland_live_contest_client.GetContestEventsResponse
-         * @static
-         * @param {$protobuf.Reader|Uint8Array} reader Reader or buffer to decode from
-         * @returns {rankland_live_contest_client.GetContestEventsResponse} GetContestEventsResponse
-         * @throws {Error} If the payload is not a reader or valid buffer
-         * @throws {$protobuf.util.ProtocolError} If required fields are missing
-         */
-        GetContestEventsResponse.decodeDelimited = function decodeDelimited(reader) {
-            if (!(reader instanceof $Reader))
-                reader = new $Reader(reader);
-            return this.decode(reader, reader.uint32());
-        };
-
-        /**
-         * Verifies a GetContestEventsResponse message.
-         * @function verify
-         * @memberof rankland_live_contest_client.GetContestEventsResponse
-         * @static
-         * @param {Object.<string,*>} message Plain object to verify
-         * @returns {string|null} `null` if valid, otherwise the reason why it is not
-         */
-        GetContestEventsResponse.verify = function verify(message) {
-            if (typeof message !== "object" || message === null)
-                return "object expected";
-            var properties = {};
-            if (message.uk != null && message.hasOwnProperty("uk"))
-                if (!$util.isString(message.uk))
-                    return "uk: string expected";
-            if (message.fromEventId != null && message.hasOwnProperty("fromEventId")) {
-                properties._fromEventId = 1;
-                if (!$util.isInteger(message.fromEventId))
-                    return "fromEventId: integer expected";
-            }
-            if (message.toEventId != null && message.hasOwnProperty("toEventId")) {
-                properties._toEventId = 1;
-                if (!$util.isInteger(message.toEventId))
-                    return "toEventId: integer expected";
-            }
-            if (message.checkpointEventId != null && message.hasOwnProperty("checkpointEventId"))
-                if (!$util.isInteger(message.checkpointEventId))
-                    return "checkpointEventId: integer expected";
-            if (message.latestEventId != null && message.hasOwnProperty("latestEventId"))
-                if (!$util.isInteger(message.latestEventId))
-                    return "latestEventId: integer expected";
-            if (message.streamRevision != null && message.hasOwnProperty("streamRevision"))
-                if (!$util.isInteger(message.streamRevision))
-                    return "streamRevision: integer expected";
-            if (message.hasMore != null && message.hasOwnProperty("hasMore"))
-                if (typeof message.hasMore !== "boolean")
-                    return "hasMore: boolean expected";
-            if (message.resetRequired != null && message.hasOwnProperty("resetRequired"))
-                if (typeof message.resetRequired !== "boolean")
-                    return "resetRequired: boolean expected";
-            if (message.resetReason != null && message.hasOwnProperty("resetReason"))
-                if (!$util.isString(message.resetReason))
-                    return "resetReason: string expected";
-            if (message.events != null && message.hasOwnProperty("events")) {
-                if (!Array.isArray(message.events))
-                    return "events: array expected";
-                for (var i = 0; i < message.events.length; ++i) {
-                    var error = $root.rankland_live_contest_client.ClientEvent.verify(message.events[i]);
-                    if (error)
-                        return "events." + error;
-                }
-            }
-            return null;
-        };
-
-        /**
-         * Creates a GetContestEventsResponse message from a plain object. Also converts values to their respective internal types.
-         * @function fromObject
-         * @memberof rankland_live_contest_client.GetContestEventsResponse
-         * @static
-         * @param {Object.<string,*>} object Plain object
-         * @returns {rankland_live_contest_client.GetContestEventsResponse} GetContestEventsResponse
-         */
-        GetContestEventsResponse.fromObject = function fromObject(object) {
-            if (object instanceof $root.rankland_live_contest_client.GetContestEventsResponse)
-                return object;
-            var message = new $root.rankland_live_contest_client.GetContestEventsResponse();
-            if (object.uk != null)
-                message.uk = String(object.uk);
-            if (object.fromEventId != null)
-                message.fromEventId = object.fromEventId >>> 0;
-            if (object.toEventId != null)
-                message.toEventId = object.toEventId >>> 0;
-            if (object.checkpointEventId != null)
-                message.checkpointEventId = object.checkpointEventId >>> 0;
-            if (object.latestEventId != null)
-                message.latestEventId = object.latestEventId >>> 0;
-            if (object.streamRevision != null)
-                message.streamRevision = object.streamRevision >>> 0;
-            if (object.hasMore != null)
-                message.hasMore = Boolean(object.hasMore);
-            if (object.resetRequired != null)
-                message.resetRequired = Boolean(object.resetRequired);
-            if (object.resetReason != null)
-                message.resetReason = String(object.resetReason);
-            if (object.events) {
-                if (!Array.isArray(object.events))
-                    throw TypeError(".rankland_live_contest_client.GetContestEventsResponse.events: array expected");
-                message.events = [];
-                for (var i = 0; i < object.events.length; ++i) {
-                    if (typeof object.events[i] !== "object")
-                        throw TypeError(".rankland_live_contest_client.GetContestEventsResponse.events: object expected");
-                    message.events[i] = $root.rankland_live_contest_client.ClientEvent.fromObject(object.events[i]);
-                }
-            }
-            return message;
-        };
-
-        /**
-         * Creates a plain object from a GetContestEventsResponse message. Also converts values to other types if specified.
-         * @function toObject
-         * @memberof rankland_live_contest_client.GetContestEventsResponse
-         * @static
-         * @param {rankland_live_contest_client.GetContestEventsResponse} message GetContestEventsResponse
-         * @param {$protobuf.IConversionOptions} [options] Conversion options
-         * @returns {Object.<string,*>} Plain object
-         */
-        GetContestEventsResponse.toObject = function toObject(message, options) {
-            if (!options)
-                options = {};
-            var object = {};
-            if (options.arrays || options.defaults)
-                object.events = [];
-            if (options.defaults) {
-                object.uk = "";
-                object.checkpointEventId = 0;
-                object.latestEventId = 0;
-                object.streamRevision = 0;
-                object.hasMore = false;
-                object.resetRequired = false;
-                object.resetReason = "";
-            }
-            if (message.uk != null && message.hasOwnProperty("uk"))
-                object.uk = message.uk;
-            if (message.fromEventId != null && message.hasOwnProperty("fromEventId")) {
-                object.fromEventId = message.fromEventId;
-                if (options.oneofs)
-                    object._fromEventId = "fromEventId";
-            }
-            if (message.toEventId != null && message.hasOwnProperty("toEventId")) {
-                object.toEventId = message.toEventId;
-                if (options.oneofs)
-                    object._toEventId = "toEventId";
-            }
-            if (message.checkpointEventId != null && message.hasOwnProperty("checkpointEventId"))
-                object.checkpointEventId = message.checkpointEventId;
-            if (message.latestEventId != null && message.hasOwnProperty("latestEventId"))
-                object.latestEventId = message.latestEventId;
-            if (message.streamRevision != null && message.hasOwnProperty("streamRevision"))
-                object.streamRevision = message.streamRevision;
-            if (message.hasMore != null && message.hasOwnProperty("hasMore"))
-                object.hasMore = message.hasMore;
-            if (message.resetRequired != null && message.hasOwnProperty("resetRequired"))
-                object.resetRequired = message.resetRequired;
-            if (message.resetReason != null && message.hasOwnProperty("resetReason"))
-                object.resetReason = message.resetReason;
-            if (message.events && message.events.length) {
-                object.events = [];
-                for (var j = 0; j < message.events.length; ++j)
-                    object.events[j] = $root.rankland_live_contest_client.ClientEvent.toObject(message.events[j], options);
-            }
-            return object;
-        };
-
-        /**
-         * Converts this GetContestEventsResponse to JSON.
-         * @function toJSON
-         * @memberof rankland_live_contest_client.GetContestEventsResponse
-         * @instance
-         * @returns {Object.<string,*>} JSON object
-         */
-        GetContestEventsResponse.prototype.toJSON = function toJSON() {
-            return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
-        };
-
-        return GetContestEventsResponse;
-    })();
-
-    return rankland_live_contest_client;
 })();
 
 module.exports = $root;

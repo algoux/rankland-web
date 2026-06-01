@@ -29,10 +29,6 @@ export default class ContestSseHub {
     const removeClient = () => this.removeClient(uk, response);
     response.on('close', removeClient);
     response.on('error', removeClient);
-    if (!this.writeRaw(response, 'retry: 1000\n\n')) {
-      removeClient();
-      return;
-    }
     if (initialPayload) {
       this.writeEvent(uk, response, 'events-available', initialPayload);
     }

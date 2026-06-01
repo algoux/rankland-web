@@ -13,8 +13,6 @@ export interface ContestStoredEvent {
   eventId: number;
   streamRevision: number;
   type: rankland_live_contest_common.EventType;
-  payloadHash: string;
-  payloadBytes: Buffer;
   producerId: string;
   solutionId?: number | null;
   userId?: string | null;
@@ -24,6 +22,8 @@ export interface ContestStoredEvent {
   result?: number | null;
   timeNs?: string | null;
   solutionSubmitTimeNs?: string | null;
+  payloadHash: string;
+  payloadBytes: Buffer;
 }
 
 export interface ContestEventInsertInput extends Omit<ContestStoredEvent, 'contestId' | 'streamRevision'> {}

@@ -1,4 +1,4 @@
-import { Contract, Data, Get, InjectCtx, Post, RequestContext, UseGuards } from 'bwcx-ljsm';
+import { Contract, Data, Delete, Get, InjectCtx, Patch, Post, RequestContext, UseGuards } from 'bwcx-ljsm';
 import { Inject } from 'bwcx-core';
 import { Api } from 'bwcx-api';
 import { ApiController } from '@server/decorators';
@@ -9,15 +9,17 @@ import {
   CreateContestReqDTO,
   CreateContestRespDTO,
   GetContestReqDTO,
-  GetContestEventsReqDTO,
-  GetContestEventsRespDTO,
+  GetPublicContestEventsReqDTO,
+  GetPublicContestEventsRespDTO,
   GetContestRespDTO,
   GetPublicContestReqDTO,
   GetPublicContestRespDTO,
   UpdateContestReqDTO,
   ResetContestEventsReqDTO,
-  GetContestStreamStateReqDTO,
-  GetContestStreamStateRespDTO,
+  GetContestEventStreamReqDTO,
+  GetContestEventStreamRespDTO,
+  GetPublicContestEventStreamReqDTO,
+  GetPublicContestEventStreamRespDTO,
   GetPublicContestUsersReqDTO,
   GetPublicContestUsersRespDTO,
   GetPublicContestUserReqDTO,
@@ -26,9 +28,9 @@ import {
   GetContestUsersRespDTO,
   GetContestUserReqDTO,
   GetContestUserRespDTO,
-  ReleaseContestProducerReqDTO,
+  DeleteContestEventStreamProducerLockReqDTO,
   UpdateContestUserReqDTO,
-  RawContestEventsReqDTO,
+  StreamPublicContestEventStreamNotificationsReqDTO,
 } from '@common/modules/contest/contest.dto';
 import LogicException from '@server/exceptions/logic.exception';
 import { ErrCode } from '@common/enums/err-code.enum';
@@ -71,7 +73,7 @@ export default class ContestController {
   }
 
   @Api.Summary('更新实时比赛')
-  @Post('/contests/:uk')
+  @Patch('/contests/:uk')
   @UseGuards(AuthGuard)
   @Contract(UpdateContestReqDTO, null)
   public async updateContest(@Data() data: UpdateContestReqDTO) {
@@ -100,7 +102,7 @@ export default class ContestController {
     @Data() data: AppendContestEventsReqDTO,
   ): Promise<AppendContestEventsRespDTO> {
     const producerId = this.ctx.headers['x-producer-id'] as string;
-    const batch = parseProducerBatchJson({ events: data.events });
+    const batch = parseProducerBatchJson({ streamRevision: data.streamRevision, events: data.events });
     const result = await this.eventStreamService.appendProducerEvents({
       uk: data.uk,
       producerId,
@@ -114,15 +116,15 @@ export default class ContestController {
     return result;
   }
 
-  @Api.Summary('查询实时比赛事件')
-  @Get('/contests/:uk/events')
-  @Contract(GetContestEventsReqDTO, GetContestEventsRespDTO)
+  @Api.Summary('公开查询实时比赛事件')
+  @Get('/public/contests/:uk/events')
+  @Contract(GetPublicContestEventsReqDTO, GetPublicContestEventsRespDTO)
   @ProtobufContract(null, rankland_live_contest_client.GetContestEventsResponse)
-  public async getContestEvents(@Data() data: GetContestEventsReqDTO): Promise<any> {
+  public async getPublicContestEvents(@Data() data: GetPublicContestEventsReqDTO): Promise<any> {
     const result = await this.eventStreamService.getClientEvents({
       uk: data.uk,
-      afterEventId: data.afterEventId || 0,
-      limit: data.limit || 1000,
+      afterEventId: data.afterEventId ?? 0,
+      limit: data.limit ?? 1000,
       streamRevision: data.streamRevision,
       compactProgress: data.compactProgress,
     });
@@ -131,11 +133,13 @@ export default class ContestController {
     return getContestEventsResponseToJson(result);
   }
 
-  @Api.Summary('实时比赛事件流 SSE 通知')
-  @Get('/contests/:uk/events/stream')
+  @Api.Summary('公开实时比赛事件流通知')
+  @Get('/public/contests/:uk/event-stream/notifications')
   @Sse()
-  @Contract(RawContestEventsReqDTO, null)
-  public async streamContestEvents(@Data() data: RawContestEventsReqDTO) {
+  @Contract(StreamPublicContestEventStreamNotificationsReqDTO, null)
+  public async streamPublicContestEventStreamNotifications(
+    @Data() data: StreamPublicContestEventStreamNotificationsReqDTO,
+  ) {
     // ContentNegotiation + SSE middleware have already opened the event stream
     // (headers, ctx.respond = false). Here we only do the business hookup.
     const stream = await this.eventStreamService.getStreamState(data.uk);
@@ -146,23 +150,37 @@ export default class ContestController {
     });
   }
 
-  @Api.Summary('查询实时比赛事件流状态')
-  @Get('/contests/:uk/stream')
+  @Api.Summary('查询实时比赛事件流')
+  @Get('/contests/:uk/event-stream')
   @UseGuards(AuthGuard)
-  @Contract(GetContestStreamStateReqDTO, GetContestStreamStateRespDTO)
-  public async getContestStreamState(
-    @Data() data: GetContestStreamStateReqDTO,
-  ): Promise<GetContestStreamStateRespDTO> {
+  @Contract(GetContestEventStreamReqDTO, GetContestEventStreamRespDTO)
+  public async getContestEventStream(
+    @Data() data: GetContestEventStreamReqDTO,
+  ): Promise<GetContestEventStreamRespDTO> {
     return this.eventStreamService.getStreamState(data.uk);
   }
 
-  @Api.Summary('释放实时比赛生产者锁')
-  @Post('/contests/:uk/producer/release')
+  @Api.Summary('公开查询实时比赛事件流')
+  @Get('/public/contests/:uk/event-stream')
+  @Contract(GetPublicContestEventStreamReqDTO, GetPublicContestEventStreamRespDTO)
+  public async getPublicContestEventStream(
+    @Data() data: GetPublicContestEventStreamReqDTO,
+  ): Promise<GetPublicContestEventStreamRespDTO> {
+    const stream = await this.eventStreamService.getStreamState(data.uk);
+    return {
+      uk: stream.uk,
+      lastEventId: stream.lastEventId,
+      streamRevision: stream.streamRevision,
+    };
+  }
+
+  @Api.Summary('释放实时比赛事件流生产者锁')
+  @Delete('/contests/:uk/event-stream/producer-lock')
   @UseGuards(AuthGuard)
-  @Contract(ReleaseContestProducerReqDTO, GetContestStreamStateRespDTO)
-  public async releaseContestProducer(
-    @Data() data: ReleaseContestProducerReqDTO,
-  ): Promise<GetContestStreamStateRespDTO> {
+  @Contract(DeleteContestEventStreamProducerLockReqDTO, GetContestEventStreamRespDTO)
+  public async deleteContestEventStreamProducerLock(
+    @Data() data: DeleteContestEventStreamProducerLockReqDTO,
+  ): Promise<GetContestEventStreamRespDTO> {
     return this.eventStreamService.releaseProducerLock(data.uk);
   }
 
@@ -235,7 +253,7 @@ export default class ContestController {
   }
 
   @Api.Summary('更新实时比赛用户')
-  @Post('/contests/:uk/users/:userId')
+  @Patch('/contests/:uk/users/:userId')
   @UseGuards(AuthGuard)
   @Contract(UpdateContestUserReqDTO, null)
   public async updateContestUser(@Data() data: UpdateContestUserReqDTO) {

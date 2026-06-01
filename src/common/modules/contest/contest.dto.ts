@@ -5,12 +5,14 @@ import {
   ArrayMinSize,
   IsArray,
   IsBoolean,
+  IsInt,
   IsNotEmpty,
   IsNumber,
   IsObject,
   IsOptional,
   IsString,
   Length,
+  Min,
   ValidateNested,
 } from 'class-validator';
 import type * as srk from '@algoux/standard-ranklist';
@@ -311,6 +313,12 @@ export class AppendContestEventsReqDTO {
   public uk: string;
 
   @FromBody()
+  @Type(() => Number)
+  @IsInt()
+  @Min(1)
+  public streamRevision: number;
+
+  @FromBody()
   @IsArray()
   @ArrayMinSize(1)
   public events: any[];
@@ -324,7 +332,7 @@ export class AppendContestEventsRespDTO {
   public streamRevision: number;
 }
 
-export class GetContestEventsReqDTO {
+export class GetPublicContestEventsReqDTO {
   @FromParam()
   @IsString()
   @IsNotEmpty()
@@ -333,17 +341,22 @@ export class GetContestEventsReqDTO {
   @FromQuery()
   @IsOptional()
   @Type(() => Number)
+  @IsInt()
+  @Min(0)
   public afterEventId?: number;
 
   @FromQuery()
   @IsOptional()
   @Type(() => Number)
+  @IsInt()
+  @Min(1)
   public limit?: number;
 
   @FromQuery()
-  @IsOptional()
   @Type(() => Number)
-  public streamRevision?: number;
+  @IsInt()
+  @Min(1)
+  public streamRevision: number;
 
   @FromQuery()
   @IsOptional()
@@ -352,7 +365,7 @@ export class GetContestEventsReqDTO {
   public compactProgress?: boolean;
 }
 
-export class GetContestEventsRespDTO {
+export class GetPublicContestEventsRespDTO {
   public uk: string;
   public fromEventId: number | null;
   public toEventId: number | null;
@@ -365,14 +378,14 @@ export class GetContestEventsRespDTO {
   public resetReason?: string;
 }
 
-export class GetContestStreamStateReqDTO {
+export class GetContestEventStreamReqDTO {
   @FromParam()
   @IsString()
   @IsNotEmpty()
   public uk: string;
 }
 
-export class GetContestStreamStateRespDTO {
+export class GetContestEventStreamRespDTO {
   public contestId: string;
   public uk: string;
   public lastEventId: number;
@@ -380,14 +393,27 @@ export class GetContestStreamStateRespDTO {
   public producerId?: string | null;
 }
 
-export class ReleaseContestProducerReqDTO {
+export class GetPublicContestEventStreamReqDTO {
   @FromParam()
   @IsString()
   @IsNotEmpty()
   public uk: string;
 }
 
-export class RawContestEventsReqDTO {
+export class GetPublicContestEventStreamRespDTO {
+  public uk: string;
+  public lastEventId: number;
+  public streamRevision: number;
+}
+
+export class DeleteContestEventStreamProducerLockReqDTO {
+  @FromParam()
+  @IsString()
+  @IsNotEmpty()
+  public uk: string;
+}
+
+export class StreamPublicContestEventStreamNotificationsReqDTO {
   @FromParam()
   @IsString()
   @IsNotEmpty()

@@ -43,6 +43,7 @@ export interface ContestProducerEventBO {
 }
 
 export interface ContestProducerBatchBO {
+  streamRevision: number;
   events: ContestProducerEventBO[];
 }
 

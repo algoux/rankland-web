@@ -1,5 +1,4 @@
 import { Inject, Provide } from 'bwcx-core';
-import Long from 'long';
 import { DataSource, EntityManager, FindOptionsWhere, In } from 'typeorm';
 import type { User } from '@algoux/standard-ranklist';
 import type * as srk from '@algoux/standard-ranklist';
@@ -7,11 +6,8 @@ import TypeOrmClient from '@server/database/typeorm-client';
 import { ContestEntity } from '@server/entities/contest.entity';
 import { ContestUserEntity } from '@server/entities/contest-user.entity';
 import { ContestEventStreamEntity } from '@server/entities/contest-event-stream.entity';
-import { ContestEventEntity } from '@server/entities/contest-event.entity';
 import LogicException from '@server/exceptions/logic.exception';
 import { ErrCode } from '@common/enums/err-code.enum';
-import { rankland_live_contest_common } from '@common/proto/rankland_live_contest';
-import MiscUtils from '@server/utils/misc.util';
 
 export type ContestUserInput = srk.User & {
   banned?: boolean;
@@ -36,7 +32,6 @@ type ContestUpdateInput = Partial<
 export default class ContestService {
   public constructor(
     @Inject(TypeOrmClient) private readonly typeOrmClient: TypeOrmClient,
-    @Inject(MiscUtils) private readonly miscUtils: MiscUtils,
   ) {}
 
   private contestIdCacheMap = new Map<string, string>();
@@ -144,7 +139,6 @@ export default class ContestService {
       if (!stream) {
         throw new LogicException(ErrCode.ContestNotFound);
       }
-      await manager.getRepository(ContestEventEntity).delete({ contestId: stream.contestId });
       stream.lastEventId = 0;
       stream.streamRevision += 1;
       stream.producerId = null;
@@ -176,29 +170,6 @@ export default class ContestService {
       sorter: contest.sorter,
       contributors: contest.contributors,
     };
-  }
-
-  public async processEventResult(
-    uk: string,
-    result: rankland_live_contest_common.Result,
-    timeValue: number | Long,
-    timeUnit: rankland_live_contest_common.TimeUnit,
-  ) {
-    if (!result) {
-      return result;
-    }
-    const contest = await this.getContest(uk);
-    const { duration, frozenDuration } = contest.contest;
-    const d = this.miscUtils.convertRLTimeDurationToSrk(timeValue, timeUnit);
-    const timeMs = this.miscUtils.formatTimeDuration(d, 'ms');
-    const durationMs = this.miscUtils.formatTimeDuration(duration, 'ms');
-    const frozenDurationMs = this.miscUtils.formatTimeDuration(frozenDuration, 'ms') || 0;
-    const inFrozen = timeMs >= durationMs - frozenDurationMs;
-    if (inFrozen) {
-      console.log('In frozen', timeMs, 'previous result', result);
-      return rankland_live_contest_common.Result.FZ;
-    }
-    return result;
   }
 
   public filterUserForPublic(user: ContestUserEntity | any): User {

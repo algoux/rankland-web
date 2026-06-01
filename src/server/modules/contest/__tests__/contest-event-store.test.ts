@@ -11,7 +11,7 @@ import {
   ContestStoredEvent,
   ContestStreamState,
 } from '../contest-event-store';
-import { parseProducerBatch } from '../contest-event-codec';
+import { parseProducerBatchJson } from '../contest-event-codec';
 import { ContestClientEventBO } from '../contest-event-bo';
 
 function progress(eventId: number, solutionId = 1, percentageProgress = 50) {
@@ -47,8 +47,8 @@ function settle(eventId: number, solutionId = 1, timeValue = 0) {
   };
 }
 
-function batch(events: rankland_live_contest_producer.IProducerEvent[]) {
-  return parseProducerBatch(rankland_live_contest_producer.BatchProducerEvent.encode({ events }).finish());
+function batch(events: rankland_live_contest_producer.IProducerEvent[], streamRevision = 1) {
+  return parseProducerBatchJson({ streamRevision, events });
 }
 
 function clientEventIds(events: ContestClientEventBO[]): number[] {
@@ -153,7 +153,7 @@ describe('contest event stream service', () => {
       batch: batch([newSolution(1, 10), newSolution(2, 11), progress(3, 10, 20), progress(4, 11, 30), settle(5, 10)]),
     });
 
-    const page = await service.getClientEvents({ uk: 'contest-a', afterEventId: 2, limit: 2 });
+    const page = await service.getClientEvents({ uk: 'contest-a', afterEventId: 2, limit: 2, streamRevision: 1 });
 
     expect(page.uk).toBe('contest-a');
     expect(clientEventIds(page.events)).toEqual([4]);
@@ -178,6 +178,7 @@ describe('contest event stream service', () => {
       uk: 'contest-a',
       afterEventId: 0,
       limit: 10,
+      streamRevision: 1,
       compactProgress: false,
     });
 
@@ -202,6 +203,7 @@ describe('contest event stream service', () => {
       uk: 'contest-a',
       afterEventId: 0,
       limit: 10,
+      streamRevision: 1,
       compactProgress: false,
     });
 
@@ -225,6 +227,7 @@ describe('contest event stream service', () => {
       uk: 'contest-a',
       afterEventId: 0,
       limit: 10,
+      streamRevision: 1,
       compactProgress: false,
     });
 
@@ -275,6 +278,69 @@ describe('contest event stream service', () => {
     expect(page.streamRevision).toBe(2);
     expect(page.checkpointEventId).toBe(0);
     expect(clientEventIds(page.events)).toEqual([]);
+  });
+
+  it('rejects append batches whose stream revision does not match the current stream', async () => {
+    const store = new InMemoryContestEventStore();
+    store.addContest('contest-a');
+    const service = new ContestEventStreamService(store);
+
+    await expect(
+      service.appendProducerEvents({
+        uk: 'contest-a',
+        producerId: 'producer-a',
+        batch: batch([newSolution(1)], 2),
+      }),
+    ).rejects.toMatchObject({ code: 'STREAM_REVISION_MISMATCH' });
+
+    await expect(service.getStreamState('contest-a')).resolves.toMatchObject({
+      lastEventId: 0,
+      streamRevision: 1,
+      producerId: null,
+    });
+  });
+
+  it('requires a client stream revision for catch-up', async () => {
+    const store = new InMemoryContestEventStore();
+    store.addContest('contest-a');
+    const service = new ContestEventStreamService(store);
+
+    await expect(
+      service.getClientEvents({ uk: 'contest-a', afterEventId: 0, limit: 10 } as any),
+    ).rejects.toThrow(/streamRevision is required/);
+  });
+
+  it('retains old revision events while allowing a reset stream to reuse event ids', async () => {
+    const store = new InMemoryContestEventStore();
+    store.addContest('contest-a');
+    const service = new ContestEventStreamService(store);
+
+    await service.appendProducerEvents({
+      uk: 'contest-a',
+      producerId: 'producer-a',
+      batch: batch([newSolution(1, 1)]),
+    });
+    await store.runInStreamTransaction('contest-a', async (transaction) => {
+      transaction.stream.lastEventId = 0;
+      transaction.stream.streamRevision = 2;
+      transaction.stream.producerId = null;
+      await transaction.advanceLastEventId(0);
+    });
+
+    const appendResult = await service.appendProducerEvents({
+      uk: 'contest-a',
+      producerId: 'producer-b',
+      batch: batch([newSolution(1, 2)], 2),
+    });
+    const page = await service.getClientEvents({ uk: 'contest-a', afterEventId: 0, limit: 10, streamRevision: 2 });
+
+    expect(appendResult.acceptedEventIds).toEqual([1]);
+    expect(clientEventIds(page.events)).toEqual([1]);
+    expect(page.streamRevision).toBe(2);
+    expect((store as any).events.get('contest-a').map((event: ContestStoredEvent) => event.streamRevision)).toEqual([
+      1,
+      2,
+    ]);
   });
 
   it('rejects blank producer ids before claiming the stream lock', async () => {
@@ -350,7 +416,7 @@ class InstrumentedContestEventTransaction implements ContestEventTransaction {
   public async findEvents(eventIds: number[]): Promise<ContestStoredEvent[]> {
     this.findEventsCalls += 1;
     return this.events
-      .filter((item) => eventIds.includes(item.eventId))
+      .filter((item) => item.streamRevision === this.stream.streamRevision && eventIds.includes(item.eventId))
       .map((event) => ({ ...event, payloadBytes: Buffer.from(event.payloadBytes) }));
   }
 
@@ -361,6 +427,7 @@ class InstrumentedContestEventTransaction implements ContestEventTransaction {
     for (const event of this.events) {
       if (
         event.type === rankland_live_contest_common.EventType.NEW_SOLUTION &&
+        event.streamRevision === this.stream.streamRevision &&
         event.solutionId !== undefined &&
         event.solutionId !== null &&
         solutionIdsSet.has(event.solutionId)

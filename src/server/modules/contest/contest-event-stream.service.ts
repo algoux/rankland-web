@@ -30,7 +30,7 @@ export interface GetClientEventsInput {
   uk: string;
   afterEventId: number;
   limit: number;
-  streamRevision?: number;
+  streamRevision: number;
   compactProgress?: boolean;
 }
 
@@ -47,6 +47,13 @@ export default class ContestEventStreamService {
 
     return this.store.runInStreamTransaction(input.uk, async (transaction) => {
       const { stream } = transaction;
+      if (input.batch.streamRevision !== stream.streamRevision) {
+        throw new ContestEventError(
+          ContestEventErrorCode.StreamRevisionMismatch,
+          `expected stream revision ${stream.streamRevision} but received ${input.batch.streamRevision}`,
+          { expectedStreamRevision: stream.streamRevision, receivedStreamRevision: input.batch.streamRevision },
+        );
+      }
       if (!stream.producerId) {
         await transaction.setProducerLock(producerId);
         stream.producerId = producerId;
@@ -128,13 +135,17 @@ export default class ContestEventStreamService {
   }
 
   public async getClientEvents(input: GetClientEventsInput): Promise<GetClientEventsResult> {
-    const limit = Math.max(1, Math.min(input.limit || 1000, 5000));
-    const snapshot = await this.store.readEventsSnapshot(input.uk, input.afterEventId, limit + 1);
+    if (!Number.isInteger(input.streamRevision) || input.streamRevision < 1) {
+      throw new ContestEventError(ContestEventErrorCode.InvalidEventBatch, 'streamRevision is required');
+    }
+    const afterEventId = Math.max(0, input.afterEventId ?? 0);
+    const limit = Math.max(1, Math.min(input.limit ?? 1000, 5000));
+    const snapshot = await this.store.readEventsSnapshot(input.uk, afterEventId, limit + 1);
     const { stream } = snapshot;
-    if (input.streamRevision !== undefined && input.streamRevision !== stream.streamRevision) {
+    if (input.streamRevision !== stream.streamRevision) {
       return emptyResetResponse(input.uk, stream, 'stream revision changed');
     }
-    if (input.afterEventId > stream.lastEventId) {
+    if (afterEventId > stream.lastEventId) {
       return emptyResetResponse(input.uk, stream, 'afterEventId is ahead of latestEventId');
     }
     const storedEvents = snapshot.events;
@@ -145,7 +156,7 @@ export default class ContestEventStreamService {
       input.compactProgress === false
         ? clientEvents
         : compactSettledProgressEvents(clientEvents, snapshot.settledEventIdsBySolutionId);
-    const checkpointEventId = page.length ? page[page.length - 1].eventId : input.afterEventId;
+    const checkpointEventId = page.length ? page[page.length - 1].eventId : afterEventId;
 
     return {
       uk: input.uk,

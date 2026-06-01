@@ -2,8 +2,7 @@ import { Column, CreateDateColumn, Entity, Index, PrimaryGeneratedColumn } from 
 import { rankland_live_contest_common } from '@common/proto/rankland_live_contest';
 
 @Entity('contest_event')
-@Index('IDX_contest_event_contest_event', ['contestId', 'eventId'], { unique: true })
-@Index('IDX_contest_event_revision_event', ['contestId', 'streamRevision', 'eventId'])
+@Index('IDX_contest_event_contest_revision_event', ['contestId', 'streamRevision', 'eventId'], { unique: true })
 @Index('IDX_contest_event_solution', ['contestId', 'solutionId'])
 @Index('IDX_contest_event_type', ['contestId', 'type'])
 @Index('IDX_contest_event_solution_type_lookup', ['contestId', 'streamRevision', 'type', 'solutionId'])
@@ -22,12 +21,6 @@ export class ContestEventEntity {
 
   @Column({ type: 'tinyint', unsigned: true })
   public type: rankland_live_contest_common.EventType;
-
-  @Column({ name: 'payload_hash', type: 'char', length: 64 })
-  public payloadHash: string;
-
-  @Column({ name: 'payload_bytes', type: 'longblob' })
-  public payloadBytes: Buffer;
 
   @Column({ name: 'producer_id', type: 'varchar', length: 128 })
   public producerId: string;
@@ -58,4 +51,10 @@ export class ContestEventEntity {
 
   @CreateDateColumn({ name: 'created_at', type: 'datetime', precision: 3 })
   public createdAt: Date;
+
+  @Column({ name: 'payload_hash', type: 'char', length: 64 })
+  public payloadHash: string;
+
+  @Column({ name: 'payload_bytes', type: 'longblob' })
+  public payloadBytes: Buffer;
 }

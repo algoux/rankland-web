@@ -24,6 +24,7 @@ decorate(ProtobufContract(null, {} as any), GetController, 'get');
 function createBatchBytes() {
   return Buffer.from(
     rankland_live_contest_producer.BatchProducerEvent.encode({
+      streamRevision: 1,
       events: [
         {
           eventId: 1,

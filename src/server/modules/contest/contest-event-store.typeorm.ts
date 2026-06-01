@@ -136,6 +136,7 @@ class TypeOrmContestEventTransaction implements ContestEventTransaction {
     const entities = await this.manager.getRepository(ContestEventEntity).find({
       where: {
         contestId: this.stream.contestId,
+        streamRevision: this.stream.streamRevision,
         eventId: In(eventIds),
       },
     });
@@ -212,8 +213,6 @@ function eventEntityToStoredEvent(entity: ContestEventEntity): ContestStoredEven
     eventId: entity.eventId,
     streamRevision: entity.streamRevision,
     type: entity.type,
-    payloadHash: entity.payloadHash,
-    payloadBytes: Buffer.from(entity.payloadBytes),
     producerId: entity.producerId,
     solutionId: entity.solutionId,
     userId: entity.userId,
@@ -223,5 +222,7 @@ function eventEntityToStoredEvent(entity: ContestEventEntity): ContestStoredEven
     result: entity.result,
     timeNs: entity.timeNs,
     solutionSubmitTimeNs: entity.solutionSubmitTimeNs,
+    payloadHash: entity.payloadHash,
+    payloadBytes: Buffer.from(entity.payloadBytes),
   };
 }

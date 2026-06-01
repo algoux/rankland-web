@@ -110,7 +110,7 @@ class InMemoryContestEventTransaction implements ContestEventTransaction {
   public async findEvents(eventIds: number[]): Promise<ContestStoredEvent[]> {
     const eventIdsSet = new Set(eventIds);
     return this.events
-      .filter((item) => eventIdsSet.has(item.eventId))
+      .filter((item) => item.streamRevision === this.stream.streamRevision && eventIdsSet.has(item.eventId))
       .map((event) => ({ ...event, payloadBytes: Buffer.from(event.payloadBytes) }));
   }
 
@@ -120,6 +120,7 @@ class InMemoryContestEventTransaction implements ContestEventTransaction {
     for (const event of this.events) {
       if (
         event.type !== rankland_live_contest_common.EventType.NEW_SOLUTION ||
+        event.streamRevision !== this.stream.streamRevision ||
         event.solutionId === undefined ||
         event.solutionId === null ||
         !solutionIdsSet.has(event.solutionId)

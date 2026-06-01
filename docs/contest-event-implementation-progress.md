@@ -41,18 +41,20 @@ Updated: 2026-05-29
   - write-side `solution_submit_time_ns` denormalization for progress/result events
 - Added HTTP APIs:
   - `POST /api/v2/contests`
-  - `POST /api/v2/contests/:uk`
+  - `PATCH /api/v2/contests/:uk`
   - `GET /api/v2/contests/:uk`
   - `GET /api/v2/public/contests/:uk`
   - `GET /api/v2/contests/:uk/users`
   - `GET /api/v2/contests/:uk/users/:userId`
-  - `POST /api/v2/contests/:uk/users/:userId`
+  - `PATCH /api/v2/contests/:uk/users/:userId`
   - `GET /api/v2/public/contests/:uk/users`
   - `GET /api/v2/public/contests/:uk/users/:userId`
   - `POST /api/v2/contests/:uk/events` for direct JSON or protobuf event batches
-  - `GET /api/v2/contests/:uk/events` for catch-up
-  - `GET /api/v2/contests/:uk/stream` for admin inspection
-  - `POST /api/v2/contests/:uk/producer/release` for admin lock release
+  - `GET /api/v2/public/contests/:uk/events` for catch-up
+  - `GET /api/v2/contests/:uk/event-stream` for admin inspection
+  - `GET /api/v2/public/contests/:uk/event-stream` for public bootstrap
+  - `GET /api/v2/public/contests/:uk/event-stream/notifications` for SSE notifications
+  - `DELETE /api/v2/contests/:uk/event-stream/producer-lock` for admin lock release
   - `POST /api/v2/contests/:uk/events/reset` for stream reset
   - contest/user APIs now use MySQL and expose the `users` field
 - Refactored the contest-specific protobuf/SSE middleware into generic, metadata-driven infrastructure:
@@ -66,7 +68,8 @@ Updated: 2026-05-29
   - Removed `ContestEventMiddleware`, `contest-event-response.ts`, `binary-response.ts`, and the manual
     `createContestEventBinaryResponse` wrapping; the events endpoints no longer carry protobuf-first logic.
 - Catch-up reads stream state and event page in one MySQL snapshot and filters by the same `streamRevision`.
-- Catch-up accepts optional `streamRevision`; a stale revision returns an empty reset envelope with `resetRequired: true`.
+- Catch-up requires `streamRevision`; a stale revision returns an empty reset envelope with `resetRequired: true`.
+- Append requires producer batches to include the current `streamRevision`; mismatches return `STREAM_REVISION_MISMATCH`.
 - Default catch-up compaction now checks later settle/change events beyond the current page before dropping stale progress events.
 - Catch-up now filters frozen submissions before compaction. The filter uses the solution's new-solution submit time, works even when `compactProgress=false`, and still advances `checkpointEventId` across filtered events.
 - Removed Socket.IO server startup from the Node process.
@@ -101,7 +104,15 @@ pnpm run build
 
 - Old Mongo event logs are not migrated.
 - Runtime no longer connects to MongoDB for contest data.
-- `resetContestEvents` now resets the stream: deletes events, increments `streamRevision`, clears `lastEventId`, and releases the producer lock.
+- `resetContestEvents` now resets the stream: retains old event rows, increments `streamRevision`, clears `lastEventId`, and releases the producer lock.
 - `resetContestEvents` also sends an SSE notification with the new `streamRevision`.
 - Consumers should persist both `checkpointEventId` and `streamRevision`. `checkpointEventId` may be sparse when compaction removes stale progress events.
 - Catch-up compaction filters stale progress events only in HTTP recovery responses. Live realtime notifications are never compacted because they do not carry event payloads.
+
+## Follow-Up Backlog
+
+- Define retention/archive policy for retained old-revision `contest_event` rows before resets become routine.
+- Load-test large contests for catch-up settled-event aggregation and public user text filters; optimize indexes or push filtering into SQL only if measurements justify it.
+- Tighten public user DTO/query types so they do not advertise admin-only fields.
+- Decide one `uk -> contestId` lookup strategy and either bound/invalidate `contestIdCacheMap` or remove it.
+- Add an SSE heartbeat/keep-alive frame if deployment intermediaries are observed dropping idle streams.

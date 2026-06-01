@@ -15,14 +15,13 @@ import {
 } from './contest-event-bo';
 
 export interface ParsedProducerBatch {
+  streamRevision: number;
   events: ContestProducerEventBO[];
 }
 
 export interface StoredEventInput {
   eventId: number;
   type: rankland_live_contest_common.EventType;
-  payloadHash: string;
-  payloadBytes: Buffer;
   producerId: string;
   solutionId?: number;
   userId?: string;
@@ -32,6 +31,8 @@ export interface StoredEventInput {
   result?: rankland_live_contest_common.Result;
   timeNs?: string;
   solutionSubmitTimeNs?: string;
+  payloadHash: string;
+  payloadBytes: Buffer;
 }
 
 export interface StoredClientEventLike {
@@ -57,22 +58,6 @@ const eventDataFieldByType: Record<number, keyof ContestProducerEventBO> = {
   [rankland_live_contest_common.EventType.CONTEST_CONFIG_CHANGE]: 'contestConfigChangeData',
 };
 
-export function parseProducerBatch(bytes: Uint8Array): ParsedProducerBatch {
-  let batch: rankland_live_contest_producer.BatchProducerEvent;
-  try {
-    batch = rankland_live_contest_producer.BatchProducerEvent.decode(bytes);
-  } catch (e) {
-    throw invalidBatch(`invalid protobuf batch: ${(e as Error).message}`);
-  }
-
-  const verifyError = rankland_live_contest_producer.BatchProducerEvent.verify(batch);
-  if (verifyError) {
-    throw invalidBatch(`invalid protobuf batch: ${verifyError}`);
-  }
-
-  return validateProducerBatch(toProducerBatchBO(batch), 'invalid protobuf batch');
-}
-
 export function parseProducerBatchJson(data: unknown): ParsedProducerBatch {
   if (!data || typeof data !== 'object' || Array.isArray(data)) {
     throw invalidBatch('producer batch JSON body must be an object');
@@ -96,13 +81,6 @@ export function parseProducerBatchJson(data: unknown): ParsedProducerBatch {
   return validateProducerBatch(toProducerBatchBO(batch), 'invalid producer batch JSON');
 }
 
-export function producerBatchToJson(batch: ContestProducerBatchBO): Record<string, unknown> {
-  return rankland_live_contest_producer.BatchProducerEvent.toObject(
-    rankland_live_contest_producer.BatchProducerEvent.fromObject(batch as any),
-    jsonConversionOptions,
-  );
-}
-
 function toProducerBatchBO(
   batch: rankland_live_contest_producer.BatchProducerEvent,
 ): ContestProducerBatchBO {
@@ -113,6 +91,9 @@ function toProducerBatchBO(
 }
 
 function validateProducerBatch(batch: ContestProducerBatchBO, prefix: string): ParsedProducerBatch {
+  if (!Number.isInteger(batch.streamRevision) || batch.streamRevision < 1) {
+    throw invalidBatch(`${prefix}: streamRevision must be a positive integer`);
+  }
   if (!batch.events?.length) {
     throw invalidBatch('event batch must not be empty');
   }
@@ -129,7 +110,7 @@ function validateProducerBatch(batch: ContestProducerBatchBO, prefix: string): P
     assertEventPayloadMatchesType(item);
   }
 
-  return { events: batch.events };
+  return { streamRevision: batch.streamRevision, events: batch.events };
 }
 
 export function eventToStoredEventInput(
@@ -198,14 +179,6 @@ export function storedEventToClientEvent(event: StoredClientEventLike): ContestC
     throw invalidBatch(`invalid stored client event: ${verifyError}`);
   }
   return normalizeClientEventTimeToNanoseconds(toClientEventBO(decoded));
-}
-
-export function encodeGetContestEventsResponseBinary(response: ContestEventsResponseBO): Buffer {
-  return Buffer.from(
-    rankland_live_contest_client.GetContestEventsResponse.encode(
-      getContestEventsResponseToProtobufObject(response) as any,
-    ).finish(),
-  );
 }
 
 export function getContestEventsResponseToJson(response: ContestEventsResponseBO): Record<string, any> {

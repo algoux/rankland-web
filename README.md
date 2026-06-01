@@ -105,23 +105,24 @@ RUN_MYSQL_TESTS=true pnpm run test
 
 ```text
 POST /api/v2/contests                              x-token
-POST /api/v2/contests/:uk                          x-token
+PATCH /api/v2/contests/:uk                         x-token
 GET  /api/v2/contests/:uk                          x-token
 GET  /api/v2/public/contests/:uk
 GET  /api/v2/contests/:uk/users                    x-token
 GET  /api/v2/contests/:uk/users/:userId            x-token
-POST /api/v2/contests/:uk/users/:userId            x-token
+PATCH /api/v2/contests/:uk/users/:userId           x-token
 GET  /api/v2/public/contests/:uk/users
 GET  /api/v2/public/contests/:uk/users/:userId
 POST /api/v2/contests/:uk/events                   x-token, x-producer-id
-GET  /api/v2/contests/:uk/events
-GET  /api/v2/contests/:uk/events/stream
-GET  /api/v2/contests/:uk/stream                   x-token
-POST /api/v2/contests/:uk/producer/release         x-token
+GET  /api/v2/public/contests/:uk/events
+GET  /api/v2/public/contests/:uk/event-stream/notifications
+GET  /api/v2/contests/:uk/event-stream             x-token
+GET  /api/v2/public/contests/:uk/event-stream
+DELETE /api/v2/contests/:uk/event-stream/producer-lock x-token
 POST /api/v2/contests/:uk/events/reset             x-token
 ```
 
-`POST /api/v2/contests/:uk/events` 支持直接传 `BatchProducerEvent` 等价 JSON，也支持 raw protobuf bytes；protobuf content type 仅允许 `application/x-protobuf` 或 `application/protobuf`。`GET /api/v2/contests/:uk/events` 会按 `Accept` 返回 `GetContestEventsResponse` protobuf bytes 或等价 JSON。
+`POST /api/v2/contests/:uk/events` 支持直接传 `BatchProducerEvent` 等价 JSON，也支持 raw protobuf bytes；protobuf content type 仅允许 `application/x-protobuf` 或 `application/protobuf`。`GET /api/v2/public/contests/:uk/events` 会按 `Accept` 返回 `GetContestEventsResponse` protobuf bytes 或等价 JSON。
 
 `contest.uk` 是唯一比赛标识。MySQL 表字段使用 snake_case；例如 `contest_event_stream` 只保存 `contest_id`、事件高水位和 producer lock，不保存冗余 `uk`。接口、DTO 和业务代码中的字段仍使用 camelCase，并由 TypeORM 映射到 snake_case 列。
 

@@ -39,7 +39,7 @@ Tables:
 - `contest`: contest metadata. `uk` is unique and is the public contest key.
 - `contest_user`: contest users. `(contest_id, user_id)` is unique.
 - `contest_event_stream`: one row per contest event stream. It stores `contest_id`, `last_event_id`, `stream_revision`, and producer lock fields. It does not store `uk`.
-- `contest_event`: append-only event log keyed by `(contest_id, event_id)`. It stores normalized `time_ns` and denormalized `solution_submit_time_ns` so consumer catch-up can filter frozen submissions without querying `NEW_SOLUTION` for every request.
+- `contest_event`: append-only event log keyed by `(contest_id, stream_revision, event_id)`. It stores normalized `time_ns` and denormalized `solution_submit_time_ns` so consumer catch-up can filter frozen submissions without querying `NEW_SOLUTION` for every request. Older revisions remain in this table as retained history after reset.
 
 `contest_event_stream` is intentionally normalized through the TypeScript `contestId` property, mapped to the `contest_id` column. Services resolve `contest.uk` to `contest.id` before touching stream or event rows.
 
@@ -59,18 +59,19 @@ Append endpoint:
 Append rules:
 
 1. Decode and verify `BatchProducerEvent`.
-2. Require non-empty batch.
+2. Require `streamRevision` and a non-empty batch.
 3. Require event ids to be strictly increasing inside the batch.
 4. Resolve `uk -> contestId`.
 5. Lock the `contest_event_stream` row in a transaction.
-6. The first producer claims the stream lock.
-7. Later appends must use the same `x-producer-id` until an admin releases the lock.
-8. `eventId` must continue from `lastEventId + 1`.
-9. Duplicate retries are accepted only when the stored payload hash matches.
-10. Conflicting duplicate payloads and gaps abort the transaction.
-11. For non-new solution events, resolve the solution submit time from an earlier `NEW_SOLUTION` in the same batch or one batch lookup of existing new-solution rows.
-12. `lastEventId` is updated only after the event rows are inserted.
-13. SSE notifications are broadcast only after transaction commit.
+6. Reject the append if batch `streamRevision` differs from the locked stream row.
+7. The first producer claims the stream lock.
+8. Later appends must use the same `x-producer-id` until an admin releases the lock.
+9. `eventId` must continue from `lastEventId + 1`.
+10. Duplicate retries are accepted only when the stored payload hash matches within the current revision.
+11. Conflicting duplicate payloads and gaps abort the transaction.
+12. For non-new solution events, resolve the solution submit time from an earlier `NEW_SOLUTION` in the same batch or one batch lookup of existing new-solution rows in the current revision.
+13. `lastEventId` is updated only after the event rows are inserted.
+14. SSE notifications are broadcast only after transaction commit.
 
 This one-request/one-ack flow is the correctness boundary. Producers should not send the next batch until the previous append response succeeds.
 
@@ -89,7 +90,7 @@ When `contest.frozenDuration` is positive, catch-up computes `frozenStartNs = du
 
 Catch-up endpoint:
 
-- `GET /api/v2/contests/:uk/events?afterEventId=123&limit=1000`
+- `GET /api/v2/public/contests/:uk/events?afterEventId=123&limit=1000&streamRevision=1`
 
 This endpoint is unauthenticated by current implementation.
 
@@ -135,11 +136,11 @@ This keeps `application/protobuf` ⇄ JSON interchange a transport concern; the 
 
 SSE endpoint:
 
-- `GET /api/v2/contests/:uk/events/stream`
+- `GET /api/v2/public/contests/:uk/event-stream/notifications`
 
 Implemented as a controller route marked `@Sse()`; the generic `SseMiddleware` handles the event-stream
 plumbing and the controller performs the business hookup (resolve stream state, register with the SSE hub).
-This endpoint is unauthenticated by current implementation. It carries no event payloads.
+This public notification endpoint is unauthenticated by current implementation. It carries no event payloads.
 
 The stream sends `events-available` events:
 
@@ -158,22 +159,24 @@ Clients should treat SSE as a hint and then use HTTP catch-up to fetch missing e
 Admin APIs are under `/api/v2`:
 
 - `POST /api/v2/contests`
-- `POST /api/v2/contests/:uk`
+- `PATCH /api/v2/contests/:uk`
 - `GET /api/v2/contests/:uk`
 - `GET /api/v2/contests/:uk/users`
 - `GET /api/v2/contests/:uk/users/:userId`
-- `POST /api/v2/contests/:uk/users/:userId`
-- `GET /api/v2/contests/:uk/stream`
-- `POST /api/v2/contests/:uk/producer/release`
+- `PATCH /api/v2/contests/:uk/users/:userId`
+- `GET /api/v2/contests/:uk/event-stream`
+- `DELETE /api/v2/contests/:uk/event-stream/producer-lock`
 - `POST /api/v2/contests/:uk/events/reset`
 
 These admin APIs require `x-token`.
 
-Reset deletes event rows for the contest, increments `streamRevision`, resets `lastEventId` to `0`, and releases the producer lock. Consumers that see a changed or stale `streamRevision` should reset local event state and catch up from the new stream.
+Reset retains historical event rows, increments `streamRevision`, resets `lastEventId` to `0`, and releases the producer lock. Consumers that see a changed or stale `streamRevision` should reset local event state and catch up from the new stream.
 
 Public APIs are:
 
 - `GET /api/v2/public/contests/:uk`
+- `GET /api/v2/public/contests/:uk/event-stream`
+- `GET /api/v2/public/contests/:uk/event-stream/notifications`
 - `GET /api/v2/public/contests/:uk/users`
 - `GET /api/v2/public/contests/:uk/users/:userId`
 

@@ -9,9 +9,8 @@ import TypeOrmContestEventStore from '../contest-event-store.typeorm';
 import ContestEventStreamService from '../contest-event-stream.service';
 import {
   rankland_live_contest_common,
-  rankland_live_contest_producer,
 } from '@common/proto/rankland_live_contest';
-import { parseProducerBatch } from '../contest-event-codec';
+import { parseProducerBatchJson } from '../contest-event-codec';
 import { ContestClientEventBO } from '../contest-event-bo';
 
 const runMysqlTests = process.env.RUN_MYSQL_TESTS === 'true';
@@ -73,7 +72,8 @@ describe.runIf(runMysqlTests)('contest TypeORM event store', () => {
   it('persists append results transactionally and keeps duplicate retries idempotent', async () => {
     const store = new TypeOrmContestEventStore({ getDataSource: () => dataSource } as TypeOrmClient);
     const service = new ContestEventStreamService(store);
-    const batch = parseProducerBatch(rankland_live_contest_producer.BatchProducerEvent.encode({
+    const batch = parseProducerBatchJson({
+      streamRevision: 1,
       events: [
         newSolution(1, 100),
         {
@@ -82,11 +82,11 @@ describe.runIf(runMysqlTests)('contest TypeORM event store', () => {
           solutionOnProgressData: { solutionId: 100, percentageProgress: 50 },
         },
       ],
-    }).finish());
+    });
 
     const first = await service.appendProducerEvents({ uk, producerId: 'producer-a', batch });
     const retry = await service.appendProducerEvents({ uk, producerId: 'producer-a', batch });
-    const page = await service.getClientEvents({ uk, afterEventId: 0, limit: 10, compactProgress: false });
+    const page = await service.getClientEvents({ uk, afterEventId: 0, limit: 10, streamRevision: 1, compactProgress: false });
 
     expect(page.uk).toBe(uk);
     expect(first.acceptedEventIds).toEqual([1, 2]);
@@ -105,6 +105,9 @@ describe.runIf(runMysqlTests)('contest TypeORM event store', () => {
     const lookupIndexColumns = await dataSource.query(
       "SELECT COLUMN_NAME AS columnName FROM INFORMATION_SCHEMA.STATISTICS WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'contest_event' AND INDEX_NAME = 'IDX_contest_event_solution_type_lookup' ORDER BY SEQ_IN_INDEX",
     );
+    const redundantRevisionIndexRows = await dataSource.query(
+      "SELECT INDEX_NAME AS indexName FROM INFORMATION_SCHEMA.STATISTICS WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'contest_event' AND INDEX_NAME = 'IDX_contest_event_revision_event'",
+    );
     const columns = await dataSource.query(
       "SELECT TABLE_NAME AS tableName, COLUMN_NAME AS columnName FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME IN ('contest', 'contest_user', 'contest_event_stream', 'contest_event') ORDER BY TABLE_NAME, ORDINAL_POSITION",
     );
@@ -122,6 +125,7 @@ describe.runIf(runMysqlTests)('contest TypeORM event store', () => {
       'type',
       'solution_id',
     ]);
+    expect(redundantRevisionIndexRows).toEqual([]);
     expect(groupColumnsByTable(columns)).toEqual({
       contest: [
         'id',
@@ -142,8 +146,6 @@ describe.runIf(runMysqlTests)('contest TypeORM event store', () => {
         'event_id',
         'stream_revision',
         'type',
-        'payload_hash',
-        'payload_bytes',
         'producer_id',
         'solution_id',
         'user_id',
@@ -154,6 +156,8 @@ describe.runIf(runMysqlTests)('contest TypeORM event store', () => {
         'time_ns',
         'solution_submit_time_ns',
         'created_at',
+        'payload_hash',
+        'payload_bytes',
       ],
       contest_event_stream: [
         'contest_id',
@@ -227,7 +231,8 @@ describe.runIf(runMysqlTests)('contest TypeORM event store', () => {
     await service.appendProducerEvents({
       uk: frozenUk,
       producerId: 'producer-a',
-      batch: parseProducerBatch(rankland_live_contest_producer.BatchProducerEvent.encode({
+      batch: parseProducerBatchJson({
+        streamRevision: 1,
         events: [
           newSolution(1, 201, 4 * 60 * 60),
           progress(2, 201),
@@ -235,7 +240,7 @@ describe.runIf(runMysqlTests)('contest TypeORM event store', () => {
           newSolution(4, 202, 60 * 60),
           settle(5, 202, 4 * 60 * 60),
         ],
-      }).finish()),
+      }),
     });
 
     const contest = await dataSource.getRepository(ContestEntity).findOneOrFail({ where: { uk: frozenUk } });
@@ -247,6 +252,7 @@ describe.runIf(runMysqlTests)('contest TypeORM event store', () => {
       uk: frozenUk,
       afterEventId: 0,
       limit: 10,
+      streamRevision: 1,
       compactProgress: false,
     });
 

@@ -1,6 +1,8 @@
 import { Column, CreateDateColumn, Entity, Index, PrimaryGeneratedColumn, UpdateDateColumn } from 'typeorm';
 import type { Contest, Contributor, Marker, Problem, RankSeries, Sorter } from '@algoux/standard-ranklist';
 
+import { nullableOutputTransformer } from './nullable-output.transformer';
+
 @Entity('contest')
 @Index('IDX_contest_uk', ['uk'], { unique: true })
 export class ContestEntity {
@@ -25,10 +27,10 @@ export class ContestEntity {
   @Column({ type: 'json' })
   public series: RankSeries[];
 
-  @Column({ type: 'json', nullable: true })
+  @Column({ type: 'json', nullable: true, transformer: nullableOutputTransformer })
   public sorter?: Sorter | null;
 
-  @Column({ type: 'json', nullable: true })
+  @Column({ type: 'json', nullable: true, transformer: nullableOutputTransformer })
   public contributors?: Contributor[] | null;
 
   @CreateDateColumn({ name: 'created_at', type: 'datetime', precision: 3 })

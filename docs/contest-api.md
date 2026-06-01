@@ -143,6 +143,8 @@ x-producer-id: <producer-id>
 - `rankland_live_contest_client.BatchClientEvent`
 - 共享事件类型定义在 `rankland_live_contest_common`
 
+`BatchProducerEvent` 必须包含 `streamRevision` 和非空 `events`。
+
 当前支持事件类型：
 
 ```text
@@ -193,15 +195,15 @@ Data:
 ### 更新比赛
 
 ```text
-POST /api/v2/contests/:uk
+PATCH /api/v2/contests/:uk
 Auth: x-token
 ```
 
 Body 中字段均为可选：`name`、`contest`、`problems`、`users`、`markers`、`series`、`sorter`、`contributors`。
 
-如果传入 `users` 数组，会替换当前 contest 的用户集合；未出现在新数组中的用户会被删除。
+接口语义固定为部分更新：未传字段不更新；传入字段只按外层字段整体替换，不支持 `a.b.c` 形式的深层字段局部更新。
 
-注意：当前代码路径可以处理 `users: null` 并清空用户集合，但 DTO 类型没有把它声明为正式接口契约；外部调用方应优先使用数组语义，除非后续专门把 `null` 契约化。
+如果传入 `users` 数组，会替换当前 contest 的用户集合；未出现在新数组中的用户会被删除。传 `users: []` 表示清空用户集合。
 
 Data: `null`
 
@@ -259,7 +261,7 @@ Data: admin user object。
 ### 更新比赛用户
 
 ```text
-POST /api/v2/contests/:uk/users/:userId
+PATCH /api/v2/contests/:uk/users/:userId
 Auth: x-token
 ```
 
@@ -280,6 +282,8 @@ Body 字段均可选：
 }
 ```
 
+接口语义固定为部分更新：未传字段不更新；传入字段只按外层字段整体替换，不支持 `a.b.c` 形式的深层字段局部更新。`teamMembers`、`markers` 等数组字段会整体替换；声明支持 `null` 的字段传 `null` 表示清空该字段。
+
 Data: `null`
 
 ## 公开 API
@@ -291,6 +295,24 @@ GET /api/v2/public/contests/:uk
 ```
 
 Data 与管理查询比赛类似，但 `users` 中不包含 `banned`、`broadcasterToken`。
+
+### 公开查询事件流
+
+```text
+GET /api/v2/public/contests/:uk/event-stream
+```
+
+Data:
+
+```ts
+{
+  uk: string;
+  lastEventId: number;
+  streamRevision: number;
+}
+```
+
+纯 HTTP 消费者可以先用这个接口获取当前 `streamRevision`，再调用 catch-up。
 
 ### 公开查询用户列表
 
@@ -346,6 +368,7 @@ Body:
 
 ```json
 {
+  "streamRevision": 1,
   "events": [
     {
       "eventId": 101,
@@ -389,7 +412,9 @@ application/x-protobuf
 application/protobuf
 ```
 
-该端点通过 `@ProtobufContract(BatchProducerEvent, null)` 声明可接收 protobuf 请求体，由通用 protobuf 中间件在校验前解码。Body 是 `BatchProducerEvent` protobuf 原始 bytes，最大 5 MiB（超出 `413`）。`application/octet-stream` 不被接受（`415`）。无法解码的字节返回 `400`。追加端点无 protobuf 响应消息，响应固定为 JSON（与 JSON 追加相同）。
+该端点通过 `@ProtobufContract(BatchProducerEvent, null)` 声明可接收 protobuf 请求体，由通用 protobuf 中间件在校验前解码。Body 是 `BatchProducerEvent` protobuf 原始 bytes，必须包含 `streamRevision`，最大 5 MiB（超出 `413`）。`application/octet-stream` 不被接受（`415`）。无法解码的字节返回 `400`。追加端点无 protobuf 响应消息，响应固定为 JSON（与 JSON 追加相同）。
+
+append 请求的 `streamRevision` 必须等于服务端当前 `contest_event_stream.stream_revision`，否则返回 `STREAM_REVISION_MISMATCH`。
 
 事件追加成功提交事务后，服务端才会发送 SSE 通知。
 
@@ -398,7 +423,7 @@ application/protobuf
 ### HTTP catch-up
 
 ```text
-GET /api/v2/contests/:uk/events
+GET /api/v2/public/contests/:uk/events
 ```
 
 Query:
@@ -407,7 +432,7 @@ Query:
 {
   afterEventId?: number;       // 默认 0
   limit?: number;              // 默认 1000，服务端限制 1..5000
-  streamRevision?: number;     // 客户端本地事件流版本
+  streamRevision: number;      // 必填，客户端本地事件流版本
   compactProgress?: boolean;   // URL 中传 compactProgress=false 才会关闭；默认 true
 }
 ```
@@ -451,7 +476,7 @@ X-RL-Resp-Code: 0
 
 封榜过滤和 progress compaction 都不会改变 `checkpointEventId` 的含义：它仍然基于服务端本次扫描的过滤前 page 计算。因此响应里的 events 可能为空，但 `checkpointEventId` 仍会前进。
 
-如果客户端传入的 `streamRevision` 已过期，或 `afterEventId` 大于服务端 `latestEventId`，响应会包含：
+如果客户端省略或传入非法 `streamRevision`，参数校验失败。首次纯 HTTP 客户端应先调用公开 event stream 接口获取当前 `streamRevision`。如果客户端传入的 `streamRevision` 已过期，或 `afterEventId` 大于服务端 `latestEventId`，响应会包含：
 
 ```json
 {
@@ -465,7 +490,7 @@ X-RL-Resp-Code: 0
 ### SSE 更新通知
 
 ```text
-GET /api/v2/contests/:uk/events/stream
+GET /api/v2/public/contests/:uk/event-stream/notifications
 ```
 
 响应类型：
@@ -494,10 +519,10 @@ data: {"uk":"contest-a","latestEventId":123,"streamRevision":1}
 
 SSE 只表示“有新高水位”，不携带事件 payload。消费者必须通过 HTTP catch-up 读取事件数据。
 
-### 查询事件流状态
+### 查询事件流
 
 ```text
-GET /api/v2/contests/:uk/stream
+GET /api/v2/contests/:uk/event-stream
 Auth: x-token
 ```
 
@@ -518,7 +543,7 @@ Data:
 ### 释放 producer lock
 
 ```text
-POST /api/v2/contests/:uk/producer/release
+DELETE /api/v2/contests/:uk/event-stream/producer-lock
 Auth: x-token
 ```
 
@@ -537,7 +562,7 @@ Data: `null`
 
 效果：
 
-- 删除当前 contest 的 `contest_event` 行。
+- 保留历史 `contest_event` 行作为旧 revision 归档。
 - `contest_event_stream.last_event_id` 重置为 `0`。
 - `contest_event_stream.stream_revision` 加 1。
 - 清空 producer lock。
