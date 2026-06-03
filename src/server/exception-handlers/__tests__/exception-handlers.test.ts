@@ -3,11 +3,9 @@ import '@server/err-code-configs/general.err-code';
 import LogicExceptionHandler from '../logic.exception-handler';
 import HttpExceptionHandler from '../http.exception-handler';
 import ValidationExceptionHandler from '../validation.exception-handler';
-import ContestEventExceptionHandler from '../contest-event.exception-handler';
 import LogicException from '@server/exceptions/logic.exception';
 import HttpException from '@server/exceptions/http.exception';
 import { ValidationException } from 'bwcx-ljsm';
-import { ContestEventError, ContestEventErrorCode } from '@server/modules/contest/contest-event-errors';
 import { ResponseContentType } from '@server/http/content-type';
 import { ErrCode } from '@common/enums/err-code.enum';
 
@@ -50,19 +48,14 @@ describe('exception handlers (content-negotiated)', () => {
     expect(ctx.headers['X-RL-Resp-Msg']).toBe(encodeURIComponent('该比赛未找到'));
   });
 
-  it('ContestEventExceptionHandler maps status and carries error metadata in protobuf headers', () => {
-    const ctx = createCtx({ respContentType: ResponseContentType.Protobuf });
-    const err = new ContestEventError(ContestEventErrorCode.ProducerLocked, 'locked', { producerId: 'p1' });
-    new ContestEventExceptionHandler().catch(err, ctx);
-    expect(ctx.status).toBe(409);
-    expect(ctx.headers['X-RL-Resp-Meta']).toBe(encodeURIComponent(JSON.stringify({ producerId: 'p1' })));
-  });
-
-  it('ContestEventExceptionHandler spreads metadata into the json body', () => {
+  it('LogicExceptionHandler writes numeric event business codes', () => {
     const ctx = createCtx({ respContentType: ResponseContentType.Json });
-    const err = new ContestEventError(ContestEventErrorCode.ProducerLocked, 'locked', { producerId: 'p1' });
-    new ContestEventExceptionHandler().catch(err, ctx);
-    expect(ctx.body).toEqual({ success: false, code: 'PRODUCER_LOCKED', msg: 'locked', producerId: 'p1' });
+    new LogicExceptionHandler().catch(new LogicException(ErrCode.ContestEventProducerLocked, 'locked'), ctx);
+    expect(ctx.body).toEqual({
+      success: false,
+      code: ErrCode.ContestEventProducerLocked,
+      msg: '事件流已被其他生产者锁定',
+    });
   });
 
   it('HttpExceptionHandler writes a json error for api routes', () => {

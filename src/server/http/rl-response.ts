@@ -16,7 +16,7 @@ export function encodeHeaderValue(value: string): string {
 
 export function writeRlSuccessHeaders(
   ctx: RequestContext,
-  options: { contentType: string; code?: string | number },
+  options: { contentType: string; code?: number },
 ): void {
   ctx.set({
     'Content-Type': options.contentType,
@@ -29,7 +29,7 @@ export function writeRlErrorHeaders(
   ctx: RequestContext,
   options: {
     contentType: string;
-    code: string | number;
+    code: number;
     msg: string;
     meta?: Record<string, unknown>;
   },
@@ -55,7 +55,7 @@ export function writeErrorResponse(
   ctx: RequestContext,
   options: {
     status: number;
-    code: string | number;
+    code: number;
     msg: string;
     meta?: Record<string, unknown>;
   },

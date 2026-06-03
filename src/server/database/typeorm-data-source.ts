@@ -5,29 +5,18 @@ import { ContestEntity } from '@server/entities/contest.entity';
 import { ContestEventEntity } from '@server/entities/contest-event.entity';
 import { ContestUserEntity } from '@server/entities/contest-user.entity';
 import { ContestEventStreamEntity } from '@server/entities/contest-event-stream.entity';
+import MysqlConfig from '@server/configs/mysql/mysql.config';
 
-const defaultMysqlConfig = {
-  host: '127.0.0.1',
-  port: '3306',
-  username: 'blue',
-  password: 'test',
-  database: 'rankland',
-};
+export type MysqlDataSourceConfig = Pick<MysqlConfig, 'host' | 'port' | 'username' | 'password' | 'database'>;
 
-export function getMysqlDataSourceOptions(): DataSourceOptions {
-  const requireProductionEnv = process.env.NODE_ENV === 'production';
-  const host = readDbEnv('MYSQL_HOST', defaultMysqlConfig.host, requireProductionEnv);
-  const username = readDbEnv('MYSQL_USER', defaultMysqlConfig.username, requireProductionEnv);
-  const password = readDbEnv('MYSQL_PASS', defaultMysqlConfig.password, requireProductionEnv, true);
-  const database = readDbEnv('MYSQL_DB', defaultMysqlConfig.database, requireProductionEnv);
-
+export function getMysqlDataSourceOptions(mysqlConfig: MysqlDataSourceConfig): DataSourceOptions {
   return {
     type: 'mysql',
-    host,
-    port: parseInt(process.env.MYSQL_PORT || '3306', 10),
-    username,
-    password,
-    database,
+    host: mysqlConfig.host,
+    port: mysqlConfig.port,
+    username: mysqlConfig.username,
+    password: mysqlConfig.password,
+    database: mysqlConfig.database,
     supportBigNumbers: true,
     bigNumberStrings: true,
     synchronize: false,
@@ -38,15 +27,6 @@ export function getMysqlDataSourceOptions(): DataSourceOptions {
   };
 }
 
-export const AppDataSource = new DataSource(getMysqlDataSourceOptions());
-
-function readDbEnv(name: string, defaultValue: string, requireProductionEnv: boolean, allowEmpty = false): string {
-  const value = process.env[name];
-  if (value !== undefined && (allowEmpty || value !== '')) {
-    return value;
-  }
-  if (requireProductionEnv) {
-    throw new Error(`Missing required production database environment variable ${name}`);
-  }
-  return defaultValue;
+export function createMysqlDataSource(mysqlConfig: MysqlDataSourceConfig): DataSource {
+  return new DataSource(getMysqlDataSourceOptions(mysqlConfig));
 }

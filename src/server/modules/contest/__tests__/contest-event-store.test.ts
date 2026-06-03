@@ -2,6 +2,7 @@ import {
   rankland_live_contest_common,
   rankland_live_contest_producer,
 } from '@common/proto/rankland_live_contest';
+import { ErrCode } from '@common/enums/err-code.enum';
 import { InMemoryContestEventStore } from '../contest-event-store.memory';
 import ContestEventStreamService from '../contest-event-stream.service';
 import {
@@ -291,7 +292,7 @@ describe('contest event stream service', () => {
         producerId: 'producer-a',
         batch: batch([newSolution(1)], 2),
       }),
-    ).rejects.toMatchObject({ code: 'STREAM_REVISION_MISMATCH' });
+    ).rejects.toMatchObject({ code: ErrCode.ContestEventStreamRevisionMismatch });
 
     await expect(service.getStreamState('contest-a')).resolves.toMatchObject({
       lastEventId: 0,

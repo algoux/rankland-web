@@ -5,7 +5,6 @@ import {
   rankland_live_contest_common,
   rankland_live_contest_producer,
 } from '@common/proto/rankland_live_contest';
-import { ContestEventError, ContestEventErrorCode } from './contest-event-errors';
 import {
   ContestClientEventBO,
   ContestEventsResponseBO,
@@ -13,6 +12,8 @@ import {
   ContestProducerEventBO,
   ContestTimeDurationBO,
 } from './contest-event-bo';
+import LogicException from '@server/exceptions/logic.exception';
+import { ErrCode } from '@common/enums/err-code.enum';
 
 export interface ParsedProducerBatch {
   streamRevision: number;
@@ -384,8 +385,8 @@ function getSettledSolutionId(event: ContestClientEventBO): number | undefined {
   return undefined;
 }
 
-function invalidBatch(message: string): ContestEventError {
-  return new ContestEventError(ContestEventErrorCode.InvalidEventBatch, message);
+function invalidBatch(message: string): LogicException {
+  return new LogicException(ErrCode.ContestEventInvalidBatch, message);
 }
 
 function assertNewSolutionEvent(data: any): void {

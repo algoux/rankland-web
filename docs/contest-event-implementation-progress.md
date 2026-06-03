@@ -69,7 +69,7 @@ Updated: 2026-05-29
     `createContestEventBinaryResponse` wrapping; the events endpoints no longer carry protobuf-first logic.
 - Catch-up reads stream state and event page in one MySQL snapshot and filters by the same `streamRevision`.
 - Catch-up requires `streamRevision`; a stale revision returns an empty reset envelope with `resetRequired: true`.
-- Append requires producer batches to include the current `streamRevision`; mismatches return `STREAM_REVISION_MISMATCH`.
+- Append requires producer batches to include the current `streamRevision`; mismatches return `ErrCode.ContestEventStreamRevisionMismatch` (`100007`).
 - Default catch-up compaction now checks later settle/change events beyond the current page before dropping stale progress events.
 - Catch-up now filters frozen submissions before compaction. The filter uses the solution's new-solution submit time, works even when `compactProgress=false`, and still advances `checkpointEventId` across filtered events.
 - Removed Socket.IO server startup from the Node process.

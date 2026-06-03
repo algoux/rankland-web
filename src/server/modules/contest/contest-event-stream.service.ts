@@ -6,11 +6,12 @@ import {
   storedEventToClientEvent,
 } from './contest-event-codec';
 import { ContestEventStore, ContestStoredEvent } from './contest-event-store';
-import { ContestEventError, ContestEventErrorCode } from './contest-event-errors';
 import TypeOrmContestEventStore from './contest-event-store.typeorm';
 import { rankland_live_contest_common } from '@common/proto/rankland_live_contest';
 import Long from 'long';
 import { ContestClientEventBO, ContestEventsResponseBO, ContestProducerBatchBO } from './contest-event-bo';
+import LogicException from '@server/exceptions/logic.exception';
+import { ErrCode } from '@common/enums/err-code.enum';
 
 export interface AppendProducerEventsInput {
   uk: string;
@@ -48,20 +49,18 @@ export default class ContestEventStreamService {
     return this.store.runInStreamTransaction(input.uk, async (transaction) => {
       const { stream } = transaction;
       if (input.batch.streamRevision !== stream.streamRevision) {
-        throw new ContestEventError(
-          ContestEventErrorCode.StreamRevisionMismatch,
+        throw new LogicException(
+          ErrCode.ContestEventStreamRevisionMismatch,
           `expected stream revision ${stream.streamRevision} but received ${input.batch.streamRevision}`,
-          { expectedStreamRevision: stream.streamRevision, receivedStreamRevision: input.batch.streamRevision },
         );
       }
       if (!stream.producerId) {
         await transaction.setProducerLock(producerId);
         stream.producerId = producerId;
       } else if (stream.producerId !== producerId) {
-        throw new ContestEventError(
-          ContestEventErrorCode.ProducerLocked,
+        throw new LogicException(
+          ErrCode.ContestEventProducerLocked,
           `contest ${input.uk} is locked by another producer`,
-          { producerId: stream.producerId },
         );
       }
 
@@ -89,10 +88,9 @@ export default class ContestEventStreamService {
         const existing = existingEventsById.get(stored.eventId);
         if (existing) {
           if (existing.payloadHash !== stored.payloadHash) {
-            throw new ContestEventError(
-              ContestEventErrorCode.EventIdConflict,
+            throw new LogicException(
+              ErrCode.ContestEventIdConflict,
               `event id ${stored.eventId} already exists with different payload`,
-              { conflictEventId: stored.eventId },
             );
           }
           duplicateEventIds.push(stored.eventId);
@@ -104,10 +102,9 @@ export default class ContestEventStreamService {
 
         const expectedEventId = cursor + 1;
         if (stored.eventId !== expectedEventId) {
-          throw new ContestEventError(
-            ContestEventErrorCode.EventIdGap,
+          throw new LogicException(
+            ErrCode.ContestEventIdGap,
             `expected event id ${expectedEventId} but received ${stored.eventId}`,
-            { expectedEventId, receivedEventId: stored.eventId },
           );
         }
 
@@ -136,10 +133,10 @@ export default class ContestEventStreamService {
 
   public async getClientEvents(input: GetClientEventsInput): Promise<GetClientEventsResult> {
     if (!Number.isInteger(input.streamRevision) || input.streamRevision < 1) {
-      throw new ContestEventError(ContestEventErrorCode.InvalidEventBatch, 'streamRevision is required');
+      throw new LogicException(ErrCode.ContestEventInvalidBatch, 'streamRevision is required');
     }
     const afterEventId = Math.max(0, input.afterEventId ?? 0);
-    const limit = Math.max(1, Math.min(input.limit ?? 1000, 5000));
+    const limit = Math.max(1, Math.min(input.limit ?? 1000, 1000));
     const snapshot = await this.store.readEventsSnapshot(input.uk, afterEventId, limit + 1);
     const { stream } = snapshot;
     if (input.streamRevision !== stream.streamRevision) {
@@ -211,10 +208,9 @@ function fillSolutionSubmitTime(
   }
   const submitTimeNs = batchSubmitTimesByEventId.get(event.eventId) || persistedSubmitTimesBySolutionId.get(event.solutionId);
   if (!submitTimeNs) {
-    throw new ContestEventError(
-      ContestEventErrorCode.InvalidEventBatch,
+    throw new LogicException(
+      ErrCode.ContestEventInvalidBatch,
       `new solution for solution ${event.solutionId} is required before non-new events`,
-      { solutionId: event.solutionId },
     );
   }
   event.solutionSubmitTimeNs = submitTimeNs;
@@ -251,18 +247,18 @@ function needsSolutionSubmitTime(
 
 function normalizeProducerId(value: unknown): string {
   if (Array.isArray(value)) {
-    throw new ContestEventError(ContestEventErrorCode.InvalidEventBatch, 'x-producer-id must be a single header');
+    throw new LogicException(ErrCode.ContestEventInvalidBatch, 'x-producer-id must be a single header');
   }
   if (typeof value !== 'string') {
-    throw new ContestEventError(ContestEventErrorCode.InvalidEventBatch, 'x-producer-id is required');
+    throw new LogicException(ErrCode.ContestEventInvalidBatch, 'x-producer-id is required');
   }
   const producerId = value.trim();
   if (!producerId) {
-    throw new ContestEventError(ContestEventErrorCode.InvalidEventBatch, 'x-producer-id is required');
+    throw new LogicException(ErrCode.ContestEventInvalidBatch, 'x-producer-id is required');
   }
   if (producerId.length > 128) {
-    throw new ContestEventError(
-      ContestEventErrorCode.InvalidEventBatch,
+    throw new LogicException(
+      ErrCode.ContestEventInvalidBatch,
       'x-producer-id must not exceed 128 characters',
     );
   }

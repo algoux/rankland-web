@@ -12,6 +12,7 @@ import {
   IsOptional,
   IsString,
   Length,
+  Max,
   Min,
   ValidateNested,
 } from 'class-validator';
@@ -350,6 +351,7 @@ export class GetPublicContestEventsReqDTO {
   @Type(() => Number)
   @IsInt()
   @Min(1)
+  @Max(1000)
   public limit?: number;
 
   @FromQuery()

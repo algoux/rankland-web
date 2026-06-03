@@ -5,7 +5,6 @@ import { ContestEntity } from '@server/entities/contest.entity';
 import { ContestEventEntity } from '@server/entities/contest-event.entity';
 import { ContestEventStreamEntity } from '@server/entities/contest-event-stream.entity';
 import { rankland_live_contest_common } from '@common/proto/rankland_live_contest';
-import { ContestEventError, ContestEventErrorCode } from './contest-event-errors';
 import { getFrozenStartNs } from './contest-time';
 import {
   ContestEventInsertInput,
@@ -15,6 +14,8 @@ import {
   ContestStoredEvent,
   ContestStreamState,
 } from './contest-event-store';
+import LogicException from '@server/exceptions/logic.exception';
+import { ErrCode } from '@common/enums/err-code.enum';
 
 @Provide()
 export default class TypeOrmContestEventStore implements ContestEventStore {
@@ -95,7 +96,7 @@ export default class TypeOrmContestEventStore implements ContestEventStore {
       lock: { mode: 'pessimistic_write' },
     });
     if (!stream) {
-      throw new ContestEventError(ContestEventErrorCode.ContestNotFound, `contest ${uk} not found`);
+      throw new LogicException(ErrCode.ContestNotFound, `contest ${uk} not found`);
     }
     return stream;
   }
@@ -104,7 +105,7 @@ export default class TypeOrmContestEventStore implements ContestEventStore {
     const { contest } = await this.findContestByUk(manager, uk);
     const stream = await manager.getRepository(ContestEventStreamEntity).findOne({ where: { contestId: contest.id } });
     if (!stream) {
-      throw new ContestEventError(ContestEventErrorCode.ContestNotFound, `contest ${uk} not found`);
+      throw new LogicException(ErrCode.ContestNotFound, `contest ${uk} not found`);
     }
     return { contest, stream };
   }
@@ -112,7 +113,7 @@ export default class TypeOrmContestEventStore implements ContestEventStore {
   private async findContestByUk(manager: EntityManager, uk: string): Promise<{ contest: ContestEntity }> {
     const contest = await manager.getRepository(ContestEntity).findOne({ where: { uk } });
     if (!contest) {
-      throw new ContestEventError(ContestEventErrorCode.ContestNotFound, `contest ${uk} not found`);
+      throw new LogicException(ErrCode.ContestNotFound, `contest ${uk} not found`);
     }
     return { contest };
   }

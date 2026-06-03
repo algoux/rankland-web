@@ -7,8 +7,9 @@ import {
   ContestStreamState,
 } from './contest-event-store';
 import { rankland_live_contest_common } from '@common/proto/rankland_live_contest';
-import { ContestEventError, ContestEventErrorCode } from './contest-event-errors';
 import { getFrozenStartNs } from './contest-time';
+import LogicException from '@server/exceptions/logic.exception';
+import { ErrCode } from '@common/enums/err-code.enum';
 
 export class InMemoryContestEventStore implements ContestEventStore {
   private readonly streams = new Map<string, ContestStreamState>();
@@ -71,7 +72,7 @@ export class InMemoryContestEventStore implements ContestEventStore {
   private getExistingStream(uk: string): ContestStreamState {
     const stream = this.streams.get(uk);
     if (!stream) {
-      throw new ContestEventError(ContestEventErrorCode.ContestNotFound, `contest ${uk} not found`);
+      throw new LogicException(ErrCode.ContestNotFound, `contest ${uk} not found`);
     }
     return stream;
   }

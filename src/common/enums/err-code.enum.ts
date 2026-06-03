@@ -14,4 +14,9 @@ export enum ErrCode {
   ContestExisted = 100000,
   ContestNotFound = 100001,
   ContestUserNotFound = 100002,
+  ContestEventInvalidBatch = 100003,
+  ContestEventProducerLocked = 100004,
+  ContestEventIdGap = 100005,
+  ContestEventIdConflict = 100006,
+  ContestEventStreamRevisionMismatch = 100007,
 }

@@ -55,7 +55,7 @@ describe('writeRlErrorHeaders', () => {
     const ctx = createCtx();
     writeRlErrorHeaders(ctx, {
       contentType: 'application/protobuf',
-      code: 'PRODUCER_LOCKED',
+      code: 100004,
       msg: 'locked',
       meta: { producerId: 'p1' },
     });

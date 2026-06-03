@@ -12,4 +12,9 @@ registerErrCodeConfigs({
   [ErrCode.ContestExisted]: '该比赛已存在',
   [ErrCode.ContestNotFound]: '该比赛未找到',
   [ErrCode.ContestUserNotFound]: '该比赛用户未找到',
+  [ErrCode.ContestEventInvalidBatch]: '事件批次非法',
+  [ErrCode.ContestEventProducerLocked]: '事件流已被其他生产者锁定',
+  [ErrCode.ContestEventIdGap]: '事件 ID 不连续',
+  [ErrCode.ContestEventIdConflict]: '事件 ID 已存在但内容不一致',
+  [ErrCode.ContestEventStreamRevisionMismatch]: '事件流版本不匹配',
 });
