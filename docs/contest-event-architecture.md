@@ -82,7 +82,7 @@ Contest event `TimeDuration` values use nanosecond semantics internally.
 - Incoming `S`, `MS`, `US`, and `NS` values are normalized to nanoseconds.
 - MySQL stores the normalized value in `contest_event.time_ns`.
 - Outgoing client protobuf events use `unit = NS`.
-- Large integer values are handled with Long/string-compatible paths instead of plain JS number assumptions.
+- Large integer values are handled with Long/string-compatible paths instead of plain JS number assumptions; direct JSON batches reject unsafe numeric `TimeDuration.value` values before protobuf conversion.
 
 When `contest.frozenDuration` is positive, catch-up computes `frozenStartNs = duration - frozenDuration`. If a solution's `NEW_SOLUTION.time` is at or after that start, the HTTP catch-up response hides that solution's progress, result settle, and result change events. The new-solution event itself remains visible.
 

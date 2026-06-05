@@ -172,6 +172,27 @@ describe('contest event codec', () => {
     expect(stored.timeNs).toBe('9007199254740993');
   });
 
+  it('rejects unsafe numeric JSON time values before protobuf conversion can lose precision', () => {
+    expect(() => parseProducerBatchJson({
+      streamRevision: 1,
+      events: [
+        {
+          eventId: 1,
+          type: 'NEW_SOLUTION',
+          newSolutionData: {
+            solutionId: 11,
+            userId: 'team-a',
+            problemAlias: 'A',
+            time: {
+              value: 9007199254740993,
+              unit: 'NS',
+            },
+          },
+        },
+      ],
+    })).toThrow(/safe integer or string/);
+  });
+
   it('rejects the legacy eventsBase64 JSON envelope', () => {
     expect(() => parseProducerBatchJson({ eventsBase64: 'AAAA' })).toThrow(/eventsBase64/);
   });

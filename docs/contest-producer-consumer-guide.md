@@ -253,7 +253,7 @@ x-producer-id: <producer-id>
 
 raw protobuf body 最大 5 MiB。`x-producer-id` 必填，建议使用一个稳定且可读的短字符串，例如脚本实例 id 或部署实例 id。
 
-事件中的相对比赛时间使用 `TimeDuration` 表示。服务端出站会统一转成纳秒语义，即 `unit = NS`，`value` 是 int64；生产者可以提交 `S`、`MS`、`US` 或 `NS`，但应避免在脚本中用普通 JS number 承载可能超过安全整数范围的纳秒值。
+事件中的相对比赛时间使用 `TimeDuration` 表示。服务端出站会统一转成纳秒语义，即 `unit = NS`，`value` 是 int64；生产者可以提交 `S`、`MS`、`US` 或 `NS`。JSON 请求中若用 number 表示 `TimeDuration.value`，该 number 必须在 JS safe integer 范围内；可能超过安全整数范围的纳秒值必须用字符串。
 
 生产者必须先提交某个 solution 的 `NEW_SOLUTION`，再提交该 solution 的 progress / settle / changed。服务端会在写入时把 `NEW_SOLUTION.time` 反范式保存到后续事件行，用于高并发消费时快速执行封榜过滤；如果非 new 事件找不到对应的 new solution，会返回 `ErrCode.ContestEventInvalidBatch`（`100003`）。
 

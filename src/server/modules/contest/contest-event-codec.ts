@@ -66,6 +66,7 @@ export function parseProducerBatchJson(data: unknown): ParsedProducerBatch {
   if (Object.prototype.hasOwnProperty.call(data, 'eventsBase64')) {
     throw invalidBatch('eventsBase64 JSON envelope is no longer supported; send BatchProducerEvent JSON directly');
   }
+  assertSafeJsonTimeDurationValues(data);
 
   let batch: rankland_live_contest_producer.BatchProducerEvent;
   try {
@@ -335,7 +336,11 @@ export function timeDurationToNanoseconds(data: any): Long {
   if (!data) {
     throw invalidBatch('time duration is required');
   }
-  const value = Long.fromValue(data.value || 0);
+  const rawValue = data.value ?? 0;
+  if (typeof rawValue === 'number' && !Number.isSafeInteger(rawValue)) {
+    throw invalidBatch('time duration value must be a safe integer or string for int64 precision');
+  }
+  const value = Long.fromValue(rawValue);
   switch (data.unit) {
     case rankland_live_contest_common.TimeUnit.S:
       return value.mul(1_000_000_000);
@@ -346,6 +351,40 @@ export function timeDurationToNanoseconds(data: any): Long {
     case rankland_live_contest_common.TimeUnit.NS:
     default:
       return value;
+  }
+}
+
+function assertSafeJsonTimeDurationValues(data: unknown): void {
+  if (!data || typeof data !== 'object' || Array.isArray(data)) {
+    return;
+  }
+  const events = (data as { events?: unknown }).events;
+  if (!Array.isArray(events)) {
+    return;
+  }
+  events.forEach((event, index) => {
+    if (!event || typeof event !== 'object' || Array.isArray(event)) {
+      return;
+    }
+    assertSafeJsonTimeDurationValue((event as any).newSolutionData?.time, `events[${index}].newSolutionData.time.value`);
+    assertSafeJsonTimeDurationValue(
+      (event as any).solutionOnResultSettleData?.time,
+      `events[${index}].solutionOnResultSettleData.time.value`,
+    );
+    assertSafeJsonTimeDurationValue(
+      (event as any).solutionOnResultChangeData?.time,
+      `events[${index}].solutionOnResultChangeData.time.value`,
+    );
+  });
+}
+
+function assertSafeJsonTimeDurationValue(time: unknown, field: string): void {
+  if (!time || typeof time !== 'object' || Array.isArray(time)) {
+    return;
+  }
+  const value = (time as { value?: unknown }).value;
+  if (typeof value === 'number' && !Number.isSafeInteger(value)) {
+    throw invalidBatch(`${field} must be a safe integer or string for int64 precision`);
   }
 }
 

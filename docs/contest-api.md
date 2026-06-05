@@ -149,7 +149,7 @@ SOLUTION_ON_RESULT_CHANGE
 CONTEST_CONFIG_CHANGE
 ```
 
-生产者提交的 `ProducerEvent.type` 必须与 oneof payload 字段匹配。服务端会把出站 `ClientEvent` 中所有相对比赛开始时间的 `TimeDuration` 规范化为 `unit = NS`；`value` 是 int64 纳秒值，前端和脚本侧不要用会丢精度的 number 处理超大值。
+生产者提交的 `ProducerEvent.type` 必须与 oneof payload 字段匹配。服务端会把出站 `ClientEvent` 中所有相对比赛开始时间的 `TimeDuration` 规范化为 `unit = NS`；`value` 是 int64 纳秒值。JSON 请求中若用 number 表示 `TimeDuration.value`，该 number 必须在 JS safe integer 范围内；超过范围时必须用字符串，否则服务端会拒绝该 batch。
 
 ## 管理 API
 
