@@ -71,6 +71,64 @@ describe('contest event codec', () => {
     expect(() => parseProducerBatchJson(data)).toThrow(/percentageProgress/);
   });
 
+  it('keeps FB as the deprecated result enum placeholder without shifting later values', () => {
+    expect(rankland_live_contest_common.Result.FB).toBe(6);
+    expect(rankland_live_contest_common.Result.RJ).toBe(7);
+    expect(rankland_live_contest_common.Result.WA).toBe(8);
+    expect(rankland_live_contest_common.Result.CE).toBe(15);
+  });
+
+  it('rejects FB in raw solution result events', () => {
+    const settleFb = {
+      streamRevision: 1,
+      events: [
+        {
+          eventId: 1,
+          type: 'SOLUTION_ON_RESULT_SETTLE',
+          solutionOnResultSettleData: {
+            solutionId: 10,
+            result: 'FB',
+            time: { value: 100, unit: 'S' },
+          },
+        },
+      ],
+    };
+    const changeFromFb = {
+      streamRevision: 1,
+      events: [
+        {
+          eventId: 1,
+          type: 'SOLUTION_ON_RESULT_CHANGE',
+          solutionOnResultChangeData: {
+            solutionId: 10,
+            previousResult: 'FB',
+            result: 'AC',
+            time: { value: 100, unit: 'S' },
+          },
+        },
+      ],
+    };
+    const changeToFb = {
+      streamRevision: 1,
+      events: [
+        {
+          eventId: 1,
+          type: 'SOLUTION_ON_RESULT_CHANGE',
+          solutionOnResultChangeData: {
+            solutionId: 10,
+            previousResult: 'WA',
+            result: 'FB',
+            time: { value: 100, unit: 'S' },
+          },
+        },
+      ],
+    };
+
+    expect(() => parseProducerBatchJson(settleFb)).toThrow(/FB.*computed/i);
+    expect(() => parseProducerBatchJson(changeFromFb)).toThrow(/FB.*computed/i);
+    expect(() => parseProducerBatchJson(changeToFb)).toThrow(/FB.*computed/i);
+  });
+
   it('normalizes all event time values to nanoseconds without losing int64 precision', () => {
     const parsed = parseProducerBatchJson({
       streamRevision: 1,
@@ -248,6 +306,40 @@ describe('contest event codec', () => {
 
     expect(clientEvent.solutionOnResultSettleData?.time?.unit).toBe(rankland_live_contest_common.TimeUnit.NS);
     expect(Long.fromValue(clientEvent.solutionOnResultSettleData?.time?.value).toString()).toBe('123456789');
+  });
+
+  it('normalizes deprecated stored FB results back to raw AC for client events', () => {
+    const settleEvent = storedEventToClientEvent({
+      eventId: 1,
+      type: rankland_live_contest_common.EventType.SOLUTION_ON_RESULT_SETTLE,
+      payloadBytes: rankland_live_contest_client.ClientEvent.encode({
+        eventId: 1,
+        type: rankland_live_contest_common.EventType.SOLUTION_ON_RESULT_SETTLE,
+        solutionOnResultSettleData: {
+          solutionId: 12,
+          result: rankland_live_contest_common.Result.FB,
+          time: { value: Long.fromString('123456789'), unit: rankland_live_contest_common.TimeUnit.NS },
+        },
+      }).finish(),
+    });
+    const changeEvent = storedEventToClientEvent({
+      eventId: 2,
+      type: rankland_live_contest_common.EventType.SOLUTION_ON_RESULT_CHANGE,
+      payloadBytes: rankland_live_contest_client.ClientEvent.encode({
+        eventId: 2,
+        type: rankland_live_contest_common.EventType.SOLUTION_ON_RESULT_CHANGE,
+        solutionOnResultChangeData: {
+          solutionId: 12,
+          previousResult: rankland_live_contest_common.Result.FB,
+          result: rankland_live_contest_common.Result.FB,
+          time: { value: Long.fromString('123456789'), unit: rankland_live_contest_common.TimeUnit.NS },
+        },
+      }).finish(),
+    });
+
+    expect(settleEvent.solutionOnResultSettleData?.result).toBe(rankland_live_contest_common.Result.AC);
+    expect(changeEvent.solutionOnResultChangeData?.previousResult).toBe(rankland_live_contest_common.Result.AC);
+    expect(changeEvent.solutionOnResultChangeData?.result).toBe(rankland_live_contest_common.Result.AC);
   });
 
   it('compacts stale progress events only when a later result event exists for the same solution', () => {

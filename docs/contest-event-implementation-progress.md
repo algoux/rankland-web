@@ -37,7 +37,7 @@ Updated: 2026-05-29
   - bulk insert for newly accepted event rows after validation
   - producer lock enforcement and admin release
   - nanosecond normalization
-  - semantic payload checks for required ids, strings, time, result enums, and progress range
+  - semantic payload checks for required ids, strings, time, raw result enums, deprecated `FZ` fallback allowance, forbidden `FB`, and progress range
   - write-side `solution_submit_time_ns` denormalization for progress/result events
 - Added HTTP APIs:
   - `POST /api/v2/contests`

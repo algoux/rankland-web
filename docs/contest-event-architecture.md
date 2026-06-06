@@ -84,6 +84,8 @@ Contest event `TimeDuration` values use nanosecond semantics internally.
 - Outgoing client protobuf events use `unit = NS`.
 - Large integer values are handled with Long/string-compatible paths instead of plain JS number assumptions; direct JSON batches reject unsafe numeric `TimeDuration.value` values before protobuf conversion.
 
+Solution result values in events should be raw judge results whenever the upstream data source exposes them. They intentionally differ from SRK `SolutionResultLite` / `SolutionResultFull`: `FZ` maps to the SRK `?` frozen/unknown display state and is deprecated, but remains producer-supported as a fallback when the raw frozen result cannot be retrieved. `FB` is a computed ranklist property derived from AC events, so append and catch-up event payloads must not contain `FB`. If a retained legacy payload already contains deprecated `FB`, the catch-up codec normalizes it back to raw `AC` before responding.
+
 When `contest.frozenDuration` is positive, catch-up computes `frozenStartNs = duration - frozenDuration`. If a solution's `NEW_SOLUTION.time` is at or after that start, the HTTP catch-up response hides that solution's progress, result settle, and result change events. The new-solution event itself remains visible.
 
 ## Consumer Protocol

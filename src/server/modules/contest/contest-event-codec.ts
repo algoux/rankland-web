@@ -180,7 +180,7 @@ export function storedEventToClientEvent(event: StoredClientEventLike): ContestC
   if (verifyError) {
     throw invalidBatch(`invalid stored client event: ${verifyError}`);
   }
-  return normalizeClientEventTimeToNanoseconds(toClientEventBO(decoded));
+  return normalizeClientEventForOutput(toClientEventBO(decoded));
 }
 
 export function getContestEventsResponseToJson(response: ContestEventsResponseBO): Record<string, any> {
@@ -289,6 +289,12 @@ function producerEventToClientEvent(
   }
 }
 
+function normalizeClientEventForOutput(event: ContestClientEventBO): ContestClientEventBO {
+  normalizeClientEventTimeToNanoseconds(event);
+  normalizeDeprecatedClientEventResults(event);
+  return event;
+}
+
 function normalizeClientEventTimeToNanoseconds(
   event: ContestClientEventBO,
 ): ContestClientEventBO {
@@ -302,6 +308,18 @@ function normalizeClientEventTimeToNanoseconds(
     event.solutionOnResultChangeData = normalizeResultChangeTime(event.solutionOnResultChangeData);
   }
   return event;
+}
+
+function normalizeDeprecatedClientEventResults(event: ContestClientEventBO): void {
+  if (event.solutionOnResultSettleData?.result === rankland_live_contest_common.Result.FB) {
+    event.solutionOnResultSettleData.result = rankland_live_contest_common.Result.AC;
+  }
+  if (event.solutionOnResultChangeData?.previousResult === rankland_live_contest_common.Result.FB) {
+    event.solutionOnResultChangeData.previousResult = rankland_live_contest_common.Result.AC;
+  }
+  if (event.solutionOnResultChangeData?.result === rankland_live_contest_common.Result.FB) {
+    event.solutionOnResultChangeData.result = rankland_live_contest_common.Result.AC;
+  }
 }
 
 function normalizeNewSolutionTime(data: any) {
@@ -470,6 +488,9 @@ function assertNonEmptyString(value: string | undefined, field: string): void {
 function assertKnownResult(value: number | undefined, field: string): void {
   if (value === undefined || typeof rankland_live_contest_common.Result[value] !== 'string') {
     throw invalidBatch(`${field} must be a known result`);
+  }
+  if (value === rankland_live_contest_common.Result.FB) {
+    throw invalidBatch(`${field} must not be FB; first blood is a computed ranklist property, not a raw solution result`);
   }
 }
 

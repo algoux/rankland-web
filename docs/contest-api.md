@@ -149,7 +149,9 @@ SOLUTION_ON_RESULT_CHANGE
 CONTEST_CONFIG_CHANGE
 ```
 
-生产者提交的 `ProducerEvent.type` 必须与 oneof payload 字段匹配。服务端会把出站 `ClientEvent` 中所有相对比赛开始时间的 `TimeDuration` 规范化为 `unit = NS`；`value` 是 int64 纳秒值。JSON 请求中若用 number 表示 `TimeDuration.value`，该 number 必须在 JS safe integer 范围内；超过范围时必须用字符串，否则服务端会拒绝该 batch。
+生产者提交的 `ProducerEvent.type` 必须与 oneof payload 字段匹配。事件中的 `rankland_live_contest_common.Result` 表示原始评测结果，不等同于 SRK `SolutionResultLite` / `SolutionResultFull` 的完整结果集合；`FZ`（SRK `?`，封榜/未知展示态）是 deprecated 的展示兜底值，应尽量避免使用，但当数据源无法获取封榜期间的原始结果时仍可使用。`FB` 是计算属性，不允许出现在 append 或 get events 的 solution result / previousResult 中。
+
+服务端会把出站 `ClientEvent` 中所有相对比赛开始时间的 `TimeDuration` 规范化为 `unit = NS`；`value` 是 int64 纳秒值。JSON 请求中若用 number 表示 `TimeDuration.value`，该 number 必须在 JS safe integer 范围内；超过范围时必须用字符串，否则服务端会拒绝该 batch。
 
 ## 管理 API
 
@@ -410,6 +412,8 @@ application/protobuf
 
 append 请求的 `streamRevision` 必须等于服务端当前 `contest_event_stream.stream_revision`，否则返回 `ErrCode.ContestEventStreamRevisionMismatch`（`100007`）。
 
+append 请求中的 solution result / previousResult 优先使用原始评测结果。服务端不会拒绝 `FZ`，仅当数据源无法获取封榜期间的原始结果时才建议用它作为兜底。但当前服务端会拒绝包含 `FB` 的 event batch；first blood 应由消费者或榜单计算层根据原始 AC 事件推导。
+
 事件追加成功提交事务后，服务端才会发送 SSE 通知。
 
 ## 事件消费 API
@@ -465,6 +469,8 @@ X-RL-Resp-Code: 0
 ```
 
 `checkpointEventId` 是消费者处理本次响应后可安全保存的 cursor。开启 compaction 时，返回事件可能是稀疏的，因此不要用 `toEventId` 替代 `checkpointEventId`。
+
+响应中的 `ClientEvent` result / previousResult 通常为原始评测结果集合；若上游数据源无法获取封榜期间的原始结果，可能出现 deprecated `FZ`（SRK `?`）兜底值。响应不应包含 SRK `SolutionResultLite` / `SolutionResultFull` 中作为计算属性出现的 `FB`。需要展示 first blood 时，应基于 AC 事件和榜单状态自行计算。
 
 如果 contest 配置了正数 `frozenDuration`，服务端会按 `duration - frozenDuration` 计算封榜起点。某个 solution 的 `NEW_SOLUTION.time` 落入封榜区间时，catch-up 响应会过滤该 solution 的 `SOLUTION_ON_PROGRESS`、`SOLUTION_ON_RESULT_SETTLE`、`SOLUTION_ON_RESULT_CHANGE`，但仍返回 `NEW_SOLUTION` 本身。这个过滤不受 `compactProgress` 影响；`compactProgress=false` 也会过滤封榜非 new 事件。判断依据只看 `NEW_SOLUTION.time`，不看 settle/change 事件自身的 time。
 
