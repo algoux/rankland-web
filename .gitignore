@@ -4,6 +4,7 @@ node_modules/
 dist/
 app/
 coverage/
+test-results/
 npm-debug.log
 tsconfig.tsbuildinfo
 temp/

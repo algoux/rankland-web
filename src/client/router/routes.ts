@@ -4,25 +4,17 @@
  */
 
 import { parseRoutes, RenderMethodKind } from 'bwcx-client-vue3';
-import { DemoDetailRPO } from '../../common/modules/demo/demo.rpo';
+import { CollectionRPO } from '../../common/modules/collection/collection.rpo';
+import { LiveRPO } from '../../common/modules/live/live.rpo';
+import { RanklistRPO } from '../../common/modules/ranklist/ranklist.rpo';
 
 const clientRoutes = parseRoutes([
   {
-    name: 'About',
-    path: '/about',
-    fullPath: '/about',
-    component: () => import(/* webpackChunkName: "About" */ '../modules/about/about.view.vue'),
-    routeProps: undefined,
-    priority: undefined,
-    renderMethod: undefined,
-    otherOptions: undefined,
-  },
-  {
-    name: 'DemoDetail',
-    path: '/demo/detail/:id',
-    fullPath: '/demo/detail/:id',
-    component: () => import(/* webpackChunkName: "DemoDetail" */ '../modules/demo/demo-detail.view.vue'),
-    routeProps: DemoDetailRPO,
+    name: 'Collection',
+    path: '/collection/:id',
+    fullPath: '/collection/:id',
+    component: () => import(/* webpackChunkName: "Collection" */ '../modules/collection/collection.view.vue'),
+    routeProps: CollectionRPO,
     priority: undefined,
     renderMethod: RenderMethodKind.SSR,
     otherOptions: undefined,
@@ -37,7 +29,46 @@ const clientRoutes = parseRoutes([
     renderMethod: RenderMethodKind.SSR,
     otherOptions: undefined,
   },
+  {
+    name: 'Live',
+    path: '/live/:id',
+    fullPath: '/live/:id',
+    component: () => import(/* webpackChunkName: "Live" */ '../modules/live/live.view.vue'),
+    routeProps: LiveRPO,
+    priority: undefined,
+    renderMethod: undefined,
+    otherOptions: undefined,
+  },
+  {
+    name: 'Playground',
+    path: '/playground',
+    fullPath: '/playground',
+    component: () => import(/* webpackChunkName: "Playground" */ '../modules/playground/playground.view.vue'),
+    routeProps: undefined,
+    priority: undefined,
+    renderMethod: undefined,
+    otherOptions: undefined,
+  },
+  {
+    name: 'Ranklist',
+    path: '/ranklist/:id',
+    fullPath: '/ranklist/:id',
+    component: () => import(/* webpackChunkName: "Ranklist" */ '../modules/ranklist/ranklist.view.vue'),
+    routeProps: RanklistRPO,
+    priority: undefined,
+    renderMethod: RenderMethodKind.SSR,
+    otherOptions: undefined,
+  },
+  {
+    name: 'Search',
+    path: '/search',
+    fullPath: '/search',
+    component: () => import(/* webpackChunkName: "Search" */ '../modules/search/search.view.vue'),
+    routeProps: undefined,
+    priority: undefined,
+    renderMethod: undefined,
+    otherOptions: undefined,
+  },
 ]);
 
 export default clientRoutes;
-

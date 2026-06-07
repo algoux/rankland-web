@@ -1,65 +1,410 @@
 <template>
-  <div>
-    <h2>This is the Home Page.</h2>
-    <p>SSR/CSR asyncData fetched by ApiClient:</p>
-    <pre>{{ JSON.stringify({ homeState }) }}</pre>
-    <client-only>
-      <h4>&lt;client-only&gt;This area will only be rendered in the browser&lt;/client-only&gt;</h4>
-    </client-only>
-  </div>
+  <main data-id="home-content" class="normal-content home-page">
+    <div data-id="home-intro" class="home-intro">
+      <section data-id="home-hero" class="home-hero">
+        <h1 style="font-size: 32px;">欢迎来到 RankLand</h1>
+        <p class="text-base">
+          这里是一个由算法竞赛爱好者们自发维护的、专注于托管和分享任何竞赛榜单的宝地，你可以轻松查阅 ICPC、CCPC
+          等赛事的历史榜单。
+        </p>
+        <div data-id="home-hydrated" class="home-hydrated" aria-hidden="true">{{ hydrated ? 'hydrated' : 'ssr' }}</div>
+      </section>
+
+      <div data-id="home-recommendations" class="block home-section">
+        <h1 class="block-title">为你推荐</h1>
+        <a-row :gutter="16" style="margin-left: 0; margin-right: 0;">
+          <a-col class="mb-4" :xs="24" :sm="12">
+            <router-link
+              data-id="home-recommendation-search"
+              class="home-card-link"
+              :to="searchPath"
+            >
+              <a-card hoverable class="home-card">
+                <h2 class="home-card-title">
+                  <UnorderedListOutlined class="home-card-icon" />
+                  <span>探索</span>
+                </h2>
+                <p class="mt-4 mb-0">
+                  在 <strong data-id="home-total-srk-count">{{ totalSrkCountText }}</strong> 个高质量程序设计竞赛榜单中自由浏览和搜索
+                </p>
+              </a-card>
+            </router-link>
+          </a-col>
+          <a-col class="mb-4" :xs="24" :sm="12">
+            <router-link
+              data-id="home-recommendation-collection"
+              class="home-card-link"
+              :to="collectionPath"
+            >
+              <a-card hoverable class="home-card">
+                <h2 class="home-card-title">
+                  <TrophyOutlined class="home-card-icon" />
+                  <span>榜单合集</span>
+                </h2>
+                <p class="mt-4 mb-0">查阅由 SDUTACM 和 algoUX 团队精心整理的历年赛事榜单合集</p>
+              </a-card>
+            </router-link>
+          </a-col>
+        </a-row>
+      </div>
+
+      <div data-id="home-tools" class="block home-section">
+        <h1 class="block-title">算竞周边工具</h1>
+        <a-row :gutter="16" style="margin-left: 0; margin-right: 0;">
+          <a-col class="mb-4" :xs="24" :sm="12">
+            <a
+              data-id="home-tool-paste-then-ac"
+              class="home-card-link"
+              href="https://paste.then.ac/?utm_source=rankland"
+              target="_blank"
+            >
+              <a-card hoverable class="home-card">
+                <h2 class="home-card-title">
+                  <img :src="pasteThenACLogo" alt="paste.then.ac logo" class="mr-3 inline-block home-card-logo-padded">
+                  <span>paste.then.ac</span>
+                </h2>
+                <p class="mt-4 mb-0">免注册、更适合算竞宝宝体质的的代码剪贴板</p>
+              </a-card>
+            </a>
+          </a-col>
+          <a-col class="mb-4" :xs="24" :sm="12">
+            <a
+              data-id="home-tool-algo-bootstrap"
+              class="home-card-link"
+              href="https://ab.algoux.cn/?utm_source=rankland"
+              target="_blank"
+            >
+              <a-card hoverable class="home-card">
+                <h2 class="home-card-title">
+                  <img :src="algoBootstrapLogo" alt="Algo Bootstrap logo" class="mr-3 inline-block">
+                  <span>Algo Bootstrap</span>
+                </h2>
+                <p class="mt-4 mb-0">一键配置 C++、Python 和 VS Code 编程环境</p>
+              </a-card>
+            </a>
+          </a-col>
+        </a-row>
+      </div>
+
+      <div data-id="home-resources" class="block home-section">
+        <h1 class="block-title">资源和生态</h1>
+        <ul>
+          <li>
+            <a href="https://srk.algoux.org/?utm_source=rankland" target="_blank">Standard Ranklist</a>
+            ：标准榜单格式（srk）旨在标准化榜单数据，欢迎了解和共建生态
+          </li>
+          <li>
+            <a href="https://github.com/algoux/srk-collection" target="_blank">collection</a>
+            ：长期维护的历年算竞榜单合集
+          </li>
+          <li>
+            <a href="https://github.com/algoux/standard-ranklist-renderer-component" target="_blank">
+              renderer-component
+            </a>
+            ：在 Web 项目中使用渲染组件展示标准榜单
+          </li>
+          <li>
+            <a href="https://github.com/algoux/standard-ranklist-utils" target="_blank">utils</a>
+            ：标准榜单开发实用工具库
+          </li>
+          <li>
+            <a href="https://github.com/algoux/standard-ranklist-convert-to" target="_blank">convert-to</a>
+            ：转换标准榜单到 Excel、Gym Ghost、VJ 等其他格式
+          </li>
+        </ul>
+      </div>
+
+      <div data-id="home-contact" class="block home-section">
+        <h1 class="block-title">联系我们</h1>
+        <p>
+          如要为赛事寻求专业的实时外榜托管服务或希望补全/纠正本站数据，欢迎
+          <ContactUs>
+            <a data-id="contact-us-trigger" class="contact-us-trigger">与我们联系</a>
+          </ContactUs>。
+        </p>
+      </div>
+
+      <div data-id="home-about" class="block home-section">
+        <h1 class="block-title">关于我们</h1>
+        <p>algoUX: Give your algorithm better UX</p>
+        <p>
+          Find us on <a href="https://github.com/algoux" target="_blank">GitHub</a>
+        </p>
+        <p>© 2022-present algoUX. All Rights Reserved.</p>
+        <p>
+          榜单访问统计：至少 <span data-id="home-total-view-count">{{ totalViewCountText }}</span> 次
+        </p>
+        <p>
+          其他链接：
+          <a href="https://algoux.org" target="_blank">首页</a>
+          <span class="mx-2 home-separator">|</span>
+          <a href="https://servicestatus.algoux.org" target="_blank">服务状态</a>
+        </p>
+        <p v-if="showBeian">
+          备案号：
+          <a data-id="home-beian-link" href="https://beian.miit.gov.cn/" target="_blank">{{ beianText }}</a>
+        </p>
+      </div>
+    </div>
+  </main>
 </template>
 
 <script lang="ts">
-import { Vue, setup } from 'vue-class-component';
-import { Prop } from 'vue-property-decorator';
+import { defineComponent, type PropType } from 'vue';
 import { useHead } from '@vueuse/head';
-import { useContext } from 'vite-ssr/vue';
-import { View, RenderMethod, RenderMethodKind } from 'bwcx-client-vue3';
-import type { DemoGetRespDTO } from '@common/modules/demo/demo.dto';
+import { routeView, RenderMethodKind } from 'bwcx-client-vue3';
+import { TrophyOutlined, UnorderedListOutlined } from '@ant-design/icons-vue';
+import { ranklandRoutes } from '@common/rankland-router';
+import type { IApiStatistics } from '@common/rankland-api';
 import type { AsyncDataOptions } from '@client/typings';
+import { formatTitle } from '@client/utils/title-format.util';
+import ContactUs from '@client/components/contact-us.vue';
+import pasteThenACLogo from './assets/paste-then-ac_logo.png';
+import algoBootstrapLogo from './assets/algo-bootstrap_logo.png';
+import { buildHomeAbsoluteUrl } from './home-site';
 
-@View('/')
-@RenderMethod(RenderMethodKind.SSR)
-export default class Home extends Vue {
-  // passed from asyncData
-  @Prop() homeState: DemoGetRespDTO;
+const searchPath = ranklandRoutes.search.build();
+const collectionPath = ranklandRoutes.collection.build({ id: 'official' });
+const homepageUrl = buildHomeAbsoluteUrl(ranklandRoutes.home.build());
+const exploreUrl = buildHomeAbsoluteUrl(searchPath);
+const collectionUrl = buildHomeAbsoluteUrl(collectionPath);
 
-  initialState = setup(() => {
-    const { isClient, url, initialState } = useContext();
-    isClient && console.log('Homepage setup', { url, initialState });
+const websiteJsonLd = JSON.stringify({
+  '@context': 'https://schema.org',
+  '@type': 'WebSite',
+  name: 'RankLand',
+  url: homepageUrl,
+  potentialAction: {
+    '@type': 'SearchAction',
+    target: `${exploreUrl}?kw={search_term_string}`,
+    'query-input': 'required name=search_term_string',
+  },
+});
 
+const siteNavigationJsonLd = JSON.stringify({
+  '@context': 'https://schema.org',
+  '@graph': [
+    {
+      '@type': 'SiteNavigationElement',
+      name: '探索',
+      url: exploreUrl,
+    },
+    {
+      '@type': 'SiteNavigationElement',
+      name: '榜单合集',
+      url: collectionUrl,
+    },
+  ],
+});
+
+const HomePage = defineComponent({
+  name: 'Home',
+  components: {
+    ContactUs,
+    TrophyOutlined,
+    UnorderedListOutlined,
+  },
+  props: {
+    statistics: {
+      type: Object as PropType<IApiStatistics>,
+      required: false,
+    },
+  },
+  setup() {
     useHead({
-      title: 'Home',
+      title: formatTitle(),
       meta: [
-        { name: 'description', content: 'This should be moved to head' },
+        { property: 'og:title', content: formatTitle() },
+        { property: 'og:url', content: homepageUrl },
+      ],
+      link: [
+        { rel: 'canonical', href: homepageUrl },
+      ],
+      script: [
+        { type: 'application/ld+json', children: websiteJsonLd },
+        { type: 'application/ld+json', children: siteNavigationJsonLd },
       ],
     });
-    return initialState;
-  });
 
-  // as computed
-  get list() {
-    return this.homeState.list;
-  }
-
-  async asyncData({ apiClient }: AsyncDataOptions) {
-    const res = await apiClient.demoGet({
-      id: 42,
-      page: 9,
-    });
     return {
-      homeState: res,
+      searchPath,
+      collectionPath,
+      pasteThenACLogo,
+      algoBootstrapLogo,
+      beianText: process.env.BEIAN || '',
+      showBeian: (process.env.RANKLAND_SITE_ALIAS || process.env.SITE_ALIAS) === 'cnn',
     };
-  }
-}
+  },
+  data() {
+    return {
+      hydrated: false,
+    };
+  },
+  computed: {
+    totalSrkCountText(): string {
+      return String(this.statistics?.totalSrkCount ?? '-');
+    },
+    totalViewCountText(): string {
+      return String(this.statistics?.totalViewCount ?? '-');
+    },
+  },
+  mounted() {
+    this.hydrated = true;
+  },
+  async asyncData({ ranklandApiService }: AsyncDataOptions) {
+    const statistics = await ranklandApiService.getStatistics();
+
+    return {
+      statistics,
+    };
+  },
+});
+
+export default routeView(HomePage, '/', undefined, undefined, {
+  renderMethod: RenderMethodKind.SSR,
+});
 </script>
 
 <style lang="less" scoped>
-.test {
-  color: #333;
+.home-page {
+  margin: 0;
+  padding: 32px 50px;
 }
-pre {
-  white-space: pre-wrap;
-  word-wrap: break-word;
+
+.home-hero {
+  margin-bottom: 40px;
+}
+
+.home-hero h1 {
+  margin: 0 0 16px;
+  font-size: 32px;
+  line-height: 1.25;
+}
+
+.home-hero p {
+  max-width: 760px;
+  margin: 0;
+  color: var(--rankland-legacy-text-color);
+  font-size: 16px;
+  line-height: 1.8;
+}
+
+.home-hydrated {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  color: transparent;
+}
+
+.home-section {
+  margin-top: 40px;
+}
+
+.mb-4 {
+  margin-bottom: 16px;
+}
+
+.mr-3 {
+  margin-right: 12px;
+}
+
+.mx-2 {
+  margin-right: 8px;
+  margin-left: 8px;
+}
+
+.inline-block {
+  display: inline-block;
+}
+
+.home-section .block-title {
+  margin: 0 0 20px;
+  color: var(--rankland-legacy-text-color);
+  font-size: 32px;
+  font-weight: 500;
+}
+
+.home-section p,
+.home-section li {
+  color: var(--rankland-legacy-text-color);
+  line-height: 1.8;
+}
+
+.home-section ul {
+  margin: 0;
+  padding-left: 22px;
+}
+
+.home-section :deep(.ant-row) {
+  margin-right: 0 !important;
+  margin-left: 0 !important;
+}
+
+.home-card-link {
+  display: block;
+  height: 100%;
+  color: inherit;
+  text-decoration: none;
+}
+
+.home-card {
+  height: 100%;
+}
+
+.home-card :deep(.ant-card-body) {
+  min-height: 128px;
+}
+
+.home-card h2 {
+  margin: 0 0 14px;
+  color: inherit;
+  font-size: 20px;
+  line-height: 1.4;
+}
+
+.home-card p {
+  margin: 16px 0 0;
+  color: inherit;
+  line-height: 1.7;
+}
+
+.home-card em {
+  color: inherit;
+  font-style: normal;
+  font-weight: 700;
+}
+
+.home-card-title {
+  display: block;
+  column-gap: 0;
+}
+
+.home-card-title img {
+  width: 24px;
+  height: 24px;
+  margin-right: 12px;
+  object-fit: contain;
+}
+
+.home-card-logo-padded {
+  padding: 2px;
+}
+
+.home-card-icon {
+  margin-right: 12px;
+  font-size: 24px;
+}
+
+.home-separator {
+  margin: 0 8px;
+  color: inherit;
+}
+
+@media (max-width: 768px) {
+  .home-page {
+    padding-right: 20px;
+    padding-left: 20px;
+  }
 }
 </style>

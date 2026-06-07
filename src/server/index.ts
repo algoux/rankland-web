@@ -22,7 +22,7 @@ import LoggerMiddleware from './middlewares/logger.middleware';
 import DefaultResponseHandler from '@server/response-handlers/default.response-handler';
 import { IPageRenderer } from './lib/page-renderer.interface';
 import { BwcxClientVueClientRoutesMapId } from 'bwcx-client-vue/server';
-import { clientRoutesMap } from '@common/router/client-routes';
+import { getClientRoutesMapForServer } from '@common/router/e2e-client-routes';
 import MongoClient from './lib/mongo-client';
 import SocketIOServer from './modules/socket-io/socket-io';
 
@@ -68,7 +68,7 @@ export default class OurApp extends App {
 
   public constructor() {
     super();
-    this.container.bind(BwcxClientVueClientRoutesMapId).toConstantValue(clientRoutesMap);
+    this.container.bind(BwcxClientVueClientRoutesMapId).toConstantValue(getClientRoutesMapForServer());
   }
 
   protected async beforeWire() {
@@ -87,6 +87,26 @@ export default class OurApp extends App {
         }),
       ),
     );
+    this.instance.use(
+      mount(
+        '/monaco-editor',
+        koaStatic(`${process.cwd()}/node_modules/monaco-editor/min/`, {
+          index: false,
+          maxage: 2592000000,
+          extensions: false,
+        }),
+      ),
+    );
+    if (process.env.RANKLAND_E2E_HEALTH === '1') {
+      this.instance.use(async (ctx, next) => {
+        if (ctx.path === '/__e2e/health') {
+          ctx.status = 200;
+          ctx.body = 'ok';
+          return;
+        }
+        await next();
+      });
+    }
     // SSR
     this.pageRenderer = getDependency<IPageRenderer>(IPageRenderer, this.container);
     const renderMiddleware = await this.pageRenderer.init?.();
@@ -104,8 +124,12 @@ export default class OurApp extends App {
       }
     });
 
-    const mongoClient = getDependency<MongoClient>(MongoClient, this.container);
-    await mongoClient.init();
+    if (process.env.RANKLAND_E2E_SKIP_MONGO === '1') {
+      console.warn('[E2E] Skipping Mongo initialization');
+    } else {
+      const mongoClient = getDependency<MongoClient>(MongoClient, this.container);
+      await mongoClient.init();
+    }
   }
 
   protected async afterStart() {
@@ -132,10 +156,14 @@ export default class OurApp extends App {
 const app = new OurApp();
 app.scan();
 app.bootstrap().then(async () => {
-  const socketIOServer = getDependency<SocketIOServer>(SocketIOServer, app.container);
   await app.startManually(async () => {
     const httpServer = http.createServer(app.instance.callback());
-    socketIOServer.init(httpServer);
+    if (process.env.RANKLAND_E2E_SKIP_SOCKET === '1') {
+      console.warn('[E2E] Skipping Socket.IO initialization');
+    } else {
+      const socketIOServer = getDependency<SocketIOServer>(SocketIOServer, app.container);
+      socketIOServer.init(httpServer);
+    }
     const listenPromise = new Promise((resolve, _reject) => {
       httpServer.listen(app.port, app.hostname, () => {
         resolve(true);

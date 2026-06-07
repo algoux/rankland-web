@@ -1,9 +1,18 @@
 <template>
-  <Head>
-    <title>页面不存在</title>
-  </Head>
-  <div class="flex flex-col items-center justify-center">
-    <h1 class="mt-10 text-2xl text-white">页面不存在</h1>
-    <a href="/" class="hover:underline">返回首页</a>
-  </div>
+  <div data-id="fallback-not-found" class="text-center mt-32 text-xl">404 Not Found · 你来到了榜单荒地</div>
 </template>
+
+<style lang="less" scoped>
+.text-center {
+  text-align: center;
+}
+
+.mt-32 {
+  margin-top: 128px;
+}
+
+.text-xl {
+  font-size: 20px;
+  line-height: 28px;
+}
+</style>

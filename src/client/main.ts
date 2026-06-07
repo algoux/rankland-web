@@ -1,4 +1,25 @@
 import './index.less';
+import 'ant-design-vue/dist/reset.css';
+import {
+  Alert,
+  Button,
+  Card,
+  Col,
+  ConfigProvider,
+  Dropdown,
+  FloatButton,
+  Input,
+  Layout,
+  List,
+  Menu,
+  Modal,
+  Radio,
+  Row,
+  Select,
+  Spin,
+  Switch,
+  Tag,
+} from 'ant-design-vue';
 import { ClientOnly } from 'vite-ssr';
 import { createHead, Head } from '@vueuse/head';
 import type { HookParams } from 'vite-ssr/vue/types';
@@ -6,9 +27,32 @@ import { Vue } from 'vue-class-component';
 import { BwcxClientRouterPlugin } from 'bwcx-client-vue3';
 import { clientRoutesMap } from '@common/router/client-routes';
 import { ApiClientPlugin } from './plugins/api-client.plugin';
+import { RanklandApiPlugin } from './plugins/rankland-api.plugin';
 import type { ApiType, ApiClientType } from './api';
+import type { RanklandApiService } from '@common/rankland-api';
 
 Vue.registerHooks(['setup', 'beforeRouteEnter', 'beforeRouteUpdate', 'beforeRouteLeave', 'asyncData']);
+
+const antDesignComponents = [
+  Alert,
+  Button,
+  Card,
+  Col,
+  ConfigProvider,
+  Dropdown,
+  FloatButton,
+  Input,
+  Layout,
+  List,
+  Menu,
+  Modal,
+  Radio,
+  Row,
+  Select,
+  Spin,
+  Switch,
+  Tag,
+];
 
 export function mainEntry({
   app,
@@ -17,14 +61,21 @@ export function mainEntry({
   initialState,
   api,
   apiClient,
-}: HookParams & { api: ApiType; apiClient: ApiClientType }) {
+  ranklandApiService,
+}: HookParams & { api: ApiType; apiClient: ApiClientType; ranklandApiService: RanklandApiService }) {
   const head = createHead();
   app.use(head);
+  for (const component of antDesignComponents) {
+    app.use(component);
+  }
   app.use(BwcxClientRouterPlugin, {
     routesMap: clientRoutesMap,
   });
   app.use(ApiClientPlugin, {
     apiClient,
+  });
+  app.use(RanklandApiPlugin, {
+    ranklandApiService,
   });
   app.component(Head.name, Head);
   app.component(ClientOnly.name, ClientOnly);
@@ -60,7 +111,16 @@ export function mainEntry({
     // 可以在这里加入全局 loading 进度条。或改写这个钩子实现 Route-Update-First 的导航
     try {
       // @ts-ignore
-      const result = await component.asyncData({ app, router, initialState, to, from, api, apiClient });
+      const result = await component.asyncData({
+        app,
+        router,
+        initialState,
+        to,
+        from,
+        api,
+        apiClient,
+        ranklandApiService,
+      });
       // eslint-disable-next-line no-param-reassign
       to.meta.state = result;
       return next();

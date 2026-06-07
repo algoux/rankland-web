@@ -8,11 +8,17 @@
 </template>
 
 <script lang="ts">
-import { Vue } from 'vue-class-component';
-import { View } from 'bwcx-client-vue3';
+import { defineComponent } from 'vue';
+import { routeView } from 'bwcx-client-vue3';
 
-@View('/about')
-export default class About extends Vue {
-  public env = process.env.NODE_ENV;
-}
+const About = defineComponent({
+  name: 'About',
+  data() {
+    return {
+      env: process.env.NODE_ENV,
+    };
+  },
+});
+
+export default routeView(About, '/about');
 </script>
