@@ -29,7 +29,7 @@ module.exports = defineConfig(({ command }) => {
       },
     },
     // If using CDN, you can set base like 'https://yourcdn.com/dist/'
-    base: isBuild ? '/dist/' : undefined,
+    base: isBuild ? process.env.CDN_BASE || '/dist/' : undefined,
     define: {
       'process.env.BWCX_RUNTIME_SCOPE': JSON.stringify('client'),
       'process.env.NODE_ENV': JSON.stringify(process.env.NODE_ENV || (isBuild ? 'production' : 'development')),

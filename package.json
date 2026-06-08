@@ -109,6 +109,7 @@
     "autoprefixer": "^10.5.0",
     "concurrently": "^7.0.0",
     "copyfiles": "^2.4.1",
+    "cos-nodejs-sdk-v5": "^2.15.4",
     "cross-env": "^7.0.3",
     "eslint": "^8.56.0",
     "eslint-config-alloy": "^4",
