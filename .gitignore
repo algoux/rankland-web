@@ -1,9 +1,13 @@
 .DS_Store
 .idea
 node_modules/
+.agents/
+skills-lock.json
 dist/
 app/
 coverage/
+test-results/
+playwright-report/
 npm-debug.log
 tsconfig.tsbuildinfo
 temp/

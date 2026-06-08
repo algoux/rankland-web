@@ -1,4 +1,5 @@
 import './index.less';
+import './index.css';
 import { ClientOnly } from 'vite-ssr';
 import { createHead, Head } from '@vueuse/head';
 import type { HookParams } from 'vite-ssr/vue/types';
@@ -6,7 +7,11 @@ import { Vue } from 'vue-class-component';
 import { BwcxClientRouterPlugin } from 'bwcx-client-vue3';
 import { clientRoutesMap } from '@common/router/client-routes';
 import { ApiClientPlugin } from './plugins/api-client.plugin';
-import type { ApiType, ApiClientType } from './api';
+import type { ApiClientType } from './api';
+import type { ApiService } from './services/ranklist-api';
+import { createThemeService, THEME_TOKEN } from './lib/theme';
+import { installRanklandAnalytics } from './app/analytics';
+import { applyMacBlinkOptimizations } from './app/platform';
 
 Vue.registerHooks(['setup', 'beforeRouteEnter', 'beforeRouteUpdate', 'beforeRouteLeave', 'asyncData']);
 
@@ -15,10 +20,12 @@ export function mainEntry({
   router,
   isClient,
   initialState,
+  writeResponse,
   api,
   apiClient,
-}: HookParams & { api: ApiType; apiClient: ApiClientType }) {
+}: HookParams & { api: ApiService; apiClient: ApiClientType }) {
   const head = createHead();
+  const theme = createThemeService();
   app.use(head);
   app.use(BwcxClientRouterPlugin, {
     routesMap: clientRoutesMap,
@@ -26,8 +33,20 @@ export function mainEntry({
   app.use(ApiClientPlugin, {
     apiClient,
   });
+  app.provide(THEME_TOKEN, theme);
+  app.config.globalProperties.$theme = theme;
+  app.config.globalProperties.$ranklandApi = api;
   app.component(Head.name, Head);
   app.component(ClientOnly.name, ClientOnly);
+
+  if (isClient) {
+    // Defer system theme sync until after Vue hydrates the SSR markup.
+    window.setTimeout(() => {
+      theme.mount(window);
+      applyMacBlinkOptimizations(window);
+      installRanklandAnalytics(router, window);
+    }, 0);
+  }
 
   app.config.errorHandler = (err, vm, info) => {
     console.error('Vue error:', err, vm, info);
@@ -60,7 +79,17 @@ export function mainEntry({
     // 可以在这里加入全局 loading 进度条。或改写这个钩子实现 Route-Update-First 的导航
     try {
       // @ts-ignore
-      const result = await component.asyncData({ app, router, initialState, to, from, api, apiClient });
+      const result = await component.asyncData({
+        app,
+        router,
+        initialState,
+        isClient,
+        writeResponse,
+        to,
+        from,
+        api,
+        apiClient,
+      });
       // eslint-disable-next-line no-param-reassign
       to.meta.state = result;
       return next();

@@ -1,72 +1,60 @@
 <template>
-  <h1>Welcome to bwcx Demo</h1>
-  <div>
-    <img class="logo" src="./assets/logo.png" alt="不忘初心" />
-  </div>
-  <p class="slogan">Light, Progressive, Object Oriented</p>
-  <p class="secondary-prompt">It's a template from <a href="https://github.com/bwcxjs/bwcx-vue3-ssr-template" target="_blank">bwcx-vue3-ssr-template</a></p>
-  <nav>
-    <router-link to="/">Go to Home</router-link>
-    <router-link :to="{ name: 'About' }">Go to About</router-link>
-    <router-link :to="demoDetailUrl">Go to Detail</router-link>
-  </nav>
-  <h3>Below is the currently rendered route view:</h3>
+  <Sonner />
 
-  <router-view v-slot="{ Component }">
+  <router-view v-if="focusMode" v-slot="{ Component }">
     <Suspense>
       <component :is="Component" />
     </Suspense>
   </router-view>
+
+  <div v-else class="min-h-screen bg-background text-foreground">
+    <header class="rankland-site-header px-[50px] max-md:px-5">
+      <div data-id="site-header-inner" class="flex h-16 w-full items-center gap-3">
+        <router-link class="flex h-11 w-11 shrink-0 items-center justify-center" to="/" aria-label="RankLand">
+          <img class="h-10 w-10" src="./assets/rankland-logo.png" alt="RankLand" />
+        </router-link>
+        <NavMenu class="flex-1" />
+        <RightMenu />
+      </div>
+    </header>
+
+    <main class="w-full px-[50px] py-8 max-md:px-5">
+      <router-view v-slot="{ Component }">
+        <Suspense>
+          <component :is="Component" />
+        </Suspense>
+      </router-view>
+    </main>
+
+    <BackTop />
+  </div>
 </template>
 
 <script lang="ts">
 import { Options, Vue } from 'vue-class-component';
+import BackTop from './components/layout/BackTop.vue';
+import NavMenu from './components/layout/NavMenu.vue';
+import RightMenu from './components/layout/RightMenu.vue';
+import { Sonner } from './components/ui/sonner';
+import { revealBodyAfterInitialHydration } from './app/hydration-flicker-guard';
 
 @Options({
   components: {
+    BackTop,
+    NavMenu,
+    RightMenu,
+    Sonner,
   },
 })
 export default class App extends Vue {
-  get demoDetailUrl() {
-    return this.$$router.to('DemoDetail').formatUrl({
-      id: 42,
-      preview: false,
-      arr: [1, 2],
+  get focusMode() {
+    return this.$route.query.focus === 'yes' || this.$route.query['聚焦'] === '是';
+  }
+
+  mounted() {
+    this.$nextTick(() => {
+      void revealBodyAfterInitialHydration(window);
     });
   }
 }
 </script>
-
-<style lang="less" scoped>
-nav {
-  width: 600px;
-  display: flex;
-  padding: 20px;
-  justify-content: space-between;
-  margin-left: auto;
-  margin-right: auto;
-  background: #efefef;
-  border: 1px solid #ccc;
-  margin-top: 16px;
-  border-radius: 4px;
-}
-.slogan {
-  background-color: #21b6fd;
-  background-image: linear-gradient(108deg, #21b6fd 36%, #b721ff 100%);
-  -webkit-background-clip: text;
-  color: transparent;
-  font-size: 20px;
-  font-weight: 500;
-}
-
-.logo {
-  width: 108px;
-  height: 108px;
-}
-
-.secondary-prompt {
-  color: #737373;
-  font-size: 14px;
-  margin-bottom: 0;
-}
-</style>

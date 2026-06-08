@@ -3,7 +3,7 @@
 import { Provide } from 'bwcx-core';
 import type { RequestContext } from 'bwcx-ljsm';
 import type { Renderer, Rendered } from 'vite-ssr/utils/types';
-import { IPageRenderer } from './page-renderer.interface';
+import { IPageRenderer, type PageRenderOptions } from './page-renderer.interface';
 
 @Provide({ id: IPageRenderer, when: 'production' })
 export default class PageRendererProd implements IPageRenderer {
@@ -21,7 +21,7 @@ export default class PageRendererProd implements IPageRenderer {
     this.renderPage = renderPage;
   }
 
-  public async render(mode: 'ssr' | 'csr', ctx: RequestContext) {
+  public async render(mode: 'ssr' | 'csr', ctx: RequestContext, options: PageRenderOptions = {}) {
     ctx.info(`${mode} ${ctx.url}`);
     const url = `${ctx.protocol}://${ctx.host}${ctx.originalUrl}`;
     let res: Rendered;
@@ -44,9 +44,13 @@ export default class PageRendererProd implements IPageRenderer {
     if (!res) {
       throw new Error(`Render failed for ${ctx.url}`);
     }
-    const { html, status = 200, headers } = res;
-    ctx.status = status;
+    const { html, status, headers } = res;
+    ctx.status = resolveRenderedStatus(status, options.defaultStatus);
     ctx.set(headers);
     return html;
   }
+}
+
+export function resolveRenderedStatus(renderedStatus?: number, defaultStatus?: number) {
+  return renderedStatus ?? defaultStatus ?? 200;
 }

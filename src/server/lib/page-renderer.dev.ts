@@ -5,7 +5,7 @@
 
 import { Provide } from 'bwcx-core';
 import type { RequestContext } from 'bwcx-ljsm';
-import type { ViteDevServer, InlineConfig } from 'vite';
+import type { ViteDevServer, InlineConfig, ServerOptions } from 'vite';
 import type { SsrOptions } from 'vite-ssr/dev';
 import { getEntryPoint, getPluginOptions } from 'vite-ssr/config';
 import type { ViteSsrPluginOptions } from 'vite-ssr/config';
@@ -14,7 +14,7 @@ import c2k from 'koa-connect';
 import path from 'path';
 import { promises as fs } from 'fs';
 import chalk from 'chalk';
-import { IPageRenderer } from './page-renderer.interface';
+import { IPageRenderer, type PageRenderOptions } from './page-renderer.interface';
 
 @Provide({ id: IPageRenderer, when: 'development' })
 export default class PageRendererDev implements IPageRenderer {
@@ -39,9 +39,9 @@ export default class PageRendererDev implements IPageRenderer {
     return c2k(this.server.middlewares);
   }
 
-  public async render(mode: 'ssr' | 'csr', ctx: RequestContext) {
+  public async render(mode: 'ssr' | 'csr', ctx: RequestContext, options: PageRenderOptions = {}) {
     if (mode === 'ssr') {
-      return this.handleSsrRequest(ctx);
+      return this.handleSsrRequest(ctx, options);
     }
     return this.getIndexTemplate(ctx.originalUrl);
   }
@@ -52,9 +52,10 @@ export default class PageRendererDev implements IPageRenderer {
 
   private async createSsrServer(options: InlineConfig & { polyfills?: boolean } = {}) {
     const createViteServer = await import('vite').then((m) => m.createServer);
+    const serverOptions = options.server || ({ ...options } as ServerOptions);
     const viteServer = await createViteServer({
       ...options,
-      server: options.server || { ...options },
+      server: serverOptions,
     });
 
     if (options.polyfills !== false) {
@@ -163,7 +164,7 @@ export default class PageRendererDev implements IPageRenderer {
     }
   }
 
-  private async handleSsrRequest(ctx: RequestContext): Promise<string> {
+  private async handleSsrRequest(ctx: RequestContext, options: PageRenderOptions = {}): Promise<string> {
     this.fixEntryPoint();
 
     let template: string;
@@ -210,7 +211,10 @@ export default class PageRendererDev implements IPageRenderer {
         ...context,
       });
 
-      this.writeHead(ctx, result);
+      this.writeHead(ctx, {
+        ...result,
+        status: result.status ?? options.defaultStatus,
+      });
       if (this.isRedirect(result)) {
         return;
       }
