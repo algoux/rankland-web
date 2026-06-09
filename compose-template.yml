@@ -1,20 +1,21 @@
 version: '3'
 services:
-  be:
+  app:
     image: algoux/rankland-web:latest
     network_mode: host
     restart: unless-stopped
     container_name: rankland-web
     environment:
-      - SERVER_HOST=127.0.0.1
-      - SERVER_PORT=3000
-      - MYSQL_HOST=127.0.0.1
-      - MYSQL_PORT=3306
-      - MYSQL_DB=rankland
-      - MYSQL_USER=blue
-      - MYSQL_PASS=test
-      - REDIS_HOST=127.0.0.1
-      - REDIS_PORT=6379
-      - REDIS_DB=0
-      - REDIS_PASS=
-      - AUTH_TOKEN=your-auth-token
+      TZ: Asia/Shanghai
+      SERVER_HOST: 127.0.0.1
+      SERVER_PORT: 3000
+      MYSQL_HOST: 127.0.0.1
+      MYSQL_PORT: 3306
+      MYSQL_DB: rankland
+      MYSQL_USER: blue
+      MYSQL_PASS: test
+      REDIS_HOST: 127.0.0.1
+      REDIS_PORT: 6379
+      REDIS_DB: 0
+      REDIS_PASS:
+      AUTH_TOKEN: your-auth-token
