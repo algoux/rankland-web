@@ -1,10 +1,12 @@
 import { describe, expect, it, vi } from 'vitest';
 import { LogicException, LogicExceptionKind } from '@/services/ranklist-api';
+import { SSR_SKIP_CACHE_HEADER } from '@common/ssr-cache';
 import {
   RanklistPageErrorKind,
   shouldLogRanklistPageError,
   toRanklistPageErrorKind,
   writeRanklistPageErrorResponse,
+  writeRanklistPageSkipCacheResponse,
 } from './page-error';
 
 describe('ranklist page error normalization', () => {
@@ -41,5 +43,31 @@ describe('ranklist page error normalization', () => {
       writeResponse: clientWriteResponse,
     });
     expect(clientWriteResponse).not.toHaveBeenCalled();
+  });
+
+  it('marks server-side transient load failures as not cacheable', () => {
+    const writeResponse = vi.fn();
+
+    expect(writeRanklistPageErrorResponse(new Error('upstream down'), {
+      isClient: false,
+      writeResponse,
+    })).toBe(RanklistPageErrorKind.LoadFailed);
+    expect(writeResponse).toHaveBeenCalledWith({
+      headers: {
+        [SSR_SKIP_CACHE_HEADER]: '1',
+      },
+    });
+  });
+
+  it('can mark server-side partial page failures as not cacheable without changing status', () => {
+    const writeResponse = vi.fn();
+
+    writeRanklistPageSkipCacheResponse({ isClient: false, writeResponse });
+
+    expect(writeResponse).toHaveBeenCalledWith({
+      headers: {
+        [SSR_SKIP_CACHE_HEADER]: '1',
+      },
+    });
   });
 });

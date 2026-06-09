@@ -7,6 +7,6 @@ export interface PageRenderOptions {
 
 export interface IPageRenderer {
   render: (mode: 'ssr' | 'csr', ctx: RequestContext, options?: PageRenderOptions) => string | Promise<string>;
-  init?: () => Promise<ApplicationMiddleware>;
+  init?: () => Promise<ApplicationMiddleware | void>;
   destory?: () => Promise<void>;
 }

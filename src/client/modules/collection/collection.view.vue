@@ -155,6 +155,7 @@ import {
   RanklistPageErrorKind,
   shouldLogRanklistPageError,
   writeRanklistPageErrorResponse,
+  writeRanklistPageSkipCacheResponse,
 } from '@/domain/ranklist/page-error';
 import {
   findCollectionAncestorKeys,
@@ -360,8 +361,12 @@ export default class Collection extends Vue {
     const id = Array.isArray(to.params.id) ? to.params.id[0] : String(to.params.id || '');
     const rankId = firstQueryValue(to.query.rankId);
     try {
+      const collectionPageData = await loadCollectionPageData({ api, id, rankId });
+      if (collectionPageData.ranklistHasError && !isClient) {
+        writeRanklistPageSkipCacheResponse({ isClient, writeResponse });
+      }
       return {
-        collectionPageData: await loadCollectionPageData({ api, id, rankId }),
+        collectionPageData,
         errorKind: undefined,
       };
     } catch (error) {

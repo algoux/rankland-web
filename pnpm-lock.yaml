@@ -90,6 +90,9 @@ importers:
       fuse.js:
         specifier: ^7.4.0
         version: 7.4.0
+      ioredis:
+        specifier: ^5.8.2
+        version: 5.11.1
       koa-connect:
         specifier: ^2.1.0
         version: 2.1.0
@@ -149,7 +152,7 @@ importers:
         version: 1.0.2
       typeorm:
         specifier: 0.3.26
-        version: 0.3.26(mysql2@3.22.3(@types/node@20.19.41))(reflect-metadata@0.2.2)(ts-node@10.9.2(@types/node@20.19.41)(typescript@5.9.3))
+        version: 0.3.26(ioredis@5.11.1)(mysql2@3.22.3(@types/node@20.19.41))(reflect-metadata@0.2.2)(ts-node@10.9.2(@types/node@20.19.41)(typescript@5.9.3))
       urlcat-fork:
         specifier: ^2.0.5
         version: 2.0.5
@@ -715,6 +718,9 @@ packages:
 
   '@internationalized/number@3.6.7':
     resolution: {integrity: sha512-3ji1fcrT+FPAK86UqEhB/psHixYo6niWPJtt7+qRaYFynt/BaJG8GhAPimtWUpEiVSTq8ZM8L5psMxGquiB/Vg==}
+
+  '@ioredis/commands@1.10.0':
+    resolution: {integrity: sha512-UmeW7z4LfctwoQ5wkhVzgq8tXkreED2xZGpX+Bg+zA+WJFZCT6c062AfCK/Dfk81xZnnwdhJCUMkitihRaoC2Q==}
 
   '@isaacs/cliui@8.0.2':
     resolution: {integrity: sha512-O8jcjabXaleOG9DQ0+ARXWZBTfnP4WNAqzuiJK7ll44AmxGKv/J2M4TPjxjY3znBCfvBXFzucm1twdyFybFqEA==}
@@ -1780,6 +1786,10 @@ packages:
     resolution: {integrity: sha512-eYm0QWBtUrBWZWG0d386OGAw16Z995PiOVo2B7bjWSbHedGl5e0ZWaq65kOGgUSNesEIDkB9ISbTg/JK9dhCZA==}
     engines: {node: '>=6'}
 
+  cluster-key-slot@1.1.1:
+    resolution: {integrity: sha512-rwHwUfXL40Chm1r08yrhU3qpUvdVlgkKNeyeGPOxnW8/SyVDvgRaed/Uz54AqWNaTCAThlj6QAs3TZcKI0xDEw==}
+    engines: {node: '>=0.10.0'}
+
   co-body@6.1.0:
     resolution: {integrity: sha512-m7pOT6CdLN7FuXUcpuz/8lfQ/L77x8SchHCF4G0RBTJO20Wzmhn5Sp4/5WsKy8OSpifBSUrmg83qEqaDHdyFuQ==}
 
@@ -2804,6 +2814,10 @@ packages:
   inversify@5.1.1:
     resolution: {integrity: sha512-j8grHGDzv1v+8T1sAQ+3boTCntFPfvxLCkNcxB1J8qA0lUN+fAlSyYd+RXKvaPRL4AGyPxViutBEJHNXOyUdFQ==}
 
+  ioredis@5.11.1:
+    resolution: {integrity: sha512-ehuGcf94bQXhfagULNXrJdfnWO38v070jxSx/qE87Kjzmu2fU7ro5EFAb+OPituLqgfyuQaym5DlrNydW2sJ9A==}
+    engines: {node: '>=12.22.0'}
+
   is-accessor-descriptor@1.0.1:
     resolution: {integrity: sha512-YBUanLI8Yoihw923YeFUS5fs0fF2f5TSFTNiYAAzhhDscDa3lEqYuz1pDOEP5KvX94I9ey3vsqjJcLVFVU+3QA==}
     engines: {node: '>= 0.10'}
@@ -3798,6 +3812,14 @@ packages:
     resolution: {integrity: sha512-hOS089on8RduqdbhvQ5Z37A0ESjsqz6qnRcffsMU3495FuTdqSm+7bhJ29JvIOsBDEEnan5DPu9t3To9VRlMzA==}
     engines: {node: '>=8.10.0'}
 
+  redis-errors@1.2.0:
+    resolution: {integrity: sha512-1qny3OExCf0UvUV/5wpYKf2YwPcOqXzkwKKSmKHiE6ZMQs5heeE/c8eXK+PNllPvmjgAbfnsbpkGZWy8cBpn9w==}
+    engines: {node: '>=4'}
+
+  redis-parser@3.0.0:
+    resolution: {integrity: sha512-DJnGAeenTdpMEH6uAJRK/uiyEIH9WVsUmoLwzudwGJUwZPp80PDBWPHXSAGNPwNvIXAbe7MSUB1zQFugFml66A==}
+    engines: {node: '>=4'}
+
   reflect-metadata@0.1.13:
     resolution: {integrity: sha512-Ts1Y/anZELhSsjMcU605fU9RE4Oi3p5ORujwbIKXfWa+0Zxs510Qrmrce5/Jowq3cHSZSJqBjypxmHarc+vEWg==}
 
@@ -4096,6 +4118,9 @@ packages:
 
   stackback@0.0.2:
     resolution: {integrity: sha512-1XMJE5fQo1jGH6Y/7ebnwPOBEkIEnT4QF32d5R1+VXdXveM0IBMJt8zfaxX1P3QhVwrYe+576+jkANtSS2mBbw==}
+
+  standard-as-callback@2.1.0:
+    resolution: {integrity: sha512-qoRRSyROncaz1z0mvYqIE4lCd9p2R90i6GxW3uZv5ucSu8tU7B5HXUP1gG8pVZsYNVaXjk8ClXHPttLyxAL48A==}
 
   static-extend@0.1.2:
     resolution: {integrity: sha512-72E9+uLc27Mt718pMHt9VMNiAL4LMsmDbBva8mxWUCkT07fSzEGMYUCk0XWY6lp0j6RBAG4cJ3mWuZv2OE3s0g==}
@@ -5372,7 +5397,7 @@ snapshots:
   '@eslint/eslintrc@2.1.4':
     dependencies:
       ajv: 6.12.6
-      debug: 4.3.4
+      debug: 4.4.3
       espree: 9.6.1
       globals: 13.24.0
       ignore: 5.3.0
@@ -5408,7 +5433,7 @@ snapshots:
   '@humanwhocodes/config-array@0.11.13':
     dependencies:
       '@humanwhocodes/object-schema': 2.0.1
-      debug: 4.3.4
+      debug: 4.4.3
       minimatch: 3.1.2
     transitivePeerDependencies:
       - supports-color
@@ -5424,6 +5449,8 @@ snapshots:
   '@internationalized/number@3.6.7':
     dependencies:
       '@swc/helpers': 0.5.23
+
+  '@ioredis/commands@1.10.0': {}
 
   '@isaacs/cliui@8.0.2':
     dependencies:
@@ -5803,7 +5830,7 @@ snapshots:
       '@typescript-eslint/type-utils': 6.17.0(eslint@8.56.0)(typescript@5.9.3)
       '@typescript-eslint/utils': 6.17.0(eslint@8.56.0)(typescript@5.9.3)
       '@typescript-eslint/visitor-keys': 6.17.0
-      debug: 4.3.4
+      debug: 4.4.3
       eslint: 8.56.0
       graphemer: 1.4.0
       ignore: 5.3.0
@@ -5833,7 +5860,7 @@ snapshots:
       '@typescript-eslint/types': 6.17.0
       '@typescript-eslint/typescript-estree': 6.17.0(typescript@5.9.3)
       '@typescript-eslint/visitor-keys': 6.17.0
-      debug: 4.3.4
+      debug: 4.4.3
       eslint: 8.56.0
     optionalDependencies:
       typescript: 5.9.3
@@ -5854,7 +5881,7 @@ snapshots:
     dependencies:
       '@typescript-eslint/typescript-estree': 5.62.0(typescript@5.9.3)
       '@typescript-eslint/utils': 5.62.0(eslint@8.56.0)(typescript@5.9.3)
-      debug: 4.3.4
+      debug: 4.4.3
       eslint: 8.56.0
       tsutils: 3.21.0(typescript@5.9.3)
     optionalDependencies:
@@ -5866,7 +5893,7 @@ snapshots:
     dependencies:
       '@typescript-eslint/typescript-estree': 6.17.0(typescript@5.9.3)
       '@typescript-eslint/utils': 6.17.0(eslint@8.56.0)(typescript@5.9.3)
-      debug: 4.3.4
+      debug: 4.4.3
       eslint: 8.56.0
       ts-api-utils: 1.0.3(typescript@5.9.3)
     optionalDependencies:
@@ -5882,7 +5909,7 @@ snapshots:
     dependencies:
       '@typescript-eslint/types': 5.62.0
       '@typescript-eslint/visitor-keys': 5.62.0
-      debug: 4.3.4
+      debug: 4.4.3
       globby: 11.1.0
       is-glob: 4.0.3
       semver: 7.5.4
@@ -5896,7 +5923,7 @@ snapshots:
     dependencies:
       '@typescript-eslint/types': 6.17.0
       '@typescript-eslint/visitor-keys': 6.17.0
-      debug: 4.3.4
+      debug: 4.4.3
       globby: 11.1.0
       is-glob: 4.0.3
       minimatch: 9.0.3
@@ -6654,6 +6681,8 @@ snapshots:
       wrap-ansi: 7.0.0
 
   clsx@2.1.1: {}
+
+  cluster-key-slot@1.1.1: {}
 
   co-body@6.1.0:
     dependencies:
@@ -7772,6 +7801,18 @@ snapshots:
 
   inversify@5.1.1: {}
 
+  ioredis@5.11.1:
+    dependencies:
+      '@ioredis/commands': 1.10.0
+      cluster-key-slot: 1.1.1
+      debug: 4.4.3
+      denque: 2.1.0
+      redis-errors: 1.2.0
+      redis-parser: 3.0.0
+      standard-as-callback: 2.1.0
+    transitivePeerDependencies:
+      - supports-color
+
   is-accessor-descriptor@1.0.1:
     dependencies:
       hasown: 2.0.0
@@ -8080,7 +8121,7 @@ snapshots:
 
   koa-send@5.0.1:
     dependencies:
-      debug: 4.3.4
+      debug: 4.4.3
       http-errors: 1.8.1
       resolve-path: 1.4.0
     transitivePeerDependencies:
@@ -8100,7 +8141,7 @@ snapshots:
       content-disposition: 0.5.4
       content-type: 1.0.5
       cookies: 0.8.0
-      debug: 4.3.4
+      debug: 4.4.3
       delegates: 1.0.0
       depd: 2.0.0
       destroy: 1.2.0
@@ -8780,6 +8821,12 @@ snapshots:
     dependencies:
       picomatch: 2.3.1
 
+  redis-errors@1.2.0: {}
+
+  redis-parser@3.0.0:
+    dependencies:
+      redis-errors: 1.2.0
+
   reflect-metadata@0.1.13: {}
 
   reflect-metadata@0.2.2: {}
@@ -9153,6 +9200,8 @@ snapshots:
       tweetnacl: 0.14.5
 
   stackback@0.0.2: {}
+
+  standard-as-callback@2.1.0: {}
 
   static-extend@0.1.2:
     dependencies:
@@ -9533,7 +9582,7 @@ snapshots:
 
   typedarray@0.0.6: {}
 
-  typeorm@0.3.26(mysql2@3.22.3(@types/node@20.19.41))(reflect-metadata@0.2.2)(ts-node@10.9.2(@types/node@20.19.41)(typescript@5.9.3)):
+  typeorm@0.3.26(ioredis@5.11.1)(mysql2@3.22.3(@types/node@20.19.41))(reflect-metadata@0.2.2)(ts-node@10.9.2(@types/node@20.19.41)(typescript@5.9.3)):
     dependencies:
       '@sqltools/formatter': 1.2.5
       ansis: 3.17.0
@@ -9551,6 +9600,7 @@ snapshots:
       uuid: 11.1.1
       yargs: 17.7.2
     optionalDependencies:
+      ioredis: 5.11.1
       mysql2: 3.22.3(@types/node@20.19.41)
       ts-node: 10.9.2(@types/node@20.19.41)(typescript@5.9.3)
     transitivePeerDependencies:

@@ -15,7 +15,7 @@ export default class ViewService {
   ) {}
 
   public async render(mode: RenderMethodKind, options: PageRenderOptions = {}) {
-    if (mode === RenderMethodKind.CSR || this.ctx.query.ssr === '0') {
+    if (mode === RenderMethodKind.CSR || shouldForceCsr(this.ctx.query.ssr)) {
       return await this.renderer.render('csr', this.ctx, options);
     }
     if (mode === RenderMethodKind.SSR) {
@@ -23,4 +23,9 @@ export default class ViewService {
     }
     throw new Error(`Unsupported render mode ${mode}`);
   }
+}
+
+function shouldForceCsr(ssrQuery: unknown) {
+  const value = Array.isArray(ssrQuery) ? ssrQuery[0] : ssrQuery;
+  return value === '0' || value === 'false';
 }

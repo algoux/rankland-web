@@ -57,7 +57,7 @@ fnm exec --using v20.19.1 corepack pnpm@9.15.9 run dev
 
 2. 在浏览器中打开 <http://127.0.0.1:3000/>。
 
-开发环境可以通过环境变量覆盖默认 MySQL 配置：
+开发环境可以通过环境变量覆盖默认 MySQL / Redis 配置：
 
 ```bash
 MYSQL_HOST=127.0.0.1 \
@@ -65,8 +65,14 @@ MYSQL_PORT=3306 \
 MYSQL_USER=blue \
 MYSQL_PASS=test \
 MYSQL_DB=rankland \
+REDIS_HOST=127.0.0.1 \
+REDIS_PORT=6379 \
+REDIS_DB=0 \
+REDIS_PASS= \
 pnpm run dev
 ```
+
+Redis 用于开发和生产 SSR 页面结果缓存。Redis 不可用时服务会跳过缓存并继续未缓存 SSR；不会因为缓存层异常中断页面响应。
 
 运行时不会自动执行 migration。切换分支、拉取代码或新增 migration 后，请手动运行：
 
@@ -88,6 +94,7 @@ pnpm run db:migration:generate
 - [Contest v2 API 文档](docs/contest-api.md)
 - [生产者 / 消费者实现指导](docs/contest-producer-consumer-guide.md)
 - [Contest 事件实现进度](docs/contest-event-implementation-progress.md)
+- [Redis SSR 页面缓存](docs/ssr-redis-cache.md)
 
 ## RankLand 前端
 
@@ -189,11 +196,16 @@ MYSQL_PORT=3306 \
 MYSQL_USER=... \
 MYSQL_PASS=... \
 MYSQL_DB=... \
+REDIS_HOST=... \
+REDIS_PORT=6379 \
+REDIS_DB=0 \
+REDIS_PASS=... \
 AUTH_TOKEN=... \
 fnm exec --using v20.19.1 corepack pnpm@9.15.9 run start
 ```
 
 `NODE_ENV=production` 下必须提供 `MYSQL_HOST`、`MYSQL_USER`、`MYSQL_PASS` 和 `MYSQL_DB`。生产启动不会自动迁移数据库。
+Redis 配置未提供时会使用 `127.0.0.1:6379/0`，仅影响 SSR 页面缓存。
 
 ## 开发指南
 

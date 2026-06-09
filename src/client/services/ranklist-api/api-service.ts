@@ -1,5 +1,6 @@
 import type * as srk from '@algoux/standard-ranklist';
 import urlcatImport from 'urlcat-fork';
+import { ErrCode } from '@common/enums/err-code.enum';
 import { ApiException, HttpException } from './request';
 import { LogicException, LogicExceptionKind } from './logic-exception';
 import type {
@@ -13,6 +14,7 @@ import type {
 } from './types';
 
 const urlcat = ((urlcatImport as any).default || urlcatImport) as typeof urlcatImport;
+const LEGACY_API_NOT_FOUND_CODE = 11;
 
 interface ApiServiceOptions {
   api: RanklandRequestAdapter;
@@ -77,7 +79,7 @@ export class ApiService {
         srk: ranklist,
       };
     } catch (e) {
-      if ((e instanceof ApiException && e.code === 11) || (e instanceof HttpException && e.status === 404)) {
+      if (isApiNotFoundError(e)) {
         throw new LogicException(LogicExceptionKind.NotFound);
       }
       throw e;
@@ -102,10 +104,10 @@ export class ApiService {
       const plain = await this.cdnApi
         .get<{ content: string }>(urlcat('/rank/group/:key', { key: opts.uniqueKey }))
         .then((res) => res.content);
-      await this.cacheManager?.setEx(cacheKey, 2 * 60, plain);
+      await this.cacheManager?.setEx(cacheKey, 60, plain);
       return JSON.parse(plain) as IApiCollection;
     } catch (e) {
-      if ((e instanceof ApiException && e.code === 11) || (e instanceof HttpException && e.status === 404)) {
+      if (isApiNotFoundError(e)) {
         throw new LogicException(LogicExceptionKind.NotFound);
       }
       throw e;
@@ -122,7 +124,7 @@ export class ApiService {
         urlcat('/ranking/config/:uniqueKey', { uniqueKey: opts.uniqueKey, _t: Date.now() }),
       )
       .catch((e) => {
-        if ((e instanceof ApiException && e.code === 11) || (e instanceof HttpException && e.status === 404)) {
+        if (isApiNotFoundError(e)) {
           throw new LogicException(LogicExceptionKind.NotFound);
         }
         throw e;
@@ -130,8 +132,23 @@ export class ApiService {
   }
 
   public getLiveRanklist(opts: { id: string; token?: string }): Promise<srk.Ranklist> {
-    return this.api.get<srk.Ranklist>(
-      urlcat('/ranking/:id', { id: opts.id, token: opts.token || undefined, _t: Date.now() }),
-    );
+    return this.api
+      .get<srk.Ranklist>(
+        urlcat('/ranking/:id', { id: opts.id, token: opts.token || undefined, _t: Date.now() }),
+      )
+      .catch((e) => {
+        if (isApiNotFoundError(e)) {
+          throw new LogicException(LogicExceptionKind.NotFound);
+        }
+        throw e;
+      });
   }
+}
+
+function isApiNotFoundError(error: unknown) {
+  return (
+    (error instanceof ApiException
+      && (error.code === LEGACY_API_NOT_FOUND_CODE || error.code === ErrCode.ContestNotFound))
+    || (error instanceof HttpException && error.status === 404)
+  );
 }

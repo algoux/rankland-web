@@ -13,3 +13,4 @@ export const clientRoutesMap = new Map<string, { path: string; routeProps: Newab
   ['Ranklist', { path: '/ranklist/:id', routeProps: undefined, renderMethod: RenderMethodKind.SSR }],
   ['Search', { path: '/search', routeProps: undefined, renderMethod: RenderMethodKind.SSR }],
 ]);
+

@@ -18,16 +18,20 @@ import favicon from 'koa-favicon';
 import mount from 'koa-mount';
 import koaStatic from 'koa-static';
 import cors from '@koa/cors';
+import Redis from 'ioredis';
 import UtilityHeaderMiddleware from './middlewares/utility-header.middleware';
 import LoggerMiddleware from './middlewares/logger.middleware';
 import ContentNegotiationMiddleware from './middlewares/content-negotiation.middleware';
 import ProtobufMiddleware from './middlewares/protobuf.middleware';
 import SseMiddleware from './middlewares/sse.middleware';
+import { chromeDevtoolsProbeMiddleware } from './middlewares/chrome-devtools-probe.middleware';
 import DefaultResponseHandler from '@server/response-handlers/default.response-handler';
 import { IPageRenderer } from './lib/page-renderer.interface';
 import { BwcxClientVueClientRoutesMapId } from 'bwcx-client-vue/server';
 import { clientRoutesMap } from '@common/router/client-routes';
 import TypeOrmClient from './database/typeorm-client';
+import RedisConfig from './configs/redis/redis.config';
+import { RedisClientId } from './container-ids';
 
 export default class OurApp extends App {
   protected baseDir = path.join(__dirname, '..');
@@ -77,6 +81,7 @@ export default class OurApp extends App {
   };
 
   private pageRenderer: IPageRenderer;
+  private redisClient: Redis;
 
   public constructor() {
     super();
@@ -84,6 +89,28 @@ export default class OurApp extends App {
   }
 
   protected async beforeWire() {
+    const redisConfig = getDependency<RedisConfig>(RedisConfig, this.container);
+    this.redisClient = new Redis({
+      host: redisConfig.host,
+      port: redisConfig.port,
+      db: redisConfig.db,
+      password: redisConfig.password || undefined,
+      lazyConnect: true,
+      connectTimeout: 500,
+      commandTimeout: 200,
+      enableOfflineQueue: false,
+      maxRetriesPerRequest: 1,
+    });
+    this.redisClient.on('error', (error) => {
+      console.warn('[Redis] client error:', error);
+    });
+    void this.redisClient.connect().catch((error) => {
+      console.warn('[Redis] initial connection failed, SSR cache will be skipped until Redis recovers:', error);
+    });
+    if (!this.container.isBound(RedisClientId)) {
+      this.container.bind(RedisClientId).toConstantValue(this.redisClient);
+    }
+
     // cors
     this.instance.use(cors());
     // favicon.ico
@@ -99,6 +126,9 @@ export default class OurApp extends App {
         }),
       ),
     );
+    // Chrome DevTools probes this optional app-specific config on every page load.
+    // Handle it before Vite dev middleware so a missing JSON file does not log a noisy SSR error.
+    this.instance.use(chromeDevtoolsProbeMiddleware);
 
     // SSR
     this.pageRenderer = getDependency<IPageRenderer>(IPageRenderer, this.container);
@@ -139,6 +169,9 @@ export default class OurApp extends App {
 
   protected async beforeExit() {
     await this.pageRenderer?.destory?.();
+    await this.redisClient?.quit().catch((error) => {
+      console.warn('[Redis] quit failed:', error);
+    });
   }
 }
 

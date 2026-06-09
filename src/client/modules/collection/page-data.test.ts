@@ -1,5 +1,6 @@
 import { describe, expect, it, vi } from 'vitest';
 import { CollectionItemType, type ApiService, type IApiCollection, type IApiRanklist } from '@/services/ranklist-api';
+import { LogicException, LogicExceptionKind } from '@/services/ranklist-api';
 import {
   flattenCollectionRanklistKeys,
   findCollectionAncestorKeys,
@@ -78,16 +79,27 @@ describe('collection page data helpers', () => {
     expect(api.getRanklist).toHaveBeenCalledWith({ uniqueKey: 'regional-2026' });
   });
 
-  it('marks invalid rankId values without exposing the fetched ranklist', async () => {
+  it('treats invalid rankId values as page-level not found without fetching the ranklist', async () => {
     const api = createApi();
 
-    await expect(loadCollectionPageData({ api, id: 'official', rankId: 'missing-ranklist' })).resolves.toMatchObject({
-      collection,
-      ranklist: undefined,
-      ranklistHasError: false,
-      ranklistIdInvalid: true,
+    await expect(loadCollectionPageData({ api, id: 'official', rankId: 'missing-ranklist' })).rejects.toMatchObject({
+      name: 'LogicException',
+      kind: LogicExceptionKind.NotFound,
     });
-    expect(api.getRanklist).toHaveBeenCalledWith({ uniqueKey: 'missing-ranklist' });
+    expect(api.getRanklist).not.toHaveBeenCalled();
+  });
+
+  it('treats selected ranklist not found errors as page-level not found', async () => {
+    const api = createApi({
+      getRanklist: vi.fn(async () => {
+        throw new LogicException(LogicExceptionKind.NotFound);
+      }),
+    });
+
+    await expect(loadCollectionPageData({ api, id: 'official', rankId: 'regional-2026' })).rejects.toMatchObject({
+      name: 'LogicException',
+      kind: LogicExceptionKind.NotFound,
+    });
   });
 
   it('keeps the collection visible when the selected ranklist fails to load', async () => {

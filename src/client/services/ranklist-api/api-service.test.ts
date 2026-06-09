@@ -1,4 +1,5 @@
 import { describe, expect, it, vi } from 'vitest';
+import { ErrCode } from '@common/enums/err-code.enum';
 import { ApiException, HttpException } from './request';
 import { LogicException, LogicExceptionKind } from './logic-exception';
 import { ApiService } from './api-service';
@@ -102,15 +103,51 @@ describe('ApiService ranklist API', () => {
     await expect(httpMissing.getCollection({ uniqueKey: 'missing' })).rejects.toBeInstanceOf(LogicException);
   });
 
+  it('caches collections for 60 seconds', async () => {
+    const collection = { root: { children: [] } };
+    const cache = makeCache();
+    const cdnGet = vi.fn().mockResolvedValue({ content: JSON.stringify(collection) });
+    const { service } = buildService({ cdnGet, cacheManager: cache });
+
+    await expect(service.getCollection({ uniqueKey: 'official' })).resolves.toEqual(collection);
+
+    expect(cache.setEx).toHaveBeenCalledWith(
+      'rankland_ssr_api_cache:getCollection:official',
+      60,
+      JSON.stringify(collection),
+    );
+  });
+
   it('translates missing live ranklist info into LogicException(NotFound)', async () => {
     const { service: apiMissing } = buildService({ apiGet: vi.fn().mockRejectedValue(new ApiException(11, 'not found')) });
+    const { service: contestMissing } = buildService({ apiGet: vi.fn().mockRejectedValue(new ApiException(ErrCode.ContestNotFound, 'not found')) });
     const { service: httpMissing } = buildService({ apiGet: vi.fn().mockRejectedValue(new HttpException(404, 'Not Found')) });
 
     await expect(apiMissing.getLiveRanklistInfo({ uniqueKey: 'missing-live' })).rejects.toMatchObject({
       name: 'LogicException',
       kind: LogicExceptionKind.NotFound,
     });
+    await expect(contestMissing.getLiveRanklistInfo({ uniqueKey: 'missing-live' })).rejects.toMatchObject({
+      name: 'LogicException',
+      kind: LogicExceptionKind.NotFound,
+    });
     await expect(httpMissing.getLiveRanklistInfo({ uniqueKey: 'missing-live' })).rejects.toBeInstanceOf(LogicException);
+  });
+
+  it('translates missing live ranklist snapshots into LogicException(NotFound)', async () => {
+    const { service: apiMissing } = buildService({ apiGet: vi.fn().mockRejectedValue(new ApiException(11, 'not found')) });
+    const { service: contestMissing } = buildService({ apiGet: vi.fn().mockRejectedValue(new ApiException(ErrCode.ContestNotFound, 'not found')) });
+    const { service: httpMissing } = buildService({ apiGet: vi.fn().mockRejectedValue(new HttpException(404, 'Not Found')) });
+
+    await expect(apiMissing.getLiveRanklist({ id: 'missing-live' })).rejects.toMatchObject({
+      name: 'LogicException',
+      kind: LogicExceptionKind.NotFound,
+    });
+    await expect(contestMissing.getLiveRanklist({ id: 'missing-live' })).rejects.toMatchObject({
+      name: 'LogicException',
+      kind: LogicExceptionKind.NotFound,
+    });
+    await expect(httpMissing.getLiveRanklist({ id: 'missing-live' })).rejects.toBeInstanceOf(LogicException);
   });
 
   it('uses the same route shapes as rankland-fe', async () => {

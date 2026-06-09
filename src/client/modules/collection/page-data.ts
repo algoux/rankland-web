@@ -1,5 +1,5 @@
 import type { ApiService, IApiCollection, IApiCollectionItem, IApiRanklist } from '@/services/ranklist-api';
-import { CollectionItemType } from '@/services/ranklist-api';
+import { CollectionItemType, LogicException, LogicExceptionKind } from '@/services/ranklist-api';
 
 export interface CollectionPageData {
   collection: IApiCollection;
@@ -61,14 +61,7 @@ export async function loadCollectionPageData({
   rankId?: string;
 }): Promise<CollectionPageData> {
   const realId = normalizeCollectionId(id);
-  const [collection, ranklistResult] = await Promise.all([
-    api.getCollection({ uniqueKey: realId }),
-    rankId
-      ? api.getRanklist({ uniqueKey: rankId })
-          .then((data) => ({ data }))
-          .catch((error: Error) => ({ error }))
-      : Promise.resolve(undefined),
-  ]);
+  const collection = await api.getCollection({ uniqueKey: realId });
 
   let ranklist: IApiRanklist | undefined;
   let ranklistHasError = false;
@@ -76,11 +69,16 @@ export async function loadCollectionPageData({
   if (rankId) {
     const validRanklistKeys = flattenCollectionRanklistKeys(collection);
     if (!validRanklistKeys.includes(rankId)) {
-      ranklistIdInvalid = true;
-    } else if (ranklistResult && 'data' in ranklistResult) {
-      ranklist = ranklistResult.data;
+      throw new LogicException(LogicExceptionKind.NotFound);
     } else {
-      ranklistHasError = true;
+      try {
+        ranklist = await api.getRanklist({ uniqueKey: rankId });
+      } catch (error) {
+        if (isNotFoundError(error)) {
+          throw error;
+        }
+        ranklistHasError = true;
+      }
     }
   }
 
@@ -90,4 +88,10 @@ export async function loadCollectionPageData({
     ranklistHasError,
     ranklistIdInvalid,
   };
+}
+
+function isNotFoundError(error: unknown) {
+  return Boolean(
+    error instanceof LogicException && error.kind === LogicExceptionKind.NotFound,
+  );
 }
