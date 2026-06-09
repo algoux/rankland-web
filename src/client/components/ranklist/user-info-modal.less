@@ -1,0 +1,73 @@
+@font-face {
+  font-family: 'ZCOOL XiaoWei';
+  src: url('@/assets/fonts/ZCOOL_XiaoWei/ZCOOLXiaoWei-Regular.woff2') format('woff2');
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+
+.user-modal {
+  --divider-color: #ececec;
+
+  .user-modal-segment-label {
+    display: inline-block;
+    padding: 4px;
+    border-radius: 4px;
+    color: #ffffff;
+  }
+
+  .bg-segment-gold {
+    background-color: var(--srk-color-gold);
+  }
+
+  .bg-segment-silver {
+    background-color: var(--srk-color-silver);
+  }
+
+  .bg-segment-bronze {
+    background-color: var(--srk-color-bronze);
+  }
+
+  .bg-segment-iron {
+    background-color: #a94442;
+  }
+
+  .slogan {
+    font-family: 'ZCOOL XiaoWei', serif;
+    text-align: center;
+    font-size: 32px;
+
+    &::before {
+      content: 'SLOGAN';
+      display: block;
+      font-size: 14px;
+    }
+  }
+
+  .user-modal-info-team-members {
+    opacity: 0.8;
+    padding-top: 6px;
+
+    .user-modal-info-team-members-slash {
+      opacity: 0.5;
+      font-size: 80%;
+    }
+  }
+
+  .user-modal-info-marker {
+    display: inline-flex;
+    border-radius: 4px;
+    border: 1px solid transparent;
+    padding: 2px 4px;
+    font-size: 12px;
+    line-height: 1.2;
+
+    &:not(:last-of-type) {
+      margin-right: 4px;
+    }
+  }
+}
+
+html.dark .user-modal {
+  --divider-color: #3e3e3e;
+}

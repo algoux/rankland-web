@@ -3,9 +3,9 @@
 
 // forked from vite-ssr `src/dev/server.ts`
 
-import { Provide } from 'bwcx-core';
+import { Inject, Provide } from 'bwcx-core';
 import type { RequestContext } from 'bwcx-ljsm';
-import type { ViteDevServer, InlineConfig } from 'vite';
+import type { ViteDevServer, InlineConfig, ServerOptions } from 'vite';
 import type { SsrOptions } from 'vite-ssr/dev';
 import { getEntryPoint, getPluginOptions } from 'vite-ssr/config';
 import type { ViteSsrPluginOptions } from 'vite-ssr/config';
@@ -14,7 +14,17 @@ import c2k from 'koa-connect';
 import path from 'path';
 import { promises as fs } from 'fs';
 import chalk from 'chalk';
-import { IPageRenderer } from './page-renderer.interface';
+import { IPageRenderer, type PageRenderOptions } from './page-renderer.interface';
+import {
+  RedisSsrPageCache,
+  getSsrPageCacheKey,
+  logSsrPageCacheHit,
+  sanitizeSsrPageCacheHeaders,
+  shouldWriteSsrPageCache,
+  toSsrPageCachePayload,
+  type SsrPageCachePayload,
+  type SsrPageRenderResult,
+} from './ssr-page-cache';
 
 @Provide({ id: IPageRenderer, when: 'development' })
 export default class PageRendererDev implements IPageRenderer {
@@ -22,10 +32,16 @@ export default class PageRendererDev implements IPageRenderer {
   private pluginOptions: ViteSsrPluginOptions;
   private options: SsrOptions;
 
+  public constructor(
+    @Inject(RedisSsrPageCache)
+    private readonly cache?: RedisSsrPageCache,
+  ) {}
+
   public async init() {
     if (!this.server) {
       this.server = await this.createSsrServer({
-        server: { middlewareMode: 'ssr' },
+        appType: 'custom',
+        server: { middlewareMode: true },
         // @ts-ignore
         ssr: 'src/client/entry-server.ts',
       });
@@ -39,9 +55,9 @@ export default class PageRendererDev implements IPageRenderer {
     return c2k(this.server.middlewares);
   }
 
-  public async render(mode: 'ssr' | 'csr', ctx: RequestContext) {
+  public async render(mode: 'ssr' | 'csr', ctx: RequestContext, options: PageRenderOptions = {}) {
     if (mode === 'ssr') {
-      return this.handleSsrRequest(ctx);
+      return this.handleSsrRequest(ctx, options);
     }
     return this.getIndexTemplate(ctx.originalUrl);
   }
@@ -52,9 +68,10 @@ export default class PageRendererDev implements IPageRenderer {
 
   private async createSsrServer(options: InlineConfig & { polyfills?: boolean } = {}) {
     const createViteServer = await import('vite').then((m) => m.createServer);
+    const serverOptions = options.server || ({ ...options } as ServerOptions);
     const viteServer = await createViteServer({
       ...options,
-      server: options.server || { ...options },
+      server: serverOptions,
     });
 
     if (options.polyfills !== false) {
@@ -147,7 +164,8 @@ export default class PageRendererDev implements IPageRenderer {
     return await this.server.transformIndexHtml(url, indexHtml);
   }
 
-  private writeHead(ctx: RequestContext, params: WriteResponse = {}) {
+  private writeHead(ctx: RequestContext, params: WriteResponse = {}, capturedHeaders?: Record<string, string>) {
+    let skipCache = false;
     if (params.status) {
       ctx.status = params.status;
     }
@@ -157,14 +175,29 @@ export default class PageRendererDev implements IPageRenderer {
     }
 
     if (params.headers) {
-      for (const [key, value] of Object.entries(params.headers)) {
+      const sanitized = sanitizeSsrPageCacheHeaders(params.headers as Record<string, string>);
+      skipCache = sanitized.skipCache;
+      const { headers } = sanitized;
+      for (const [key, value] of Object.entries(headers)) {
         ctx.set(key, value);
+        if (capturedHeaders) {
+          capturedHeaders[key] = value;
+        }
       }
     }
+    return skipCache;
   }
 
-  private async handleSsrRequest(ctx: RequestContext): Promise<string> {
+  private async handleSsrRequest(ctx: RequestContext, options: PageRenderOptions = {}): Promise<string> {
     this.fixEntryPoint();
+    const url = this.resolveRequestUrl(ctx);
+    const cacheKey = getSsrPageCacheKey(url);
+    const cached = cacheKey ? await this.cache?.get(cacheKey) : undefined;
+    if (cached) {
+      logSsrPageCacheHit(url);
+      this.writeCachedPayload(ctx, cached);
+      return cached.html;
+    }
 
     let template: string;
 
@@ -182,10 +215,6 @@ export default class PageRendererDev implements IPageRenderer {
       resolvedEntryPoint = resolvedEntryPoint.default || resolvedEntryPoint;
       const render = resolvedEntryPoint.render || resolvedEntryPoint;
 
-      const protocol = ctx.protocol || (ctx.headers.referer || '').split(':')[0] || 'http';
-
-      const url = `${protocol}://${ctx.headers.host}${ctx.originalUrl}`;
-
       // This context might contain initialState provided by other plugins
       const context =
         (this.options.getRenderContext &&
@@ -198,7 +227,8 @@ export default class PageRendererDev implements IPageRenderer {
         {};
 
       // This is used by Vitedge
-      this.writeHead(ctx, context);
+      const headers: Record<string, string> = {};
+      let skipCache = this.writeHead(ctx, context, headers);
       if (this.isRedirect(context)) {
         return;
       }
@@ -210,12 +240,25 @@ export default class PageRendererDev implements IPageRenderer {
         ...context,
       });
 
-      this.writeHead(ctx, result);
+      const status = result.status ?? options.defaultStatus ?? 200;
+      skipCache = this.writeHead(ctx, {
+        ...result,
+        status,
+      }, headers) || skipCache;
+      const rendered: SsrPageRenderResult = {
+        html: result.html,
+        status,
+        headers,
+        skipCache,
+      };
       if (this.isRedirect(result)) {
         return;
       }
+      if (cacheKey && shouldWriteSsrPageCache(rendered)) {
+        await this.cache?.set(cacheKey, toSsrPageCachePayload(rendered));
+      }
 
-      return result.html;
+      return rendered.html;
     } catch (e) {
       ctx.error?.(`Render ${ctx.url} failed, retry with csr mode. Error:`, e);
       this.server.ssrFixStacktrace(e as Error);
@@ -223,5 +266,15 @@ export default class PageRendererDev implements IPageRenderer {
       // Send back template HTML to inject ViteErrorOverlay
       return template;
     }
+  }
+
+  private resolveRequestUrl(ctx: RequestContext) {
+    const protocol = ctx.protocol || (ctx.headers.referer || '').split(':')[0] || 'http';
+    return `${protocol}://${ctx.headers.host}${ctx.originalUrl}`;
+  }
+
+  private writeCachedPayload(ctx: RequestContext, payload: SsrPageCachePayload) {
+    ctx.status = payload.status;
+    ctx.set(payload.headers);
   }
 }

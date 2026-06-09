@@ -10,8 +10,13 @@ export enum ErrCode {
   /** 无效的授权信息 */
   InvalidAuthInfo = -5,
 
-  // LiveContest
-  LiveContestExisted = 100000,
-  LiveContestNotFound = 100001,
-  LiveContestMemberNotFound = 100002,
+  // Contest
+  ContestExisted = 100000,
+  ContestNotFound = 100001,
+  ContestUserNotFound = 100002,
+  ContestEventInvalidBatch = 100003,
+  ContestEventProducerLocked = 100004,
+  ContestEventIdGap = 100005,
+  ContestEventIdConflict = 100006,
+  ContestEventStreamRevisionMismatch = 100007,
 }

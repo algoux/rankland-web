@@ -3,6 +3,8 @@ import routes from './routes';
 import viteSSR from 'vite-ssr/vue/entry-server';
 import { ApiFactory } from './api/api-factory.server';
 import { ApiClientFactory, API_REQUEST_TOKEN, API_CLIENT_TOKEN } from './api';
+import { createServerRanklandApi } from './services/ranklist-api/factory.server';
+import { RANKLAND_API_TOKEN } from './services/ranklist-api';
 import { mainEntry } from './main';
 
 export default viteSSR(App, { routes }, (hookParams) => {
@@ -17,14 +19,16 @@ export default viteSSR(App, { routes }, (hookParams) => {
     }
     return ip;
   };
-  const api = ApiFactory.createInstance({
+  const apiRequest = ApiFactory.createInstance({
     cookie: request.headers.cookie,
     ip: getIp(request),
     ua: request.headers['user-agent'],
   });
-  const apiClient = ApiClientFactory.createInstance(api);
-  app.provide(API_REQUEST_TOKEN, api);
+  const apiClient = ApiClientFactory.createInstance(apiRequest);
+  const api = createServerRanklandApi();
+  app.provide(API_REQUEST_TOKEN, apiRequest);
   app.provide(API_CLIENT_TOKEN, apiClient);
+  app.provide(RANKLAND_API_TOKEN, api);
 
   return mainEntry({ ...hookParams, api, apiClient });
 });

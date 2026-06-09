@@ -1,12 +1,12 @@
-FROM algoux/nodebase:16
+FROM algoux/nodebase:20
 
-WORKDIR /app
+WORKDIR /app/
 
-RUN npm install -g pnpm@^8.0.0
 COPY package.json pnpm-lock.yaml ./
-RUN pnpm install --frozen-lockfile
-COPY . .
-RUN pnpm run build
+COPY node_modules ./node_modules
+COPY app ./app
+COPY dist ./dist
+COPY public ./public
 
-ENV PATH="/app/node_modules/pm2/bin:${PATH}"
-CMD npm run deploy:foreground
+ENV NODE_ENV=production
+CMD node --unhandled-rejections=warn app/server/index.js

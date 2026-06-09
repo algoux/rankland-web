@@ -220,6 +220,156 @@ export namespace rankland_live_contest_client {
          */
         public toJSON(): { [k: string]: any };
     }
+
+    /** Properties of a GetContestEventsResponse. */
+    interface IGetContestEventsResponse {
+
+        /** GetContestEventsResponse uk */
+        uk?: (string|null);
+
+        /** GetContestEventsResponse fromEventId */
+        fromEventId?: (number|null);
+
+        /** GetContestEventsResponse toEventId */
+        toEventId?: (number|null);
+
+        /** GetContestEventsResponse checkpointEventId */
+        checkpointEventId?: (number|null);
+
+        /** GetContestEventsResponse latestEventId */
+        latestEventId?: (number|null);
+
+        /** GetContestEventsResponse streamRevision */
+        streamRevision?: (number|null);
+
+        /** GetContestEventsResponse hasMore */
+        hasMore?: (boolean|null);
+
+        /** GetContestEventsResponse resetRequired */
+        resetRequired?: (boolean|null);
+
+        /** GetContestEventsResponse resetReason */
+        resetReason?: (string|null);
+
+        /** GetContestEventsResponse events */
+        events?: (rankland_live_contest_client.IClientEvent[]|null);
+    }
+
+    /** Represents a GetContestEventsResponse. */
+    class GetContestEventsResponse implements IGetContestEventsResponse {
+
+        /**
+         * Constructs a new GetContestEventsResponse.
+         * @param [properties] Properties to set
+         */
+        constructor(properties?: rankland_live_contest_client.IGetContestEventsResponse);
+
+        /** GetContestEventsResponse uk. */
+        public uk: string;
+
+        /** GetContestEventsResponse fromEventId. */
+        public fromEventId?: (number|null);
+
+        /** GetContestEventsResponse toEventId. */
+        public toEventId?: (number|null);
+
+        /** GetContestEventsResponse checkpointEventId. */
+        public checkpointEventId: number;
+
+        /** GetContestEventsResponse latestEventId. */
+        public latestEventId: number;
+
+        /** GetContestEventsResponse streamRevision. */
+        public streamRevision: number;
+
+        /** GetContestEventsResponse hasMore. */
+        public hasMore: boolean;
+
+        /** GetContestEventsResponse resetRequired. */
+        public resetRequired: boolean;
+
+        /** GetContestEventsResponse resetReason. */
+        public resetReason: string;
+
+        /** GetContestEventsResponse events. */
+        public events: rankland_live_contest_client.IClientEvent[];
+
+        /** GetContestEventsResponse _fromEventId. */
+        public _fromEventId?: "fromEventId";
+
+        /** GetContestEventsResponse _toEventId. */
+        public _toEventId?: "toEventId";
+
+        /**
+         * Creates a new GetContestEventsResponse instance using the specified properties.
+         * @param [properties] Properties to set
+         * @returns GetContestEventsResponse instance
+         */
+        public static create(properties?: rankland_live_contest_client.IGetContestEventsResponse): rankland_live_contest_client.GetContestEventsResponse;
+
+        /**
+         * Encodes the specified GetContestEventsResponse message. Does not implicitly {@link rankland_live_contest_client.GetContestEventsResponse.verify|verify} messages.
+         * @param message GetContestEventsResponse message or plain object to encode
+         * @param [writer] Writer to encode to
+         * @returns Writer
+         */
+        public static encode(message: rankland_live_contest_client.IGetContestEventsResponse, writer?: $protobuf.Writer): $protobuf.Writer;
+
+        /**
+         * Encodes the specified GetContestEventsResponse message, length delimited. Does not implicitly {@link rankland_live_contest_client.GetContestEventsResponse.verify|verify} messages.
+         * @param message GetContestEventsResponse message or plain object to encode
+         * @param [writer] Writer to encode to
+         * @returns Writer
+         */
+        public static encodeDelimited(message: rankland_live_contest_client.IGetContestEventsResponse, writer?: $protobuf.Writer): $protobuf.Writer;
+
+        /**
+         * Decodes a GetContestEventsResponse message from the specified reader or buffer.
+         * @param reader Reader or buffer to decode from
+         * @param [length] Message length if known beforehand
+         * @returns GetContestEventsResponse
+         * @throws {Error} If the payload is not a reader or valid buffer
+         * @throws {$protobuf.util.ProtocolError} If required fields are missing
+         */
+        public static decode(reader: ($protobuf.Reader|Uint8Array), length?: number): rankland_live_contest_client.GetContestEventsResponse;
+
+        /**
+         * Decodes a GetContestEventsResponse message from the specified reader or buffer, length delimited.
+         * @param reader Reader or buffer to decode from
+         * @returns GetContestEventsResponse
+         * @throws {Error} If the payload is not a reader or valid buffer
+         * @throws {$protobuf.util.ProtocolError} If required fields are missing
+         */
+        public static decodeDelimited(reader: ($protobuf.Reader|Uint8Array)): rankland_live_contest_client.GetContestEventsResponse;
+
+        /**
+         * Verifies a GetContestEventsResponse message.
+         * @param message Plain object to verify
+         * @returns `null` if valid, otherwise the reason why it is not
+         */
+        public static verify(message: { [k: string]: any }): (string|null);
+
+        /**
+         * Creates a GetContestEventsResponse message from a plain object. Also converts values to their respective internal types.
+         * @param object Plain object
+         * @returns GetContestEventsResponse
+         */
+        public static fromObject(object: { [k: string]: any }): rankland_live_contest_client.GetContestEventsResponse;
+
+        /**
+         * Creates a plain object from a GetContestEventsResponse message. Also converts values to other types if specified.
+         * @param message GetContestEventsResponse
+         * @param [options] Conversion options
+         * @returns Plain object
+         */
+        public static toObject(message: rankland_live_contest_client.GetContestEventsResponse, options?: $protobuf.IConversionOptions): { [k: string]: any };
+
+        /**
+         * Converts this GetContestEventsResponse to JSON.
+         * @returns JSON object
+         */
+        public toJSON(): { [k: string]: any };
+    }
 }
 
 /** Namespace rankland_live_contest_common. */
@@ -474,6 +624,9 @@ export namespace rankland_live_contest_common {
 
         /** SolutionOnProgressEvent percentageProgress */
         percentageProgress?: (number|null);
+
+        /** SolutionOnProgressEvent time */
+        time?: (rankland_live_contest_common.ITimeDuration|null);
     }
 
     /** Represents a SolutionOnProgressEvent. */
@@ -490,6 +643,9 @@ export namespace rankland_live_contest_common {
 
         /** SolutionOnProgressEvent percentageProgress. */
         public percentageProgress: number;
+
+        /** SolutionOnProgressEvent time. */
+        public time?: (rankland_live_contest_common.ITimeDuration|null);
 
         /**
          * Creates a new SolutionOnProgressEvent instance using the specified properties.
@@ -772,8 +928,152 @@ export namespace rankland_live_contest_common {
         public toJSON(): { [k: string]: any };
     }
 
+    /** Properties of a ContestConfigPatch. */
+    interface IContestConfigPatch {
+
+        /** ContestConfigPatch name */
+        name?: (string|null);
+
+        /** ContestConfigPatch contest */
+        contest?: (google.protobuf.IStruct|null);
+
+        /** ContestConfigPatch problems */
+        problems?: (google.protobuf.IListValue|null);
+
+        /** ContestConfigPatch users */
+        users?: (google.protobuf.IListValue|null);
+
+        /** ContestConfigPatch markers */
+        markers?: (google.protobuf.IListValue|null);
+
+        /** ContestConfigPatch series */
+        series?: (google.protobuf.IListValue|null);
+
+        /** ContestConfigPatch sorter */
+        sorter?: (google.protobuf.IValue|null);
+
+        /** ContestConfigPatch contributors */
+        contributors?: (google.protobuf.IValue|null);
+    }
+
+    /** Represents a ContestConfigPatch. */
+    class ContestConfigPatch implements IContestConfigPatch {
+
+        /**
+         * Constructs a new ContestConfigPatch.
+         * @param [properties] Properties to set
+         */
+        constructor(properties?: rankland_live_contest_common.IContestConfigPatch);
+
+        /** ContestConfigPatch name. */
+        public name?: (string|null);
+
+        /** ContestConfigPatch contest. */
+        public contest?: (google.protobuf.IStruct|null);
+
+        /** ContestConfigPatch problems. */
+        public problems?: (google.protobuf.IListValue|null);
+
+        /** ContestConfigPatch users. */
+        public users?: (google.protobuf.IListValue|null);
+
+        /** ContestConfigPatch markers. */
+        public markers?: (google.protobuf.IListValue|null);
+
+        /** ContestConfigPatch series. */
+        public series?: (google.protobuf.IListValue|null);
+
+        /** ContestConfigPatch sorter. */
+        public sorter?: (google.protobuf.IValue|null);
+
+        /** ContestConfigPatch contributors. */
+        public contributors?: (google.protobuf.IValue|null);
+
+        /** ContestConfigPatch _name. */
+        public _name?: "name";
+
+        /**
+         * Creates a new ContestConfigPatch instance using the specified properties.
+         * @param [properties] Properties to set
+         * @returns ContestConfigPatch instance
+         */
+        public static create(properties?: rankland_live_contest_common.IContestConfigPatch): rankland_live_contest_common.ContestConfigPatch;
+
+        /**
+         * Encodes the specified ContestConfigPatch message. Does not implicitly {@link rankland_live_contest_common.ContestConfigPatch.verify|verify} messages.
+         * @param message ContestConfigPatch message or plain object to encode
+         * @param [writer] Writer to encode to
+         * @returns Writer
+         */
+        public static encode(message: rankland_live_contest_common.IContestConfigPatch, writer?: $protobuf.Writer): $protobuf.Writer;
+
+        /**
+         * Encodes the specified ContestConfigPatch message, length delimited. Does not implicitly {@link rankland_live_contest_common.ContestConfigPatch.verify|verify} messages.
+         * @param message ContestConfigPatch message or plain object to encode
+         * @param [writer] Writer to encode to
+         * @returns Writer
+         */
+        public static encodeDelimited(message: rankland_live_contest_common.IContestConfigPatch, writer?: $protobuf.Writer): $protobuf.Writer;
+
+        /**
+         * Decodes a ContestConfigPatch message from the specified reader or buffer.
+         * @param reader Reader or buffer to decode from
+         * @param [length] Message length if known beforehand
+         * @returns ContestConfigPatch
+         * @throws {Error} If the payload is not a reader or valid buffer
+         * @throws {$protobuf.util.ProtocolError} If required fields are missing
+         */
+        public static decode(reader: ($protobuf.Reader|Uint8Array), length?: number): rankland_live_contest_common.ContestConfigPatch;
+
+        /**
+         * Decodes a ContestConfigPatch message from the specified reader or buffer, length delimited.
+         * @param reader Reader or buffer to decode from
+         * @returns ContestConfigPatch
+         * @throws {Error} If the payload is not a reader or valid buffer
+         * @throws {$protobuf.util.ProtocolError} If required fields are missing
+         */
+        public static decodeDelimited(reader: ($protobuf.Reader|Uint8Array)): rankland_live_contest_common.ContestConfigPatch;
+
+        /**
+         * Verifies a ContestConfigPatch message.
+         * @param message Plain object to verify
+         * @returns `null` if valid, otherwise the reason why it is not
+         */
+        public static verify(message: { [k: string]: any }): (string|null);
+
+        /**
+         * Creates a ContestConfigPatch message from a plain object. Also converts values to their respective internal types.
+         * @param object Plain object
+         * @returns ContestConfigPatch
+         */
+        public static fromObject(object: { [k: string]: any }): rankland_live_contest_common.ContestConfigPatch;
+
+        /**
+         * Creates a plain object from a ContestConfigPatch message. Also converts values to other types if specified.
+         * @param message ContestConfigPatch
+         * @param [options] Conversion options
+         * @returns Plain object
+         */
+        public static toObject(message: rankland_live_contest_common.ContestConfigPatch, options?: $protobuf.IConversionOptions): { [k: string]: any };
+
+        /**
+         * Converts this ContestConfigPatch to JSON.
+         * @returns JSON object
+         */
+        public toJSON(): { [k: string]: any };
+    }
+
     /** Properties of a ContestConfigChangeEvent. */
     interface IContestConfigChangeEvent {
+
+        /** ContestConfigChangeEvent changedFields */
+        changedFields?: (string[]|null);
+
+        /** ContestConfigChangeEvent config */
+        config?: (rankland_live_contest_common.IContestConfigPatch|null);
+
+        /** ContestConfigChangeEvent time */
+        time?: (rankland_live_contest_common.ITimeDuration|null);
     }
 
     /** Represents a ContestConfigChangeEvent. */
@@ -784,6 +1084,15 @@ export namespace rankland_live_contest_common {
          * @param [properties] Properties to set
          */
         constructor(properties?: rankland_live_contest_common.IContestConfigChangeEvent);
+
+        /** ContestConfigChangeEvent changedFields. */
+        public changedFields: string[];
+
+        /** ContestConfigChangeEvent config. */
+        public config?: (rankland_live_contest_common.IContestConfigPatch|null);
+
+        /** ContestConfigChangeEvent time. */
+        public time?: (rankland_live_contest_common.ITimeDuration|null);
 
         /**
          * Creates a new ContestConfigChangeEvent instance using the specified properties.
@@ -854,6 +1163,322 @@ export namespace rankland_live_contest_common {
          * @returns JSON object
          */
         public toJSON(): { [k: string]: any };
+    }
+}
+
+/** Namespace google. */
+export namespace google {
+
+    /** Namespace protobuf. */
+    namespace protobuf {
+
+        /** Properties of a Struct. */
+        interface IStruct {
+
+            /** Struct fields */
+            fields?: ({ [k: string]: google.protobuf.IValue }|null);
+        }
+
+        /** Represents a Struct. */
+        class Struct implements IStruct {
+
+            /**
+             * Constructs a new Struct.
+             * @param [properties] Properties to set
+             */
+            constructor(properties?: google.protobuf.IStruct);
+
+            /** Struct fields. */
+            public fields: { [k: string]: google.protobuf.IValue };
+
+            /**
+             * Creates a new Struct instance using the specified properties.
+             * @param [properties] Properties to set
+             * @returns Struct instance
+             */
+            public static create(properties?: google.protobuf.IStruct): google.protobuf.Struct;
+
+            /**
+             * Encodes the specified Struct message. Does not implicitly {@link google.protobuf.Struct.verify|verify} messages.
+             * @param message Struct message or plain object to encode
+             * @param [writer] Writer to encode to
+             * @returns Writer
+             */
+            public static encode(message: google.protobuf.IStruct, writer?: $protobuf.Writer): $protobuf.Writer;
+
+            /**
+             * Encodes the specified Struct message, length delimited. Does not implicitly {@link google.protobuf.Struct.verify|verify} messages.
+             * @param message Struct message or plain object to encode
+             * @param [writer] Writer to encode to
+             * @returns Writer
+             */
+            public static encodeDelimited(message: google.protobuf.IStruct, writer?: $protobuf.Writer): $protobuf.Writer;
+
+            /**
+             * Decodes a Struct message from the specified reader or buffer.
+             * @param reader Reader or buffer to decode from
+             * @param [length] Message length if known beforehand
+             * @returns Struct
+             * @throws {Error} If the payload is not a reader or valid buffer
+             * @throws {$protobuf.util.ProtocolError} If required fields are missing
+             */
+            public static decode(reader: ($protobuf.Reader|Uint8Array), length?: number): google.protobuf.Struct;
+
+            /**
+             * Decodes a Struct message from the specified reader or buffer, length delimited.
+             * @param reader Reader or buffer to decode from
+             * @returns Struct
+             * @throws {Error} If the payload is not a reader or valid buffer
+             * @throws {$protobuf.util.ProtocolError} If required fields are missing
+             */
+            public static decodeDelimited(reader: ($protobuf.Reader|Uint8Array)): google.protobuf.Struct;
+
+            /**
+             * Verifies a Struct message.
+             * @param message Plain object to verify
+             * @returns `null` if valid, otherwise the reason why it is not
+             */
+            public static verify(message: { [k: string]: any }): (string|null);
+
+            /**
+             * Creates a Struct message from a plain object. Also converts values to their respective internal types.
+             * @param object Plain object
+             * @returns Struct
+             */
+            public static fromObject(object: { [k: string]: any }): google.protobuf.Struct;
+
+            /**
+             * Creates a plain object from a Struct message. Also converts values to other types if specified.
+             * @param message Struct
+             * @param [options] Conversion options
+             * @returns Plain object
+             */
+            public static toObject(message: google.protobuf.Struct, options?: $protobuf.IConversionOptions): { [k: string]: any };
+
+            /**
+             * Converts this Struct to JSON.
+             * @returns JSON object
+             */
+            public toJSON(): { [k: string]: any };
+        }
+
+        /** Properties of a Value. */
+        interface IValue {
+
+            /** Value nullValue */
+            nullValue?: (google.protobuf.NullValue|null);
+
+            /** Value numberValue */
+            numberValue?: (number|null);
+
+            /** Value stringValue */
+            stringValue?: (string|null);
+
+            /** Value boolValue */
+            boolValue?: (boolean|null);
+
+            /** Value structValue */
+            structValue?: (google.protobuf.IStruct|null);
+
+            /** Value listValue */
+            listValue?: (google.protobuf.IListValue|null);
+        }
+
+        /** Represents a Value. */
+        class Value implements IValue {
+
+            /**
+             * Constructs a new Value.
+             * @param [properties] Properties to set
+             */
+            constructor(properties?: google.protobuf.IValue);
+
+            /** Value nullValue. */
+            public nullValue?: (google.protobuf.NullValue|null);
+
+            /** Value numberValue. */
+            public numberValue?: (number|null);
+
+            /** Value stringValue. */
+            public stringValue?: (string|null);
+
+            /** Value boolValue. */
+            public boolValue?: (boolean|null);
+
+            /** Value structValue. */
+            public structValue?: (google.protobuf.IStruct|null);
+
+            /** Value listValue. */
+            public listValue?: (google.protobuf.IListValue|null);
+
+            /** Value kind. */
+            public kind?: ("nullValue"|"numberValue"|"stringValue"|"boolValue"|"structValue"|"listValue");
+
+            /**
+             * Creates a new Value instance using the specified properties.
+             * @param [properties] Properties to set
+             * @returns Value instance
+             */
+            public static create(properties?: google.protobuf.IValue): google.protobuf.Value;
+
+            /**
+             * Encodes the specified Value message. Does not implicitly {@link google.protobuf.Value.verify|verify} messages.
+             * @param message Value message or plain object to encode
+             * @param [writer] Writer to encode to
+             * @returns Writer
+             */
+            public static encode(message: google.protobuf.IValue, writer?: $protobuf.Writer): $protobuf.Writer;
+
+            /**
+             * Encodes the specified Value message, length delimited. Does not implicitly {@link google.protobuf.Value.verify|verify} messages.
+             * @param message Value message or plain object to encode
+             * @param [writer] Writer to encode to
+             * @returns Writer
+             */
+            public static encodeDelimited(message: google.protobuf.IValue, writer?: $protobuf.Writer): $protobuf.Writer;
+
+            /**
+             * Decodes a Value message from the specified reader or buffer.
+             * @param reader Reader or buffer to decode from
+             * @param [length] Message length if known beforehand
+             * @returns Value
+             * @throws {Error} If the payload is not a reader or valid buffer
+             * @throws {$protobuf.util.ProtocolError} If required fields are missing
+             */
+            public static decode(reader: ($protobuf.Reader|Uint8Array), length?: number): google.protobuf.Value;
+
+            /**
+             * Decodes a Value message from the specified reader or buffer, length delimited.
+             * @param reader Reader or buffer to decode from
+             * @returns Value
+             * @throws {Error} If the payload is not a reader or valid buffer
+             * @throws {$protobuf.util.ProtocolError} If required fields are missing
+             */
+            public static decodeDelimited(reader: ($protobuf.Reader|Uint8Array)): google.protobuf.Value;
+
+            /**
+             * Verifies a Value message.
+             * @param message Plain object to verify
+             * @returns `null` if valid, otherwise the reason why it is not
+             */
+            public static verify(message: { [k: string]: any }): (string|null);
+
+            /**
+             * Creates a Value message from a plain object. Also converts values to their respective internal types.
+             * @param object Plain object
+             * @returns Value
+             */
+            public static fromObject(object: { [k: string]: any }): google.protobuf.Value;
+
+            /**
+             * Creates a plain object from a Value message. Also converts values to other types if specified.
+             * @param message Value
+             * @param [options] Conversion options
+             * @returns Plain object
+             */
+            public static toObject(message: google.protobuf.Value, options?: $protobuf.IConversionOptions): { [k: string]: any };
+
+            /**
+             * Converts this Value to JSON.
+             * @returns JSON object
+             */
+            public toJSON(): { [k: string]: any };
+        }
+
+        /** NullValue enum. */
+        enum NullValue {
+            NULL_VALUE = 0
+        }
+
+        /** Properties of a ListValue. */
+        interface IListValue {
+
+            /** ListValue values */
+            values?: (google.protobuf.IValue[]|null);
+        }
+
+        /** Represents a ListValue. */
+        class ListValue implements IListValue {
+
+            /**
+             * Constructs a new ListValue.
+             * @param [properties] Properties to set
+             */
+            constructor(properties?: google.protobuf.IListValue);
+
+            /** ListValue values. */
+            public values: google.protobuf.IValue[];
+
+            /**
+             * Creates a new ListValue instance using the specified properties.
+             * @param [properties] Properties to set
+             * @returns ListValue instance
+             */
+            public static create(properties?: google.protobuf.IListValue): google.protobuf.ListValue;
+
+            /**
+             * Encodes the specified ListValue message. Does not implicitly {@link google.protobuf.ListValue.verify|verify} messages.
+             * @param message ListValue message or plain object to encode
+             * @param [writer] Writer to encode to
+             * @returns Writer
+             */
+            public static encode(message: google.protobuf.IListValue, writer?: $protobuf.Writer): $protobuf.Writer;
+
+            /**
+             * Encodes the specified ListValue message, length delimited. Does not implicitly {@link google.protobuf.ListValue.verify|verify} messages.
+             * @param message ListValue message or plain object to encode
+             * @param [writer] Writer to encode to
+             * @returns Writer
+             */
+            public static encodeDelimited(message: google.protobuf.IListValue, writer?: $protobuf.Writer): $protobuf.Writer;
+
+            /**
+             * Decodes a ListValue message from the specified reader or buffer.
+             * @param reader Reader or buffer to decode from
+             * @param [length] Message length if known beforehand
+             * @returns ListValue
+             * @throws {Error} If the payload is not a reader or valid buffer
+             * @throws {$protobuf.util.ProtocolError} If required fields are missing
+             */
+            public static decode(reader: ($protobuf.Reader|Uint8Array), length?: number): google.protobuf.ListValue;
+
+            /**
+             * Decodes a ListValue message from the specified reader or buffer, length delimited.
+             * @param reader Reader or buffer to decode from
+             * @returns ListValue
+             * @throws {Error} If the payload is not a reader or valid buffer
+             * @throws {$protobuf.util.ProtocolError} If required fields are missing
+             */
+            public static decodeDelimited(reader: ($protobuf.Reader|Uint8Array)): google.protobuf.ListValue;
+
+            /**
+             * Verifies a ListValue message.
+             * @param message Plain object to verify
+             * @returns `null` if valid, otherwise the reason why it is not
+             */
+            public static verify(message: { [k: string]: any }): (string|null);
+
+            /**
+             * Creates a ListValue message from a plain object. Also converts values to their respective internal types.
+             * @param object Plain object
+             * @returns ListValue
+             */
+            public static fromObject(object: { [k: string]: any }): google.protobuf.ListValue;
+
+            /**
+             * Creates a plain object from a ListValue message. Also converts values to other types if specified.
+             * @param message ListValue
+             * @param [options] Conversion options
+             * @returns Plain object
+             */
+            public static toObject(message: google.protobuf.ListValue, options?: $protobuf.IConversionOptions): { [k: string]: any };
+
+            /**
+             * Converts this ListValue to JSON.
+             * @returns JSON object
+             */
+            public toJSON(): { [k: string]: any };
+        }
     }
 }
 
@@ -994,6 +1619,9 @@ export namespace rankland_live_contest_producer {
 
         /** BatchProducerEvent events */
         events?: (rankland_live_contest_producer.IProducerEvent[]|null);
+
+        /** BatchProducerEvent streamRevision */
+        streamRevision?: (number|null);
     }
 
     /** Represents a BatchProducerEvent. */
@@ -1007,6 +1635,9 @@ export namespace rankland_live_contest_producer {
 
         /** BatchProducerEvent events. */
         public events: rankland_live_contest_producer.IProducerEvent[];
+
+        /** BatchProducerEvent streamRevision. */
+        public streamRevision: number;
 
         /**
          * Creates a new BatchProducerEvent instance using the specified properties.

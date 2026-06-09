@@ -1,8 +1,10 @@
 {
   "extends": "../../tsconfig.json",
   "compilerOptions": {
+    "lib": ["es2017", "dom", "dom.iterable"],
     "module": "esnext",
-    "jsx": "preserve"
+    "jsx": "preserve",
+    "skipLibCheck": true
   },
   "include": ["./**/*", "../common/**/*"]
 }

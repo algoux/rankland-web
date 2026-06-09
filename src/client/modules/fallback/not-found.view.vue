@@ -1,9 +1,17 @@
 <template>
   <Head>
-    <title>页面不存在</title>
+    <title>{{ pageTitle }}</title>
   </Head>
-  <div class="flex flex-col items-center justify-center">
-    <h1 class="mt-10 text-2xl text-white">页面不存在</h1>
-    <a href="/" class="hover:underline">返回首页</a>
+  <div class="mt-32 text-center text-xl" data-id="not-found-page">
+    404 Not Found · 你来到了榜单荒地
   </div>
 </template>
+
+<script lang="ts">
+import { Vue } from 'vue-class-component';
+import { formatTitle } from '@/app/title-format';
+
+export default class NotFound extends Vue {
+  pageTitle = formatTitle('Not Found');
+}
+</script>

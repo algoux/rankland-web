@@ -647,6 +647,448 @@ $root.rankland_live_contest_client = (function() {
         return BatchClientEvent;
     })();
 
+    rankland_live_contest_client.GetContestEventsResponse = (function() {
+
+        /**
+         * Properties of a GetContestEventsResponse.
+         * @memberof rankland_live_contest_client
+         * @interface IGetContestEventsResponse
+         * @property {string|null} [uk] GetContestEventsResponse uk
+         * @property {number|null} [fromEventId] GetContestEventsResponse fromEventId
+         * @property {number|null} [toEventId] GetContestEventsResponse toEventId
+         * @property {number|null} [checkpointEventId] GetContestEventsResponse checkpointEventId
+         * @property {number|null} [latestEventId] GetContestEventsResponse latestEventId
+         * @property {number|null} [streamRevision] GetContestEventsResponse streamRevision
+         * @property {boolean|null} [hasMore] GetContestEventsResponse hasMore
+         * @property {boolean|null} [resetRequired] GetContestEventsResponse resetRequired
+         * @property {string|null} [resetReason] GetContestEventsResponse resetReason
+         * @property {Array.<rankland_live_contest_client.IClientEvent>|null} [events] GetContestEventsResponse events
+         */
+
+        /**
+         * Constructs a new GetContestEventsResponse.
+         * @memberof rankland_live_contest_client
+         * @classdesc Represents a GetContestEventsResponse.
+         * @implements IGetContestEventsResponse
+         * @constructor
+         * @param {rankland_live_contest_client.IGetContestEventsResponse=} [properties] Properties to set
+         */
+        function GetContestEventsResponse(properties) {
+            this.events = [];
+            if (properties)
+                for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
+                    if (properties[keys[i]] != null)
+                        this[keys[i]] = properties[keys[i]];
+        }
+
+        /**
+         * GetContestEventsResponse uk.
+         * @member {string} uk
+         * @memberof rankland_live_contest_client.GetContestEventsResponse
+         * @instance
+         */
+        GetContestEventsResponse.prototype.uk = "";
+
+        /**
+         * GetContestEventsResponse fromEventId.
+         * @member {number|null|undefined} fromEventId
+         * @memberof rankland_live_contest_client.GetContestEventsResponse
+         * @instance
+         */
+        GetContestEventsResponse.prototype.fromEventId = null;
+
+        /**
+         * GetContestEventsResponse toEventId.
+         * @member {number|null|undefined} toEventId
+         * @memberof rankland_live_contest_client.GetContestEventsResponse
+         * @instance
+         */
+        GetContestEventsResponse.prototype.toEventId = null;
+
+        /**
+         * GetContestEventsResponse checkpointEventId.
+         * @member {number} checkpointEventId
+         * @memberof rankland_live_contest_client.GetContestEventsResponse
+         * @instance
+         */
+        GetContestEventsResponse.prototype.checkpointEventId = 0;
+
+        /**
+         * GetContestEventsResponse latestEventId.
+         * @member {number} latestEventId
+         * @memberof rankland_live_contest_client.GetContestEventsResponse
+         * @instance
+         */
+        GetContestEventsResponse.prototype.latestEventId = 0;
+
+        /**
+         * GetContestEventsResponse streamRevision.
+         * @member {number} streamRevision
+         * @memberof rankland_live_contest_client.GetContestEventsResponse
+         * @instance
+         */
+        GetContestEventsResponse.prototype.streamRevision = 0;
+
+        /**
+         * GetContestEventsResponse hasMore.
+         * @member {boolean} hasMore
+         * @memberof rankland_live_contest_client.GetContestEventsResponse
+         * @instance
+         */
+        GetContestEventsResponse.prototype.hasMore = false;
+
+        /**
+         * GetContestEventsResponse resetRequired.
+         * @member {boolean} resetRequired
+         * @memberof rankland_live_contest_client.GetContestEventsResponse
+         * @instance
+         */
+        GetContestEventsResponse.prototype.resetRequired = false;
+
+        /**
+         * GetContestEventsResponse resetReason.
+         * @member {string} resetReason
+         * @memberof rankland_live_contest_client.GetContestEventsResponse
+         * @instance
+         */
+        GetContestEventsResponse.prototype.resetReason = "";
+
+        /**
+         * GetContestEventsResponse events.
+         * @member {Array.<rankland_live_contest_client.IClientEvent>} events
+         * @memberof rankland_live_contest_client.GetContestEventsResponse
+         * @instance
+         */
+        GetContestEventsResponse.prototype.events = $util.emptyArray;
+
+        // OneOf field names bound to virtual getters and setters
+        var $oneOfFields;
+
+        /**
+         * GetContestEventsResponse _fromEventId.
+         * @member {"fromEventId"|undefined} _fromEventId
+         * @memberof rankland_live_contest_client.GetContestEventsResponse
+         * @instance
+         */
+        Object.defineProperty(GetContestEventsResponse.prototype, "_fromEventId", {
+            get: $util.oneOfGetter($oneOfFields = ["fromEventId"]),
+            set: $util.oneOfSetter($oneOfFields)
+        });
+
+        /**
+         * GetContestEventsResponse _toEventId.
+         * @member {"toEventId"|undefined} _toEventId
+         * @memberof rankland_live_contest_client.GetContestEventsResponse
+         * @instance
+         */
+        Object.defineProperty(GetContestEventsResponse.prototype, "_toEventId", {
+            get: $util.oneOfGetter($oneOfFields = ["toEventId"]),
+            set: $util.oneOfSetter($oneOfFields)
+        });
+
+        /**
+         * Creates a new GetContestEventsResponse instance using the specified properties.
+         * @function create
+         * @memberof rankland_live_contest_client.GetContestEventsResponse
+         * @static
+         * @param {rankland_live_contest_client.IGetContestEventsResponse=} [properties] Properties to set
+         * @returns {rankland_live_contest_client.GetContestEventsResponse} GetContestEventsResponse instance
+         */
+        GetContestEventsResponse.create = function create(properties) {
+            return new GetContestEventsResponse(properties);
+        };
+
+        /**
+         * Encodes the specified GetContestEventsResponse message. Does not implicitly {@link rankland_live_contest_client.GetContestEventsResponse.verify|verify} messages.
+         * @function encode
+         * @memberof rankland_live_contest_client.GetContestEventsResponse
+         * @static
+         * @param {rankland_live_contest_client.IGetContestEventsResponse} message GetContestEventsResponse message or plain object to encode
+         * @param {$protobuf.Writer} [writer] Writer to encode to
+         * @returns {$protobuf.Writer} Writer
+         */
+        GetContestEventsResponse.encode = function encode(message, writer) {
+            if (!writer)
+                writer = $Writer.create();
+            if (message.uk != null && Object.hasOwnProperty.call(message, "uk"))
+                writer.uint32(/* id 1, wireType 2 =*/10).string(message.uk);
+            if (message.fromEventId != null && Object.hasOwnProperty.call(message, "fromEventId"))
+                writer.uint32(/* id 2, wireType 0 =*/16).uint32(message.fromEventId);
+            if (message.toEventId != null && Object.hasOwnProperty.call(message, "toEventId"))
+                writer.uint32(/* id 3, wireType 0 =*/24).uint32(message.toEventId);
+            if (message.checkpointEventId != null && Object.hasOwnProperty.call(message, "checkpointEventId"))
+                writer.uint32(/* id 4, wireType 0 =*/32).uint32(message.checkpointEventId);
+            if (message.latestEventId != null && Object.hasOwnProperty.call(message, "latestEventId"))
+                writer.uint32(/* id 5, wireType 0 =*/40).uint32(message.latestEventId);
+            if (message.streamRevision != null && Object.hasOwnProperty.call(message, "streamRevision"))
+                writer.uint32(/* id 6, wireType 0 =*/48).uint32(message.streamRevision);
+            if (message.hasMore != null && Object.hasOwnProperty.call(message, "hasMore"))
+                writer.uint32(/* id 7, wireType 0 =*/56).bool(message.hasMore);
+            if (message.resetRequired != null && Object.hasOwnProperty.call(message, "resetRequired"))
+                writer.uint32(/* id 8, wireType 0 =*/64).bool(message.resetRequired);
+            if (message.resetReason != null && Object.hasOwnProperty.call(message, "resetReason"))
+                writer.uint32(/* id 9, wireType 2 =*/74).string(message.resetReason);
+            if (message.events != null && message.events.length)
+                for (var i = 0; i < message.events.length; ++i)
+                    $root.rankland_live_contest_client.ClientEvent.encode(message.events[i], writer.uint32(/* id 10, wireType 2 =*/82).fork()).ldelim();
+            return writer;
+        };
+
+        /**
+         * Encodes the specified GetContestEventsResponse message, length delimited. Does not implicitly {@link rankland_live_contest_client.GetContestEventsResponse.verify|verify} messages.
+         * @function encodeDelimited
+         * @memberof rankland_live_contest_client.GetContestEventsResponse
+         * @static
+         * @param {rankland_live_contest_client.IGetContestEventsResponse} message GetContestEventsResponse message or plain object to encode
+         * @param {$protobuf.Writer} [writer] Writer to encode to
+         * @returns {$protobuf.Writer} Writer
+         */
+        GetContestEventsResponse.encodeDelimited = function encodeDelimited(message, writer) {
+            return this.encode(message, writer).ldelim();
+        };
+
+        /**
+         * Decodes a GetContestEventsResponse message from the specified reader or buffer.
+         * @function decode
+         * @memberof rankland_live_contest_client.GetContestEventsResponse
+         * @static
+         * @param {$protobuf.Reader|Uint8Array} reader Reader or buffer to decode from
+         * @param {number} [length] Message length if known beforehand
+         * @returns {rankland_live_contest_client.GetContestEventsResponse} GetContestEventsResponse
+         * @throws {Error} If the payload is not a reader or valid buffer
+         * @throws {$protobuf.util.ProtocolError} If required fields are missing
+         */
+        GetContestEventsResponse.decode = function decode(reader, length) {
+            if (!(reader instanceof $Reader))
+                reader = $Reader.create(reader);
+            var end = length === undefined ? reader.len : reader.pos + length, message = new $root.rankland_live_contest_client.GetContestEventsResponse();
+            while (reader.pos < end) {
+                var tag = reader.uint32();
+                switch (tag >>> 3) {
+                case 1:
+                    message.uk = reader.string();
+                    break;
+                case 2:
+                    message.fromEventId = reader.uint32();
+                    break;
+                case 3:
+                    message.toEventId = reader.uint32();
+                    break;
+                case 4:
+                    message.checkpointEventId = reader.uint32();
+                    break;
+                case 5:
+                    message.latestEventId = reader.uint32();
+                    break;
+                case 6:
+                    message.streamRevision = reader.uint32();
+                    break;
+                case 7:
+                    message.hasMore = reader.bool();
+                    break;
+                case 8:
+                    message.resetRequired = reader.bool();
+                    break;
+                case 9:
+                    message.resetReason = reader.string();
+                    break;
+                case 10:
+                    if (!(message.events && message.events.length))
+                        message.events = [];
+                    message.events.push($root.rankland_live_contest_client.ClientEvent.decode(reader, reader.uint32()));
+                    break;
+                default:
+                    reader.skipType(tag & 7);
+                    break;
+                }
+            }
+            return message;
+        };
+
+        /**
+         * Decodes a GetContestEventsResponse message from the specified reader or buffer, length delimited.
+         * @function decodeDelimited
+         * @memberof rankland_live_contest_client.GetContestEventsResponse
+         * @static
+         * @param {$protobuf.Reader|Uint8Array} reader Reader or buffer to decode from
+         * @returns {rankland_live_contest_client.GetContestEventsResponse} GetContestEventsResponse
+         * @throws {Error} If the payload is not a reader or valid buffer
+         * @throws {$protobuf.util.ProtocolError} If required fields are missing
+         */
+        GetContestEventsResponse.decodeDelimited = function decodeDelimited(reader) {
+            if (!(reader instanceof $Reader))
+                reader = new $Reader(reader);
+            return this.decode(reader, reader.uint32());
+        };
+
+        /**
+         * Verifies a GetContestEventsResponse message.
+         * @function verify
+         * @memberof rankland_live_contest_client.GetContestEventsResponse
+         * @static
+         * @param {Object.<string,*>} message Plain object to verify
+         * @returns {string|null} `null` if valid, otherwise the reason why it is not
+         */
+        GetContestEventsResponse.verify = function verify(message) {
+            if (typeof message !== "object" || message === null)
+                return "object expected";
+            var properties = {};
+            if (message.uk != null && message.hasOwnProperty("uk"))
+                if (!$util.isString(message.uk))
+                    return "uk: string expected";
+            if (message.fromEventId != null && message.hasOwnProperty("fromEventId")) {
+                properties._fromEventId = 1;
+                if (!$util.isInteger(message.fromEventId))
+                    return "fromEventId: integer expected";
+            }
+            if (message.toEventId != null && message.hasOwnProperty("toEventId")) {
+                properties._toEventId = 1;
+                if (!$util.isInteger(message.toEventId))
+                    return "toEventId: integer expected";
+            }
+            if (message.checkpointEventId != null && message.hasOwnProperty("checkpointEventId"))
+                if (!$util.isInteger(message.checkpointEventId))
+                    return "checkpointEventId: integer expected";
+            if (message.latestEventId != null && message.hasOwnProperty("latestEventId"))
+                if (!$util.isInteger(message.latestEventId))
+                    return "latestEventId: integer expected";
+            if (message.streamRevision != null && message.hasOwnProperty("streamRevision"))
+                if (!$util.isInteger(message.streamRevision))
+                    return "streamRevision: integer expected";
+            if (message.hasMore != null && message.hasOwnProperty("hasMore"))
+                if (typeof message.hasMore !== "boolean")
+                    return "hasMore: boolean expected";
+            if (message.resetRequired != null && message.hasOwnProperty("resetRequired"))
+                if (typeof message.resetRequired !== "boolean")
+                    return "resetRequired: boolean expected";
+            if (message.resetReason != null && message.hasOwnProperty("resetReason"))
+                if (!$util.isString(message.resetReason))
+                    return "resetReason: string expected";
+            if (message.events != null && message.hasOwnProperty("events")) {
+                if (!Array.isArray(message.events))
+                    return "events: array expected";
+                for (var i = 0; i < message.events.length; ++i) {
+                    var error = $root.rankland_live_contest_client.ClientEvent.verify(message.events[i]);
+                    if (error)
+                        return "events." + error;
+                }
+            }
+            return null;
+        };
+
+        /**
+         * Creates a GetContestEventsResponse message from a plain object. Also converts values to their respective internal types.
+         * @function fromObject
+         * @memberof rankland_live_contest_client.GetContestEventsResponse
+         * @static
+         * @param {Object.<string,*>} object Plain object
+         * @returns {rankland_live_contest_client.GetContestEventsResponse} GetContestEventsResponse
+         */
+        GetContestEventsResponse.fromObject = function fromObject(object) {
+            if (object instanceof $root.rankland_live_contest_client.GetContestEventsResponse)
+                return object;
+            var message = new $root.rankland_live_contest_client.GetContestEventsResponse();
+            if (object.uk != null)
+                message.uk = String(object.uk);
+            if (object.fromEventId != null)
+                message.fromEventId = object.fromEventId >>> 0;
+            if (object.toEventId != null)
+                message.toEventId = object.toEventId >>> 0;
+            if (object.checkpointEventId != null)
+                message.checkpointEventId = object.checkpointEventId >>> 0;
+            if (object.latestEventId != null)
+                message.latestEventId = object.latestEventId >>> 0;
+            if (object.streamRevision != null)
+                message.streamRevision = object.streamRevision >>> 0;
+            if (object.hasMore != null)
+                message.hasMore = Boolean(object.hasMore);
+            if (object.resetRequired != null)
+                message.resetRequired = Boolean(object.resetRequired);
+            if (object.resetReason != null)
+                message.resetReason = String(object.resetReason);
+            if (object.events) {
+                if (!Array.isArray(object.events))
+                    throw TypeError(".rankland_live_contest_client.GetContestEventsResponse.events: array expected");
+                message.events = [];
+                for (var i = 0; i < object.events.length; ++i) {
+                    if (typeof object.events[i] !== "object")
+                        throw TypeError(".rankland_live_contest_client.GetContestEventsResponse.events: object expected");
+                    message.events[i] = $root.rankland_live_contest_client.ClientEvent.fromObject(object.events[i]);
+                }
+            }
+            return message;
+        };
+
+        /**
+         * Creates a plain object from a GetContestEventsResponse message. Also converts values to other types if specified.
+         * @function toObject
+         * @memberof rankland_live_contest_client.GetContestEventsResponse
+         * @static
+         * @param {rankland_live_contest_client.GetContestEventsResponse} message GetContestEventsResponse
+         * @param {$protobuf.IConversionOptions} [options] Conversion options
+         * @returns {Object.<string,*>} Plain object
+         */
+        GetContestEventsResponse.toObject = function toObject(message, options) {
+            if (!options)
+                options = {};
+            var object = {};
+            if (options.arrays || options.defaults)
+                object.events = [];
+            if (options.defaults) {
+                object.uk = "";
+                object.checkpointEventId = 0;
+                object.latestEventId = 0;
+                object.streamRevision = 0;
+                object.hasMore = false;
+                object.resetRequired = false;
+                object.resetReason = "";
+            }
+            if (message.uk != null && message.hasOwnProperty("uk"))
+                object.uk = message.uk;
+            if (message.fromEventId != null && message.hasOwnProperty("fromEventId")) {
+                object.fromEventId = message.fromEventId;
+                if (options.oneofs)
+                    object._fromEventId = "fromEventId";
+            }
+            if (message.toEventId != null && message.hasOwnProperty("toEventId")) {
+                object.toEventId = message.toEventId;
+                if (options.oneofs)
+                    object._toEventId = "toEventId";
+            }
+            if (message.checkpointEventId != null && message.hasOwnProperty("checkpointEventId"))
+                object.checkpointEventId = message.checkpointEventId;
+            if (message.latestEventId != null && message.hasOwnProperty("latestEventId"))
+                object.latestEventId = message.latestEventId;
+            if (message.streamRevision != null && message.hasOwnProperty("streamRevision"))
+                object.streamRevision = message.streamRevision;
+            if (message.hasMore != null && message.hasOwnProperty("hasMore"))
+                object.hasMore = message.hasMore;
+            if (message.resetRequired != null && message.hasOwnProperty("resetRequired"))
+                object.resetRequired = message.resetRequired;
+            if (message.resetReason != null && message.hasOwnProperty("resetReason"))
+                object.resetReason = message.resetReason;
+            if (message.events && message.events.length) {
+                object.events = [];
+                for (var j = 0; j < message.events.length; ++j)
+                    object.events[j] = $root.rankland_live_contest_client.ClientEvent.toObject(message.events[j], options);
+            }
+            return object;
+        };
+
+        /**
+         * Converts this GetContestEventsResponse to JSON.
+         * @function toJSON
+         * @memberof rankland_live_contest_client.GetContestEventsResponse
+         * @instance
+         * @returns {Object.<string,*>} JSON object
+         */
+        GetContestEventsResponse.prototype.toJSON = function toJSON() {
+            return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
+        };
+
+        return GetContestEventsResponse;
+    })();
+
     return rankland_live_contest_client;
 })();
 
@@ -1253,6 +1695,7 @@ $root.rankland_live_contest_common = (function() {
          * @interface ISolutionOnProgressEvent
          * @property {number|null} [solutionId] SolutionOnProgressEvent solutionId
          * @property {number|null} [percentageProgress] SolutionOnProgressEvent percentageProgress
+         * @property {rankland_live_contest_common.ITimeDuration|null} [time] SolutionOnProgressEvent time
          */
 
         /**
@@ -1287,6 +1730,14 @@ $root.rankland_live_contest_common = (function() {
         SolutionOnProgressEvent.prototype.percentageProgress = 0;
 
         /**
+         * SolutionOnProgressEvent time.
+         * @member {rankland_live_contest_common.ITimeDuration|null|undefined} time
+         * @memberof rankland_live_contest_common.SolutionOnProgressEvent
+         * @instance
+         */
+        SolutionOnProgressEvent.prototype.time = null;
+
+        /**
          * Creates a new SolutionOnProgressEvent instance using the specified properties.
          * @function create
          * @memberof rankland_live_contest_common.SolutionOnProgressEvent
@@ -1314,6 +1765,8 @@ $root.rankland_live_contest_common = (function() {
                 writer.uint32(/* id 1, wireType 0 =*/8).uint32(message.solutionId);
             if (message.percentageProgress != null && Object.hasOwnProperty.call(message, "percentageProgress"))
                 writer.uint32(/* id 2, wireType 0 =*/16).uint32(message.percentageProgress);
+            if (message.time != null && Object.hasOwnProperty.call(message, "time"))
+                $root.rankland_live_contest_common.TimeDuration.encode(message.time, writer.uint32(/* id 3, wireType 2 =*/26).fork()).ldelim();
             return writer;
         };
 
@@ -1353,6 +1806,9 @@ $root.rankland_live_contest_common = (function() {
                     break;
                 case 2:
                     message.percentageProgress = reader.uint32();
+                    break;
+                case 3:
+                    message.time = $root.rankland_live_contest_common.TimeDuration.decode(reader, reader.uint32());
                     break;
                 default:
                     reader.skipType(tag & 7);
@@ -1395,6 +1851,11 @@ $root.rankland_live_contest_common = (function() {
             if (message.percentageProgress != null && message.hasOwnProperty("percentageProgress"))
                 if (!$util.isInteger(message.percentageProgress))
                     return "percentageProgress: integer expected";
+            if (message.time != null && message.hasOwnProperty("time")) {
+                var error = $root.rankland_live_contest_common.TimeDuration.verify(message.time);
+                if (error)
+                    return "time." + error;
+            }
             return null;
         };
 
@@ -1414,6 +1875,11 @@ $root.rankland_live_contest_common = (function() {
                 message.solutionId = object.solutionId >>> 0;
             if (object.percentageProgress != null)
                 message.percentageProgress = object.percentageProgress >>> 0;
+            if (object.time != null) {
+                if (typeof object.time !== "object")
+                    throw TypeError(".rankland_live_contest_common.SolutionOnProgressEvent.time: object expected");
+                message.time = $root.rankland_live_contest_common.TimeDuration.fromObject(object.time);
+            }
             return message;
         };
 
@@ -1433,11 +1899,14 @@ $root.rankland_live_contest_common = (function() {
             if (options.defaults) {
                 object.solutionId = 0;
                 object.percentageProgress = 0;
+                object.time = null;
             }
             if (message.solutionId != null && message.hasOwnProperty("solutionId"))
                 object.solutionId = message.solutionId;
             if (message.percentageProgress != null && message.hasOwnProperty("percentageProgress"))
                 object.percentageProgress = message.percentageProgress;
+            if (message.time != null && message.hasOwnProperty("time"))
+                object.time = $root.rankland_live_contest_common.TimeDuration.toObject(message.time, options);
             return object;
         };
 
@@ -2200,12 +2669,411 @@ $root.rankland_live_contest_common = (function() {
         return SolutionOnResultChangeEvent;
     })();
 
+    rankland_live_contest_common.ContestConfigPatch = (function() {
+
+        /**
+         * Properties of a ContestConfigPatch.
+         * @memberof rankland_live_contest_common
+         * @interface IContestConfigPatch
+         * @property {string|null} [name] ContestConfigPatch name
+         * @property {google.protobuf.IStruct|null} [contest] ContestConfigPatch contest
+         * @property {google.protobuf.IListValue|null} [problems] ContestConfigPatch problems
+         * @property {google.protobuf.IListValue|null} [users] ContestConfigPatch users
+         * @property {google.protobuf.IListValue|null} [markers] ContestConfigPatch markers
+         * @property {google.protobuf.IListValue|null} [series] ContestConfigPatch series
+         * @property {google.protobuf.IValue|null} [sorter] ContestConfigPatch sorter
+         * @property {google.protobuf.IValue|null} [contributors] ContestConfigPatch contributors
+         */
+
+        /**
+         * Constructs a new ContestConfigPatch.
+         * @memberof rankland_live_contest_common
+         * @classdesc Represents a ContestConfigPatch.
+         * @implements IContestConfigPatch
+         * @constructor
+         * @param {rankland_live_contest_common.IContestConfigPatch=} [properties] Properties to set
+         */
+        function ContestConfigPatch(properties) {
+            if (properties)
+                for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
+                    if (properties[keys[i]] != null)
+                        this[keys[i]] = properties[keys[i]];
+        }
+
+        /**
+         * ContestConfigPatch name.
+         * @member {string|null|undefined} name
+         * @memberof rankland_live_contest_common.ContestConfigPatch
+         * @instance
+         */
+        ContestConfigPatch.prototype.name = null;
+
+        /**
+         * ContestConfigPatch contest.
+         * @member {google.protobuf.IStruct|null|undefined} contest
+         * @memberof rankland_live_contest_common.ContestConfigPatch
+         * @instance
+         */
+        ContestConfigPatch.prototype.contest = null;
+
+        /**
+         * ContestConfigPatch problems.
+         * @member {google.protobuf.IListValue|null|undefined} problems
+         * @memberof rankland_live_contest_common.ContestConfigPatch
+         * @instance
+         */
+        ContestConfigPatch.prototype.problems = null;
+
+        /**
+         * ContestConfigPatch users.
+         * @member {google.protobuf.IListValue|null|undefined} users
+         * @memberof rankland_live_contest_common.ContestConfigPatch
+         * @instance
+         */
+        ContestConfigPatch.prototype.users = null;
+
+        /**
+         * ContestConfigPatch markers.
+         * @member {google.protobuf.IListValue|null|undefined} markers
+         * @memberof rankland_live_contest_common.ContestConfigPatch
+         * @instance
+         */
+        ContestConfigPatch.prototype.markers = null;
+
+        /**
+         * ContestConfigPatch series.
+         * @member {google.protobuf.IListValue|null|undefined} series
+         * @memberof rankland_live_contest_common.ContestConfigPatch
+         * @instance
+         */
+        ContestConfigPatch.prototype.series = null;
+
+        /**
+         * ContestConfigPatch sorter.
+         * @member {google.protobuf.IValue|null|undefined} sorter
+         * @memberof rankland_live_contest_common.ContestConfigPatch
+         * @instance
+         */
+        ContestConfigPatch.prototype.sorter = null;
+
+        /**
+         * ContestConfigPatch contributors.
+         * @member {google.protobuf.IValue|null|undefined} contributors
+         * @memberof rankland_live_contest_common.ContestConfigPatch
+         * @instance
+         */
+        ContestConfigPatch.prototype.contributors = null;
+
+        // OneOf field names bound to virtual getters and setters
+        var $oneOfFields;
+
+        /**
+         * ContestConfigPatch _name.
+         * @member {"name"|undefined} _name
+         * @memberof rankland_live_contest_common.ContestConfigPatch
+         * @instance
+         */
+        Object.defineProperty(ContestConfigPatch.prototype, "_name", {
+            get: $util.oneOfGetter($oneOfFields = ["name"]),
+            set: $util.oneOfSetter($oneOfFields)
+        });
+
+        /**
+         * Creates a new ContestConfigPatch instance using the specified properties.
+         * @function create
+         * @memberof rankland_live_contest_common.ContestConfigPatch
+         * @static
+         * @param {rankland_live_contest_common.IContestConfigPatch=} [properties] Properties to set
+         * @returns {rankland_live_contest_common.ContestConfigPatch} ContestConfigPatch instance
+         */
+        ContestConfigPatch.create = function create(properties) {
+            return new ContestConfigPatch(properties);
+        };
+
+        /**
+         * Encodes the specified ContestConfigPatch message. Does not implicitly {@link rankland_live_contest_common.ContestConfigPatch.verify|verify} messages.
+         * @function encode
+         * @memberof rankland_live_contest_common.ContestConfigPatch
+         * @static
+         * @param {rankland_live_contest_common.IContestConfigPatch} message ContestConfigPatch message or plain object to encode
+         * @param {$protobuf.Writer} [writer] Writer to encode to
+         * @returns {$protobuf.Writer} Writer
+         */
+        ContestConfigPatch.encode = function encode(message, writer) {
+            if (!writer)
+                writer = $Writer.create();
+            if (message.name != null && Object.hasOwnProperty.call(message, "name"))
+                writer.uint32(/* id 1, wireType 2 =*/10).string(message.name);
+            if (message.contest != null && Object.hasOwnProperty.call(message, "contest"))
+                $root.google.protobuf.Struct.encode(message.contest, writer.uint32(/* id 2, wireType 2 =*/18).fork()).ldelim();
+            if (message.problems != null && Object.hasOwnProperty.call(message, "problems"))
+                $root.google.protobuf.ListValue.encode(message.problems, writer.uint32(/* id 3, wireType 2 =*/26).fork()).ldelim();
+            if (message.users != null && Object.hasOwnProperty.call(message, "users"))
+                $root.google.protobuf.ListValue.encode(message.users, writer.uint32(/* id 4, wireType 2 =*/34).fork()).ldelim();
+            if (message.markers != null && Object.hasOwnProperty.call(message, "markers"))
+                $root.google.protobuf.ListValue.encode(message.markers, writer.uint32(/* id 5, wireType 2 =*/42).fork()).ldelim();
+            if (message.series != null && Object.hasOwnProperty.call(message, "series"))
+                $root.google.protobuf.ListValue.encode(message.series, writer.uint32(/* id 6, wireType 2 =*/50).fork()).ldelim();
+            if (message.sorter != null && Object.hasOwnProperty.call(message, "sorter"))
+                $root.google.protobuf.Value.encode(message.sorter, writer.uint32(/* id 7, wireType 2 =*/58).fork()).ldelim();
+            if (message.contributors != null && Object.hasOwnProperty.call(message, "contributors"))
+                $root.google.protobuf.Value.encode(message.contributors, writer.uint32(/* id 8, wireType 2 =*/66).fork()).ldelim();
+            return writer;
+        };
+
+        /**
+         * Encodes the specified ContestConfigPatch message, length delimited. Does not implicitly {@link rankland_live_contest_common.ContestConfigPatch.verify|verify} messages.
+         * @function encodeDelimited
+         * @memberof rankland_live_contest_common.ContestConfigPatch
+         * @static
+         * @param {rankland_live_contest_common.IContestConfigPatch} message ContestConfigPatch message or plain object to encode
+         * @param {$protobuf.Writer} [writer] Writer to encode to
+         * @returns {$protobuf.Writer} Writer
+         */
+        ContestConfigPatch.encodeDelimited = function encodeDelimited(message, writer) {
+            return this.encode(message, writer).ldelim();
+        };
+
+        /**
+         * Decodes a ContestConfigPatch message from the specified reader or buffer.
+         * @function decode
+         * @memberof rankland_live_contest_common.ContestConfigPatch
+         * @static
+         * @param {$protobuf.Reader|Uint8Array} reader Reader or buffer to decode from
+         * @param {number} [length] Message length if known beforehand
+         * @returns {rankland_live_contest_common.ContestConfigPatch} ContestConfigPatch
+         * @throws {Error} If the payload is not a reader or valid buffer
+         * @throws {$protobuf.util.ProtocolError} If required fields are missing
+         */
+        ContestConfigPatch.decode = function decode(reader, length) {
+            if (!(reader instanceof $Reader))
+                reader = $Reader.create(reader);
+            var end = length === undefined ? reader.len : reader.pos + length, message = new $root.rankland_live_contest_common.ContestConfigPatch();
+            while (reader.pos < end) {
+                var tag = reader.uint32();
+                switch (tag >>> 3) {
+                case 1:
+                    message.name = reader.string();
+                    break;
+                case 2:
+                    message.contest = $root.google.protobuf.Struct.decode(reader, reader.uint32());
+                    break;
+                case 3:
+                    message.problems = $root.google.protobuf.ListValue.decode(reader, reader.uint32());
+                    break;
+                case 4:
+                    message.users = $root.google.protobuf.ListValue.decode(reader, reader.uint32());
+                    break;
+                case 5:
+                    message.markers = $root.google.protobuf.ListValue.decode(reader, reader.uint32());
+                    break;
+                case 6:
+                    message.series = $root.google.protobuf.ListValue.decode(reader, reader.uint32());
+                    break;
+                case 7:
+                    message.sorter = $root.google.protobuf.Value.decode(reader, reader.uint32());
+                    break;
+                case 8:
+                    message.contributors = $root.google.protobuf.Value.decode(reader, reader.uint32());
+                    break;
+                default:
+                    reader.skipType(tag & 7);
+                    break;
+                }
+            }
+            return message;
+        };
+
+        /**
+         * Decodes a ContestConfigPatch message from the specified reader or buffer, length delimited.
+         * @function decodeDelimited
+         * @memberof rankland_live_contest_common.ContestConfigPatch
+         * @static
+         * @param {$protobuf.Reader|Uint8Array} reader Reader or buffer to decode from
+         * @returns {rankland_live_contest_common.ContestConfigPatch} ContestConfigPatch
+         * @throws {Error} If the payload is not a reader or valid buffer
+         * @throws {$protobuf.util.ProtocolError} If required fields are missing
+         */
+        ContestConfigPatch.decodeDelimited = function decodeDelimited(reader) {
+            if (!(reader instanceof $Reader))
+                reader = new $Reader(reader);
+            return this.decode(reader, reader.uint32());
+        };
+
+        /**
+         * Verifies a ContestConfigPatch message.
+         * @function verify
+         * @memberof rankland_live_contest_common.ContestConfigPatch
+         * @static
+         * @param {Object.<string,*>} message Plain object to verify
+         * @returns {string|null} `null` if valid, otherwise the reason why it is not
+         */
+        ContestConfigPatch.verify = function verify(message) {
+            if (typeof message !== "object" || message === null)
+                return "object expected";
+            var properties = {};
+            if (message.name != null && message.hasOwnProperty("name")) {
+                properties._name = 1;
+                if (!$util.isString(message.name))
+                    return "name: string expected";
+            }
+            if (message.contest != null && message.hasOwnProperty("contest")) {
+                var error = $root.google.protobuf.Struct.verify(message.contest);
+                if (error)
+                    return "contest." + error;
+            }
+            if (message.problems != null && message.hasOwnProperty("problems")) {
+                var error = $root.google.protobuf.ListValue.verify(message.problems);
+                if (error)
+                    return "problems." + error;
+            }
+            if (message.users != null && message.hasOwnProperty("users")) {
+                var error = $root.google.protobuf.ListValue.verify(message.users);
+                if (error)
+                    return "users." + error;
+            }
+            if (message.markers != null && message.hasOwnProperty("markers")) {
+                var error = $root.google.protobuf.ListValue.verify(message.markers);
+                if (error)
+                    return "markers." + error;
+            }
+            if (message.series != null && message.hasOwnProperty("series")) {
+                var error = $root.google.protobuf.ListValue.verify(message.series);
+                if (error)
+                    return "series." + error;
+            }
+            if (message.sorter != null && message.hasOwnProperty("sorter")) {
+                var error = $root.google.protobuf.Value.verify(message.sorter);
+                if (error)
+                    return "sorter." + error;
+            }
+            if (message.contributors != null && message.hasOwnProperty("contributors")) {
+                var error = $root.google.protobuf.Value.verify(message.contributors);
+                if (error)
+                    return "contributors." + error;
+            }
+            return null;
+        };
+
+        /**
+         * Creates a ContestConfigPatch message from a plain object. Also converts values to their respective internal types.
+         * @function fromObject
+         * @memberof rankland_live_contest_common.ContestConfigPatch
+         * @static
+         * @param {Object.<string,*>} object Plain object
+         * @returns {rankland_live_contest_common.ContestConfigPatch} ContestConfigPatch
+         */
+        ContestConfigPatch.fromObject = function fromObject(object) {
+            if (object instanceof $root.rankland_live_contest_common.ContestConfigPatch)
+                return object;
+            var message = new $root.rankland_live_contest_common.ContestConfigPatch();
+            if (object.name != null)
+                message.name = String(object.name);
+            if (object.contest != null) {
+                if (typeof object.contest !== "object")
+                    throw TypeError(".rankland_live_contest_common.ContestConfigPatch.contest: object expected");
+                message.contest = $root.google.protobuf.Struct.fromObject(object.contest);
+            }
+            if (object.problems != null) {
+                if (typeof object.problems !== "object")
+                    throw TypeError(".rankland_live_contest_common.ContestConfigPatch.problems: object expected");
+                message.problems = $root.google.protobuf.ListValue.fromObject(object.problems);
+            }
+            if (object.users != null) {
+                if (typeof object.users !== "object")
+                    throw TypeError(".rankland_live_contest_common.ContestConfigPatch.users: object expected");
+                message.users = $root.google.protobuf.ListValue.fromObject(object.users);
+            }
+            if (object.markers != null) {
+                if (typeof object.markers !== "object")
+                    throw TypeError(".rankland_live_contest_common.ContestConfigPatch.markers: object expected");
+                message.markers = $root.google.protobuf.ListValue.fromObject(object.markers);
+            }
+            if (object.series != null) {
+                if (typeof object.series !== "object")
+                    throw TypeError(".rankland_live_contest_common.ContestConfigPatch.series: object expected");
+                message.series = $root.google.protobuf.ListValue.fromObject(object.series);
+            }
+            if (object.sorter != null) {
+                if (typeof object.sorter !== "object")
+                    throw TypeError(".rankland_live_contest_common.ContestConfigPatch.sorter: object expected");
+                message.sorter = $root.google.protobuf.Value.fromObject(object.sorter);
+            }
+            if (object.contributors != null) {
+                if (typeof object.contributors !== "object")
+                    throw TypeError(".rankland_live_contest_common.ContestConfigPatch.contributors: object expected");
+                message.contributors = $root.google.protobuf.Value.fromObject(object.contributors);
+            }
+            return message;
+        };
+
+        /**
+         * Creates a plain object from a ContestConfigPatch message. Also converts values to other types if specified.
+         * @function toObject
+         * @memberof rankland_live_contest_common.ContestConfigPatch
+         * @static
+         * @param {rankland_live_contest_common.ContestConfigPatch} message ContestConfigPatch
+         * @param {$protobuf.IConversionOptions} [options] Conversion options
+         * @returns {Object.<string,*>} Plain object
+         */
+        ContestConfigPatch.toObject = function toObject(message, options) {
+            if (!options)
+                options = {};
+            var object = {};
+            if (options.defaults) {
+                object.contest = null;
+                object.problems = null;
+                object.users = null;
+                object.markers = null;
+                object.series = null;
+                object.sorter = null;
+                object.contributors = null;
+            }
+            if (message.name != null && message.hasOwnProperty("name")) {
+                object.name = message.name;
+                if (options.oneofs)
+                    object._name = "name";
+            }
+            if (message.contest != null && message.hasOwnProperty("contest"))
+                object.contest = $root.google.protobuf.Struct.toObject(message.contest, options);
+            if (message.problems != null && message.hasOwnProperty("problems"))
+                object.problems = $root.google.protobuf.ListValue.toObject(message.problems, options);
+            if (message.users != null && message.hasOwnProperty("users"))
+                object.users = $root.google.protobuf.ListValue.toObject(message.users, options);
+            if (message.markers != null && message.hasOwnProperty("markers"))
+                object.markers = $root.google.protobuf.ListValue.toObject(message.markers, options);
+            if (message.series != null && message.hasOwnProperty("series"))
+                object.series = $root.google.protobuf.ListValue.toObject(message.series, options);
+            if (message.sorter != null && message.hasOwnProperty("sorter"))
+                object.sorter = $root.google.protobuf.Value.toObject(message.sorter, options);
+            if (message.contributors != null && message.hasOwnProperty("contributors"))
+                object.contributors = $root.google.protobuf.Value.toObject(message.contributors, options);
+            return object;
+        };
+
+        /**
+         * Converts this ContestConfigPatch to JSON.
+         * @function toJSON
+         * @memberof rankland_live_contest_common.ContestConfigPatch
+         * @instance
+         * @returns {Object.<string,*>} JSON object
+         */
+        ContestConfigPatch.prototype.toJSON = function toJSON() {
+            return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
+        };
+
+        return ContestConfigPatch;
+    })();
+
     rankland_live_contest_common.ContestConfigChangeEvent = (function() {
 
         /**
          * Properties of a ContestConfigChangeEvent.
          * @memberof rankland_live_contest_common
          * @interface IContestConfigChangeEvent
+         * @property {Array.<string>|null} [changedFields] ContestConfigChangeEvent changedFields
+         * @property {rankland_live_contest_common.IContestConfigPatch|null} [config] ContestConfigChangeEvent config
+         * @property {rankland_live_contest_common.ITimeDuration|null} [time] ContestConfigChangeEvent time
          */
 
         /**
@@ -2217,11 +3085,36 @@ $root.rankland_live_contest_common = (function() {
          * @param {rankland_live_contest_common.IContestConfigChangeEvent=} [properties] Properties to set
          */
         function ContestConfigChangeEvent(properties) {
+            this.changedFields = [];
             if (properties)
                 for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
                     if (properties[keys[i]] != null)
                         this[keys[i]] = properties[keys[i]];
         }
+
+        /**
+         * ContestConfigChangeEvent changedFields.
+         * @member {Array.<string>} changedFields
+         * @memberof rankland_live_contest_common.ContestConfigChangeEvent
+         * @instance
+         */
+        ContestConfigChangeEvent.prototype.changedFields = $util.emptyArray;
+
+        /**
+         * ContestConfigChangeEvent config.
+         * @member {rankland_live_contest_common.IContestConfigPatch|null|undefined} config
+         * @memberof rankland_live_contest_common.ContestConfigChangeEvent
+         * @instance
+         */
+        ContestConfigChangeEvent.prototype.config = null;
+
+        /**
+         * ContestConfigChangeEvent time.
+         * @member {rankland_live_contest_common.ITimeDuration|null|undefined} time
+         * @memberof rankland_live_contest_common.ContestConfigChangeEvent
+         * @instance
+         */
+        ContestConfigChangeEvent.prototype.time = null;
 
         /**
          * Creates a new ContestConfigChangeEvent instance using the specified properties.
@@ -2247,6 +3140,13 @@ $root.rankland_live_contest_common = (function() {
         ContestConfigChangeEvent.encode = function encode(message, writer) {
             if (!writer)
                 writer = $Writer.create();
+            if (message.changedFields != null && message.changedFields.length)
+                for (var i = 0; i < message.changedFields.length; ++i)
+                    writer.uint32(/* id 1, wireType 2 =*/10).string(message.changedFields[i]);
+            if (message.config != null && Object.hasOwnProperty.call(message, "config"))
+                $root.rankland_live_contest_common.ContestConfigPatch.encode(message.config, writer.uint32(/* id 2, wireType 2 =*/18).fork()).ldelim();
+            if (message.time != null && Object.hasOwnProperty.call(message, "time"))
+                $root.rankland_live_contest_common.TimeDuration.encode(message.time, writer.uint32(/* id 3, wireType 2 =*/26).fork()).ldelim();
             return writer;
         };
 
@@ -2281,6 +3181,17 @@ $root.rankland_live_contest_common = (function() {
             while (reader.pos < end) {
                 var tag = reader.uint32();
                 switch (tag >>> 3) {
+                case 1:
+                    if (!(message.changedFields && message.changedFields.length))
+                        message.changedFields = [];
+                    message.changedFields.push(reader.string());
+                    break;
+                case 2:
+                    message.config = $root.rankland_live_contest_common.ContestConfigPatch.decode(reader, reader.uint32());
+                    break;
+                case 3:
+                    message.time = $root.rankland_live_contest_common.TimeDuration.decode(reader, reader.uint32());
+                    break;
                 default:
                     reader.skipType(tag & 7);
                     break;
@@ -2316,6 +3227,23 @@ $root.rankland_live_contest_common = (function() {
         ContestConfigChangeEvent.verify = function verify(message) {
             if (typeof message !== "object" || message === null)
                 return "object expected";
+            if (message.changedFields != null && message.hasOwnProperty("changedFields")) {
+                if (!Array.isArray(message.changedFields))
+                    return "changedFields: array expected";
+                for (var i = 0; i < message.changedFields.length; ++i)
+                    if (!$util.isString(message.changedFields[i]))
+                        return "changedFields: string[] expected";
+            }
+            if (message.config != null && message.hasOwnProperty("config")) {
+                var error = $root.rankland_live_contest_common.ContestConfigPatch.verify(message.config);
+                if (error)
+                    return "config." + error;
+            }
+            if (message.time != null && message.hasOwnProperty("time")) {
+                var error = $root.rankland_live_contest_common.TimeDuration.verify(message.time);
+                if (error)
+                    return "time." + error;
+            }
             return null;
         };
 
@@ -2330,7 +3258,25 @@ $root.rankland_live_contest_common = (function() {
         ContestConfigChangeEvent.fromObject = function fromObject(object) {
             if (object instanceof $root.rankland_live_contest_common.ContestConfigChangeEvent)
                 return object;
-            return new $root.rankland_live_contest_common.ContestConfigChangeEvent();
+            var message = new $root.rankland_live_contest_common.ContestConfigChangeEvent();
+            if (object.changedFields) {
+                if (!Array.isArray(object.changedFields))
+                    throw TypeError(".rankland_live_contest_common.ContestConfigChangeEvent.changedFields: array expected");
+                message.changedFields = [];
+                for (var i = 0; i < object.changedFields.length; ++i)
+                    message.changedFields[i] = String(object.changedFields[i]);
+            }
+            if (object.config != null) {
+                if (typeof object.config !== "object")
+                    throw TypeError(".rankland_live_contest_common.ContestConfigChangeEvent.config: object expected");
+                message.config = $root.rankland_live_contest_common.ContestConfigPatch.fromObject(object.config);
+            }
+            if (object.time != null) {
+                if (typeof object.time !== "object")
+                    throw TypeError(".rankland_live_contest_common.ContestConfigChangeEvent.time: object expected");
+                message.time = $root.rankland_live_contest_common.TimeDuration.fromObject(object.time);
+            }
+            return message;
         };
 
         /**
@@ -2342,8 +3288,26 @@ $root.rankland_live_contest_common = (function() {
          * @param {$protobuf.IConversionOptions} [options] Conversion options
          * @returns {Object.<string,*>} Plain object
          */
-        ContestConfigChangeEvent.toObject = function toObject() {
-            return {};
+        ContestConfigChangeEvent.toObject = function toObject(message, options) {
+            if (!options)
+                options = {};
+            var object = {};
+            if (options.arrays || options.defaults)
+                object.changedFields = [];
+            if (options.defaults) {
+                object.config = null;
+                object.time = null;
+            }
+            if (message.changedFields && message.changedFields.length) {
+                object.changedFields = [];
+                for (var j = 0; j < message.changedFields.length; ++j)
+                    object.changedFields[j] = message.changedFields[j];
+            }
+            if (message.config != null && message.hasOwnProperty("config"))
+                object.config = $root.rankland_live_contest_common.ContestConfigPatch.toObject(message.config, options);
+            if (message.time != null && message.hasOwnProperty("time"))
+                object.time = $root.rankland_live_contest_common.TimeDuration.toObject(message.time, options);
+            return object;
         };
 
         /**
@@ -2361,6 +3325,844 @@ $root.rankland_live_contest_common = (function() {
     })();
 
     return rankland_live_contest_common;
+})();
+
+$root.google = (function() {
+
+    /**
+     * Namespace google.
+     * @exports google
+     * @namespace
+     */
+    var google = {};
+
+    google.protobuf = (function() {
+
+        /**
+         * Namespace protobuf.
+         * @memberof google
+         * @namespace
+         */
+        var protobuf = {};
+
+        protobuf.Struct = (function() {
+
+            /**
+             * Properties of a Struct.
+             * @memberof google.protobuf
+             * @interface IStruct
+             * @property {Object.<string,google.protobuf.IValue>|null} [fields] Struct fields
+             */
+
+            /**
+             * Constructs a new Struct.
+             * @memberof google.protobuf
+             * @classdesc Represents a Struct.
+             * @implements IStruct
+             * @constructor
+             * @param {google.protobuf.IStruct=} [properties] Properties to set
+             */
+            function Struct(properties) {
+                this.fields = {};
+                if (properties)
+                    for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
+                        if (properties[keys[i]] != null)
+                            this[keys[i]] = properties[keys[i]];
+            }
+
+            /**
+             * Struct fields.
+             * @member {Object.<string,google.protobuf.IValue>} fields
+             * @memberof google.protobuf.Struct
+             * @instance
+             */
+            Struct.prototype.fields = $util.emptyObject;
+
+            /**
+             * Creates a new Struct instance using the specified properties.
+             * @function create
+             * @memberof google.protobuf.Struct
+             * @static
+             * @param {google.protobuf.IStruct=} [properties] Properties to set
+             * @returns {google.protobuf.Struct} Struct instance
+             */
+            Struct.create = function create(properties) {
+                return new Struct(properties);
+            };
+
+            /**
+             * Encodes the specified Struct message. Does not implicitly {@link google.protobuf.Struct.verify|verify} messages.
+             * @function encode
+             * @memberof google.protobuf.Struct
+             * @static
+             * @param {google.protobuf.IStruct} message Struct message or plain object to encode
+             * @param {$protobuf.Writer} [writer] Writer to encode to
+             * @returns {$protobuf.Writer} Writer
+             */
+            Struct.encode = function encode(message, writer) {
+                if (!writer)
+                    writer = $Writer.create();
+                if (message.fields != null && Object.hasOwnProperty.call(message, "fields"))
+                    for (var keys = Object.keys(message.fields), i = 0; i < keys.length; ++i) {
+                        writer.uint32(/* id 1, wireType 2 =*/10).fork().uint32(/* id 1, wireType 2 =*/10).string(keys[i]);
+                        $root.google.protobuf.Value.encode(message.fields[keys[i]], writer.uint32(/* id 2, wireType 2 =*/18).fork()).ldelim().ldelim();
+                    }
+                return writer;
+            };
+
+            /**
+             * Encodes the specified Struct message, length delimited. Does not implicitly {@link google.protobuf.Struct.verify|verify} messages.
+             * @function encodeDelimited
+             * @memberof google.protobuf.Struct
+             * @static
+             * @param {google.protobuf.IStruct} message Struct message or plain object to encode
+             * @param {$protobuf.Writer} [writer] Writer to encode to
+             * @returns {$protobuf.Writer} Writer
+             */
+            Struct.encodeDelimited = function encodeDelimited(message, writer) {
+                return this.encode(message, writer).ldelim();
+            };
+
+            /**
+             * Decodes a Struct message from the specified reader or buffer.
+             * @function decode
+             * @memberof google.protobuf.Struct
+             * @static
+             * @param {$protobuf.Reader|Uint8Array} reader Reader or buffer to decode from
+             * @param {number} [length] Message length if known beforehand
+             * @returns {google.protobuf.Struct} Struct
+             * @throws {Error} If the payload is not a reader or valid buffer
+             * @throws {$protobuf.util.ProtocolError} If required fields are missing
+             */
+            Struct.decode = function decode(reader, length) {
+                if (!(reader instanceof $Reader))
+                    reader = $Reader.create(reader);
+                var end = length === undefined ? reader.len : reader.pos + length, message = new $root.google.protobuf.Struct(), key, value;
+                while (reader.pos < end) {
+                    var tag = reader.uint32();
+                    switch (tag >>> 3) {
+                    case 1:
+                        if (message.fields === $util.emptyObject)
+                            message.fields = {};
+                        var end2 = reader.uint32() + reader.pos;
+                        key = "";
+                        value = null;
+                        while (reader.pos < end2) {
+                            var tag2 = reader.uint32();
+                            switch (tag2 >>> 3) {
+                            case 1:
+                                key = reader.string();
+                                break;
+                            case 2:
+                                value = $root.google.protobuf.Value.decode(reader, reader.uint32());
+                                break;
+                            default:
+                                reader.skipType(tag2 & 7);
+                                break;
+                            }
+                        }
+                        message.fields[key] = value;
+                        break;
+                    default:
+                        reader.skipType(tag & 7);
+                        break;
+                    }
+                }
+                return message;
+            };
+
+            /**
+             * Decodes a Struct message from the specified reader or buffer, length delimited.
+             * @function decodeDelimited
+             * @memberof google.protobuf.Struct
+             * @static
+             * @param {$protobuf.Reader|Uint8Array} reader Reader or buffer to decode from
+             * @returns {google.protobuf.Struct} Struct
+             * @throws {Error} If the payload is not a reader or valid buffer
+             * @throws {$protobuf.util.ProtocolError} If required fields are missing
+             */
+            Struct.decodeDelimited = function decodeDelimited(reader) {
+                if (!(reader instanceof $Reader))
+                    reader = new $Reader(reader);
+                return this.decode(reader, reader.uint32());
+            };
+
+            /**
+             * Verifies a Struct message.
+             * @function verify
+             * @memberof google.protobuf.Struct
+             * @static
+             * @param {Object.<string,*>} message Plain object to verify
+             * @returns {string|null} `null` if valid, otherwise the reason why it is not
+             */
+            Struct.verify = function verify(message) {
+                if (typeof message !== "object" || message === null)
+                    return "object expected";
+                if (message.fields != null && message.hasOwnProperty("fields")) {
+                    if (!$util.isObject(message.fields))
+                        return "fields: object expected";
+                    var key = Object.keys(message.fields);
+                    for (var i = 0; i < key.length; ++i) {
+                        var error = $root.google.protobuf.Value.verify(message.fields[key[i]]);
+                        if (error)
+                            return "fields." + error;
+                    }
+                }
+                return null;
+            };
+
+            /**
+             * Creates a Struct message from a plain object. Also converts values to their respective internal types.
+             * @function fromObject
+             * @memberof google.protobuf.Struct
+             * @static
+             * @param {Object.<string,*>} object Plain object
+             * @returns {google.protobuf.Struct} Struct
+             */
+            Struct.fromObject = function fromObject(object) {
+                if (object instanceof $root.google.protobuf.Struct)
+                    return object;
+                var message = new $root.google.protobuf.Struct();
+                if (object.fields) {
+                    if (typeof object.fields !== "object")
+                        throw TypeError(".google.protobuf.Struct.fields: object expected");
+                    message.fields = {};
+                    for (var keys = Object.keys(object.fields), i = 0; i < keys.length; ++i) {
+                        if (typeof object.fields[keys[i]] !== "object")
+                            throw TypeError(".google.protobuf.Struct.fields: object expected");
+                        message.fields[keys[i]] = $root.google.protobuf.Value.fromObject(object.fields[keys[i]]);
+                    }
+                }
+                return message;
+            };
+
+            /**
+             * Creates a plain object from a Struct message. Also converts values to other types if specified.
+             * @function toObject
+             * @memberof google.protobuf.Struct
+             * @static
+             * @param {google.protobuf.Struct} message Struct
+             * @param {$protobuf.IConversionOptions} [options] Conversion options
+             * @returns {Object.<string,*>} Plain object
+             */
+            Struct.toObject = function toObject(message, options) {
+                if (!options)
+                    options = {};
+                var object = {};
+                if (options.objects || options.defaults)
+                    object.fields = {};
+                var keys2;
+                if (message.fields && (keys2 = Object.keys(message.fields)).length) {
+                    object.fields = {};
+                    for (var j = 0; j < keys2.length; ++j)
+                        object.fields[keys2[j]] = $root.google.protobuf.Value.toObject(message.fields[keys2[j]], options);
+                }
+                return object;
+            };
+
+            /**
+             * Converts this Struct to JSON.
+             * @function toJSON
+             * @memberof google.protobuf.Struct
+             * @instance
+             * @returns {Object.<string,*>} JSON object
+             */
+            Struct.prototype.toJSON = function toJSON() {
+                return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
+            };
+
+            return Struct;
+        })();
+
+        protobuf.Value = (function() {
+
+            /**
+             * Properties of a Value.
+             * @memberof google.protobuf
+             * @interface IValue
+             * @property {google.protobuf.NullValue|null} [nullValue] Value nullValue
+             * @property {number|null} [numberValue] Value numberValue
+             * @property {string|null} [stringValue] Value stringValue
+             * @property {boolean|null} [boolValue] Value boolValue
+             * @property {google.protobuf.IStruct|null} [structValue] Value structValue
+             * @property {google.protobuf.IListValue|null} [listValue] Value listValue
+             */
+
+            /**
+             * Constructs a new Value.
+             * @memberof google.protobuf
+             * @classdesc Represents a Value.
+             * @implements IValue
+             * @constructor
+             * @param {google.protobuf.IValue=} [properties] Properties to set
+             */
+            function Value(properties) {
+                if (properties)
+                    for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
+                        if (properties[keys[i]] != null)
+                            this[keys[i]] = properties[keys[i]];
+            }
+
+            /**
+             * Value nullValue.
+             * @member {google.protobuf.NullValue|null|undefined} nullValue
+             * @memberof google.protobuf.Value
+             * @instance
+             */
+            Value.prototype.nullValue = null;
+
+            /**
+             * Value numberValue.
+             * @member {number|null|undefined} numberValue
+             * @memberof google.protobuf.Value
+             * @instance
+             */
+            Value.prototype.numberValue = null;
+
+            /**
+             * Value stringValue.
+             * @member {string|null|undefined} stringValue
+             * @memberof google.protobuf.Value
+             * @instance
+             */
+            Value.prototype.stringValue = null;
+
+            /**
+             * Value boolValue.
+             * @member {boolean|null|undefined} boolValue
+             * @memberof google.protobuf.Value
+             * @instance
+             */
+            Value.prototype.boolValue = null;
+
+            /**
+             * Value structValue.
+             * @member {google.protobuf.IStruct|null|undefined} structValue
+             * @memberof google.protobuf.Value
+             * @instance
+             */
+            Value.prototype.structValue = null;
+
+            /**
+             * Value listValue.
+             * @member {google.protobuf.IListValue|null|undefined} listValue
+             * @memberof google.protobuf.Value
+             * @instance
+             */
+            Value.prototype.listValue = null;
+
+            // OneOf field names bound to virtual getters and setters
+            var $oneOfFields;
+
+            /**
+             * Value kind.
+             * @member {"nullValue"|"numberValue"|"stringValue"|"boolValue"|"structValue"|"listValue"|undefined} kind
+             * @memberof google.protobuf.Value
+             * @instance
+             */
+            Object.defineProperty(Value.prototype, "kind", {
+                get: $util.oneOfGetter($oneOfFields = ["nullValue", "numberValue", "stringValue", "boolValue", "structValue", "listValue"]),
+                set: $util.oneOfSetter($oneOfFields)
+            });
+
+            /**
+             * Creates a new Value instance using the specified properties.
+             * @function create
+             * @memberof google.protobuf.Value
+             * @static
+             * @param {google.protobuf.IValue=} [properties] Properties to set
+             * @returns {google.protobuf.Value} Value instance
+             */
+            Value.create = function create(properties) {
+                return new Value(properties);
+            };
+
+            /**
+             * Encodes the specified Value message. Does not implicitly {@link google.protobuf.Value.verify|verify} messages.
+             * @function encode
+             * @memberof google.protobuf.Value
+             * @static
+             * @param {google.protobuf.IValue} message Value message or plain object to encode
+             * @param {$protobuf.Writer} [writer] Writer to encode to
+             * @returns {$protobuf.Writer} Writer
+             */
+            Value.encode = function encode(message, writer) {
+                if (!writer)
+                    writer = $Writer.create();
+                if (message.nullValue != null && Object.hasOwnProperty.call(message, "nullValue"))
+                    writer.uint32(/* id 1, wireType 0 =*/8).int32(message.nullValue);
+                if (message.numberValue != null && Object.hasOwnProperty.call(message, "numberValue"))
+                    writer.uint32(/* id 2, wireType 1 =*/17).double(message.numberValue);
+                if (message.stringValue != null && Object.hasOwnProperty.call(message, "stringValue"))
+                    writer.uint32(/* id 3, wireType 2 =*/26).string(message.stringValue);
+                if (message.boolValue != null && Object.hasOwnProperty.call(message, "boolValue"))
+                    writer.uint32(/* id 4, wireType 0 =*/32).bool(message.boolValue);
+                if (message.structValue != null && Object.hasOwnProperty.call(message, "structValue"))
+                    $root.google.protobuf.Struct.encode(message.structValue, writer.uint32(/* id 5, wireType 2 =*/42).fork()).ldelim();
+                if (message.listValue != null && Object.hasOwnProperty.call(message, "listValue"))
+                    $root.google.protobuf.ListValue.encode(message.listValue, writer.uint32(/* id 6, wireType 2 =*/50).fork()).ldelim();
+                return writer;
+            };
+
+            /**
+             * Encodes the specified Value message, length delimited. Does not implicitly {@link google.protobuf.Value.verify|verify} messages.
+             * @function encodeDelimited
+             * @memberof google.protobuf.Value
+             * @static
+             * @param {google.protobuf.IValue} message Value message or plain object to encode
+             * @param {$protobuf.Writer} [writer] Writer to encode to
+             * @returns {$protobuf.Writer} Writer
+             */
+            Value.encodeDelimited = function encodeDelimited(message, writer) {
+                return this.encode(message, writer).ldelim();
+            };
+
+            /**
+             * Decodes a Value message from the specified reader or buffer.
+             * @function decode
+             * @memberof google.protobuf.Value
+             * @static
+             * @param {$protobuf.Reader|Uint8Array} reader Reader or buffer to decode from
+             * @param {number} [length] Message length if known beforehand
+             * @returns {google.protobuf.Value} Value
+             * @throws {Error} If the payload is not a reader or valid buffer
+             * @throws {$protobuf.util.ProtocolError} If required fields are missing
+             */
+            Value.decode = function decode(reader, length) {
+                if (!(reader instanceof $Reader))
+                    reader = $Reader.create(reader);
+                var end = length === undefined ? reader.len : reader.pos + length, message = new $root.google.protobuf.Value();
+                while (reader.pos < end) {
+                    var tag = reader.uint32();
+                    switch (tag >>> 3) {
+                    case 1:
+                        message.nullValue = reader.int32();
+                        break;
+                    case 2:
+                        message.numberValue = reader.double();
+                        break;
+                    case 3:
+                        message.stringValue = reader.string();
+                        break;
+                    case 4:
+                        message.boolValue = reader.bool();
+                        break;
+                    case 5:
+                        message.structValue = $root.google.protobuf.Struct.decode(reader, reader.uint32());
+                        break;
+                    case 6:
+                        message.listValue = $root.google.protobuf.ListValue.decode(reader, reader.uint32());
+                        break;
+                    default:
+                        reader.skipType(tag & 7);
+                        break;
+                    }
+                }
+                return message;
+            };
+
+            /**
+             * Decodes a Value message from the specified reader or buffer, length delimited.
+             * @function decodeDelimited
+             * @memberof google.protobuf.Value
+             * @static
+             * @param {$protobuf.Reader|Uint8Array} reader Reader or buffer to decode from
+             * @returns {google.protobuf.Value} Value
+             * @throws {Error} If the payload is not a reader or valid buffer
+             * @throws {$protobuf.util.ProtocolError} If required fields are missing
+             */
+            Value.decodeDelimited = function decodeDelimited(reader) {
+                if (!(reader instanceof $Reader))
+                    reader = new $Reader(reader);
+                return this.decode(reader, reader.uint32());
+            };
+
+            /**
+             * Verifies a Value message.
+             * @function verify
+             * @memberof google.protobuf.Value
+             * @static
+             * @param {Object.<string,*>} message Plain object to verify
+             * @returns {string|null} `null` if valid, otherwise the reason why it is not
+             */
+            Value.verify = function verify(message) {
+                if (typeof message !== "object" || message === null)
+                    return "object expected";
+                var properties = {};
+                if (message.nullValue != null && message.hasOwnProperty("nullValue")) {
+                    properties.kind = 1;
+                    switch (message.nullValue) {
+                    default:
+                        return "nullValue: enum value expected";
+                    case 0:
+                        break;
+                    }
+                }
+                if (message.numberValue != null && message.hasOwnProperty("numberValue")) {
+                    if (properties.kind === 1)
+                        return "kind: multiple values";
+                    properties.kind = 1;
+                    if (typeof message.numberValue !== "number")
+                        return "numberValue: number expected";
+                }
+                if (message.stringValue != null && message.hasOwnProperty("stringValue")) {
+                    if (properties.kind === 1)
+                        return "kind: multiple values";
+                    properties.kind = 1;
+                    if (!$util.isString(message.stringValue))
+                        return "stringValue: string expected";
+                }
+                if (message.boolValue != null && message.hasOwnProperty("boolValue")) {
+                    if (properties.kind === 1)
+                        return "kind: multiple values";
+                    properties.kind = 1;
+                    if (typeof message.boolValue !== "boolean")
+                        return "boolValue: boolean expected";
+                }
+                if (message.structValue != null && message.hasOwnProperty("structValue")) {
+                    if (properties.kind === 1)
+                        return "kind: multiple values";
+                    properties.kind = 1;
+                    {
+                        var error = $root.google.protobuf.Struct.verify(message.structValue);
+                        if (error)
+                            return "structValue." + error;
+                    }
+                }
+                if (message.listValue != null && message.hasOwnProperty("listValue")) {
+                    if (properties.kind === 1)
+                        return "kind: multiple values";
+                    properties.kind = 1;
+                    {
+                        var error = $root.google.protobuf.ListValue.verify(message.listValue);
+                        if (error)
+                            return "listValue." + error;
+                    }
+                }
+                return null;
+            };
+
+            /**
+             * Creates a Value message from a plain object. Also converts values to their respective internal types.
+             * @function fromObject
+             * @memberof google.protobuf.Value
+             * @static
+             * @param {Object.<string,*>} object Plain object
+             * @returns {google.protobuf.Value} Value
+             */
+            Value.fromObject = function fromObject(object) {
+                if (object instanceof $root.google.protobuf.Value)
+                    return object;
+                var message = new $root.google.protobuf.Value();
+                switch (object.nullValue) {
+                case "NULL_VALUE":
+                case 0:
+                    message.nullValue = 0;
+                    break;
+                }
+                if (object.numberValue != null)
+                    message.numberValue = Number(object.numberValue);
+                if (object.stringValue != null)
+                    message.stringValue = String(object.stringValue);
+                if (object.boolValue != null)
+                    message.boolValue = Boolean(object.boolValue);
+                if (object.structValue != null) {
+                    if (typeof object.structValue !== "object")
+                        throw TypeError(".google.protobuf.Value.structValue: object expected");
+                    message.structValue = $root.google.protobuf.Struct.fromObject(object.structValue);
+                }
+                if (object.listValue != null) {
+                    if (typeof object.listValue !== "object")
+                        throw TypeError(".google.protobuf.Value.listValue: object expected");
+                    message.listValue = $root.google.protobuf.ListValue.fromObject(object.listValue);
+                }
+                return message;
+            };
+
+            /**
+             * Creates a plain object from a Value message. Also converts values to other types if specified.
+             * @function toObject
+             * @memberof google.protobuf.Value
+             * @static
+             * @param {google.protobuf.Value} message Value
+             * @param {$protobuf.IConversionOptions} [options] Conversion options
+             * @returns {Object.<string,*>} Plain object
+             */
+            Value.toObject = function toObject(message, options) {
+                if (!options)
+                    options = {};
+                var object = {};
+                if (message.nullValue != null && message.hasOwnProperty("nullValue")) {
+                    object.nullValue = options.enums === String ? $root.google.protobuf.NullValue[message.nullValue] : message.nullValue;
+                    if (options.oneofs)
+                        object.kind = "nullValue";
+                }
+                if (message.numberValue != null && message.hasOwnProperty("numberValue")) {
+                    object.numberValue = options.json && !isFinite(message.numberValue) ? String(message.numberValue) : message.numberValue;
+                    if (options.oneofs)
+                        object.kind = "numberValue";
+                }
+                if (message.stringValue != null && message.hasOwnProperty("stringValue")) {
+                    object.stringValue = message.stringValue;
+                    if (options.oneofs)
+                        object.kind = "stringValue";
+                }
+                if (message.boolValue != null && message.hasOwnProperty("boolValue")) {
+                    object.boolValue = message.boolValue;
+                    if (options.oneofs)
+                        object.kind = "boolValue";
+                }
+                if (message.structValue != null && message.hasOwnProperty("structValue")) {
+                    object.structValue = $root.google.protobuf.Struct.toObject(message.structValue, options);
+                    if (options.oneofs)
+                        object.kind = "structValue";
+                }
+                if (message.listValue != null && message.hasOwnProperty("listValue")) {
+                    object.listValue = $root.google.protobuf.ListValue.toObject(message.listValue, options);
+                    if (options.oneofs)
+                        object.kind = "listValue";
+                }
+                return object;
+            };
+
+            /**
+             * Converts this Value to JSON.
+             * @function toJSON
+             * @memberof google.protobuf.Value
+             * @instance
+             * @returns {Object.<string,*>} JSON object
+             */
+            Value.prototype.toJSON = function toJSON() {
+                return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
+            };
+
+            return Value;
+        })();
+
+        /**
+         * NullValue enum.
+         * @name google.protobuf.NullValue
+         * @enum {number}
+         * @property {number} NULL_VALUE=0 NULL_VALUE value
+         */
+        protobuf.NullValue = (function() {
+            var valuesById = {}, values = Object.create(valuesById);
+            values[valuesById[0] = "NULL_VALUE"] = 0;
+            return values;
+        })();
+
+        protobuf.ListValue = (function() {
+
+            /**
+             * Properties of a ListValue.
+             * @memberof google.protobuf
+             * @interface IListValue
+             * @property {Array.<google.protobuf.IValue>|null} [values] ListValue values
+             */
+
+            /**
+             * Constructs a new ListValue.
+             * @memberof google.protobuf
+             * @classdesc Represents a ListValue.
+             * @implements IListValue
+             * @constructor
+             * @param {google.protobuf.IListValue=} [properties] Properties to set
+             */
+            function ListValue(properties) {
+                this.values = [];
+                if (properties)
+                    for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
+                        if (properties[keys[i]] != null)
+                            this[keys[i]] = properties[keys[i]];
+            }
+
+            /**
+             * ListValue values.
+             * @member {Array.<google.protobuf.IValue>} values
+             * @memberof google.protobuf.ListValue
+             * @instance
+             */
+            ListValue.prototype.values = $util.emptyArray;
+
+            /**
+             * Creates a new ListValue instance using the specified properties.
+             * @function create
+             * @memberof google.protobuf.ListValue
+             * @static
+             * @param {google.protobuf.IListValue=} [properties] Properties to set
+             * @returns {google.protobuf.ListValue} ListValue instance
+             */
+            ListValue.create = function create(properties) {
+                return new ListValue(properties);
+            };
+
+            /**
+             * Encodes the specified ListValue message. Does not implicitly {@link google.protobuf.ListValue.verify|verify} messages.
+             * @function encode
+             * @memberof google.protobuf.ListValue
+             * @static
+             * @param {google.protobuf.IListValue} message ListValue message or plain object to encode
+             * @param {$protobuf.Writer} [writer] Writer to encode to
+             * @returns {$protobuf.Writer} Writer
+             */
+            ListValue.encode = function encode(message, writer) {
+                if (!writer)
+                    writer = $Writer.create();
+                if (message.values != null && message.values.length)
+                    for (var i = 0; i < message.values.length; ++i)
+                        $root.google.protobuf.Value.encode(message.values[i], writer.uint32(/* id 1, wireType 2 =*/10).fork()).ldelim();
+                return writer;
+            };
+
+            /**
+             * Encodes the specified ListValue message, length delimited. Does not implicitly {@link google.protobuf.ListValue.verify|verify} messages.
+             * @function encodeDelimited
+             * @memberof google.protobuf.ListValue
+             * @static
+             * @param {google.protobuf.IListValue} message ListValue message or plain object to encode
+             * @param {$protobuf.Writer} [writer] Writer to encode to
+             * @returns {$protobuf.Writer} Writer
+             */
+            ListValue.encodeDelimited = function encodeDelimited(message, writer) {
+                return this.encode(message, writer).ldelim();
+            };
+
+            /**
+             * Decodes a ListValue message from the specified reader or buffer.
+             * @function decode
+             * @memberof google.protobuf.ListValue
+             * @static
+             * @param {$protobuf.Reader|Uint8Array} reader Reader or buffer to decode from
+             * @param {number} [length] Message length if known beforehand
+             * @returns {google.protobuf.ListValue} ListValue
+             * @throws {Error} If the payload is not a reader or valid buffer
+             * @throws {$protobuf.util.ProtocolError} If required fields are missing
+             */
+            ListValue.decode = function decode(reader, length) {
+                if (!(reader instanceof $Reader))
+                    reader = $Reader.create(reader);
+                var end = length === undefined ? reader.len : reader.pos + length, message = new $root.google.protobuf.ListValue();
+                while (reader.pos < end) {
+                    var tag = reader.uint32();
+                    switch (tag >>> 3) {
+                    case 1:
+                        if (!(message.values && message.values.length))
+                            message.values = [];
+                        message.values.push($root.google.protobuf.Value.decode(reader, reader.uint32()));
+                        break;
+                    default:
+                        reader.skipType(tag & 7);
+                        break;
+                    }
+                }
+                return message;
+            };
+
+            /**
+             * Decodes a ListValue message from the specified reader or buffer, length delimited.
+             * @function decodeDelimited
+             * @memberof google.protobuf.ListValue
+             * @static
+             * @param {$protobuf.Reader|Uint8Array} reader Reader or buffer to decode from
+             * @returns {google.protobuf.ListValue} ListValue
+             * @throws {Error} If the payload is not a reader or valid buffer
+             * @throws {$protobuf.util.ProtocolError} If required fields are missing
+             */
+            ListValue.decodeDelimited = function decodeDelimited(reader) {
+                if (!(reader instanceof $Reader))
+                    reader = new $Reader(reader);
+                return this.decode(reader, reader.uint32());
+            };
+
+            /**
+             * Verifies a ListValue message.
+             * @function verify
+             * @memberof google.protobuf.ListValue
+             * @static
+             * @param {Object.<string,*>} message Plain object to verify
+             * @returns {string|null} `null` if valid, otherwise the reason why it is not
+             */
+            ListValue.verify = function verify(message) {
+                if (typeof message !== "object" || message === null)
+                    return "object expected";
+                if (message.values != null && message.hasOwnProperty("values")) {
+                    if (!Array.isArray(message.values))
+                        return "values: array expected";
+                    for (var i = 0; i < message.values.length; ++i) {
+                        var error = $root.google.protobuf.Value.verify(message.values[i]);
+                        if (error)
+                            return "values." + error;
+                    }
+                }
+                return null;
+            };
+
+            /**
+             * Creates a ListValue message from a plain object. Also converts values to their respective internal types.
+             * @function fromObject
+             * @memberof google.protobuf.ListValue
+             * @static
+             * @param {Object.<string,*>} object Plain object
+             * @returns {google.protobuf.ListValue} ListValue
+             */
+            ListValue.fromObject = function fromObject(object) {
+                if (object instanceof $root.google.protobuf.ListValue)
+                    return object;
+                var message = new $root.google.protobuf.ListValue();
+                if (object.values) {
+                    if (!Array.isArray(object.values))
+                        throw TypeError(".google.protobuf.ListValue.values: array expected");
+                    message.values = [];
+                    for (var i = 0; i < object.values.length; ++i) {
+                        if (typeof object.values[i] !== "object")
+                            throw TypeError(".google.protobuf.ListValue.values: object expected");
+                        message.values[i] = $root.google.protobuf.Value.fromObject(object.values[i]);
+                    }
+                }
+                return message;
+            };
+
+            /**
+             * Creates a plain object from a ListValue message. Also converts values to other types if specified.
+             * @function toObject
+             * @memberof google.protobuf.ListValue
+             * @static
+             * @param {google.protobuf.ListValue} message ListValue
+             * @param {$protobuf.IConversionOptions} [options] Conversion options
+             * @returns {Object.<string,*>} Plain object
+             */
+            ListValue.toObject = function toObject(message, options) {
+                if (!options)
+                    options = {};
+                var object = {};
+                if (options.arrays || options.defaults)
+                    object.values = [];
+                if (message.values && message.values.length) {
+                    object.values = [];
+                    for (var j = 0; j < message.values.length; ++j)
+                        object.values[j] = $root.google.protobuf.Value.toObject(message.values[j], options);
+                }
+                return object;
+            };
+
+            /**
+             * Converts this ListValue to JSON.
+             * @function toJSON
+             * @memberof google.protobuf.ListValue
+             * @instance
+             * @returns {Object.<string,*>} JSON object
+             */
+            ListValue.prototype.toJSON = function toJSON() {
+                return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
+            };
+
+            return ListValue;
+        })();
+
+        return protobuf;
+    })();
+
+    return google;
 })();
 
 $root.rankland_live_contest_producer = (function() {
@@ -2800,6 +4602,7 @@ $root.rankland_live_contest_producer = (function() {
          * @memberof rankland_live_contest_producer
          * @interface IBatchProducerEvent
          * @property {Array.<rankland_live_contest_producer.IProducerEvent>|null} [events] BatchProducerEvent events
+         * @property {number|null} [streamRevision] BatchProducerEvent streamRevision
          */
 
         /**
@@ -2825,6 +4628,14 @@ $root.rankland_live_contest_producer = (function() {
          * @instance
          */
         BatchProducerEvent.prototype.events = $util.emptyArray;
+
+        /**
+         * BatchProducerEvent streamRevision.
+         * @member {number} streamRevision
+         * @memberof rankland_live_contest_producer.BatchProducerEvent
+         * @instance
+         */
+        BatchProducerEvent.prototype.streamRevision = 0;
 
         /**
          * Creates a new BatchProducerEvent instance using the specified properties.
@@ -2853,6 +4664,8 @@ $root.rankland_live_contest_producer = (function() {
             if (message.events != null && message.events.length)
                 for (var i = 0; i < message.events.length; ++i)
                     $root.rankland_live_contest_producer.ProducerEvent.encode(message.events[i], writer.uint32(/* id 1, wireType 2 =*/10).fork()).ldelim();
+            if (message.streamRevision != null && Object.hasOwnProperty.call(message, "streamRevision"))
+                writer.uint32(/* id 2, wireType 0 =*/16).uint32(message.streamRevision);
             return writer;
         };
 
@@ -2891,6 +4704,9 @@ $root.rankland_live_contest_producer = (function() {
                     if (!(message.events && message.events.length))
                         message.events = [];
                     message.events.push($root.rankland_live_contest_producer.ProducerEvent.decode(reader, reader.uint32()));
+                    break;
+                case 2:
+                    message.streamRevision = reader.uint32();
                     break;
                 default:
                     reader.skipType(tag & 7);
@@ -2936,6 +4752,9 @@ $root.rankland_live_contest_producer = (function() {
                         return "events." + error;
                 }
             }
+            if (message.streamRevision != null && message.hasOwnProperty("streamRevision"))
+                if (!$util.isInteger(message.streamRevision))
+                    return "streamRevision: integer expected";
             return null;
         };
 
@@ -2961,6 +4780,8 @@ $root.rankland_live_contest_producer = (function() {
                     message.events[i] = $root.rankland_live_contest_producer.ProducerEvent.fromObject(object.events[i]);
                 }
             }
+            if (object.streamRevision != null)
+                message.streamRevision = object.streamRevision >>> 0;
             return message;
         };
 
@@ -2979,11 +4800,15 @@ $root.rankland_live_contest_producer = (function() {
             var object = {};
             if (options.arrays || options.defaults)
                 object.events = [];
+            if (options.defaults)
+                object.streamRevision = 0;
             if (message.events && message.events.length) {
                 object.events = [];
                 for (var j = 0; j < message.events.length; ++j)
                     object.events[j] = $root.rankland_live_contest_producer.ProducerEvent.toObject(message.events[j], options);
             }
+            if (message.streamRevision != null && message.hasOwnProperty("streamRevision"))
+                object.streamRevision = message.streamRevision;
             return object;
         };
 
