@@ -7,7 +7,6 @@
 import { AllowedRequestMethod, IBwcxApiRequestAdaptorArgs, AbstractResponseParser } from 'bwcx-api-client';
 import { configure as configureUrlcat } from 'urlcat-fork';
 import { CreateContestReqDTO, CreateContestRespDTO, UpdateContestReqDTO, ResetContestEventsReqDTO, AppendContestEventsReqDTO, AppendContestEventsRespDTO, GetPublicContestEventsReqDTO, GetPublicContestEventsRespDTO, StreamPublicContestEventStreamNotificationsReqDTO, GetContestEventStreamReqDTO, GetContestEventStreamRespDTO, GetPublicContestEventStreamReqDTO, GetPublicContestEventStreamRespDTO, DeleteContestEventStreamProducerLockReqDTO, GetContestReqDTO, GetContestRespDTO, GetPublicContestReqDTO, GetPublicContestRespDTO, GetPublicContestUsersReqDTO, GetPublicContestUsersRespDTO, GetPublicContestUserReqDTO, GetPublicContestUserRespDTO, GetContestUsersReqDTO, GetContestUsersRespDTO, GetContestUserReqDTO, GetContestUserRespDTO, UpdateContestUserReqDTO } from '../modules/contest/contest.dto';
-import { DemoGetReqDTO, DemoGetRespDTO } from '../modules/demo/demo.dto';
 
 const urlcat = configureUrlcat({ arrayFormat: 'repeat' });
 
@@ -197,17 +196,6 @@ export class ApiClient<T = undefined> {
    */
   public async updateContestUser(req: UpdateContestUserReqDTO, opts?: T): Promise<null> {
     return this._r(this._rArgs.p(req, opts)).then((resp) => this._rp.pat(null, resp));
-  }
-
-  /**
-   * 一个示例接口
-   *
-   * @param {DemoGetReqDTO} req The request data (compatible with ReqDTO).
-   * @param {T} opts Extra request options.
-   * @returns {DemoGetRespDTO} The response data (RespDTO).
-   */
-  public async demoGet(req: DemoGetReqDTO, opts?: T): Promise<DemoGetRespDTO> {
-    return this._r(this._rArgs.q(req, opts)).then((resp) => this._rp.pat(DemoGetRespDTO, resp));
   }
 
   private _rArgs = {
@@ -576,28 +564,6 @@ export class ApiClient<T = undefined> {
           path: '/api/v2/contests/:uk/users/:userId',
           req: UpdateContestUserReqDTO,
           resp: null as null,
-        },
-      };
-    },
-    q: (req: DemoGetReqDTO, opts?: any) => {
-      return {
-        method: 'GET' as AllowedRequestMethod,
-        url: this._uf('/api/demoGet/:id', {
-          param: {
-            id: req.id,
-          },
-          query: {
-            page: req.page,
-          },
-        }),
-        data: {},
-        extraOpts: opts,
-        metadata: {
-          name: 'demoGet',
-          method: 'GET',
-          path: '/api/demoGet/:id',
-          req: DemoGetReqDTO,
-          resp: DemoGetRespDTO,
         },
       };
     },

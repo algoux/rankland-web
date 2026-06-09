@@ -1,13 +1,13 @@
-version: '3'
 services:
   app:
     image: algoux/rankland-web:latest
-    network_mode: host
-    restart: unless-stopped
     container_name: rankland-web
+    restart: unless-stopped
+    ports:
+      - 3000:3000
     environment:
       TZ: Asia/Shanghai
-      SERVER_HOST: 127.0.0.1
+      SERVER_HOST: 0.0.0.0
       SERVER_PORT: 3000
       MYSQL_HOST: 127.0.0.1
       MYSQL_PORT: 3306
@@ -19,3 +19,8 @@ services:
       REDIS_DB: 0
       REDIS_PASS:
       AUTH_TOKEN: your-auth-token
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3000/api/checkHealth"]
+      interval: 3s
+      timeout: 5s
+      retries: 3
