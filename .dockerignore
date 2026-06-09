@@ -1,6 +1,9 @@
 *
 !Dockerfile
 !package.json
+!pnpm-lock.yaml
+!.node-version
+!.npmrc
 !node_modules/
 !node_modules/**
 !app/
