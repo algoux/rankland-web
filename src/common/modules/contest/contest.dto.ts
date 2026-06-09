@@ -18,6 +18,8 @@ import {
 } from 'class-validator';
 import type * as srk from '@algoux/standard-ranklist';
 
+export const MAX_APPEND_CONTEST_EVENTS_BATCH_SIZE = 1000;
+
 // #region Nested DTOs
 
 export class LinkWithTitleDTO {
@@ -322,6 +324,7 @@ export class AppendContestEventsReqDTO {
   @FromBody()
   @IsArray()
   @ArrayMinSize(1)
+  @ArrayMaxSize(MAX_APPEND_CONTEST_EVENTS_BATCH_SIZE)
   public events: any[];
 }
 

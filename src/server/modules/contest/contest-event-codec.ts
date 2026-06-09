@@ -12,6 +12,7 @@ import {
   ContestProducerEventBO,
   ContestTimeDurationBO,
 } from './contest-event-bo';
+import { MAX_APPEND_CONTEST_EVENTS_BATCH_SIZE } from '@common/modules/contest/contest.dto';
 import LogicException from '@server/exceptions/logic.exception';
 import { ErrCode } from '@common/enums/err-code.enum';
 
@@ -98,6 +99,9 @@ function validateProducerBatch(batch: ContestProducerBatchBO, prefix: string): P
   }
   if (!batch.events?.length) {
     throw invalidBatch('event batch must not be empty');
+  }
+  if (batch.events.length > MAX_APPEND_CONTEST_EVENTS_BATCH_SIZE) {
+    throw invalidBatch(`event batch size must not exceed ${MAX_APPEND_CONTEST_EVENTS_BATCH_SIZE}`);
   }
 
   let previousEventId = 0;

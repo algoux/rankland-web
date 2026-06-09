@@ -3,9 +3,25 @@ import { plainToInstance } from 'class-transformer';
 import { validate } from 'class-validator';
 import { ApiClient } from '@common/api/api-client';
 import {
+  rankland_live_contest_common,
+  rankland_live_contest_producer,
+} from '@common/proto/rankland_live_contest';
+import {
   AppendContestEventsReqDTO,
   GetPublicContestEventsReqDTO,
+  MAX_APPEND_CONTEST_EVENTS_BATCH_SIZE,
 } from '@common/modules/contest/contest.dto';
+
+function createProgressEvents(count: number) {
+  return Array.from({ length: count }, (_, index) => ({
+    eventId: index + 1,
+    type: rankland_live_contest_common.EventType.SOLUTION_ON_PROGRESS,
+    solutionOnProgressData: {
+      solutionId: index + 1,
+      percentageProgress: 50,
+    },
+  }));
+}
 
 async function validationProperties(instance: object): Promise<string[]> {
   const errors = await validate(instance as any);
@@ -26,6 +42,35 @@ describe('contest event API contract', () => {
 
     await expect(validationProperties(missing)).resolves.toContain('streamRevision');
     await expect(validationProperties(valid)).resolves.not.toContain('streamRevision');
+  });
+
+  it('limits append request batches to at most 1000 events for JSON and protobuf bodies', async () => {
+    const atLimit = plainToInstance(AppendContestEventsReqDTO, {
+      uk: 'contest-a',
+      streamRevision: 1,
+      events: createProgressEvents(MAX_APPEND_CONTEST_EVENTS_BATCH_SIZE),
+    });
+    const overLimit = plainToInstance(AppendContestEventsReqDTO, {
+      uk: 'contest-a',
+      streamRevision: 1,
+      events: createProgressEvents(MAX_APPEND_CONTEST_EVENTS_BATCH_SIZE + 1),
+    });
+    const protobufBytes = rankland_live_contest_producer.BatchProducerEvent.encode({
+      streamRevision: 1,
+      events: createProgressEvents(MAX_APPEND_CONTEST_EVENTS_BATCH_SIZE + 1),
+    }).finish();
+    const protobufBody = rankland_live_contest_producer.BatchProducerEvent.toObject(
+      rankland_live_contest_producer.BatchProducerEvent.decode(protobufBytes),
+      { longs: String, enums: String },
+    );
+    const protobufOverLimit = plainToInstance(AppendContestEventsReqDTO, {
+      uk: 'contest-a',
+      ...protobufBody,
+    });
+
+    await expect(validationProperties(atLimit)).resolves.not.toContain('events');
+    await expect(validationProperties(overLimit)).resolves.toContain('events');
+    await expect(validationProperties(protobufOverLimit)).resolves.toContain('events');
   });
 
   it('requires a positive integer streamRevision on catch-up requests', async () => {

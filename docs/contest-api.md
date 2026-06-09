@@ -180,6 +180,8 @@ Body:
 }
 ```
 
+`events` 单次 append 请求必须包含 `1..1000` 条事件；JSON 与 raw protobuf 追加都使用相同的条数限制。
+
 Data:
 
 ```json
@@ -408,7 +410,7 @@ application/x-protobuf
 application/protobuf
 ```
 
-该端点通过 `@ProtobufContract(BatchProducerEvent, null)` 声明可接收 protobuf 请求体，由通用 protobuf 中间件在校验前解码。Body 是 `BatchProducerEvent` protobuf 原始 bytes，必须包含 `streamRevision`，最大 5 MiB（超出 `413`）。`application/octet-stream` 不被接受（`415`）。无法解码的字节返回 `400`。追加端点无 protobuf 响应消息，响应固定为 JSON（与 JSON 追加相同）。
+该端点通过 `@ProtobufContract(BatchProducerEvent, null)` 声明可接收 protobuf 请求体，由通用 protobuf 中间件在校验前解码。Body 是 `BatchProducerEvent` protobuf 原始 bytes，必须包含 `streamRevision`，最大 5 MiB（超出 `413`），且 `events` 条数必须在 `1..1000` 范围内。`application/octet-stream` 不被接受（`415`）。无法解码的字节返回 `400`。追加端点无 protobuf 响应消息，响应固定为 JSON（与 JSON 追加相同）。
 
 append 请求的 `streamRevision` 必须等于服务端当前 `contest_event_stream.stream_revision`，否则返回 `ErrCode.ContestEventStreamRevisionMismatch`（`100007`）。
 

@@ -4,6 +4,7 @@ import {
   rankland_live_contest_common,
   rankland_live_contest_producer,
 } from '@common/proto/rankland_live_contest';
+import { MAX_APPEND_CONTEST_EVENTS_BATCH_SIZE } from '@common/modules/contest/contest.dto';
 import {
   getContestEventsResponseToJson,
   compactSettledProgressEvents,
@@ -14,6 +15,14 @@ import {
 
 function event(overrides: Partial<rankland_live_contest_producer.IProducerEvent>) {
   return overrides as rankland_live_contest_producer.IProducerEvent;
+}
+
+function progressEvent(eventId: number) {
+  return event({
+    eventId,
+    type: rankland_live_contest_common.EventType.SOLUTION_ON_PROGRESS,
+    solutionOnProgressData: { solutionId: eventId, percentageProgress: 50 },
+  });
 }
 
 describe('contest event codec', () => {
@@ -35,6 +44,18 @@ describe('contest event codec', () => {
     };
 
     expect(() => parseProducerBatchJson(data)).toThrow(/strictly increasing/);
+  });
+
+  it('rejects producer batches with more than 1000 events', () => {
+    const data = {
+      streamRevision: 1,
+      events: Array.from(
+        { length: MAX_APPEND_CONTEST_EVENTS_BATCH_SIZE + 1 },
+        (_, index) => progressEvent(index + 1),
+      ),
+    };
+
+    expect(() => parseProducerBatchJson(data)).toThrow(/1000/);
   });
 
   it('rejects events with missing required semantic fields', () => {
