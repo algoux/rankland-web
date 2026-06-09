@@ -28,7 +28,7 @@
 
   <section
     v-else
-    class="my-8"
+    class="my-8 rankland-ranklist-page"
     data-id="ranklist-content"
     :data-ranklist-id="ranklistId"
     :data-row-count="String(ranklistData.srk.rows.length)"
@@ -46,7 +46,7 @@
       :meta="ranklistData.info"
       show-footer
       show-filter
-      table-class="ml-4"
+      table-class="rankland-ranklist-table-frame"
     />
   </section>
 </template>

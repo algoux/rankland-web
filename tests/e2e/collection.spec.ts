@@ -470,6 +470,42 @@ test.describe('/collection/:id', () => {
     await expect(popup).toBeHidden();
   });
 
+  test('keeps wide ranklist tables in page-level overflow for mobile browser zoom', async ({ page }) => {
+    await page.setViewportSize({ width: 260, height: 844 });
+    await page.emulateMedia({ colorScheme: 'dark' });
+    await page.addInitScript(() => {
+      window.localStorage.setItem('StyledRanklistSettingsIntroRead', 'true');
+      window.localStorage.removeItem('CollectionNavCollapsed');
+    });
+    await page.goto('/collection/official?rankId=test-key');
+
+    await expect(page.locator('[data-id="collection-sidebar"]')).toHaveCSS('width', '80px');
+    await expect(page.locator('[data-id="collection-ranklist-content"][data-ranklist-id="test-key"]')).toBeVisible({
+      timeout: 20_000,
+    });
+
+    const overflowMetrics = await page.evaluate(() => {
+      const table = document.querySelector('.srk-main table')?.getBoundingClientRect();
+      const tableScroll = document.querySelector('.srk-ranklist-table-scroll');
+      const tableScrollStyle = tableScroll ? getComputedStyle(tableScroll) : null;
+      return {
+        viewportWidth: document.documentElement.clientWidth,
+        documentScrollWidth: document.documentElement.scrollWidth,
+        bodyScrollWidth: document.body.scrollWidth,
+        tableRight: table ? Math.round(table.right) : 0,
+        tableWidth: table ? Math.round(table.width) : 0,
+        tableScrollOverflowX: tableScrollStyle?.overflowX ?? '',
+      };
+    });
+
+    expect(overflowMetrics.viewportWidth).toBe(260);
+    expect(overflowMetrics.tableWidth).toBeGreaterThan(overflowMetrics.viewportWidth);
+    expect(overflowMetrics.tableRight).toBeGreaterThan(overflowMetrics.viewportWidth);
+    expect(overflowMetrics.documentScrollWidth).toBeGreaterThan(overflowMetrics.viewportWidth);
+    expect(overflowMetrics.bodyScrollWidth).toBeGreaterThan(overflowMetrics.viewportWidth);
+    expect(overflowMetrics.tableScrollOverflowX).toBe('visible');
+  });
+
   test('uses full-width expanded sidebar on narrow mobile layouts', async ({ page }) => {
     await page.setViewportSize({ width: 600, height: 900 });
     await page.emulateMedia({ colorScheme: 'dark' });

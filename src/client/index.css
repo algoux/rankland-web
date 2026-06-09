@@ -437,6 +437,22 @@
     margin: -2rem calc(50% - 50vw);
   }
 
+  .rankland-ranklist-table-frame {
+    margin-left: 1rem;
+  }
+
+  @media (max-width: 1023px) {
+    .rankland-ranklist-page {
+      width: 100vw;
+      margin-left: calc(50% - 50vw);
+      margin-right: calc(50% - 50vw);
+    }
+
+    .rankland-ranklist-table-frame {
+      margin-left: 0;
+    }
+  }
+
   [data-sonner-toaster].toaster {
     --normal-bg: hsl(var(--background));
     --normal-border: hsl(var(--border));

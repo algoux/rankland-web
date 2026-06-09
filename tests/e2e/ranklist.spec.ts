@@ -468,7 +468,7 @@ test.describe('/ranklist/:id', () => {
   });
 
   test('keeps the restored ranklist toolbar inside a narrow mobile viewport', async ({ page }) => {
-    await page.setViewportSize({ width: 390, height: 844 });
+    await page.setViewportSize({ width: 260, height: 844 });
     await page.addInitScript(() => {
       window.localStorage.setItem('StyledRanklistSettingsIntroRead', 'true');
     });
@@ -497,16 +497,90 @@ test.describe('/ranklist/:id', () => {
     await page.locator('[data-id="ranklist-org-option-Alpha University"]').click();
     await expect(page.locator('[data-id="ranklist-org-selected-count"]')).toHaveText('已选择 2 个');
 
-    const metrics = await page.evaluate(() => ({
-      innerWidth: window.innerWidth,
-      scrollX: window.scrollX,
-      documentWidth: document.documentElement.scrollWidth,
-      bodyWidth: document.body.scrollWidth,
-    }));
+    const metrics = await page.evaluate(() => {
+      const pick = (selector: string) => {
+        const element = document.querySelector(selector);
+        if (!element) {
+          return null;
+        }
+        const rect = element.getBoundingClientRect();
+        return {
+          left: Math.round(rect.left),
+          right: Math.round(rect.right),
+          width: Math.round(rect.width),
+        };
+      };
+
+      return {
+        innerWidth: window.innerWidth,
+        scrollX: window.scrollX,
+        documentWidth: document.documentElement.scrollWidth,
+        bodyWidth: document.body.scrollWidth,
+        toolbar: pick('.srk-ranklist-toolbar'),
+        filterPrimary: pick('.srk-ranklist-filter-primary'),
+        dropdown: pick('.srk-multi-select-dropdown'),
+        table: pick('.srk-main table'),
+      };
+    });
 
     expect(metrics.scrollX).toBe(0);
-    expect(metrics.documentWidth).toBeLessThanOrEqual(metrics.innerWidth);
-    expect(metrics.bodyWidth).toBeLessThanOrEqual(metrics.innerWidth);
+    expect(metrics.toolbar).not.toBeNull();
+    expect(metrics.filterPrimary).not.toBeNull();
+    expect(metrics.dropdown).not.toBeNull();
+    expect(metrics.table).not.toBeNull();
+    expect(metrics.toolbar!.right).toBeLessThanOrEqual(metrics.innerWidth);
+    expect(metrics.filterPrimary!.right).toBeLessThanOrEqual(metrics.innerWidth);
+    expect(metrics.dropdown!.right).toBeLessThanOrEqual(metrics.innerWidth);
+    expect(metrics.table!.right).toBeGreaterThan(metrics.innerWidth);
+    expect(metrics.documentWidth).toBeGreaterThanOrEqual(metrics.table!.right);
+    expect(metrics.bodyWidth).toBeGreaterThanOrEqual(metrics.table!.right);
+  });
+
+  test('uses edge-to-edge ranklist content below desktop widths while preserving desktop gutters', async ({ page }) => {
+    const readLayout = () => page.evaluate(() => {
+      const pick = (selector: string) => {
+        const element = document.querySelector(selector);
+        if (!element) {
+          return null;
+        }
+        const rect = element.getBoundingClientRect();
+        return {
+          left: Math.round(rect.left),
+          right: Math.round(rect.right),
+          width: Math.round(rect.width),
+        };
+      };
+
+      return {
+        innerWidth: window.innerWidth,
+        ranklistContent: pick('[data-id="ranklist-content"]'),
+        tableFrame: pick('.srk-ranklist-table-scroll'),
+      };
+    });
+
+    await page.addInitScript(() => {
+      window.localStorage.setItem('StyledRanklistSettingsIntroRead', 'true');
+    });
+    await page.setViewportSize({ width: 390, height: 844 });
+    await page.goto('/ranklist/test-key');
+    await expect(page.locator('[data-id="ranklist-content"][data-ranklist-id="test-key"]')).toBeVisible({ timeout: 20_000 });
+
+    const mobileLayout = await readLayout();
+    expect(mobileLayout.innerWidth).toBe(390);
+    expect(mobileLayout.ranklistContent).toMatchObject({ left: 0, right: 390, width: 390 });
+    expect(mobileLayout.tableFrame?.left).toBe(0);
+
+    await page.setViewportSize({ width: 900, height: 844 });
+    const tabletLayout = await readLayout();
+    expect(tabletLayout.innerWidth).toBe(900);
+    expect(tabletLayout.ranklistContent).toMatchObject({ left: 0, right: 900, width: 900 });
+    expect(tabletLayout.tableFrame?.left).toBe(0);
+
+    await page.setViewportSize({ width: 1280, height: 900 });
+    const desktopLayout = await readLayout();
+    expect(desktopLayout.innerWidth).toBe(1280);
+    expect(desktopLayout.ranklistContent).toMatchObject({ left: 50, right: 1230, width: 1180 });
+    expect(desktopLayout.tableFrame?.left).toBe(66);
   });
 
   test('shows Ranklist Not Found when API returns code=11', async ({ page }) => {
