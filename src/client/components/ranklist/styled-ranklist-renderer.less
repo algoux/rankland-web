@@ -562,6 +562,148 @@
   }
 }
 
+/*
+  srk 渲染器组件当前还不支持指定 light/dark，仅根据系统自动适应。
+  所以先临时覆盖。后续支持时可移除。
+*/
+html.light {
+  --srk-color-user-second-name: #828282;
+  --srk-color-accepted-bg: #99ff99;
+  --srk-color-failed-bg: #ff9999;
+  --srk-color-frozen-bg: #c8d6fa;
+  --srk-color-fb-bg: #009900;
+  --srk-color-fb-text: #ffffff;
+  --srk-color-fb-attempted-text: #f0f0f0;
+  --srk-color-accepted-text: #007f04;
+  --srk-color-failed-text: #b00000;
+  --srk-color-frozen-text: #304fa5;
+  --srk-color-fb-status-text: #007f04;
+  --srk-color-gold: #f8bf29;
+  --srk-color-silver: #c0c0c0;
+  --srk-color-bronze: #d69872;
+  --srk-color-iron: #a94442;
+  --srk-color-marker-red: #ff8989;
+  --srk-color-marker-orange: #ffa67e;
+  --srk-color-marker-yellow: #fff275;
+  --srk-color-marker-green: #64de7c;
+  --srk-color-marker-blue: #6dbeff;
+  --srk-color-marker-purple: #d384ff;
+  --srk-color-marker-pink: #ffc9f2;
+}
+
+html.dark {
+  --srk-color-user-second-name: #a5a5a5;
+  --srk-color-accepted-bg: #084b00;
+  --srk-color-failed-bg: #690700;
+  --srk-color-frozen-bg: #2f4a8e;
+  --srk-color-fb-bg: #248e18;
+  --srk-color-fb-text: #ffffff;
+  --srk-color-fb-attempted-text: #f0f0f0;
+  --srk-color-accepted-text: #5ce667;
+  --srk-color-failed-text: #ff7373;
+  --srk-color-frozen-text: #8fa4ff;
+  --srk-color-fb-status-text: #5ce667;
+  --srk-color-gold: #c39824;
+  --srk-color-silver: #adadad;
+  --srk-color-bronze: #b77750;
+  --srk-color-iron: #773b3a;
+  --srk-color-marker-red: #692424;
+  --srk-color-marker-orange: #6f3216;
+  --srk-color-marker-yellow: #6b620f;
+  --srk-color-marker-green: #20542b;
+  --srk-color-marker-blue: #3c6f98;
+  --srk-color-marker-purple: #54236f;
+  --srk-color-marker-pink: #79416c;
+}
+
+html.light .srk-progress-bar-container {
+  --color-progress-bar-normal-bg: #14c514;
+  --color-progress-bar-frozen-bg: #648fff;
+  --color-progress-bar-border-color: #cacaca;
+  --color-progress-bar-slider-bg: #eee;
+  --color-progress-bar-slider-border-color: #d2d2d2;
+  --color-progress-bar-live-text: #0faa0f;
+  --color-progress-bar-time-machine-text-color: #2e68ff;
+  --color-progress-bar-time-machine-text-shadow: 0 0 5px #f2f7ff, 0 0 10px #aec5ff, 0 0 15px #a0bbff, 0 0 20px white;
+}
+
+html.dark .srk-progress-bar-container {
+  --color-progress-bar-normal-bg: #1a740f;
+  --color-progress-bar-frozen-bg: #1440ab;
+  --color-progress-bar-border-color: #666;
+  --color-progress-bar-slider-bg: #bfbfbf;
+  --color-progress-bar-slider-border-color: #eee;
+  --color-progress-bar-live-text: #15d415;
+  --color-progress-bar-time-machine-text-color: #8fb1ff;
+  --color-progress-bar-time-machine-text-shadow: 0 0 5px #0058ff, 0 0 10px #0942d2, 0 0 15px #004aff, 0 0 20px white;
+}
+
+html.light .srk-main {
+  --srk-table-head-bg: rgba(255, 255, 255, 0.75);
+  --srk-table-head-solid-bg: #fff;
+  --srk-table-border: #ddd;
+  --srk-table-striped-bg: rgba(30, 30, 30, 0.06);
+}
+
+html.dark .srk-main {
+  --srk-table-head-bg: rgba(25, 25, 25, 0.75);
+  --srk-table-head-solid-bg: #191919;
+  --srk-table-border: #3a3a3a;
+  --srk-table-striped-bg: rgba(215, 215, 215, 0.08);
+}
+
+html.light .srk-main .srk-marker.srk-marker-dot {
+  border-color: #999;
+}
+
+html.dark .srk-main .srk-marker.srk-marker-dot {
+  border-color: #696969;
+}
+
+html.light .srk-solution-result-text {
+  --srk-color-accepted: #009a04;
+  --srk-color-accepted-masked: #03f90b;
+  --srk-color-rejected: #f75757;
+  --srk-color-frozen: #727bec;
+}
+
+html.dark .srk-solution-result-text {
+  --srk-color-accepted: #06a20a;
+  --srk-color-accepted-masked: #03f90b;
+  --srk-color-rejected: #e83a3a;
+  --srk-color-frozen: #737df9;
+}
+
+html.light .srk-user-modal-info {
+  --border-color: #777;
+  --divider-color: #ececec;
+}
+
+html.dark .srk-user-modal-info {
+  --border-color: #999;
+  --divider-color: #3e3e3e;
+}
+
+html.light .srk-general-modal-root {
+  --mask-bg: rgba(55, 55, 55, 0.6);
+  --content-bg: #fff;
+  --header-bg: #fff;
+  --header-color: rgba(0, 0, 0, 0.85);
+  --header-botder-bottom: #e9e9e9;
+  --close-color: #000;
+  --close-hover-color: #444;
+}
+
+html.dark .srk-general-modal-root {
+  --mask-bg: rgba(0, 0, 0, 0.65);
+  --content-bg: #222;
+  --header-bg: #222;
+  --header-color: rgba(255, 255, 255, 0.8);
+  --header-botder-bottom: #3b3b3b;
+  --close-color: rgba(255, 255, 255, 0.45);
+  --close-hover-color: #444;
+}
+
 html.dark .srk-ranklist-settings-modal {
   --srk-ranklist-settings-section-title-color: rgba(255, 255, 255, 0.92);
   --srk-ranklist-settings-section-divider-color: rgba(255, 255, 255, 0.16);

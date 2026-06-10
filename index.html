@@ -17,8 +17,21 @@
     <title>RankLand</title>
     <style>body{margin:0;background-color:#f0f2f5;opacity:0;transition:opacity 0.7s cubic-bezier(0.22, 0.61, 0.36, 1);}@media(prefers-color-scheme:dark){body{background-color:#000;}}</style>
     <script>
-      var systemThemeMediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
-      document.documentElement.className = systemThemeMediaQuery.matches ? 'dark' : 'light';
+      (function () {
+        var themeMode = 'auto';
+        try {
+          var storedThemeMode = window.localStorage && window.localStorage.getItem('RanklandThemeMode');
+          if (storedThemeMode === 'auto' || storedThemeMode === 'light' || storedThemeMode === 'dark') {
+            themeMode = storedThemeMode;
+          }
+        } catch (e) {}
+        var systemThemeMediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
+        var themeName = themeMode === 'light' || themeMode === 'dark'
+          ? themeMode
+          : (systemThemeMediaQuery.matches ? 'dark' : 'light');
+        document.documentElement.className = themeName;
+        document.documentElement.style.colorScheme = themeName;
+      })();
     </script>
   </head>
   <body>

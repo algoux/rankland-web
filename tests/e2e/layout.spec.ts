@@ -66,30 +66,31 @@ test.describe('site layout', () => {
     expect(activeIndicator.indicatorWidth).toBeGreaterThan(40);
     expect(activeIndicator.indicatorWidth).toBeLessThan(activeIndicator.itemWidth);
     await expect(page.locator('details').filter({ hasText: '切换' })).toHaveCount(0);
+    await expect(page.locator('[data-id="site-switch-menu"]')).toHaveCount(0);
 
-    await page.getByRole('button', { name: '切换' }).hover();
-    await expect(page.locator('[data-id="site-switch-menu"]')).toBeVisible();
-    const siteSwitchMenuItem = page.getByRole('menuitem', { name: /中国站点/ });
-    await expect(siteSwitchMenuItem).toBeVisible();
-    await siteSwitchMenuItem.hover();
-    await expect(page.locator('[data-id="site-switch-menu"]')).toBeVisible();
+    await page.getByRole('button', { name: '主题模式' }).click();
+    const themeModeMenu = page.locator('[data-id="theme-mode-menu"]');
+    await expect(themeModeMenu).toBeVisible();
+    await expect(themeModeMenu.getByRole('menuitemradio', { name: /自动/ })).toHaveAttribute('data-state', 'checked');
+    await expect(themeModeMenu.getByRole('menuitemradio', { name: /亮色/ })).toBeVisible();
+    await expect(themeModeMenu.getByRole('menuitemradio', { name: /暗色/ })).toBeVisible();
   });
 
-  test('keeps the site switch menu open after a mobile tap', async ({ page }) => {
+  test('keeps the theme mode menu open after a mobile tap', async ({ page }) => {
     await page.setViewportSize({ width: 390, height: 844 });
     await page.addInitScript(() => {
       window.localStorage.setItem('StyledRanklistSettingsIntroRead', 'true');
     });
     await page.goto('/collection/official?rankId=test-key');
 
-    await page.getByRole('button', { name: '切换' }).click();
-    const siteSwitchMenu = page.locator('[data-id="site-switch-menu"]');
-    await expect(siteSwitchMenu).toBeVisible();
+    await page.getByRole('button', { name: '主题模式' }).click();
+    const themeModeMenu = page.locator('[data-id="theme-mode-menu"]');
+    await expect(themeModeMenu).toBeVisible();
     await page.waitForTimeout(160);
-    await expect(siteSwitchMenu).toBeVisible();
+    await expect(themeModeMenu).toBeVisible();
   });
 
-  test('keeps restored ranklist metadata and site switcher hydration-clean', async ({ page }) => {
+  test('keeps restored ranklist metadata and theme menu hydration-clean', async ({ page }) => {
     const consoleMessages: string[] = [];
     page.on('console', (message) => {
       if (message.type() === 'warning' || message.type() === 'error') {

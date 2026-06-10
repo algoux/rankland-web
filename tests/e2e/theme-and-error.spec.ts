@@ -1,4 +1,23 @@
 import { expect, test } from '@playwright/test';
+import type { Page } from '@playwright/test';
+
+async function readRanklistStyleProbe(page: Page) {
+  return page.evaluate(() => {
+    const acceptedCell = document.querySelector('.srk-main .srk-prest-status-block-accepted');
+    const headerCell = document.querySelector('.srk-main table thead > tr > th');
+    if (!acceptedCell || !headerCell) {
+      return null;
+    }
+
+    const acceptedStyle = getComputedStyle(acceptedCell);
+    const headerStyle = getComputedStyle(headerCell);
+    return {
+      acceptedBackground: acceptedStyle.backgroundColor,
+      headerBackground: headerStyle.backgroundColor,
+      headerBorder: headerStyle.borderBottomColor,
+    };
+  });
+}
 
 test.describe('cross-cutting RankLand behavior', () => {
   test('keeps the legacy document head defaults', async ({ page, context }) => {
@@ -159,5 +178,71 @@ test.describe('cross-cutting RankLand behavior', () => {
     await page.emulateMedia({ colorScheme: 'light' });
 
     await expect(page.locator('html')).toHaveClass(/light/);
+  });
+
+  test('persists forced theme modes and can return to auto', async ({ page }) => {
+    await page.emulateMedia({ colorScheme: 'light' });
+    await page.goto('/');
+
+    await expect(page.locator('html')).toHaveClass(/light/, { timeout: 20_000 });
+
+    await page.getByRole('button', { name: '主题模式' }).click();
+    await page.locator('[data-id="theme-mode-menu"]').getByRole('menuitemradio', { name: /暗色/ }).click();
+    await expect(page.locator('html')).toHaveClass(/dark/);
+    await expect.poll(() => page.evaluate(() => window.localStorage.getItem('RanklandThemeMode'))).toBe('dark');
+
+    await page.reload();
+    await expect(page.locator('html')).toHaveClass(/dark/);
+
+    await page.emulateMedia({ colorScheme: 'dark' });
+    await page.getByRole('button', { name: '主题模式' }).click();
+    await page.locator('[data-id="theme-mode-menu"]').getByRole('menuitemradio', { name: /亮色/ }).click();
+    await expect(page.locator('html')).toHaveClass(/light/);
+    await expect.poll(() => page.evaluate(() => window.localStorage.getItem('RanklandThemeMode'))).toBe('light');
+
+    await page.reload();
+    await expect(page.locator('html')).toHaveClass(/light/);
+
+    await page.getByRole('button', { name: '主题模式' }).click();
+    await page.locator('[data-id="theme-mode-menu"]').getByRole('menuitemradio', { name: /自动/ }).click();
+    await expect.poll(() => page.evaluate(() => window.localStorage.getItem('RanklandThemeMode'))).toBe('auto');
+    await expect(page.locator('html')).toHaveClass(/dark/);
+
+    await page.emulateMedia({ colorScheme: 'light' });
+    await expect(page.locator('html')).toHaveClass(/light/);
+  });
+
+  test('forces ranklist renderer package styles when system color scheme differs', async ({ page }) => {
+    await page.emulateMedia({ colorScheme: 'dark' });
+    await page.addInitScript(() => {
+      if (!window.localStorage.getItem('RanklandThemeMode')) {
+        window.localStorage.setItem('RanklandThemeMode', 'light');
+      }
+      window.localStorage.setItem('StyledRanklistSettingsIntroRead', 'true');
+    });
+
+    await page.goto('/ranklist/test-key');
+
+    await expect(page.locator('html')).toHaveClass(/light/, { timeout: 20_000 });
+    await expect(page.locator('.srk-main .srk-prest-status-block-accepted').first()).toBeVisible();
+    expect(await readRanklistStyleProbe(page)).toEqual({
+      acceptedBackground: 'rgb(153, 255, 153)',
+      headerBackground: 'rgba(255, 255, 255, 0.75)',
+      headerBorder: 'rgb(221, 221, 221)',
+    });
+
+    await page.emulateMedia({ colorScheme: 'light' });
+    await page.evaluate(() => {
+      window.localStorage.setItem('RanklandThemeMode', 'dark');
+    });
+    await page.reload();
+
+    await expect(page.locator('html')).toHaveClass(/dark/);
+    await expect(page.locator('.srk-main .srk-prest-status-block-accepted').first()).toBeVisible();
+    expect(await readRanklistStyleProbe(page)).toEqual({
+      acceptedBackground: 'rgb(8, 75, 0)',
+      headerBackground: 'rgba(25, 25, 25, 0.75)',
+      headerBorder: 'rgb(58, 58, 58)',
+    });
   });
 });

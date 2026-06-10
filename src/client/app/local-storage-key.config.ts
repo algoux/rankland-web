@@ -4,4 +4,5 @@ export enum LocalStorageKey {
   CollectionNavCollapsed = 'CollectionNavCollapsed',
   StyledRanklistSettings = 'StyledRanklistSettings',
   StyledRanklistSettingsIntroRead = 'StyledRanklistSettingsIntroRead',
+  ThemeMode = 'RanklandThemeMode',
 }

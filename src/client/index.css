@@ -555,31 +555,23 @@
     opacity: 0.6;
   }
 
-  .rankland-switch-site {
+  .rankland-theme-mode {
     position: relative;
   }
 
-  .rankland-switch-site-trigger {
-    display: inline-flex;
-    height: 32px;
-    align-items: center;
-    border: 0;
-    background: transparent;
-    padding: 4px 8px;
+  .rankland-theme-mode-trigger {
+    height: 32px !important;
+    width: 32px !important;
+    border-radius: 2px !important;
     color: hsl(var(--foreground));
-    font-size: 14px;
-    line-height: 1.5715;
-    cursor: pointer;
-    transition: color 0.3s, background-color 0.3s;
   }
 
-  .rankland-switch-site-trigger:hover,
-  .rankland-switch-site:focus-within .rankland-switch-site-trigger {
-    background: hsl(var(--accent));
+  .rankland-theme-mode-trigger:hover,
+  .rankland-theme-mode-trigger[data-state='open'] {
     color: rgb(var(--rankland-primary-rgb));
   }
 
-  .rankland-switch-site-menu {
+  .rankland-theme-mode-menu {
     z-index: 40;
     width: max-content;
     min-width: 120px;
@@ -592,35 +584,20 @@
     box-shadow: 0 3px 6px -4px rgba(0, 0, 0, 0.12), 0 6px 16px rgba(0, 0, 0, 0.08), 0 9px 28px 8px rgba(0, 0, 0, 0.05);
   }
 
-  .rankland-switch-site-menu-item {
-    display: flex;
-    width: 100%;
-    align-items: center;
-    justify-content: space-between;
-    gap: 12px;
-    border: 0;
-    background: transparent;
-    padding: 5px 12px;
-    color: inherit;
-    font-size: 14px;
+  .rankland-theme-mode-menu-item {
+    gap: 8px;
+    padding-right: 12px;
     line-height: 22px;
+  }
+
+  .rankland-theme-mode-menu-item > svg {
+    width: 16px;
+    height: 16px;
+    flex: 0 0 auto;
+  }
+
+  .rankland-theme-mode-menu-text {
     word-break: keep-all;
-  }
-
-  .rankland-switch-site-menu-item:hover {
-    background: hsl(var(--accent));
-    color: hsl(var(--accent-foreground));
-  }
-
-  .rankland-switch-site-menu-text {
-    display: flex;
-    flex-direction: column;
-  }
-
-  .rankland-switch-site-menu-description {
-    color: hsl(var(--muted-foreground));
-    font-size: 12px;
-    line-height: 18px;
   }
 
   .rankland-collection-page {

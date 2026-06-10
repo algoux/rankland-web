@@ -1,123 +1,80 @@
 <script setup lang="ts">
-import { computed, onBeforeUnmount, ref } from 'vue';
-import { useRoute } from 'vue-router';
-import { ExternalLink } from 'lucide-vue-next';
+import { computed, inject } from 'vue';
+import { Monitor, Moon, Sun } from 'lucide-vue-next';
 import {
   DropdownMenu,
   DropdownMenuContent,
-  DropdownMenuGroup,
-  DropdownMenuItem,
+  DropdownMenuRadioGroup,
+  DropdownMenuRadioItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { formatCurrentUrl } from '@/app/current-url';
-import { getRanklandRuntimeConfig } from '@/app/config';
+import { Button } from '@/components/ui/button';
+import { THEME_TOKEN, type ThemeMode } from '@/lib/theme';
 
-const route = useRoute();
-const config = getRanklandRuntimeConfig();
-const menuOpen = ref(false);
-let closeTimer: ReturnType<typeof window.setTimeout> | null = null;
+const themeService = inject(THEME_TOKEN, undefined);
 
-const currentUrl = computed(() => formatCurrentUrl({
-  protocol: typeof window === 'undefined' ? 'https:' : window.location.protocol,
-  host: typeof window === 'undefined' ? config.hostGlobal : window.location.host,
-  pathname: route.path,
-  query: route.query,
-}).url);
+const themeModeOptions = [
+  { value: 'auto', label: '自动', icon: Monitor },
+  { value: 'light', label: '亮色', icon: Sun },
+  { value: 'dark', label: '暗色', icon: Moon },
+] as const;
 
-const target = computed(() => {
-  if (config.siteAlias === 'cnn') {
-    return {
-      label: '全球站点',
-      description: '',
-      host: config.hostGlobal,
-    };
-  }
-  return {
-    label: '中国站点',
-    description: '特别速度优化',
-    host: config.hostCN,
-  };
-});
+const currentThemeMode = computed<ThemeMode>(() => themeService?.state.mode || 'auto');
+const currentThemeOption = computed(() =>
+  themeModeOptions.find((option) => option.value === currentThemeMode.value) || themeModeOptions[0],
+);
 
-function clearCloseTimer() {
-  if (closeTimer !== null) {
-    window.clearTimeout(closeTimer);
-    closeTimer = null;
+function isThemeMode(value: unknown): value is ThemeMode {
+  return value === 'auto' || value === 'light' || value === 'dark';
+}
+
+function handleThemeModeChange(value: string | string[] | undefined) {
+  const nextValue = Array.isArray(value) ? value[0] : value;
+  if (isThemeMode(nextValue)) {
+    themeService?.setMode(nextValue);
   }
 }
-
-function setMenuOpen(value: boolean) {
-  clearCloseTimer();
-  menuOpen.value = value;
-}
-
-function queueClose() {
-  clearCloseTimer();
-  closeTimer = window.setTimeout(() => {
-    menuOpen.value = false;
-    closeTimer = null;
-  }, 80);
-}
-
-function shouldUseHoverPointer(event: PointerEvent) {
-  return event.pointerType === 'mouse' && window.innerWidth > 768;
-}
-
-function handlePointerEnter(event: PointerEvent) {
-  if (shouldUseHoverPointer(event)) {
-    setMenuOpen(true);
-  }
-}
-
-function handlePointerLeave(event: PointerEvent) {
-  if (shouldUseHoverPointer(event)) {
-    queueClose();
-  }
-}
-
-onBeforeUnmount(() => {
-  clearCloseTimer();
-});
 </script>
 
 <template>
-  <DropdownMenu :open="menuOpen" :modal="false" @update:open="setMenuOpen">
-    <div
-      class="rankland-switch-site"
-      @pointerenter="handlePointerEnter"
-      @pointerleave="handlePointerLeave"
-    >
+  <DropdownMenu :modal="false">
+    <div class="rankland-theme-mode">
       <DropdownMenuTrigger as-child>
-        <button class="rankland-switch-site-trigger" type="button">
-          切换
-        </button>
+        <Button
+          type="button"
+          variant="ghost"
+          size="icon"
+          class="rankland-theme-mode-trigger"
+          data-id="theme-mode-trigger"
+          aria-label="主题模式"
+        >
+          <component :is="currentThemeOption.icon" data-icon="inline-start" />
+        </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent
-        class="rankland-switch-site-menu"
-        data-id="site-switch-menu"
+        class="rankland-theme-mode-menu"
+        data-id="theme-mode-menu"
         side="bottom"
         align="end"
         :side-offset="0"
         :collision-padding="8"
-        @pointerenter="handlePointerEnter"
-        @pointerleave="handlePointerLeave"
         @close-auto-focus.prevent
       >
-        <DropdownMenuGroup>
-          <DropdownMenuItem as-child class="rankland-switch-site-menu-item">
-            <a
-              :href="`//${target.host}${currentUrl}`"
-              target="_blank"
-              rel="noreferrer"
-            >
-              <span class="rankland-switch-site-menu-text">
-                <span>{{ target.label }}</span>
-                <span v-if="target.description" class="rankland-switch-site-menu-description">{{ target.description }}</span>
-              </span>
-              <ExternalLink data-icon="inline-end" />
-            </a>
-          </DropdownMenuItem>
-        </DropdownMenuGroup>
+        <DropdownMenuRadioGroup
+          :model-value="currentThemeMode"
+          @update:model-value="handleThemeModeChange"
+        >
+          <DropdownMenuRadioItem
+            v-for="option in themeModeOptions"
+            :key="option.value"
+            class="rankland-theme-mode-menu-item"
+            :data-id="`theme-mode-option-${option.value}`"
+            :value="option.value"
+          >
+            <component :is="option.icon" />
+            <span class="rankland-theme-mode-menu-text">{{ option.label }}</span>
+          </DropdownMenuRadioItem>
+        </DropdownMenuRadioGroup>
       </DropdownMenuContent>
     </div>
   </DropdownMenu>
