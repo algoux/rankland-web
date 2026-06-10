@@ -4,8 +4,9 @@ import { getRanklandRuntimeConfig } from './config';
 
 declare global {
   interface Window {
-    dataLayer?: unknown[][];
+    dataLayer?: Array<IArguments | unknown[]>;
     gtag?: (...args: unknown[]) => void;
+    __ranklandAnalyticsInstalled?: boolean;
   }
 }
 
@@ -14,6 +15,10 @@ export function installRanklandAnalytics(router: Router, win: Window = window) {
   if (!config.gtag) {
     return;
   }
+  if (win.__ranklandAnalyticsInstalled) {
+    return;
+  }
+  win.__ranklandAnalyticsInstalled = true;
 
   ensureGtag(config.gtag, win);
   sendPageView(router.currentRoute.value.path, router.currentRoute.value.query, config.gtag, win);
@@ -23,10 +28,10 @@ export function installRanklandAnalytics(router: Router, win: Window = window) {
 }
 
 function ensureGtag(tagId: string, win: Window) {
-  if (!win.gtag) {
+  if (typeof win.gtag !== 'function') {
     win.dataLayer = win.dataLayer || [];
-    win.gtag = (...args: unknown[]) => {
-      win.dataLayer?.push(args);
+    win.gtag = function gtag() {
+      win.dataLayer?.push(arguments);
     };
     win.gtag('js', new Date());
   }
