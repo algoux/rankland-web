@@ -17,7 +17,13 @@ const visible = ref(false);
   >
     <div>
       <p>
-        联系邮箱：<a href="mailto:algoux.org@gmail.com">algoux.org@gmail.com</a>
+        如需请求榜单收录或贡献数据，欢迎提交
+        <a href="https://github.com/algoux/srk-collection/issues/new" target="_blank" rel="noopener noreferrer">
+          Issue
+        </a>
+      </p>
+      <p>
+        亦可通过邮件联系我们：<a href="mailto:algoux.org@gmail.com">algoux.org@gmail.com</a>
       </p>
       <p>或加入讨论群：</p>
       <img :src="qqGroupImg" class="w-full" alt="RankLand QQ group" />
