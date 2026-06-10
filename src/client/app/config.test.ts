@@ -40,7 +40,7 @@ describe('rankland runtime config', () => {
       buildCommit: '1234567890abcdef',
     })).toEqual({
       label: '12345678',
-      href: 'https://github.com/algoux/rankland-web/commit/1234567890abcdef',
+      href: 'https://github.com/algoux/rankland-web/tree/1234567890abcdef',
     });
   });
 
