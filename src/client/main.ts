@@ -12,6 +12,7 @@ import type { ApiService } from './services/ranklist-api';
 import { createThemeService, THEME_TOKEN } from './lib/theme';
 import { installRanklandAnalytics } from './app/analytics';
 import { applyMacBlinkOptimizations } from './app/platform';
+import { installRouteProgress } from './app/route-progress';
 
 Vue.registerHooks(['setup', 'beforeRouteEnter', 'beforeRouteUpdate', 'beforeRouteLeave', 'asyncData']);
 
@@ -40,6 +41,7 @@ export function mainEntry({
   app.component(ClientOnly.name, ClientOnly);
 
   if (isClient) {
+    installRouteProgress(router);
     // Defer system theme sync until after Vue hydrates the SSR markup.
     window.setTimeout(() => {
       theme.mount(window);

@@ -4,7 +4,7 @@ node_modules/
 .agents/
 skills-lock.json
 dist/
-app/
+/app/
 coverage/
 test-results/
 playwright-report/
