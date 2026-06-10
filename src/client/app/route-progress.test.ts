@@ -53,7 +53,7 @@ describe('installRouteProgress', () => {
     hooks.beforeResolve[0](to, from);
 
     expect(nprogressMock.start).toHaveBeenCalledTimes(1);
-    expect(nprogressMock.set).toHaveBeenCalledWith(0.65);
+    expect(nprogressMock.set).toHaveBeenCalledWith(0.25);
   });
 
   it('finishes after successful and cancelled navigations', () => {
