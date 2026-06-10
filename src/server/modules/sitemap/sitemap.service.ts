@@ -130,13 +130,15 @@ export default class SitemapService {
       throw new Error(`RL API returned an invalid /rank/listall payload: ${payload.message || 'unknown error'}`);
     }
 
-    return payload.data.ranks.flatMap((rank) => {
-      if (typeof rank.uniqueKey !== 'string') {
-        return [];
-      }
-      const uniqueKey = rank.uniqueKey.trim();
-      return uniqueKey ? [uniqueKey] : [];
-    });
+    return payload.data.ranks
+      .flatMap((rank) => {
+        if (typeof rank.uniqueKey !== 'string') {
+          return [];
+        }
+        const uniqueKey = rank.uniqueKey.trim();
+        return uniqueKey ? [uniqueKey] : [];
+      })
+      .reverse();
   }
 
   private isRedisReady() {

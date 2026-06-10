@@ -35,22 +35,31 @@ function createFetch(ranks: unknown[]): FetchMock {
 }
 
 describe('SitemapService', () => {
-  it('loads ranklist unique keys from /rank/listall and caches only newline-delimited keys', async () => {
+  it('reverses /rank/listall unique keys before caching them as newline-delimited keys', async () => {
     const redis = createRedis();
     const fetchMock = createFetch([
-      { uniqueKey: 'alpha', name: 'Alpha', fileID: 'f1' },
-      { uniqueKey: 'beta', content: '{"ignored":true}' },
+      { uniqueKey: 'newest-rank', name: 'Newest', fileID: 'f1' },
+      { uniqueKey: 'middle-rank', content: '{"ignored":true}' },
+      { uniqueKey: 'oldest-rank' },
       { uniqueKey: '' },
       { uniqueKey: 123 },
       {},
     ]);
     const service = new SitemapService(redis as any);
 
-    await expect(service.getRanklistUniqueKeys({ fetchImpl: fetchMock as any })).resolves.toEqual(['alpha', 'beta']);
+    await expect(service.getRanklistUniqueKeys({ fetchImpl: fetchMock as any })).resolves.toEqual([
+      'oldest-rank',
+      'middle-rank',
+      'newest-rank',
+    ]);
 
     expect(fetchMock).toHaveBeenCalledTimes(1);
     expect(fetchMock.mock.calls[0][0]).toBe('https://rl-api.algoux.cn/rank/listall');
-    expect(redis.setex).toHaveBeenCalledWith(SITEMAP_CACHE_KEY, SITEMAP_CACHE_TTL_SECONDS, 'alpha\nbeta');
+    expect(redis.setex).toHaveBeenCalledWith(
+      SITEMAP_CACHE_KEY,
+      SITEMAP_CACHE_TTL_SECONDS,
+      'oldest-rank\nmiddle-rank\nnewest-rank',
+    );
   });
 
   it('uses cached unique keys without calling the RL API', async () => {
