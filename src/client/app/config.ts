@@ -77,7 +77,7 @@ export function getRanklandBuildCommitLink(config = getRanklandRuntimeConfig()) 
   }
   return {
     label: buildCommit.length > 8 ? buildCommit.slice(0, 8) : buildCommit,
-    href: `https://github.com/algoux/rankland-web/commit/${encodeURIComponent(buildCommit)}`,
+    href: `https://github.com/algoux/rankland-web/tree/${encodeURIComponent(buildCommit)}`,
   };
 }
 
