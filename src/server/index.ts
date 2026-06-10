@@ -115,6 +115,14 @@ export default class OurApp extends App {
     this.instance.use(cors());
     // favicon.ico
     this.instance.use(favicon(`${process.cwd()}/public/favicon.ico`));
+    // root-level public files such as robots.txt
+    this.instance.use(
+      koaStatic(`${process.cwd()}/public/`, {
+        index: false,
+        maxage: 0,
+        extensions: false,
+      }),
+    );
     // serve static files (remove it if use other way to serve static files like CDN)
     this.instance.use(
       mount(
