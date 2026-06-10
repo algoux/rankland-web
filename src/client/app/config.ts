@@ -15,6 +15,7 @@ export interface RanklandRuntimeConfig {
   livePollingInterval: number;
   wsBase: string;
   gtag: string;
+  buildCommit: string;
 }
 
 const routeDefs: Array<{ name: RanklandRouteName; path: string }> = [
@@ -65,6 +66,18 @@ export function getRanklandRuntimeConfig(env: Record<string, string | undefined>
     livePollingInterval: Number(env.LIVE_POLLING_INTERVAL || 10_000),
     wsBase: env.WS_BASE || '',
     gtag: env.GTAG || '',
+    buildCommit: env.BUILD_COMMIT || '',
+  };
+}
+
+export function getRanklandBuildCommitLink(config = getRanklandRuntimeConfig()) {
+  const buildCommit = config.buildCommit.trim();
+  if (!buildCommit) {
+    return undefined;
+  }
+  return {
+    label: buildCommit.length > 8 ? buildCommit.slice(0, 8) : buildCommit,
+    href: `https://github.com/algoux/rankland-web/commit/${encodeURIComponent(buildCommit)}`,
   };
 }
 

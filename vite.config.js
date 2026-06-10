@@ -15,6 +15,7 @@ function buildClientEnv() {
     LIVE_POLLING_INTERVAL: process.env.LIVE_POLLING_INTERVAL || '10000',
     WS_BASE: process.env.WS_BASE || '',
     GTAG: process.env.GTAG || '',
+    BUILD_COMMIT: process.env.BUILD_COMMIT || '',
   };
 }
 

@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import {
+  getRanklandBuildCommitLink,
   getFullUrl,
   getRanklandRuntimeConfig,
   ranklandRoutes,
@@ -23,12 +24,31 @@ describe('rankland runtime config', () => {
       CDN_API_BASE_SERVER: 'http://runtime-cdn',
       SITE_ALIAS: 'cnn',
       GTAG: 'G-RUNTIME',
+      BUILD_COMMIT: '1234567890abcdef',
     });
 
     expect(config.apiBaseServer).toBe('http://runtime-api');
     expect(config.cdnApiBaseServer).toBe('http://runtime-cdn');
     expect(config.siteAlias).toBe('cnn');
     expect(config.gtag).toBe('G-RUNTIME');
+    expect(config.buildCommit).toBe('1234567890abcdef');
+  });
+
+  it('builds an optional GitHub commit link with an eight-character label', () => {
+    expect(getRanklandBuildCommitLink({
+      ...getRanklandRuntimeConfig(),
+      buildCommit: '1234567890abcdef',
+    })).toEqual({
+      label: '12345678',
+      href: 'https://github.com/algoux/rankland-web/commit/1234567890abcdef',
+    });
+  });
+
+  it('omits the GitHub commit link when the build commit is absent', () => {
+    expect(getRanklandBuildCommitLink({
+      ...getRanklandRuntimeConfig(),
+      buildCommit: '',
+    })).toBeUndefined();
   });
 
   it('formats known rankland routes and full URLs', () => {

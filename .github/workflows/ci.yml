@@ -61,6 +61,7 @@ jobs:
           LIVE_POLLING_INTERVAL: ${{ vars.LIVE_POLLING_INTERVAL }}
           WS_BASE: ${{ vars.WS_BASE }}
           GTAG: ${{ vars.GTAG }}
+          BUILD_COMMIT: ${{ github.sha }}
         run: pnpm run build
 
       - name: Upload frontend assets to CDN

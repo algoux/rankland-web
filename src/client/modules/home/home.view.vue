@@ -102,7 +102,7 @@
       </p>
     </section>
 
-    <section class="rankland-section">
+    <section class="rankland-section mb-8">
       <h2 class="rankland-section-title">关于我们</h2>
       <div class="rankland-home-about">
         <p>algoUX: Where <span class="rankland-home-about-em-gradient"><strong>Algo</strong>rithms</span> Meet <strong class="rankland-home-about-em">UX</strong></p>
@@ -117,6 +117,10 @@
           <a href="https://algoux.org" target="_blank" rel="noopener">首页</a>
           <span class="mx-2">|</span>
           <a href="https://servicestatus.algoux.org" target="_blank" rel="noopener">服务状态</a>
+        </p>
+        <p v-if="buildCommitLink">
+          RankLand 构建版本
+          <a :href="buildCommitLink.href" target="_blank" rel="noopener">{{ buildCommitLink.label }}</a> · Powered by <a href="https://github.com/bwcxjs/bwcx" target="_blank" rel="noopener">bwcx</a>
         </p>
         <p v-if="showBeian">
           备案号：
@@ -139,7 +143,7 @@ import { Card } from '@/components/ui/card';
 import BeianLink from '@/components/site/BeianLink.vue';
 import ContactUs from '@/components/site/ContactUs.vue';
 import { formatTitle } from '@/app/title-format';
-import { getFullUrl, getRanklandRuntimeConfig, ranklandRoutes } from '@/app/config';
+import { getFullUrl, getRanklandBuildCommitLink, getRanklandRuntimeConfig, ranklandRoutes } from '@/app/config';
 import pasteThenACLogo from '@/assets/paste-then-ac_logo.png';
 import algoBootstrapLogo from '@/assets/algo-bootstrap_logo.png';
 
@@ -216,6 +220,10 @@ export default class Home extends Vue {
 
   get showBeian() {
     return getRanklandRuntimeConfig().siteAlias === 'cnn';
+  }
+
+  get buildCommitLink() {
+    return getRanklandBuildCommitLink();
   }
 
   async asyncData({ api }: AsyncDataOptions) {
