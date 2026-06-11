@@ -5,6 +5,10 @@
     :class="{ 'is-resizing': isResizing }"
     :style="{ height: `${remainingHeight}px` }"
     data-id="srk-playground-container"
+    @dragenter="handleFileDragEnter"
+    @dragover="handleFileDragOver"
+    @dragleave="handleFileDragLeave"
+    @drop="handleFileDrop"
   >
     <div
       ref="editorEl"
@@ -56,6 +60,20 @@
       </div>
     </div>
 
+    <div
+      v-if="isFileDragActive"
+      class="srk-playground-drop-overlay"
+      data-id="playground-drop-overlay"
+      role="status"
+      aria-live="polite"
+    >
+      <div class="srk-playground-drop-panel">
+        <FileUp class="srk-playground-drop-icon" :size="40" />
+        <p class="srk-playground-drop-title">拖放 srk 文件</p>
+        <p class="srk-playground-drop-text">释放后自动导入编辑器</p>
+      </div>
+    </div>
+
     <Modal
       :open="showWelcome"
       title="欢迎来到演练场！"
@@ -79,7 +97,8 @@
 <script setup lang="ts">
 import type { IDisposable, editor as MonacoEditorNamespace } from 'monaco-editor/esm/vs/editor/editor.api';
 import { computed, nextTick, onBeforeUnmount, onMounted, ref } from 'vue';
-import { CircleHelp } from 'lucide-vue-next';
+import { CircleHelp, FileUp } from 'lucide-vue-next';
+import { toast } from 'vue-sonner';
 import { Modal } from '@algoux/standard-ranklist-renderer-component-vue';
 import { Button } from '@/components/ui/button';
 import Loading from '@/components/common/Loading.vue';
@@ -112,11 +131,14 @@ const showWelcome = ref(false);
 const remainingHeight = ref(640);
 const editorWidth = ref(500);
 const isResizing = ref(false);
+const isFileDragActive = ref(false);
+const fileDragDepth = ref(0);
 
 const EDITOR_MIN_WIDTH = 320;
 const PREVIEW_MIN_WIDTH = 360;
 const DEFAULT_EDITOR_WIDTH = 500;
 const RESIZER_WIDTH = 7;
+const INVALID_SRK_FILE_MESSAGE = '不是有效的 srk 文件';
 
 let monacoApi: MonacoApi | null = null;
 let editor: MonacoEditorNamespace.IStandaloneCodeEditor | null = null;
@@ -330,10 +352,94 @@ function scheduleCodeSync() {
 }
 
 function syncEditorCode() {
+  changeTimer = undefined;
   if (!editor) {
     return;
   }
   code.value = editor.getValue() || '';
+}
+
+function setEditorCode(nextCode: string) {
+  if (changeTimer !== undefined) {
+    window.clearTimeout(changeTimer);
+    changeTimer = undefined;
+  }
+
+  code.value = nextCode;
+  if (editor && editor.getValue() !== nextCode) {
+    editor.setValue(nextCode);
+  }
+  editor?.focus();
+}
+
+function hasDraggedFiles(event: DragEvent) {
+  return Array.from(event.dataTransfer?.types || []).includes('Files');
+}
+
+function acceptFileDrag(event: DragEvent) {
+  if (!hasDraggedFiles(event)) {
+    return false;
+  }
+
+  event.preventDefault();
+  if (event.dataTransfer) {
+    event.dataTransfer.dropEffect = 'copy';
+  }
+  return true;
+}
+
+function handleFileDragEnter(event: DragEvent) {
+  if (!acceptFileDrag(event)) {
+    return;
+  }
+
+  fileDragDepth.value += 1;
+  isFileDragActive.value = true;
+}
+
+function handleFileDragOver(event: DragEvent) {
+  acceptFileDrag(event);
+}
+
+function handleFileDragLeave(event: DragEvent) {
+  if (!hasDraggedFiles(event)) {
+    return;
+  }
+
+  event.preventDefault();
+  fileDragDepth.value = Math.max(0, fileDragDepth.value - 1);
+  if (fileDragDepth.value === 0) {
+    isFileDragActive.value = false;
+  }
+}
+
+async function handleFileDrop(event: DragEvent) {
+  if (!acceptFileDrag(event)) {
+    return;
+  }
+
+  fileDragDepth.value = 0;
+  isFileDragActive.value = false;
+
+  const file = event.dataTransfer?.files?.[0];
+  if (!file) {
+    return;
+  }
+
+  if (!isJsonFile(file)) {
+    toast.error(INVALID_SRK_FILE_MESSAGE);
+    return;
+  }
+
+  try {
+    setEditorCode(await file.text());
+  } catch (error) {
+    console.error('[Playground] failed to read dropped file:', error);
+  }
+}
+
+function isJsonFile(file: File) {
+  return file.type === 'application/json' || file.name.toLowerCase().endsWith('.json');
 }
 
 function currentEditorTheme() {
@@ -356,6 +462,7 @@ function handleWelcomeOpenChange(open: boolean) {
 
 <style scoped>
 .srk-playground-container {
+  position: relative;
   display: flex;
   min-height: 480px;
   overflow: hidden;
@@ -409,7 +516,52 @@ function handleWelcomeOpenChange(open: boolean) {
   flex: 1;
   min-width: 0;
   overflow-x: auto;
-  padding: 0 1rem 1rem;
+  padding: 0 1rem 1rem 0;
+}
+
+.srk-playground-drop-overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 20;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgb(0 0 0 / 45%);
+  backdrop-filter: blur(2px);
+  pointer-events: none;
+}
+
+.srk-playground-drop-panel {
+  display: flex;
+  width: min(360px, calc(100% - 48px));
+  min-height: 160px;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  border: 1px dashed rgb(var(--rankland-primary-rgb));
+  border-radius: 8px;
+  background: hsl(var(--background));
+  color: hsl(var(--foreground));
+  box-shadow: 0 18px 48px rgb(0 0 0 / 26%);
+}
+
+.srk-playground-drop-icon {
+  color: rgb(var(--rankland-primary-rgb));
+}
+
+.srk-playground-drop-title {
+  margin: 8px 0 0;
+  font-size: 1rem;
+  font-weight: 700;
+  line-height: 1.4;
+}
+
+.srk-playground-drop-text {
+  margin: 0;
+  color: hsl(var(--muted-foreground));
+  font-size: 0.875rem;
+  line-height: 1.5;
 }
 
 .playground-welcome-content p {

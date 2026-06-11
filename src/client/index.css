@@ -492,8 +492,23 @@
     @apply bg-muted text-muted-foreground;
   }
 
+  .rankland-sonner-status-icon {
+    width: 20px;
+    height: 20px;
+    flex-shrink: 0;
+    stroke-width: 2;
+  }
+
   .rankland-sonner-success-icon {
     color: rgb(34, 197, 94);
+  }
+
+  .rankland-sonner-error-icon {
+    color: rgb(239, 68, 68);
+  }
+
+  .rankland-sonner-warning-icon {
+    color: rgb(245, 158, 11);
   }
 
   .rankland-site-header {

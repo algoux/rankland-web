@@ -1,4 +1,66 @@
-import { expect, test } from '@playwright/test';
+import { expect, test, type Page } from '@playwright/test';
+
+function createDroppedRanklistText() {
+  return JSON.stringify({
+    type: 'general',
+    version: '0.3.12',
+    contest: {
+      title: 'Dropped SRK Fixture',
+      startAt: '2024-04-01T10:00:00+08:00',
+      duration: [5, 'h'],
+      frozenDuration: [1, 'h'],
+    },
+    problems: [
+      {
+        title: 'Problem A',
+        alias: 'A',
+      },
+    ],
+    series: [
+      {
+        title: 'Rank',
+        rule: {
+          preset: 'ICPC',
+          options: {},
+        },
+      },
+    ],
+    rows: [
+      {
+        user: {
+          id: 'dropped-team',
+          name: 'Dropped Team',
+          organization: 'Dropped University',
+          official: true,
+        },
+        score: { value: 1, time: [42, 'min'] },
+        statuses: [
+          { result: 'AC', time: [42, 'min'], tries: 1 },
+        ],
+      },
+    ],
+    sorter: {
+      algorithm: 'ICPC',
+      config: {},
+    },
+  });
+}
+
+async function dispatchFileDragEvent(page: Page, type: string, text: string, fileName = 'ranklist.srk.json', fileType = 'application/json') {
+  await page.evaluate(({ eventType, fileText, droppedFileName, droppedFileType }) => {
+    const target = document.querySelector('[data-id="srk-playground-container"]');
+    if (!target) {
+      throw new Error('Playground container not found');
+    }
+    const dataTransfer = new DataTransfer();
+    dataTransfer.items.add(new File([fileText], droppedFileName, { type: droppedFileType }));
+    target.dispatchEvent(new DragEvent(eventType, {
+      bubbles: true,
+      cancelable: true,
+      dataTransfer,
+    }));
+  }, { eventType: type, fileText: text, droppedFileName: fileName, droppedFileType: fileType });
+}
 
 test.describe('/playground', () => {
   test('loads Monaco and the default srk preview', async ({ page }) => {
@@ -159,5 +221,79 @@ test.describe('/playground', () => {
 
     expect(stickyMetrics).not.toBeNull();
     expect(stickyMetrics!.gap).toBeLessThanOrEqual(1);
+  });
+
+  test('keeps the ranklist preview flush with the editor edge', async ({ page }) => {
+    await page.addInitScript(() => {
+      window.localStorage.setItem('PlaygroundWelcomeMessageRead', 'true');
+      window.localStorage.setItem('StyledRanklistSettingsIntroRead', 'true');
+    });
+    await page.goto('/playground');
+
+    await expect(page.locator('.monaco-editor').first()).toBeVisible({ timeout: 60_000 });
+    await expect(page.locator('[data-id="playground-preview"][data-row-count="3"]')).toBeVisible();
+
+    const previewAlignment = await page.evaluate(() => {
+      const preview = document.querySelector('.srk-playground-preview')?.getBoundingClientRect();
+      const table = document.querySelector('[data-id="playground-preview"] .srk-main table')?.getBoundingClientRect();
+      if (!preview || !table) {
+        return null;
+      }
+      return {
+        gap: Math.round(table.left - preview.left),
+        previewLeft: Math.round(preview.left),
+        tableLeft: Math.round(table.left),
+      };
+    });
+
+    expect(previewAlignment).not.toBeNull();
+    expect(previewAlignment!.gap).toBeLessThanOrEqual(1);
+  });
+
+  test('imports a dragged srk json file and shows a drop overlay', async ({ page }) => {
+    await page.addInitScript(() => {
+      window.localStorage.setItem('PlaygroundWelcomeMessageRead', 'true');
+      window.localStorage.setItem('StyledRanklistSettingsIntroRead', 'true');
+    });
+    await page.goto('/playground');
+
+    await expect(page.locator('.monaco-editor').first()).toBeVisible({ timeout: 60_000 });
+    await expect(page.locator('[data-id="playground-preview"][data-row-count="3"]')).toBeVisible();
+
+    const fileText = createDroppedRanklistText();
+    await dispatchFileDragEvent(page, 'dragenter', fileText);
+    await expect(page.locator('[data-id="playground-drop-overlay"]')).toBeVisible();
+    await expect(page.locator('[data-id="playground-drop-overlay"]')).toContainText('拖放');
+
+    await dispatchFileDragEvent(page, 'dragover', fileText);
+    await dispatchFileDragEvent(page, 'drop', fileText);
+
+    await expect(page.locator('[data-id="playground-drop-overlay"]')).toBeHidden();
+    await expect(page.locator('[data-id="playground-preview"][data-row-count="1"]')).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'Dropped SRK Fixture' })).toBeVisible();
+  });
+
+  test('rejects a dragged non-json file with an error toast', async ({ page }) => {
+    await page.addInitScript(() => {
+      window.localStorage.setItem('PlaygroundWelcomeMessageRead', 'true');
+      window.localStorage.setItem('StyledRanklistSettingsIntroRead', 'true');
+    });
+    await page.goto('/playground');
+
+    await expect(page.locator('.monaco-editor').first()).toBeVisible({ timeout: 60_000 });
+    await expect(page.locator('[data-id="playground-preview"][data-row-count="3"]')).toBeVisible();
+
+    await dispatchFileDragEvent(page, 'dragenter', 'not srk json', 'ranklist.txt', 'text/plain');
+    await expect(page.locator('[data-id="playground-drop-overlay"]')).toBeVisible();
+    await dispatchFileDragEvent(page, 'drop', 'not srk json', 'ranklist.txt', 'text/plain');
+
+    const errorToast = page.locator('[data-sonner-toast][data-type="error"]');
+    await expect(errorToast).toContainText('不是有效的 srk 文件');
+    const errorIcon = errorToast.locator('svg.rankland-sonner-error-icon');
+    await expect(errorIcon).toHaveClass(/rankland-sonner-status-icon/);
+    await expect(errorIcon).toHaveCSS('color', 'rgb(239, 68, 68)');
+    await expect(page.locator('[data-id="playground-drop-overlay"]')).toBeHidden();
+    await expect(page.locator('[data-id="playground-preview"][data-row-count="3"]')).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'Dropped SRK Fixture' })).toHaveCount(0);
   });
 });

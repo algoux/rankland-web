@@ -273,7 +273,9 @@ test.describe('/ranklist/:id', () => {
     await expect(page.locator('[data-id="ranklist-share-menu"]')).toBeHidden();
     const successToast = page.locator('[data-sonner-toast][data-type="success"]');
     await expect(successToast).toContainText('链接已复制');
-    await expect(successToast.locator('svg').first()).toHaveCSS('color', 'rgb(34, 197, 94)');
+    const successIcon = successToast.locator('svg.rankland-sonner-success-icon');
+    await expect(successIcon).toHaveClass(/rankland-sonner-status-icon/);
+    await expect(successIcon).toHaveCSS('color', 'rgb(34, 197, 94)');
     await expect(page.locator('[data-id="global-message"]')).toHaveCount(0);
     await expect(page.locator('.srk-ranklist-copied-notice')).toHaveCount(0);
     await page.locator('[data-id="ranklist-ref-links-more"]').hover();
@@ -311,6 +313,7 @@ test.describe('/ranklist/:id', () => {
     await expect(toaster).toHaveAttribute('data-sonner-theme', 'dark');
     const successToast = page.locator('[data-sonner-toast][data-type="success"]');
     await expect(successToast).toContainText('链接已复制');
+    await expect(successToast.locator('svg.rankland-sonner-success-icon')).toHaveClass(/rankland-sonner-status-icon/);
     await expect(successToast).toHaveCSS('background-color', 'rgb(0, 0, 0)');
     await expect(successToast).toHaveCSS('color', 'rgb(217, 217, 217)');
     await expect(successToast).toHaveCSS('border-color', 'rgb(66, 66, 66)');

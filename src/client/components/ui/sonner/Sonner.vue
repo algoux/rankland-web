@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed, onBeforeUnmount, onMounted, ref } from 'vue';
-import { CheckCircle2 } from 'lucide-vue-next';
+import { CheckCircle2, CircleX, TriangleAlert } from 'lucide-vue-next';
 import { Toaster as Sonner } from 'vue-sonner';
 import type { ToasterProps } from 'vue-sonner';
 import type { ThemeName } from '@/lib/theme';
@@ -70,7 +70,13 @@ onBeforeUnmount(() => {
     :toast-options="sonnerToastOptions"
   >
     <template #success-icon>
-      <CheckCircle2 class="rankland-sonner-success-icon" />
+      <CheckCircle2 class="rankland-sonner-status-icon rankland-sonner-success-icon" />
+    </template>
+    <template #error-icon>
+      <CircleX class="rankland-sonner-status-icon rankland-sonner-error-icon" />
+    </template>
+    <template #warning-icon>
+      <TriangleAlert class="rankland-sonner-status-icon rankland-sonner-warning-icon" />
     </template>
   </Sonner>
 </template>
