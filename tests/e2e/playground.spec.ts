@@ -121,4 +121,43 @@ test.describe('/playground', () => {
       return Math.round(editor?.getBoundingClientRect().width || 0);
     })).toBe(620);
   });
+
+  test('keeps the ranklist table header flush with the preview scrollport while scrolling', async ({ page }) => {
+    await page.addInitScript(() => {
+      window.localStorage.setItem('PlaygroundWelcomeMessageRead', 'true');
+      window.localStorage.setItem('StyledRanklistSettingsIntroRead', 'true');
+    });
+    await page.goto('/playground');
+
+    await expect(page.locator('.monaco-editor').first()).toBeVisible({ timeout: 60_000 });
+    await expect(page.locator('[data-id="playground-preview"][data-row-count="3"]')).toBeVisible();
+    await page.addStyleTag({
+      content: '.srk-playground-preview { height: 180px !important; }',
+    });
+
+    await page.evaluate(() => {
+      const preview = document.querySelector('.srk-playground-preview');
+      if (preview instanceof HTMLElement) {
+        preview.scrollTop = 360;
+        preview.scrollLeft = 120;
+      }
+    });
+    await page.waitForTimeout(100);
+
+    const stickyMetrics = await page.evaluate(() => {
+      const preview = document.querySelector('.srk-playground-preview')?.getBoundingClientRect();
+      const header = document.querySelector('[data-id="playground-preview"] .srk-main thead th')?.getBoundingClientRect();
+      if (!preview || !header) {
+        return null;
+      }
+      return {
+        gap: Math.round(header.top - preview.top),
+        headerTop: Math.round(header.top),
+        previewTop: Math.round(preview.top),
+      };
+    });
+
+    expect(stickyMetrics).not.toBeNull();
+    expect(stickyMetrics!.gap).toBeLessThanOrEqual(1);
+  });
 });

@@ -409,7 +409,7 @@ function handleWelcomeOpenChange(open: boolean) {
   flex: 1;
   min-width: 0;
   overflow-x: auto;
-  padding: 1rem;
+  padding: 0 1rem 1rem;
 }
 
 .playground-welcome-content p {
