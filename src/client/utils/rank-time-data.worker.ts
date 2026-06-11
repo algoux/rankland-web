@@ -10,19 +10,24 @@ import type { RankTimeWorkerRequest, RankTimeWorkerResponse } from './rank-time-
 
 let cachedKey = '';
 let cachedDataSet: RankTimeDataSet = createEmptyRankTimeDataSet();
+let cachedDataSetReady = false;
 
 function ensureDataSet(message: RankTimeWorkerRequest) {
-  if (cachedKey === message.cacheKey && cachedDataSet.totalUsers > 0) {
+  if (cachedKey === message.cacheKey && cachedDataSetReady) {
     return cachedDataSet;
+  }
+
+  if (!message.ranklist || !message.solutions || !message.unit) {
+    throw new Error('Rank time worker cache is not prepared');
   }
 
   cachedDataSet = getAllRankTimeData(message.ranklist, message.solutions, message.unit);
   cachedKey = message.cacheKey;
+  cachedDataSetReady = true;
   return cachedDataSet;
 }
 
-self.onmessage = (event: MessageEvent<RankTimeWorkerRequest>) => {
-  const message = event.data;
+export function handleRankTimeWorkerMessage(message: RankTimeWorkerRequest): RankTimeWorkerResponse {
   try {
     const dataSet = ensureDataSet(message);
     const response: RankTimeWorkerResponse = {
@@ -41,12 +46,18 @@ self.onmessage = (event: MessageEvent<RankTimeWorkerRequest>) => {
       });
     }
 
-    self.postMessage(response);
+    return response;
   } catch (error) {
-    self.postMessage({
+    return {
       requestId: message.requestId,
       kind: message.kind,
       error: error instanceof Error ? error.message : String(error),
-    } satisfies RankTimeWorkerResponse);
+    } satisfies RankTimeWorkerResponse;
   }
-};
+}
+
+if (typeof self !== 'undefined') {
+  self.onmessage = (event: MessageEvent<RankTimeWorkerRequest>) => {
+    self.postMessage(handleRankTimeWorkerMessage(event.data));
+  };
+}

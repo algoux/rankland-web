@@ -3,6 +3,7 @@ import { inject, onBeforeUnmount, onMounted, ref, watch } from 'vue';
 import { formatTimeDuration, secToTimeStr } from '@algoux/standard-ranklist-utils';
 import { THEME_TOKEN } from '@/lib/theme';
 import type { RankTimePoint, RankTimeSeriesSegment, RankTimeSolvedEventPoint } from '@/utils/rank-time-data.util';
+import { preloadRankCurveRenderer } from './rank-curve-loader';
 
 const props = defineProps<{
   unit: string;
@@ -39,7 +40,7 @@ async function renderChart() {
   if (!container.value || props.points.length === 0) {
     return;
   }
-  const { Chart } = await import('@antv/g2');
+  const { Chart } = await preloadRankCurveRenderer();
   const maxTime = props.points[props.points.length - 1].time;
   const maxRank = Math.min(Math.max(50, Math.max(...props.points.map((item) => item.rank)) + 10), props.totalUsers);
   const yTicks = [1];

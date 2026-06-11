@@ -82,6 +82,7 @@ import ContactUs from '@/components/site/ContactUs.vue';
 import BeianLink from '@/components/site/BeianLink.vue';
 import SrkAssetImage from '@/components/ranklist/SrkAssetImage.vue';
 import UserInfoModal from '@/components/ranklist/UserInfoModal.vue';
+import { preloadRankCurveRenderer } from '@/components/ranklist/rank-curve-loader';
 import {
   DEFAULT_STYLED_RANKLIST_SETTINGS,
   getEmptyStatusPlaceholder,
@@ -127,6 +128,8 @@ const RANK_TIME_WORKER_RESET_MESSAGE = 'Rank time worker reset';
 let rankTimeCalculationRequest = 0;
 let rankTimeWorker: Worker | null = null;
 let rankTimeWorkerCacheKey = '';
+let rankTimeWorkerPreparedCacheKey = '';
+let rankTimeWorkerPreparePromise: Promise<boolean> | null = null;
 let rankTimeWorkerDisabled = false;
 let rankTimeWorkerRequestId = 0;
 const rankTimeWorkerRequests = new Map<
@@ -335,6 +338,7 @@ onMounted(() => {
   window.addEventListener('resize', syncClientWidth);
   void finishInitialRanklistHydrationRender();
   scheduleRankTimeDataPreparation();
+  scheduleRankCurveRendererPreload();
   if (settingsIntroRead.value !== 'true') {
     settingsIntroModalOpen.value = true;
   }
@@ -651,6 +655,8 @@ function resetRankTimeWorker(error = new Error(RANK_TIME_WORKER_RESET_MESSAGE)) 
   rankTimeWorker?.terminate();
   rankTimeWorker = null;
   rankTimeWorkerCacheKey = '';
+  rankTimeWorkerPreparedCacheKey = '';
+  rankTimeWorkerPreparePromise = null;
 }
 
 function ensureRankTimeWorker(cacheKey: string) {
@@ -709,9 +715,8 @@ function postRankTimeWorkerRequest(payload: RankTimeWorkerRequestPayload) {
   });
 }
 
-function makeRankTimeWorkerBasePayload() {
+function makeRankTimeWorkerDataPayload() {
   return {
-    cacheKey: getRankTimeWorkerCacheKey(),
     ranklist: toPlainRankTimePayload(memorizedData.value),
     solutions: toPlainRankTimePayload(solutions.value),
     unit: getProperRankTimeChunkUnit(memorizedData.value.contest),
@@ -720,17 +725,79 @@ function makeRankTimeWorkerBasePayload() {
 
 async function prepareRankTimeDataInWorker() {
   if (!canUseRankTimeWorker()) {
+    return false;
+  }
+
+  const cacheKey = getRankTimeWorkerCacheKey();
+  if (rankTimeWorkerPreparedCacheKey === cacheKey) {
+    return true;
+  }
+  if (rankTimeWorkerPreparePromise) {
+    return rankTimeWorkerPreparePromise;
+  }
+
+  const promise = postRankTimeWorkerRequest({
+    kind: 'prepare',
+    cacheKey,
+    ...makeRankTimeWorkerDataPayload(),
+  })
+    .then(() => {
+      if (rankTimeWorkerCacheKey === cacheKey) {
+        rankTimeWorkerPreparedCacheKey = cacheKey;
+      }
+      return true;
+    })
+    .catch((error) => {
+      if (!rankTimeWorkerDisabled && !isRankTimeWorkerResetError(error)) {
+        console.warn('[RankTimeData] worker preparation failed:', error);
+      }
+      return false;
+    })
+    .finally(() => {
+      if (rankTimeWorkerPreparePromise === promise) {
+        rankTimeWorkerPreparePromise = null;
+      }
+    });
+
+  rankTimeWorkerPreparePromise = promise;
+  return promise;
+}
+
+function scheduleRankCurveRendererPreload() {
+  if (typeof window === 'undefined') {
     return;
   }
-  try {
-    await postRankTimeWorkerRequest({
-      kind: 'prepare',
-      ...makeRankTimeWorkerBasePayload(),
+
+  const run = () => {
+    void preloadRankCurveRenderer().catch((error) => {
+      console.warn('[RankCurve] renderer preload failed:', error);
     });
+  };
+
+  const idleWindow = window as Window & {
+    requestIdleCallback?: (callback: () => void, options?: { timeout: number }) => number;
+  };
+  if (idleWindow.requestIdleCallback) {
+    idleWindow.requestIdleCallback(run, { timeout: 3000 });
+    return;
+  }
+
+  scheduleRankTimeCalculation(run);
+}
+
+async function waitForPreparedRankTimeWorkerCache(cacheKey: string) {
+  if (rankTimeWorkerPreparedCacheKey === cacheKey) {
+    return true;
+  }
+  if (!rankTimeWorkerPreparePromise) {
+    return false;
+  }
+
+  try {
+    await rankTimeWorkerPreparePromise;
+    return rankTimeWorkerPreparedCacheKey === cacheKey;
   } catch (error) {
-    if (!rankTimeWorkerDisabled && !isRankTimeWorkerResetError(error)) {
-      console.warn('[RankTimeData] worker preparation failed:', error);
-    }
+    return isRankTimeWorkerResetError(error) ? false : rankTimeWorkerPreparedCacheKey === cacheKey;
   }
 }
 
@@ -738,9 +805,12 @@ async function selectRankTimeDataInWorker(userId: string) {
   if (!canUseRankTimeWorker()) {
     throw new Error('Rank time worker is unavailable');
   }
+  const cacheKey = getRankTimeWorkerCacheKey();
+  const hasPreparedCache = await waitForPreparedRankTimeWorkerCache(cacheKey);
   const response = await postRankTimeWorkerRequest({
     kind: 'select',
-    ...makeRankTimeWorkerBasePayload(),
+    cacheKey,
+    ...(hasPreparedCache ? {} : makeRankTimeWorkerDataPayload()),
     staticRows: toPlainRankTimePayload(staticData.value.rows),
     staticSeries: toPlainRankTimePayload(staticData.value.series),
     staticMarkers: toPlainRankTimePayload(staticData.value.markers),

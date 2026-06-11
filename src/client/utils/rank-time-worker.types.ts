@@ -5,17 +5,23 @@ import type { SelectedUserMainRankTimeData } from './rank-time-data.util';
 interface RankTimeWorkerBaseRequest {
   requestId: number;
   cacheKey: string;
+}
+
+interface RankTimeWorkerDataPayload {
   ranklist: srk.Ranklist;
   solutions: CalculatedSolutionTetrad[];
   unit: srk.TimeDuration;
 }
 
-export interface RankTimeWorkerPrepareRequest extends RankTimeWorkerBaseRequest {
+export interface RankTimeWorkerPrepareRequest extends RankTimeWorkerBaseRequest, RankTimeWorkerDataPayload {
   kind: 'prepare';
 }
 
 export interface RankTimeWorkerSelectRequest extends RankTimeWorkerBaseRequest {
   kind: 'select';
+  ranklist?: srk.Ranklist;
+  solutions?: CalculatedSolutionTetrad[];
+  unit?: srk.TimeDuration;
   staticRows: StaticRanklist['rows'];
   staticSeries: StaticRanklist['series'];
   staticMarkers?: srk.Marker[];
