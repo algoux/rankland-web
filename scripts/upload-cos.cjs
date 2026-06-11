@@ -1,25 +1,9 @@
-const fs = require('fs').promises;
 const path = require('path');
 const COS = require('cos-nodejs-sdk-v5');
+const { listUploadFiles } = require('./upload-cos-lib.cjs');
 
 const REMOTE_PATH = process.env.COS_BASE_PATH || 'rankland/dist/';
 const baseDir = path.join(__dirname, '../dist/client');
-
-async function listFiles(dir) {
-  let files = await fs.readdir(dir, { withFileTypes: true });
-  let fileNames = [];
-
-  for (const file of files) {
-    const fullPath = path.join(dir, file.name);
-    if (file.isDirectory()) {
-      fileNames = fileNames.concat(await listFiles(fullPath));
-    } else {
-      fileNames.push(path.relative(baseDir, fullPath));
-    }
-  }
-
-  return fileNames;
-}
 
 async function main() {
   if (!process.env.COS_SECRET_ID || !process.env.COS_SECRET_KEY || !process.env.COS_BUCKET || !process.env.COS_REGION) {
@@ -31,7 +15,7 @@ async function main() {
     SecretKey: process.env.COS_SECRET_KEY,
     Domain: process.env.COS_DOMAIN,
   });
-  const files = await listFiles(baseDir);
+  const files = await listUploadFiles(baseDir);
   const indexFileIndex = files.indexOf('index.html');
   if (indexFileIndex > -1) {
     files.push(files.splice(indexFileIndex, 1)[0]);
