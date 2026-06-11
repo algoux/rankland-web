@@ -88,9 +88,10 @@ import { LocalStorageKey } from '@/app/local-storage-key.config';
 import { createDefaultPlaygroundCode, parsePlaygroundCode } from './playground-code';
 import srkPkg from '@algoux/standard-ranklist/package.json';
 import srkSchema from '@algoux/standard-ranklist/schema.json';
+import editorWorkerUrl from 'monaco-editor/esm/vs/editor/editor.worker?worker&url';
+import jsonWorkerUrl from 'monaco-editor/esm/vs/language/json/json.worker?worker&url';
 
 type MonacoApi = typeof import('monaco-editor/esm/vs/editor/editor.api');
-type WorkerFactory = new () => Worker;
 type JsonDefaultsModule = {
   jsonDefaults?: {
     setDiagnosticsOptions: (options: unknown) => void;
@@ -169,14 +170,10 @@ async function mountEditor() {
     return;
   }
 
-  const [monaco, jsonContribution, editorWorkerModule, jsonWorkerModule] = await Promise.all([
+  const [monaco, jsonContribution] = await Promise.all([
     import('monaco-editor/esm/vs/editor/editor.api'),
     import('monaco-editor/esm/vs/language/json/monaco.contribution'),
-    import('monaco-editor/esm/vs/editor/editor.worker?worker'),
-    import('monaco-editor/esm/vs/language/json/json.worker?worker'),
   ]);
-  const EditorWorker = editorWorkerModule.default as WorkerFactory;
-  const JsonWorker = jsonWorkerModule.default as WorkerFactory;
   const windowWithMonaco = window as typeof window & {
     MonacoEnvironment?: {
       getWorker: (_workerId: string, label: string) => Worker;
@@ -185,7 +182,7 @@ async function mountEditor() {
 
   windowWithMonaco.MonacoEnvironment = {
     getWorker(_workerId, label) {
-      return label === 'json' ? new JsonWorker() : new EditorWorker();
+      return new Worker(label === 'json' ? jsonWorkerUrl : editorWorkerUrl);
     },
   };
 

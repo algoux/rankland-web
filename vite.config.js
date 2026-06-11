@@ -2,6 +2,7 @@ const { defineConfig } = require('vite');
 const path = require('path');
 const viteSSR = require('vite-ssr/plugin');
 const vue = require('@vitejs/plugin-vue');
+const { isSameOriginWorkerAsset, toSameOriginWorkerAssetUrl } = require('./scripts/worker-assets.cjs');
 
 function buildClientEnv() {
   return {
@@ -31,6 +32,13 @@ module.exports = defineConfig(({ command }) => {
     },
     // If using CDN, you can set base like 'https://yourcdn.com/dist/'
     base: isBuild ? process.env.CDN_BASE || '/dist/' : undefined,
+    experimental: {
+      renderBuiltUrl(filename) {
+        if (isSameOriginWorkerAsset(filename)) {
+          return toSameOriginWorkerAssetUrl(filename);
+        }
+      },
+    },
     define: {
       'process.env.BWCX_RUNTIME_SCOPE': JSON.stringify('client'),
       'process.env.NODE_ENV': JSON.stringify(process.env.NODE_ENV || (isBuild ? 'production' : 'development')),

@@ -1,5 +1,13 @@
 const fs = require('fs').promises;
 const path = require('path');
+const { isSameOriginWorkerAsset } = require('./worker-assets.cjs');
+
+function shouldUploadDistFile(fileName) {
+  if (fileName.endsWith('.map')) {
+    return false;
+  }
+  return !isSameOriginWorkerAsset(fileName);
+}
 
 async function listUploadFiles(baseDir, dir = baseDir) {
   const entries = await fs.readdir(dir, { withFileTypes: true });
@@ -12,11 +20,12 @@ async function listUploadFiles(baseDir, dir = baseDir) {
       continue;
     }
 
-    if (entry.name.endsWith('.map')) {
+    const fileName = path.relative(baseDir, fullPath).replace(/\\/g, '/');
+    if (!shouldUploadDistFile(fileName)) {
       continue;
     }
 
-    fileNames.push(path.relative(baseDir, fullPath));
+    fileNames.push(fileName);
   }
 
   return fileNames;
@@ -24,4 +33,5 @@ async function listUploadFiles(baseDir, dir = baseDir) {
 
 module.exports = {
   listUploadFiles,
+  shouldUploadDistFile,
 };
