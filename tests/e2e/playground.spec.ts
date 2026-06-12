@@ -46,6 +46,71 @@ function createDroppedRanklistText() {
   });
 }
 
+function createLargeLineRanklistText(title: string, rowCount: number, paddingLineCount: number) {
+  const ranklist = JSON.stringify({
+    type: 'general',
+    version: '0.3.12',
+    contest: {
+      title,
+      startAt: '2026-06-01T09:00:00+08:00',
+      duration: [5, 'h'],
+      frozenDuration: [1, 'h'],
+    },
+    problems: [
+      {
+        title: 'Problem A',
+        alias: 'A',
+      },
+    ],
+    series: [
+      {
+        title: 'Rank',
+        rule: {
+          preset: 'ICPC',
+          options: {},
+        },
+      },
+    ],
+    rows: new Array(rowCount).fill(null).map((_, index) => ({
+      user: {
+        id: `large-team-${index}`,
+        name: `Large Team ${index}`,
+        organization: 'Large Paste University',
+        official: true,
+      },
+      score: { value: index % 5, time: [42 + index, 'min'] },
+      statuses: [
+        { result: index % 2 === 0 ? 'AC' : 'RJ', time: [42 + index, 'min'], tries: 1 },
+      ],
+    })),
+    sorter: {
+      algorithm: 'ICPC',
+      config: {},
+    },
+  }, null, 2);
+  const body = ranklist.slice(0, -2);
+  const padding = new Array(paddingLineCount)
+    .fill(null)
+    .map((_, index) => `    "k${index}": ${index}`)
+    .join(',\n');
+  return `${body},\n  "_pastePadding": {\n${padding}\n  }\n}`;
+}
+
+async function pasteTextIntoFocusedEditor(page: Page, text: string) {
+  await page.evaluate((value) => navigator.clipboard.writeText(value), text);
+  await page.keyboard.press('ControlOrMeta+A');
+  await page.keyboard.press('ControlOrMeta+V');
+}
+
+async function focusPlaygroundEditor(page: Page) {
+  await page.locator('[data-id="srk-playground-editor"]').click({
+    position: {
+      x: 120,
+      y: 120,
+    },
+  });
+}
+
 async function dispatchFileDragEvent(page: Page, type: string, text: string, fileName = 'ranklist.srk.json', fileType = 'application/json') {
   await page.evaluate(({ eventType, fileText, droppedFileName, droppedFileType }) => {
     const target = document.querySelector('[data-id="srk-playground-container"]');
@@ -271,6 +336,35 @@ test.describe('/playground', () => {
     await expect(page.locator('[data-id="playground-drop-overlay"]')).toBeHidden();
     await expect(page.locator('[data-id="playground-preview"][data-row-count="1"]')).toBeVisible();
     await expect(page.getByRole('heading', { name: 'Dropped SRK Fixture' })).toBeVisible();
+  });
+
+  test('keeps the editor responsive and auto-renders when replacing one large paste with another', async ({ page }) => {
+    test.setTimeout(120_000);
+    await page.context().grantPermissions(['clipboard-read', 'clipboard-write']);
+    await page.addInitScript(() => {
+      window.localStorage.setItem('PlaygroundWelcomeMessageRead', 'true');
+      window.localStorage.setItem('StyledRanklistSettingsIntroRead', 'true');
+    });
+    await page.goto('/playground');
+
+    await expect(page.locator('.monaco-editor').first()).toBeVisible({ timeout: 60_000 });
+    await expect(page.locator('[data-id="playground-preview"][data-row-count="3"]')).toBeVisible();
+
+    const firstLargeText = createLargeLineRanklistText('Large Paste One', 20, 35_050);
+    const secondLargeText = createLargeLineRanklistText('Large Paste Two', 21, 35_075);
+    expect(firstLargeText.split('\n').length).toBeGreaterThan(35_000);
+    expect(secondLargeText.split('\n').length).toBeGreaterThan(35_000);
+
+    await dispatchFileDragEvent(page, 'drop', firstLargeText);
+    await expect(page.locator('[data-id="playground-preview"][data-row-count="20"]')).toBeVisible({ timeout: 60_000 });
+    await expect(page.getByRole('heading', { name: 'Large Paste One' })).toBeVisible();
+
+    await focusPlaygroundEditor(page);
+    await pasteTextIntoFocusedEditor(page, secondLargeText);
+    await expect(page.locator('[data-id="playground-preview-deferred"]')).toHaveCount(0);
+    await expect(page.locator('[data-id="playground-preview"][data-row-count="21"]')).toBeVisible({ timeout: 60_000 });
+    await expect(page.getByRole('heading', { name: 'Large Paste Two' })).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'Large Paste One' })).toHaveCount(0);
   });
 
   test('rejects a dragged non-json file with an error toast', async ({ page }) => {

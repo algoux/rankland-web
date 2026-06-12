@@ -46,9 +46,7 @@
         <Loading v-else />
       </div>
       <h3 v-else-if="!parsedCode.valid" class="mt-16 text-center text-lg font-semibold tracking-normal" data-id="playground-invalid">
-        Input valid srk JSON and press
-        <span class="rounded bg-primary/10 px-1.5 py-0.5 text-primary">Ctrl/Cmd + S</span>
-        to preview
+        Input valid srk JSON to preview
       </h3>
       <div
         v-else
@@ -56,7 +54,12 @@
         data-id="playground-preview"
         :data-row-count="String(parsedCode.data?.rows.length || 0)"
       >
-        <StyledRanklist :data="parsedCode.data" name="playground" show-filter />
+        <StyledRanklist
+          :data="parsedCode.data"
+          name="playground"
+          :show-progress="false"
+          show-filter
+        />
       </div>
     </div>
 
@@ -96,7 +99,7 @@
 
 <script setup lang="ts">
 import type { IDisposable, editor as MonacoEditorNamespace } from 'monaco-editor/esm/vs/editor/editor.api';
-import { computed, nextTick, onBeforeUnmount, onMounted, ref } from 'vue';
+import { computed, markRaw, nextTick, onBeforeUnmount, onMounted, ref, shallowRef } from 'vue';
 import { CircleHelp, FileUp } from 'lucide-vue-next';
 import { toast } from 'vue-sonner';
 import { Modal } from '@algoux/standard-ranklist-renderer-component-vue';
@@ -104,7 +107,13 @@ import { Button } from '@/components/ui/button';
 import Loading from '@/components/common/Loading.vue';
 import StyledRanklist from '@/components/ranklist/StyledRanklist.vue';
 import { LocalStorageKey } from '@/app/local-storage-key.config';
-import { createDefaultPlaygroundCode, parsePlaygroundCode } from './playground-code';
+import {
+  createDefaultPlaygroundCode,
+  isLargePlaygroundDocument,
+  parsePlaygroundCode,
+  shouldUseFastFullDocumentPaste,
+} from './playground-code';
+import type { PlaygroundCodeResult } from './playground-code';
 import srkPkg from '@algoux/standard-ranklist/package.json';
 import srkSchema from '@algoux/standard-ranklist/schema.json';
 import editorWorkerUrl from 'monaco-editor/esm/vs/editor/editor.worker?worker&url';
@@ -125,6 +134,7 @@ type JsonDefaultsModule = {
 const editorEl = ref<HTMLElement | null>(null);
 const containerEl = ref<HTMLElement | null>(null);
 const code = ref(createDefaultPlaygroundCode());
+const parsedCode = shallowRef<PlaygroundCodeResult>(createPreviewCodeResult(code.value));
 const ready = ref(false);
 const initializationError = ref('');
 const showWelcome = ref(false);
@@ -146,10 +156,11 @@ let changeSubscription: IDisposable | null = null;
 let resizeObserver: ResizeObserver | null = null;
 let themeObserver: MutationObserver | null = null;
 let changeTimer: number | undefined;
+let previewTimer: number | undefined;
+let settingEditorCode = false;
 let dragStartX = 0;
 let dragStartEditorWidth = DEFAULT_EDITOR_WIDTH;
 
-const parsedCode = computed(() => parsePlaygroundCode(code.value));
 const editorMaxWidth = computed(() => getEditorMaxWidth());
 const editorPaneStyle = computed(() => ({
   width: `${editorWidth.value}px`,
@@ -183,6 +194,11 @@ onBeforeUnmount(() => {
   if (changeTimer !== undefined) {
     window.clearTimeout(changeTimer);
   }
+  if (previewTimer !== undefined) {
+    window.clearTimeout(previewTimer);
+  }
+  document.removeEventListener('paste', handleEditorPasteCapture, true);
+  editorEl.value?.removeEventListener('paste', handleEditorPasteCapture, true);
   changeSubscription?.dispose();
   editor?.dispose();
 });
@@ -232,13 +248,24 @@ async function mountEditor() {
     language: 'json',
     theme: currentEditorTheme(),
     automaticLayout: true,
+    autoIndent: 'none',
+    autoIndentOnPaste: false,
+    bracketPairColorization: { enabled: false },
+    folding: false,
     fontSize: 13,
+    formatOnPaste: false,
+    largeFileOptimizations: true,
+    matchBrackets: 'never',
     minimap: { enabled: true },
+    occurrencesHighlight: 'off',
     scrollBeyondLastLine: false,
     selectOnLineNumbers: true,
+    selectionHighlight: false,
+    wordBasedSuggestions: 'off',
   });
+  document.addEventListener('paste', handleEditorPasteCapture, true);
+  editorEl.value.addEventListener('paste', handleEditorPasteCapture, true);
   changeSubscription = editor.onDidChangeModelContent(scheduleCodeSync);
-  editor.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyCode.KeyS, syncEditorCode);
 
   themeObserver = new MutationObserver(() => {
     monacoApi?.editor.setTheme(currentEditorTheme());
@@ -344,7 +371,98 @@ function isMobileLayout() {
   return window.matchMedia('(max-width: 768px)').matches;
 }
 
+function handleEditorPasteCapture(event: ClipboardEvent) {
+  if (!editor) {
+    return;
+  }
+  if (!isPasteEventForEditor(event)) {
+    return;
+  }
+
+  const pastedText = event.clipboardData?.getData('text/plain') || '';
+  if (!shouldUseFastFullDocumentPaste({
+    isCurrentDocumentLarge: isCurrentEditorDocumentLarge(),
+    isFullDocumentSelection: isFullEditorSelection(),
+    pastedText,
+  })) {
+    return;
+  }
+
+  event.preventDefault();
+  event.stopPropagation();
+  event.stopImmediatePropagation();
+  replaceEditorModelWithoutUndo(pastedText);
+}
+
+function isPasteEventForEditor(event: ClipboardEvent) {
+  const target = event.target;
+  if (target instanceof Node && editorEl.value?.contains(target)) {
+    return true;
+  }
+
+  return editor?.hasTextFocus() || false;
+}
+
+function isFullEditorSelection() {
+  const model = editor?.getModel();
+  const selections = editor?.getSelections();
+  if (!model || !selections?.length) {
+    return false;
+  }
+
+  const lastLineNumber = model.getLineCount();
+  const lastColumn = model.getLineMaxColumn(lastLineNumber);
+
+  return selections.some((selection) => (
+    selection.startLineNumber <= 1
+    && selection.startColumn <= 1
+    && selection.endLineNumber >= lastLineNumber
+    && selection.endColumn >= lastColumn
+  ));
+}
+
+function isCurrentEditorDocumentLarge() {
+  const model = editor?.getModel();
+  if (!model) {
+    return false;
+  }
+
+  return isLargePlaygroundDocument({
+    characterCount: model.getValueLength(),
+    lineCount: model.getLineCount(),
+  });
+}
+
+function replaceEditorModelWithoutUndo(nextCode: string) {
+  const model = editor?.getModel();
+  if (!model) {
+    setEditorCode(nextCode);
+    return;
+  }
+
+  if (changeTimer !== undefined) {
+    window.clearTimeout(changeTimer);
+    changeTimer = undefined;
+  }
+
+  settingEditorCode = true;
+  try {
+    model.setValue(nextCode);
+    editor?.setPosition({ lineNumber: 1, column: 1 });
+    editor?.setScrollTop(0);
+    editor?.setScrollLeft(0);
+  } finally {
+    settingEditorCode = false;
+  }
+
+  applyEditorCode(nextCode);
+  editor?.focus();
+}
+
 function scheduleCodeSync() {
+  if (settingEditorCode) {
+    return;
+  }
   if (changeTimer !== undefined) {
     window.clearTimeout(changeTimer);
   }
@@ -356,7 +474,9 @@ function syncEditorCode() {
   if (!editor) {
     return;
   }
-  code.value = editor.getValue() || '';
+
+  const nextCode = editor.getValue() || '';
+  applyEditorCode(nextCode);
 }
 
 function setEditorCode(nextCode: string) {
@@ -365,11 +485,39 @@ function setEditorCode(nextCode: string) {
     changeTimer = undefined;
   }
 
-  code.value = nextCode;
   if (editor && editor.getValue() !== nextCode) {
-    editor.setValue(nextCode);
+    settingEditorCode = true;
+    try {
+      editor.setValue(nextCode);
+    } finally {
+      settingEditorCode = false;
+    }
   }
+  applyEditorCode(nextCode);
   editor?.focus();
+}
+
+function applyEditorCode(nextCode: string) {
+  code.value = nextCode;
+  if (previewTimer !== undefined) {
+    window.clearTimeout(previewTimer);
+  }
+
+  previewTimer = window.setTimeout(() => {
+    previewTimer = undefined;
+    parsedCode.value = createPreviewCodeResult(nextCode);
+  }, 0);
+}
+
+function createPreviewCodeResult(nextCode: string): PlaygroundCodeResult {
+  const result = parsePlaygroundCode(nextCode);
+  if (!result.valid || !result.data) {
+    return result;
+  }
+  return {
+    valid: true,
+    data: markRaw(result.data),
+  };
 }
 
 function hasDraggedFiles(event: DragEvent) {

@@ -9,6 +9,7 @@ import {
   onMounted,
   reactive,
   ref,
+  shallowRef,
   toRaw,
   useSlots,
   watch,
@@ -89,6 +90,10 @@ import {
   getEmptyStatusPlaceholder,
   normalizeStyledRanklistSettings,
 } from './styled-ranklist-settings';
+import {
+  hasRanklistPayloadReferenceChange,
+  toRanklistPayloadWithoutVolatileFields,
+} from './ranklist-data-memo';
 import type {
   StyledRanklistEmptyStatusPlaceholder,
   StyledRanklistSettings,
@@ -161,7 +166,7 @@ const actionMenuCloseTimers: Record<RanklistActionMenu, ReturnType<typeof window
 
 const storedRanklistSettings = ref<unknown>(readLocalStorageJson(LocalStorageKey.StyledRanklistSettings));
 const settingsIntroRead = ref<string | undefined>(readLocalStorageString(LocalStorageKey.StyledRanklistSettingsIntroRead));
-const memorizedData = ref<srk.Ranklist>(props.data);
+const memorizedData = shallowRef<srk.Ranklist>(toRanklistPayloadWithoutVolatileFields(toRaw(props.data)));
 const rankTimeDataVersion = ref(0);
 
 const ranklistSettings = computed(() => normalizeStyledRanklistSettings(storedRanklistSettings.value));
@@ -178,15 +183,16 @@ const ranklistRenderContainerStyle = computed(() => ({
   ...props.tableStyle,
 }));
 
-const comparingData = computed(() => {
-  const { _now, ...rest } = props.data as srk.Ranklist & { _now?: unknown };
-  return rest as srk.Ranklist;
-});
-
 watch(
-  () => JSON.stringify(comparingData.value),
-  () => {
-    memorizedData.value = comparingData.value;
+  () => props.data,
+  (data, oldData) => {
+    const rawData = toRaw(data);
+    const rawOldData = oldData ? toRaw(oldData) : oldData;
+    if (!hasRanklistPayloadReferenceChange(rawOldData, rawData)) {
+      return;
+    }
+
+    memorizedData.value = toRanklistPayloadWithoutVolatileFields(rawData);
     rankTimeDataVersion.value += 1;
     resetRankTimeWorker();
     scheduleRankTimeDataPreparation();
