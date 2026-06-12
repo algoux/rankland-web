@@ -16,6 +16,7 @@ import Loading from '@/components/common/Loading.vue';
 import RankCurve from '@/components/ranklist/RankCurve.vue';
 import SrkAssetImage from '@/components/ranklist/SrkAssetImage.vue';
 import UserInfoModal from '@/components/ranklist/UserInfoModal.vue';
+import { SSR_REQUEST_LANGUAGES_TOKEN } from '@/app/request-languages';
 
 describe('ranklist Vue components', () => {
   it('can be imported by Vite/Vitest so templates stay compilable before routes use them', () => {
@@ -64,6 +65,85 @@ describe('ranklist Vue components', () => {
 
     expect(html).toContain('Example Contest');
     expect(html).toContain('Alice');
+  });
+
+  it('uses injected SSR request languages for ranklist i18n text during SSR', async () => {
+    const data: srk.Ranklist = {
+      type: 'general',
+      version: '0.3.13',
+      contest: {
+        title: { 'zh-CN': '中文比赛', fallback: 'Fallback Contest' },
+        startAt: '2026-06-01T09:00:00+08:00',
+        duration: [5, 'h'],
+      },
+      remarks: { 'zh-CN': '中文备注', fallback: 'Fallback remark' },
+      problems: [{ alias: 'A', title: { 'zh-CN': '题目 A', fallback: 'Problem A' } }],
+      series: [{ title: '#', rule: { preset: 'ICPC', options: { count: { value: [] } } } }],
+      rows: [
+        {
+          user: {
+            id: 'alice',
+            name: { 'zh-CN': '爱丽丝队', fallback: 'Alice Team' },
+            organization: { 'zh-CN': '中文大学', fallback: 'Fallback University' },
+            official: true,
+          },
+          score: { value: 1, time: [10, 'min'] },
+          statuses: [{ result: 'AC', time: [10, 'min'], tries: 1, solutions: [{ result: 'AC', time: [10, 'min'] }] }],
+        },
+      ],
+    };
+    const app = createSSRApp(StyledRanklist, { data, name: 'i18n-example', showProgress: false });
+    const router = createRouter({
+      history: createMemoryHistory(),
+      routes: [{ path: '/', component: { template: '<div />' } }],
+    });
+    app.use(router);
+    app.provide(SSR_REQUEST_LANGUAGES_TOKEN, ['zh-CN']);
+    await router.push('/');
+    await router.isReady();
+
+    const html = await renderToString(app);
+
+    expect(html).toContain('中文比赛');
+    expect(html).toContain('爱丽丝队');
+    expect(html).toContain('中文大学');
+    expect(html).not.toContain('Fallback Contest');
+    expect(html).not.toContain('Alice Team');
+  });
+
+  it('leaves ranklist i18n text on natural fallback when no SSR request language is provided', async () => {
+    const data: srk.Ranklist = {
+      type: 'general',
+      version: '0.3.13',
+      contest: {
+        title: { 'zh-CN': '中文比赛', fallback: 'Fallback Contest' },
+        startAt: '2026-06-01T09:00:00+08:00',
+        duration: [5, 'h'],
+      },
+      problems: [{ alias: 'A' }],
+      series: [{ title: '#', rule: { preset: 'ICPC', options: { count: { value: [] } } } }],
+      rows: [
+        {
+          user: { id: 'alice', name: { 'zh-CN': '爱丽丝队', fallback: 'Alice Team' }, official: true },
+          score: { value: 1, time: [10, 'min'] },
+          statuses: [{ result: 'AC', time: [10, 'min'], tries: 1 }],
+        },
+      ],
+    };
+    const app = createSSRApp(StyledRanklist, { data, name: 'fallback-example', showProgress: false });
+    const router = createRouter({
+      history: createMemoryHistory(),
+      routes: [{ path: '/', component: { template: '<div />' } }],
+    });
+    app.use(router);
+    await router.push('/');
+    await router.isReady();
+
+    const html = await renderToString(app);
+
+    expect(html).toContain('Fallback Contest');
+    expect(html).toContain('Alice Team');
+    expect(html).not.toContain('中文比赛');
   });
 
   it('passes the injected dark theme to the ranklist renderer during SSR', async () => {
@@ -152,12 +232,13 @@ describe('ranklist Vue components', () => {
       index: 0,
       ranklist,
       assetsScope: '',
+      languages: ['zh-CN'],
       rankTimeData: createEmptyRankTimeData(),
     });
 
     const html = await renderToString(app);
 
-    expect(html).toContain('Alice (captain)');
+    expect(html).toContain('张三 (captain)');
     expect(html).toContain(' / ');
     expect(html).toContain('Bob');
   });

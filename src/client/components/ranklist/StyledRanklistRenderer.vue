@@ -80,6 +80,7 @@ import type { RankTimeWorkerRequest, RankTimeWorkerResponse } from '@/utils/rank
 import ClientOnly from '@/components/common/ClientOnly.vue';
 import ContactUs from '@/components/site/ContactUs.vue';
 import BeianLink from '@/components/site/BeianLink.vue';
+import { SSR_REQUEST_LANGUAGES_TOKEN } from '@/app/request-languages';
 import SrkAssetImage from '@/components/ranklist/SrkAssetImage.vue';
 import UserInfoModal from '@/components/ranklist/UserInfoModal.vue';
 import { preloadRankCurveRenderer } from '@/components/ranklist/rank-curve-loader';
@@ -108,6 +109,7 @@ const saveAs = FileSaver.saveAs || FileSaver;
 const slots = useSlots();
 const route = useRoute();
 const themeService = inject(THEME_TOKEN, undefined);
+const injectedRequestLanguages = inject(SSR_REQUEST_LANGUAGES_TOKEN, undefined);
 const renderError = ref<Error | null>(null);
 const filter = reactive<{ organizations: string[]; officialOnly: boolean; marker: string }>({
   organizations: [],
@@ -169,6 +171,7 @@ const renderedRanklistSettings = computed(() =>
 const emptyStatusPlaceholder = computed(() =>
   getEmptyStatusPlaceholder(renderedRanklistSettings.value.emptyStatusPlaceholder),
 );
+const textLanguages = computed(() => props.languages || injectedRequestLanguages);
 const themeName = computed(() => (themeService?.state.theme || EnumTheme.light) as EnumTheme);
 const ranklistRenderContainerClassName = computed(() => props.tableClass || '');
 const ranklistRenderContainerStyle = computed(() => ({
@@ -228,7 +231,7 @@ const genData = computed(() => {
 const staticData = computed(() => convertToStaticRanklist(genData.value) as StaticRanklist);
 const organizations = computed(() =>
   Array.from(
-    new Set(staticData.value.rows.map((row) => resolveText(row.user?.organization)).filter(Boolean)),
+    new Set(staticData.value.rows.map((row) => resolveDisplayText(row.user?.organization)).filter(Boolean)),
   ).sort((a, b) => a.localeCompare(b)),
 );
 const markers = computed(() => staticData.value.markers || []);
@@ -252,7 +255,7 @@ const filteredRows = computed(() => {
   const rows = staticData.value.rows.filter((row) => {
     let ok = true;
     if (ok && filter.organizations.length > 0) {
-      ok = filter.organizations.includes(resolveText(row.user?.organization));
+      ok = filter.organizations.includes(resolveDisplayText(row.user?.organization));
     }
     if (ok && filter.officialOnly) {
       ok = row.user?.official === true;
@@ -896,6 +899,10 @@ function handleSettingsIntroModalClose() {
 function formatRendererAssetUrl(url: string) {
   return formatSrkAssetUrl(url, props.id);
 }
+
+function resolveDisplayText(text: Parameters<typeof resolveText>[0]) {
+  return resolveText(text, textLanguages.value);
+}
 </script>
 
 <template>
@@ -913,7 +920,7 @@ function formatRendererAssetUrl(url: string) {
         style="max-width: min(100%, 1820px); max-height: 40vh"
       />
     </div>
-    <h1 class="srk-ranklist-title">{{ resolveText(staticData.contest.title) }}</h1>
+    <h1 class="srk-ranklist-title">{{ resolveDisplayText(staticData.contest.title) }}</h1>
     <div class="srk-ranklist-meta">
       <span v-if="hasMetaViewCount" class="srk-ranklist-meta-item">
         <Eye class="srk-ranklist-meta-icon" /> {{ meta?.viewCnt }}
@@ -1024,7 +1031,7 @@ function formatRendererAssetUrl(url: string) {
         相关链接：
         <template v-for="(refLink, index) in mainRefLinks" :key="`${index}-${refLink.link}`">
           <span v-if="index > 0">, </span>
-          <a :href="refLink.link" target="_blank" rel="noopener">{{ resolveText(refLink.title) }}</a>
+          <a :href="refLink.link" target="_blank" rel="noopener">{{ resolveDisplayText(refLink.title) }}</a>
         </template>
         <span v-if="hiddenRefLinks.length > 0"> </span>
         <DropdownMenu
@@ -1076,7 +1083,7 @@ function formatRendererAssetUrl(url: string) {
                     target="_blank"
                     rel="noopener"
                   >
-                    {{ resolveText(refLink.title) }}
+                    {{ resolveDisplayText(refLink.title) }}
                   </a>
                 </DropdownMenuItem>
               </DropdownMenuGroup>
@@ -1139,7 +1146,7 @@ function formatRendererAssetUrl(url: string) {
             class="srk-ranklist-marker-filter-item"
             :value="marker.id"
           >
-            {{ resolveText(marker.label) }}
+            {{ resolveDisplayText(marker.label) }}
           </ToggleGroupItem>
         </ToggleGroupRoot>
       </div>
@@ -1326,7 +1333,7 @@ function formatRendererAssetUrl(url: string) {
     <div class="mt-6" />
     <div :class="ranklistRenderContainerClassName" :style="ranklistRenderContainerStyle">
       <div v-if="staticData.remarks" class="mb-4 text-center">
-        <span class="srk-remarks">备注：{{ resolveText(staticData.remarks) }}</span>
+        <span class="srk-remarks">备注：{{ resolveDisplayText(staticData.remarks) }}</span>
       </div>
       <div class="srk-ranklist-table-scroll">
         <Ranklist
@@ -1345,13 +1352,14 @@ function formatRendererAssetUrl(url: string) {
           :split-organization="renderedRanklistSettings.splitOrganization"
           :user-avatar-placement="renderedRanklistSettings.userAvatarPlacement"
           :format-srk-asset-url="formatRendererAssetUrl"
+          :languages="textLanguages"
           @user-click="handleUserClick"
           @solution-click="handleSolutionClick"
         />
       </div>
       <Modal
         :open="userModalOpen && !!activeUser && !!activeUserRow"
-        :title="activeUser ? resolveText(activeUser.name) : undefined"
+        :title="activeUser ? resolveDisplayText(activeUser.name) : undefined"
         :width="clientWidth >= 980 ? 960 : clientWidth - 20"
         root-class-name="srk-general-modal-root"
         @close="userModalOpen = false"
@@ -1366,6 +1374,7 @@ function formatRendererAssetUrl(url: string) {
           :assets-scope="id || ''"
           :filter-marker="filter.marker"
           :rank-time-data="rankTimeData"
+          :languages="textLanguages"
         />
       </Modal>
       <DefaultSolutionModal
@@ -1374,6 +1383,7 @@ function formatRendererAssetUrl(url: string) {
         :problem="activeSolutionPayload?.problem"
         :problem-index="activeSolutionPayload?.problemIndex ?? 0"
         :solutions="activeSolutionPayload?.solutions || []"
+        :languages="textLanguages"
         @close="activeSolutionPayload = null"
         @update:open="!$event && (activeSolutionPayload = null)"
       />

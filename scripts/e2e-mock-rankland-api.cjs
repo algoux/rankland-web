@@ -98,6 +98,68 @@ function createLargeRanklist() {
   };
 }
 
+function createLocalizedRanklist() {
+  return {
+    type: 'general',
+    version: '0.3.13',
+    contest: {
+      title: { 'zh-CN': '中文本地化比赛', fallback: 'Localized Contest' },
+      startAt: '2024-04-01T10:00:00+08:00',
+      duration: [5, 'h'],
+      refLinks: [
+        {
+          title: { 'zh-CN': '中文官网', fallback: 'Official Site' },
+          link: 'https://example.com/localized',
+        },
+      ],
+    },
+    remarks: { 'zh-CN': '中文备注', fallback: 'Localized remark' },
+    markers: [
+      { id: 'female', label: { 'zh-CN': '女队', fallback: 'Female Teams' }, style: 'pink' },
+    ],
+    problems: [
+      {
+        title: { 'zh-CN': '题目 A', fallback: 'Problem A' },
+        alias: 'A',
+        statistics: { accepted: 1, submitted: 1 },
+      },
+    ],
+    series: [
+      {
+        title: 'Rank',
+        rule: {
+          preset: 'ICPC',
+          options: { count: { value: [] } },
+        },
+      },
+    ],
+    rows: [
+      {
+        user: {
+          id: 'localized-team',
+          name: { 'zh-CN': '中文队伍', fallback: 'Localized Team' },
+          organization: { 'zh-CN': '中文大学', fallback: 'Localized University' },
+          official: true,
+          marker: 'female',
+          teamMembers: [
+            { name: { 'zh-CN': '张三', fallback: 'Alice' }, role: 'captain' },
+            { name: { 'zh-CN': '李四', fallback: 'Bob' } },
+          ],
+        },
+        score: { value: 1, time: [10, 'min'] },
+        statuses: [
+          {
+            result: 'AC',
+            time: [10, 'min'],
+            tries: 1,
+            solutions: [{ result: 'AC', time: [10, 'min'] }],
+          },
+        ],
+      },
+    ],
+  };
+}
+
 const largeRanklistInfo = {
   id: 'rid-large',
   uniqueKey: 'large-key',
@@ -113,6 +175,7 @@ const fixtures = {
   collection: readFixture('collection.json'),
   listAll: readFixture('listall.json'),
   liveInfo: readFixture('live-info.json'),
+  localizedSrk: createLocalizedRanklist(),
   largeSrk: createLargeRanklist(),
   ranklistInfo: readFixture('ranklist-info.json'),
   srk: readFixture('ranklist.srk.json'),
@@ -179,13 +242,16 @@ const server = http.createServer((req, res) => {
     const ranklistInfo = {
       ...fixtures.ranklistInfo,
       uniqueKey: key,
+      fileID: key === 'localized-key-v2' ? 'file-localized-v2' : fixtures.ranklistInfo.fileID,
       name: key === 'another-key'
         ? 'Another Contest'
         : key === 'icpc-2025-regional'
           ? '2025 Regional'
           : key === 'deep-key'
             ? 'Deep Scroll Contest'
-            : fixtures.ranklistInfo.name,
+            : key === 'localized-key-v2'
+              ? 'Localized Contest'
+              : fixtures.ranklistInfo.name,
     };
     if (key === 'no-view-key') {
       delete ranklistInfo.viewCnt;
@@ -197,6 +263,10 @@ const server = http.createServer((req, res) => {
   if (pathname === '/file/download') {
     if (url.searchParams.get('id') === largeRanklistInfo.fileID) {
       sendJson(res, fixtures.largeSrk);
+      return;
+    }
+    if (url.searchParams.get('id') === 'file-localized-v2') {
+      sendJson(res, fixtures.localizedSrk);
       return;
     }
     sendJson(res, fixtures.srk);

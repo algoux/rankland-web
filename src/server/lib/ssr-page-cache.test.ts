@@ -30,6 +30,20 @@ describe('SSR page cache keys', () => {
     expect(getSsrPageCacheKey('/ranklist/icpc?ssr=false')).toBe(getSsrPageCacheKey('/ranklist/icpc'));
   });
 
+  it('scopes cache keys by request languages when provided', () => {
+    const url = '/ranklist/icpc?focus=yes';
+    const urlOnlyKey = getSsrPageCacheKey(url);
+
+    expect(getSsrPageCacheKey(url, { languages: ['zh-CN', 'zh'] })).not.toBe(
+      getSsrPageCacheKey(url, { languages: ['en-US', 'en'] }),
+    );
+    expect(getSsrPageCacheKey(url, { languages: [] })).toBe(urlOnlyKey);
+    expect(getSsrPageCacheKey(url, { languages: ['zh-CN'] })).not.toBe(urlOnlyKey);
+    expect(getSsrPageCacheKey('/ranklist/icpc?focus=yes&ssr=0', { languages: ['zh-CN'] })).toBe(
+      getSsrPageCacheKey('/ranklist/icpc?focus=yes', { languages: ['zh-CN'] }),
+    );
+  });
+
   it('skips unknown routes and overly long URLs', () => {
     expect(getSsrPageCacheKey('/unknown?kw=x')).toBeUndefined();
     expect(getSsrPageCacheKey(`/ranklist/${'a'.repeat(2100)}`)).toBeUndefined();

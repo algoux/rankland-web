@@ -3,6 +3,7 @@ import type { RequestContext, ApplicationMiddleware } from 'bwcx-ljsm';
 export const IPageRenderer = Symbol('IPageRenderer');
 export interface PageRenderOptions {
   defaultStatus?: number;
+  requestLanguages?: readonly string[];
 }
 
 export interface IPageRenderer {

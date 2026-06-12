@@ -1,5 +1,7 @@
 import { describe, expect, it, vi } from 'vitest';
 import { SSR_SKIP_CACHE_HEADER } from '@common/ssr-cache';
+import { SSR_REQUEST_LANGUAGES_STATE_KEY } from '@common/request-language';
+import { getSsrPageCacheKey } from './ssr-page-cache';
 import { renderProdSsrPage, resolveRenderedStatus } from './page-renderer.prod';
 
 describe('PageRendererProd', () => {
@@ -64,6 +66,43 @@ describe('PageRendererProd', () => {
       status: 200,
       headers: { 'x-head': 'fresh' },
     });
+  });
+
+  it('uses request languages for SSR cache scope and vite-ssr initial state', async () => {
+    const renderPage = vi.fn(async () => ({ html: '<main>中文</main>', headers: { 'x-head': 'fresh' } }));
+    const cache = {
+      get: vi.fn(async () => undefined),
+      set: vi.fn(),
+    };
+    const url = 'https://rl.algoux.org/ranklist/icpc';
+    const requestLanguages = ['zh-CN', 'zh'];
+
+    await expect(renderProdSsrPage({
+      mode: 'ssr',
+      url,
+      requestLanguages,
+      renderPage,
+      manifest: {},
+      request: {} as any,
+      response: {} as any,
+      cache,
+    })).resolves.toMatchObject({
+      html: '<main>中文</main>',
+      status: 200,
+    });
+
+    const cacheKey = getSsrPageCacheKey(url, { languages: requestLanguages });
+    expect(cache.get).toHaveBeenCalledWith(cacheKey);
+    expect(cache.set).toHaveBeenCalledWith(cacheKey, {
+      html: '<main>中文</main>',
+      status: 200,
+      headers: { 'x-head': 'fresh' },
+    });
+    expect(renderPage).toHaveBeenCalledWith(url, expect.objectContaining({
+      initialState: {
+        [SSR_REQUEST_LANGUAGES_STATE_KEY]: requestLanguages,
+      },
+    }));
   });
 
   it('does not read or write the SSR page cache in CSR mode', async () => {

@@ -2,6 +2,7 @@ import crypto from 'crypto';
 import { Inject, Provide } from 'bwcx-core';
 import type Redis from 'ioredis';
 import { SSR_SKIP_CACHE_HEADER } from '@common/ssr-cache';
+import { normalizeRequestLanguages } from '@common/request-language';
 import { RedisClientId } from '@server/container-ids';
 
 const SSR_PAGE_CACHE_PREFIX = 'rankland:ssr:page:';
@@ -21,6 +22,10 @@ export interface SsrPageRenderResult extends SsrPageCachePayload {
 }
 
 type RedisLike = Pick<Redis, 'get' | 'setex'> & { status?: Redis['status'] };
+
+interface SsrPageCacheKeyOptions {
+  languages?: readonly string[];
+}
 
 @Provide()
 export class RedisSsrPageCache {
@@ -107,13 +112,24 @@ export function toSsrPageCachePayload(payload: SsrPageRenderResult): SsrPageCach
   };
 }
 
-export function getSsrPageCacheKey(url: string) {
+export function getSsrPageCacheKey(url: string, options: SsrPageCacheKeyOptions = {}) {
   const normalized = normalizeSsrPageCacheUrl(url);
   if (!normalized) {
     return undefined;
   }
-  const hash = crypto.createHash('sha256').update(normalized).digest('hex');
+  const hash = crypto.createHash('sha256').update(formatSsrPageCacheKeySource(normalized, options)).digest('hex');
   return `${SSR_PAGE_CACHE_PREFIX}${hash}`;
+}
+
+function formatSsrPageCacheKeySource(normalizedUrl: string, options: SsrPageCacheKeyOptions) {
+  const languages = normalizeRequestLanguages(options.languages);
+  if (!languages) {
+    return normalizedUrl;
+  }
+  return JSON.stringify({
+    url: normalizedUrl,
+    languages,
+  });
 }
 
 export function normalizeSsrPageCacheUrl(url: string) {

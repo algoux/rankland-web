@@ -3,6 +3,7 @@
 import { Inject, Provide } from 'bwcx-core';
 import type { RequestContext } from 'bwcx-ljsm';
 import type { Renderer, Rendered } from 'vite-ssr/utils/types';
+import { createSsrRequestLanguageInitialState } from '@common/request-language';
 import { IPageRenderer, type PageRenderOptions } from './page-renderer.interface';
 import {
   RedisSsrPageCache,
@@ -24,6 +25,7 @@ interface RenderProdSsrPageOptions {
   manifest: Record<string, string[]>;
   cache?: Pick<RedisSsrPageCache, 'get' | 'set'>;
   defaultStatus?: number;
+  requestLanguages?: readonly string[];
   onSsrError?: (error: unknown) => void;
 }
 
@@ -61,6 +63,7 @@ export default class PageRendererProd implements IPageRenderer {
       manifest: this.manifest,
       cache: this.cache,
       defaultStatus: options.defaultStatus,
+      requestLanguages: options.requestLanguages,
       onSsrError: (error) => {
         ctx.error?.(`Render ${ctx.url} failed, retry with csr mode. Error:`, error);
       },
@@ -76,7 +79,9 @@ export function resolveRenderedStatus(renderedStatus?: number, defaultStatus?: n
 }
 
 export async function renderProdSsrPage(options: RenderProdSsrPageOptions): Promise<SsrPageCachePayload> {
-  const cacheKey = options.mode === 'ssr' ? getSsrPageCacheKey(options.url) : undefined;
+  const cacheKey = options.mode === 'ssr'
+    ? getSsrPageCacheKey(options.url, { languages: options.requestLanguages })
+    : undefined;
   const cached = cacheKey ? await options.cache?.get(cacheKey) : undefined;
   if (cached) {
     logSsrPageCacheHit(options.url);
@@ -99,12 +104,14 @@ export async function renderProdSsrPage(options: RenderProdSsrPageOptions): Prom
 }
 
 async function renderWithMode(options: RenderProdSsrPageOptions, mode: 'ssr' | 'csr'): Promise<SsrPageRenderResult> {
+  const initialState = createSsrRequestLanguageInitialState(options.requestLanguages);
   const rendered = (await options.renderPage(options.url, {
     skip: mode !== 'ssr',
     manifest: options.manifest,
     preload: true,
     request: options.request,
     response: options.response,
+    ...(initialState ? { initialState } : {}),
   })) as Rendered;
   if (!rendered) {
     throw new Error(`Render failed for ${options.url}`);

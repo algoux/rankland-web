@@ -4,7 +4,7 @@
 
 ## Key
 
-缓存 key 使用规范化后的 `path + query` 做 SHA-256 哈希，前缀为 `rankland:ssr:page:`。query 只保留业务白名单：
+缓存 key 使用规范化后的 `path + query` 以及可选请求语言 scope 做 SHA-256 哈希，前缀为 `rankland:ssr:page:`。query 只保留业务白名单：
 
 - 全局：`focus`、`聚焦`
 - `/search`：`kw`
@@ -14,6 +14,8 @@
 未知 query 不参与缓存 key，过长 URL 或未知路由直接跳过页面缓存。
 
 `ssr` 是服务端渲染控制参数，仅在服务端 SSR 入口判断，不写入页面 route props 或 DTO，也不参与缓存 key。请求带 `ssr=0` 或 `ssr=false` 时会直接返回 CSR HTML，并跳过 SSR 页面缓存读写。
+
+SSR 页面会解析请求头 `Accept-Language`，按 q 值和原始顺序生成语言优先级列表。存在有效语言时，该列表会作为缓存 key 的额外 scope，并写入首屏 `window.__INITIAL_STATE__` 供 hydration 使用；不同语言请求不会复用同一个 SSR HTML。请求头缺失或解析后没有有效语言时，不写入语言 scope，也不显式 fallback 到英语。
 
 ## TTL 和降级
 

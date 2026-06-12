@@ -13,6 +13,10 @@ import { createThemeService, THEME_TOKEN } from './lib/theme';
 import { installRanklandAnalytics } from './app/analytics';
 import { applyMacBlinkOptimizations } from './app/platform';
 import { installRouteProgress } from './app/route-progress';
+import {
+  SSR_REQUEST_LANGUAGES_TOKEN,
+  resolveSsrRequestLanguagesFromInitialState,
+} from './app/request-languages';
 
 Vue.registerHooks(['setup', 'beforeRouteEnter', 'beforeRouteUpdate', 'beforeRouteLeave', 'asyncData']);
 
@@ -27,6 +31,7 @@ export function mainEntry({
 }: HookParams & { api: ApiService; apiClient: ApiClientType }) {
   const head = createHead();
   const theme = createThemeService();
+  const requestLanguages = resolveSsrRequestLanguagesFromInitialState(initialState);
   app.use(head);
   app.use(BwcxClientRouterPlugin, {
     routesMap: clientRoutesMap,
@@ -35,6 +40,9 @@ export function mainEntry({
     apiClient,
   });
   app.provide(THEME_TOKEN, theme);
+  if (requestLanguages) {
+    app.provide(SSR_REQUEST_LANGUAGES_TOKEN, requestLanguages);
+  }
   app.config.globalProperties.$theme = theme;
   app.config.globalProperties.$ranklandApi = api;
   app.component(Head.name, Head);

@@ -38,6 +38,55 @@ test.describe('/ranklist/:id', () => {
     await expect(page.locator('.srk-ranklist-client-render-region')).toHaveCount(0);
   });
 
+  test('keeps request-language SSR output hydration-clean and cache-isolated', async ({ browser, baseURL }) => {
+    const enContext = await browser.newContext({
+      baseURL,
+      locale: 'en-US',
+      extraHTTPHeaders: {
+        'Accept-Language': 'en-US,en;q=0.9',
+      },
+    });
+    const zhContext = await browser.newContext({
+      baseURL,
+      locale: 'zh-CN',
+      extraHTTPHeaders: {
+        'Accept-Language': 'zh-CN,zh;q=0.9',
+      },
+    });
+    const hydrationMessages: string[] = [];
+
+    try {
+      const enPage = await enContext.newPage();
+      enPage.on('console', (message) => {
+        const text = message.text();
+        if (/hydration|mismatch/i.test(text)) {
+          hydrationMessages.push(`en: ${text}`);
+        }
+      });
+      await enPage.goto('/ranklist/localized-key-v2');
+      await expect(enPage.getByRole('heading', { name: 'Localized Contest' })).toBeVisible({ timeout: 20_000 });
+      await expect(enPage.getByText('Localized Team')).toBeVisible();
+      await expect(enPage.getByText('中文本地化比赛')).toHaveCount(0);
+
+      const zhPage = await zhContext.newPage();
+      zhPage.on('console', (message) => {
+        const text = message.text();
+        if (/hydration|mismatch/i.test(text)) {
+          hydrationMessages.push(`zh: ${text}`);
+        }
+      });
+      await zhPage.goto('/ranklist/localized-key-v2');
+      await expect(zhPage.getByRole('heading', { name: '中文本地化比赛' })).toBeVisible({ timeout: 20_000 });
+      await expect(zhPage.getByText('中文队伍')).toBeVisible();
+      await expect(zhPage.getByText('Localized Team')).toHaveCount(0);
+    } finally {
+      await enContext.close();
+      await zhContext.close();
+    }
+
+    expect(hydrationMessages).toEqual([]);
+  });
+
   test('reveals the page after the initial ranklist preference remount', async ({ page }) => {
     const hydrationMessages: string[] = [];
     page.on('console', (message) => {

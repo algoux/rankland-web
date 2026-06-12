@@ -14,6 +14,7 @@ import c2k from 'koa-connect';
 import path from 'path';
 import { promises as fs } from 'fs';
 import chalk from 'chalk';
+import { createSsrRequestLanguageInitialState } from '@common/request-language';
 import { IPageRenderer, type PageRenderOptions } from './page-renderer.interface';
 import {
   RedisSsrPageCache,
@@ -191,7 +192,7 @@ export default class PageRendererDev implements IPageRenderer {
   private async handleSsrRequest(ctx: RequestContext, options: PageRenderOptions = {}): Promise<string> {
     this.fixEntryPoint();
     const url = this.resolveRequestUrl(ctx);
-    const cacheKey = getSsrPageCacheKey(url);
+    const cacheKey = getSsrPageCacheKey(url, { languages: options.requestLanguages });
     const cached = cacheKey ? await this.cache?.get(cacheKey) : undefined;
     if (cached) {
       logSsrPageCacheHit(url);
@@ -233,11 +234,25 @@ export default class PageRendererDev implements IPageRenderer {
         return;
       }
 
+      const requestLanguageInitialState = createSsrRequestLanguageInitialState(options.requestLanguages);
+      const contextInitialState = (context as { initialState?: Record<string, unknown> }).initialState || {};
+      const renderContext = {
+        ...context,
+        ...(requestLanguageInitialState
+          ? {
+              initialState: {
+                ...contextInitialState,
+                ...requestLanguageInitialState,
+              },
+            }
+          : {}),
+      };
+
       const result = await render(url, {
         request: ctx.req,
         response: ctx.res,
         template,
-        ...context,
+        ...renderContext,
       });
 
       const status = result.status ?? options.defaultStatus ?? 200;

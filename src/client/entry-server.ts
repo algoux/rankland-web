@@ -6,9 +6,19 @@ import { ApiClientFactory, API_REQUEST_TOKEN, API_CLIENT_TOKEN } from './api';
 import { createServerRanklandApi } from './services/ranklist-api/factory.server';
 import { RANKLAND_API_TOKEN } from './services/ranklist-api';
 import { mainEntry } from './main';
+import {
+  createSsrRequestLanguageInitialState,
+  parseAcceptLanguageHeader,
+} from '@common/request-language';
 
 export default viteSSR(App, { routes }, (hookParams) => {
-  const { app, request } = hookParams;
+  const { app, initialState, request } = hookParams;
+  const requestLanguageInitialState = createSsrRequestLanguageInitialState(
+    parseAcceptLanguageHeader(request.headers['accept-language']),
+  );
+  if (requestLanguageInitialState) {
+    Object.assign(initialState, requestLanguageInitialState);
+  }
 
   // init api
   const getIp = (req: typeof request): string => {

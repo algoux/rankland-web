@@ -4,6 +4,7 @@ import type * as srk from '@algoux/standard-ranklist';
 import { EnumTheme, resolveStyle, resolveText, resolveUserMarkers } from '@algoux/standard-ranklist-utils';
 import type { StaticRanklistRow } from '@algoux/standard-ranklist-renderer-component-vue';
 import { THEME_TOKEN } from '@/lib/theme';
+import { SSR_REQUEST_LANGUAGES_TOKEN } from '@/app/request-languages';
 import { findUserMatchedMainICPCSeries } from '@/utils/ranklist.util';
 import type { RankTimeData } from '@/utils/rank-time-data.util';
 import SrkAssetImage from './SrkAssetImage.vue';
@@ -17,10 +18,13 @@ const props = defineProps<{
   ranklist: srk.Ranklist;
   assetsScope: string;
   filterMarker?: string;
+  languages?: readonly string[];
   rankTimeData: RankTimeData;
 }>();
 
 const theme = inject(THEME_TOKEN, undefined);
+const injectedRequestLanguages = inject(SSR_REQUEST_LANGUAGES_TOKEN, undefined);
+const textLanguages = computed(() => props.languages || injectedRequestLanguages);
 const themeName = computed(() => theme?.state.theme || EnumTheme.light);
 const userMarkers = computed(() => resolveUserMarkers(props.user, props.ranklist.markers));
 const matchedMainSeries = computed(() =>
@@ -56,17 +60,21 @@ function markerStyle(marker: srk.Marker) {
 }
 
 function formatTeamMemberName(member: srk.ExternalUser) {
-  const name = resolveText(member.name);
+  const name = resolveDisplayText(member.name);
   return member.role ? `${name} (${member.role})` : name;
+}
+
+function resolveDisplayText(text: Parameters<typeof resolveText>[0]) {
+  return resolveText(text, textLanguages.value);
 }
 </script>
 
 <template>
   <div class="user-modal">
-    <p class="mb-0">{{ resolveText(user.organization) }}</p>
+    <p class="mb-0">{{ resolveDisplayText(user.organization) }}</p>
     <p v-if="user.official === false" class="mt-4 mb-0">＊ 非正式参加者</p>
     <div v-if="hasMembers" class="user-modal-info-team-members mt-2">
-      <template v-for="(member, memberIndex) in user.teamMembers" :key="resolveText(member.name)">
+      <template v-for="(member, memberIndex) in user.teamMembers" :key="resolveDisplayText(member.name)">
         <span v-if="memberIndex > 0" class="user-modal-info-team-members-slash"> / </span>
         <span>{{ formatTeamMemberName(member) }}</span>
       </template>
@@ -79,13 +87,13 @@ function formatTeamMemberName(member: srk.ExternalUser) {
         :class="markerClass(marker)"
         :style="markerStyle(marker)"
       >
-        {{ resolveText(marker.label) }}
+        {{ resolveDisplayText(marker.label) }}
       </span>
     </div>
     <p v-if="matchedSeriesSegment && matchedMainSeries" class="mt-4 mb-0">
-      所在奖区（{{ matchedMainSeries.title }}）：
+      所在奖区（{{ resolveDisplayText(matchedMainSeries.title) }}）：
       <span class="user-modal-segment-label" :class="`bg-segment-${matchedSeriesSegment.style}`">
-        {{ matchedSeriesSegment.title }}
+        {{ resolveDisplayText(matchedSeriesSegment.title) }}
       </span>
     </p>
     <div class="mt-4">

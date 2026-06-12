@@ -44,6 +44,9 @@ export default class OurApp extends App {
     '!./server/**/*.spec.(j|t)s',
     './common/**/*.(j|t)s',
     '!./common/**/*.d.ts',
+    '!./common/**/__tests__/**',
+    '!./common/**/*.test.(j|t)s',
+    '!./common/**/*.spec.(j|t)s',
     '!./common/api/**',
   ];
 

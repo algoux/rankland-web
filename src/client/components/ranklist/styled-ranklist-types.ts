@@ -12,6 +12,7 @@ export interface StyledRanklistRendererProps {
   showFilter?: boolean;
   showProgress?: boolean;
   isLive?: boolean;
+  languages?: readonly string[];
   tableClass?: string;
   tableStyle?: CSSProperties;
 }
