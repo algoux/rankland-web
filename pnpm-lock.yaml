@@ -13,17 +13,17 @@ importers:
   .:
     dependencies:
       '@algoux/standard-ranklist':
-        specifier: ^0.3.12
-        version: 0.3.12
+        specifier: ^0.3.13
+        version: 0.3.13
       '@algoux/standard-ranklist-convert-to':
-        specifier: 0.2.2
-        version: 0.2.2(@algoux/standard-ranklist@0.3.12)
+        specifier: ^0.2.2
+        version: 0.2.2(@algoux/standard-ranklist@0.3.13)
       '@algoux/standard-ranklist-renderer-component-vue':
-        specifier: 0.6.2
-        version: 0.6.2(@algoux/standard-ranklist@0.3.12)(vue@3.5.35(typescript@5.9.3))
+        specifier: ^0.6.3
+        version: 0.6.3(@algoux/standard-ranklist@0.3.13)(vue@3.5.35(typescript@5.9.3))
       '@algoux/standard-ranklist-utils':
-        specifier: ^0.3.0
-        version: 0.3.0(@algoux/standard-ranklist@0.3.12)
+        specifier: ^0.3.1
+        version: 0.3.1(@algoux/standard-ranklist@0.3.13)
       '@antv/g2':
         specifier: 5.0.13
         version: 5.0.13
@@ -295,16 +295,16 @@ packages:
     peerDependencies:
       '@algoux/standard-ranklist': '*'
 
-  '@algoux/standard-ranklist-renderer-component-core@0.6.1':
-    resolution: {integrity: sha512-PMQ2WifqyzIDPjomgEU11H51H21uoS6LxGDXLwWnnyxQMZxcdn+8q6bktLDDQ284j82xoyuWh1E07qGfWbXHkQ==}
+  '@algoux/standard-ranklist-renderer-component-core@0.6.2':
+    resolution: {integrity: sha512-Ckf9sGirDASWuTC7a3wK2bpA9vMBy6fWMCMPis1IKjFDQidsDPHnre7McU1k++j0AvKvQrYhA4l2zTGlB+QSQg==}
     peerDependencies:
       '@algoux/standard-ranklist': '*'
 
   '@algoux/standard-ranklist-renderer-component-styles@0.6.1':
     resolution: {integrity: sha512-8wNEtNLVqyuCdpQhqm0IB9y5PU7+AD5LAEjx0muFB+N/X7tTI7pstftRndx2i6drIs5aGlWmFVHq9N0E54rKxw==}
 
-  '@algoux/standard-ranklist-renderer-component-vue@0.6.2':
-    resolution: {integrity: sha512-v9BHi8F6dF42o26+bVQVx3wkJJxIBk9SFhYqwX4lyVnhYkIVyG0WBuuLoHsU3MBaqKrP/GEsUrGyCvRI0MYIJw==}
+  '@algoux/standard-ranklist-renderer-component-vue@0.6.3':
+    resolution: {integrity: sha512-/pQIMrle3aB+96gywoWVteYXkS6lTEIhJlb0QOI5uD5Acq9hxn1cteW2VKp1Cyvyl2oSl9TL0uAWLXo01sdpQg==}
     peerDependencies:
       '@algoux/standard-ranklist': '*'
       vue: '>=3.4.0'
@@ -314,18 +314,13 @@ packages:
     peerDependencies:
       '@algoux/standard-ranklist': '*'
 
-  '@algoux/standard-ranklist-utils@0.2.9':
-    resolution: {integrity: sha512-VRK4EWYXJd1fGfADjwGghEDfi2xa8JKjbZPyPU5VjMt+lfaC4Lr3VzOy1mAZjRCZxH2e0rVYeX6DnAcIL4jbIA==}
+  '@algoux/standard-ranklist-utils@0.3.1':
+    resolution: {integrity: sha512-qxXZEd6D4zLCzif3/13d8iXfX37hf0enQ52X+I1GhwQwlTGmnH4jjdQKQzX4O13ntuFRPYxtlv9/qXoWf/4zxA==}
     peerDependencies:
       '@algoux/standard-ranklist': '*'
 
-  '@algoux/standard-ranklist-utils@0.3.0':
-    resolution: {integrity: sha512-SJevRfYWaB/dgqRL0MV+0Cmaw4zDz2JARolAfHjDCC/xPkVNRu/TMaG12HR8hIxsrhu7X2vQLRdFE7oRr9JNjQ==}
-    peerDependencies:
-      '@algoux/standard-ranklist': '*'
-
-  '@algoux/standard-ranklist@0.3.12':
-    resolution: {integrity: sha512-O15MB6vtukM6sVZbbHxUNYbQqQWup4Q6FZIFHw+tPdK6RiHKlquQciAknAUPm2Ol14ewOzXxXVurY3dwvJkZGA==}
+  '@algoux/standard-ranklist@0.3.13':
+    resolution: {integrity: sha512-kwviR/kDwd/sSEQPQEyG6M3YDqyKnfeF4qPvQN+lkqggJaVjFD6NyJmwk8oByXnbAlAV+ljwAmhsXGF479fAgw==}
 
   '@alloc/quick-lru@5.2.0':
     resolution: {integrity: sha512-UrcABB+4bUrFABwbluTIBErXwvbsU/V7TZWfmbgJfbkwiBuziS9gxdODUyuiecfdGQ85jglMW6juS3+z5TsKLw==}
@@ -5083,57 +5078,48 @@ snapshots:
 
   '@aashutoshrathi/word-wrap@1.2.6': {}
 
-  '@algoux/standard-ranklist-convert-to@0.2.2(@algoux/standard-ranklist@0.3.12)':
+  '@algoux/standard-ranklist-convert-to@0.2.2(@algoux/standard-ranklist@0.3.13)':
     dependencies:
-      '@algoux/standard-ranklist': 0.3.12
-      '@algoux/standard-ranklist-utils': 0.2.9(@algoux/standard-ranklist@0.3.12)
+      '@algoux/standard-ranklist': 0.3.13
+      '@algoux/standard-ranklist-utils': 0.2.13(@algoux/standard-ranklist@0.3.13)
       xlsx: 0.18.5
 
-  '@algoux/standard-ranklist-renderer-component-core@0.6.1(@algoux/standard-ranklist@0.3.12)':
+  '@algoux/standard-ranklist-renderer-component-core@0.6.2(@algoux/standard-ranklist@0.3.13)':
     dependencies:
-      '@algoux/standard-ranklist': 0.3.12
-      '@algoux/standard-ranklist-utils': 0.2.13(@algoux/standard-ranklist@0.3.12)
+      '@algoux/standard-ranklist': 0.3.13
+      '@algoux/standard-ranklist-utils': 0.3.1(@algoux/standard-ranklist@0.3.13)
       color: 4.2.3
       semver: 7.5.4
 
   '@algoux/standard-ranklist-renderer-component-styles@0.6.1': {}
 
-  '@algoux/standard-ranklist-renderer-component-vue@0.6.2(@algoux/standard-ranklist@0.3.12)(vue@3.5.35(typescript@5.9.3))':
+  '@algoux/standard-ranklist-renderer-component-vue@0.6.3(@algoux/standard-ranklist@0.3.13)(vue@3.5.35(typescript@5.9.3))':
     dependencies:
-      '@algoux/standard-ranklist': 0.3.12
-      '@algoux/standard-ranklist-renderer-component-core': 0.6.1(@algoux/standard-ranklist@0.3.12)
+      '@algoux/standard-ranklist': 0.3.13
+      '@algoux/standard-ranklist-renderer-component-core': 0.6.2(@algoux/standard-ranklist@0.3.13)
       '@algoux/standard-ranklist-renderer-component-styles': 0.6.1
-      '@algoux/standard-ranklist-utils': 0.2.13(@algoux/standard-ranklist@0.3.12)
+      '@algoux/standard-ranklist-utils': 0.3.1(@algoux/standard-ranklist@0.3.13)
       vue: 3.5.35(typescript@5.9.3)
 
-  '@algoux/standard-ranklist-utils@0.2.13(@algoux/standard-ranklist@0.3.12)':
+  '@algoux/standard-ranklist-utils@0.2.13(@algoux/standard-ranklist@0.3.13)':
     dependencies:
-      '@algoux/standard-ranklist': 0.3.12
+      '@algoux/standard-ranklist': 0.3.13
       '@types/semver': 7.5.6
       bcp-47-match: 2.0.3
       bignumber.js: 9.1.2
       semver: 7.5.4
       textcolor: 1.0.2
 
-  '@algoux/standard-ranklist-utils@0.2.9(@algoux/standard-ranklist@0.3.12)':
+  '@algoux/standard-ranklist-utils@0.3.1(@algoux/standard-ranklist@0.3.13)':
     dependencies:
-      '@algoux/standard-ranklist': 0.3.12
+      '@algoux/standard-ranklist': 0.3.13
       '@types/semver': 7.5.6
       bcp-47-match: 2.0.3
       bignumber.js: 9.1.2
       semver: 7.5.4
       textcolor: 1.0.2
 
-  '@algoux/standard-ranklist-utils@0.3.0(@algoux/standard-ranklist@0.3.12)':
-    dependencies:
-      '@algoux/standard-ranklist': 0.3.12
-      '@types/semver': 7.5.6
-      bcp-47-match: 2.0.3
-      bignumber.js: 9.1.2
-      semver: 7.5.4
-      textcolor: 1.0.2
-
-  '@algoux/standard-ranklist@0.3.12': {}
+  '@algoux/standard-ranklist@0.3.13': {}
 
   '@alloc/quick-lru@5.2.0': {}
 

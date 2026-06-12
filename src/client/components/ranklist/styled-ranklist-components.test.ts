@@ -4,6 +4,7 @@ import { renderToString } from '@vue/server-renderer';
 import { createMemoryHistory, createRouter } from 'vue-router';
 import type * as srk from '@algoux/standard-ranklist';
 import { THEME_TOKEN, type ThemeService } from '@/lib/theme';
+import { createEmptyRankTimeData } from '@/utils/rank-time-data.util';
 import StyledRanklist from './StyledRanklist.vue';
 import StyledRanklistRenderer from './StyledRanklistRenderer.vue';
 import BeianLink from '@/components/site/BeianLink.vue';
@@ -114,5 +115,50 @@ describe('ranklist Vue components', () => {
 
     expect(html).toContain('background-color:#222222');
     expect(html).not.toContain('background-color:#f5f5f5');
+  });
+
+  it('formats user modal team members with roles during SSR', async () => {
+    const user: srk.User = {
+      id: 'team-a',
+      name: 'Team A',
+      organization: 'Example University',
+      official: true,
+      teamMembers: [
+        { name: { 'zh-CN': '张三', fallback: 'Alice' }, role: 'captain' },
+        { name: 'Bob' },
+      ],
+    };
+    const row = {
+      user,
+      score: { value: 1, time: [10, 'min'] },
+      statuses: [],
+      rankValues: [{ rank: 1, segmentIndex: null }],
+    };
+    const ranklist: srk.Ranklist = {
+      type: 'general',
+      version: '0.3.13',
+      contest: {
+        title: 'Team Member Role Contest',
+        startAt: '2026-06-01T09:00:00+08:00',
+        duration: [5, 'h'],
+      },
+      problems: [],
+      series: [{ title: '#', rule: { preset: 'ICPC', options: { count: { value: [] } } } }],
+      rows: [row],
+    };
+    const app = createSSRApp(UserInfoModal, {
+      user,
+      row,
+      index: 0,
+      ranklist,
+      assetsScope: '',
+      rankTimeData: createEmptyRankTimeData(),
+    });
+
+    const html = await renderToString(app);
+
+    expect(html).toContain('Alice (captain)');
+    expect(html).toContain(' / ');
+    expect(html).toContain('Bob');
   });
 });

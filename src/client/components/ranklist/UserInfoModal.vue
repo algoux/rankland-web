@@ -54,6 +54,11 @@ function markerStyle(marker: srk.Marker) {
     backgroundColor: style.backgroundColor[themeName.value],
   };
 }
+
+function formatTeamMemberName(member: srk.ExternalUser) {
+  const name = resolveText(member.name);
+  return member.role ? `${name} (${member.role})` : name;
+}
 </script>
 
 <template>
@@ -63,7 +68,7 @@ function markerStyle(marker: srk.Marker) {
     <div v-if="hasMembers" class="user-modal-info-team-members mt-2">
       <template v-for="(member, memberIndex) in user.teamMembers" :key="resolveText(member.name)">
         <span v-if="memberIndex > 0" class="user-modal-info-team-members-slash"> / </span>
-        <span>{{ resolveText(member.name) }}</span>
+        <span>{{ formatTeamMemberName(member) }}</span>
       </template>
     </div>
     <div v-if="userMarkers.length > 0" class="user-modal-info-markers mt-2">
