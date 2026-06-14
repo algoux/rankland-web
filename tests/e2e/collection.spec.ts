@@ -12,6 +12,13 @@ async function delayRankInfoRequest(page: Page, rankKey: string, delayMs: number
   });
 }
 
+async function readProgressSliderState(page: Page) {
+  return page.locator('[data-id="ranklist-progress"] input.srk-progress-slider').evaluate((input) => ({
+    max: Number((input as HTMLInputElement).max),
+    value: Number((input as HTMLInputElement).value),
+  }));
+}
+
 test.describe('/collection/:id', () => {
   test('renders the navigation menu and selected ranklist', async ({ page }) => {
     await page.emulateMedia({ colorScheme: 'dark' });
@@ -594,6 +601,31 @@ test.describe('/collection/:id', () => {
     });
     await expect(page).toHaveURL(/rankId=another-key/);
     await expect.poll(() => page.evaluate(() => Math.round(window.scrollY))).toBe(0);
+  });
+
+  test('resets the progress time-travel slider after switching collection ranklists', async ({ page }) => {
+    await page.emulateMedia({ colorScheme: 'dark' });
+    await page.addInitScript(() => {
+      window.localStorage.setItem('StyledRanklistSettingsIntroRead', 'true');
+      window.localStorage.removeItem('CollectionNavCollapsed');
+    });
+    await page.goto('/collection/official?rankId=short-progress-key');
+
+    await expect(
+      page.locator('[data-id="collection-ranklist-content"][data-ranklist-id="short-progress-key"]'),
+    ).toBeVisible({ timeout: 20_000 });
+    await expect(page.locator('[data-id="ranklist-progress"] input.srk-progress-slider')).toBeVisible();
+    await expect.poll(() => readProgressSliderState(page)).toEqual({ max: 180, value: 180 });
+
+    await page.evaluate(() => {
+      window.history.pushState({}, '', '/collection/official?rankId=long-progress-key');
+      window.dispatchEvent(new PopStateEvent('popstate'));
+    });
+    await expect(
+      page.locator('[data-id="collection-ranklist-content"][data-ranklist-id="long-progress-key"]'),
+    ).toBeVisible({ timeout: 5_000 });
+    await expect(page).toHaveURL(/rankId=long-progress-key/);
+    await expect.poll(() => readProgressSliderState(page)).toEqual({ max: 300, value: 300 });
   });
 
   test('keeps the hidden collection header and ranklist table header sticky while scrolling', async ({ page }) => {

@@ -294,9 +294,21 @@ const usingData = computed<StaticRanklist>(() => ({
   series: filteredSeries.value,
   rows: filteredRows.value,
 }));
+const showProfessionalProblemExtras = computed(() =>
+  renderedRanklistSettings.value.professionalMode && usingData.value.problems.length > 0,
+);
 const contestTimeRange = computed(() =>
   formatSrkContestTimeRange(staticData.value.contest.startAt, staticData.value.contest.duration),
 );
+const progressBarRenderKey = computed(() => {
+  const contest = memorizedData.value.contest;
+  return JSON.stringify([
+    props.id || props.name,
+    contest.startAt || '',
+    contest.duration || null,
+    contest.frozenDuration || null,
+  ]);
+});
 const fullUrl = computed(() => {
   if (typeof window === 'undefined') {
     return '';
@@ -1102,7 +1114,13 @@ function resolveDisplayText(text: Parameters<typeof resolveText>[0]) {
       {{ contestTimeRange.startText }} ~ {{ contestTimeRange.endText }}
     </p>
     <div class="mx-4" data-id="ranklist-progress">
-      <ProgressBar :data="memorizedData" enable-time-travel :live="isLive" @time-travel="handleTimeTravel" />
+      <ProgressBar
+        :key="progressBarRenderKey"
+        :data="memorizedData"
+        enable-time-travel
+        :live="isLive"
+        @time-travel="handleTimeTravel"
+      />
     </div>
     <div class="mx-4 mt-3 srk-ranklist-toolbar" :class="{ 'srk-ranklist-toolbar-with-filter': showFilter }">
       <div v-if="showFilter" class="srk-ranklist-filter">
@@ -1348,9 +1366,9 @@ function resolveDisplayText(text: Parameters<typeof resolveText>[0]) {
           :theme="themeName"
           :status-cell-preset="renderedRanklistSettings.statusCellPreset"
           :status-color-as-text="renderedRanklistSettings.statusColorAsText"
-          :show-problem-statistics-footer="renderedRanklistSettings.professionalMode"
-          :show-dirt-column="renderedRanklistSettings.professionalMode"
-          :show-s-e-column="renderedRanklistSettings.professionalMode"
+          :show-problem-statistics-footer="showProfessionalProblemExtras"
+          :show-dirt-column="showProfessionalProblemExtras"
+          :show-s-e-column="showProfessionalProblemExtras"
           :row-bordered="renderedRanklistSettings.tableBordered"
           :column-bordered="renderedRanklistSettings.tableBordered"
           :row-striped="renderedRanklistSettings.rowStriped"

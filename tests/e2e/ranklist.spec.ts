@@ -141,6 +141,48 @@ test.describe('/ranklist/:id', () => {
     expect(hydrationMessages).toEqual([]);
   });
 
+  test('hides the problem statistics footer in professional mode when the ranklist has no problems', async ({ page }) => {
+    await page.addInitScript(() => {
+      window.localStorage.setItem('StyledRanklistSettingsIntroRead', 'true');
+      window.localStorage.setItem('StyledRanklistSettings', JSON.stringify({
+        professionalMode: true,
+        statusCellPreset: 'minimal',
+        statusColorAsText: true,
+        rowStriped: false,
+        tableBordered: true,
+        emptyStatusPlaceholder: 'dash',
+        splitOrganization: true,
+        userAvatarPlacement: 'user',
+      }));
+    });
+
+    await page.goto('/ranklist/no-problems-key');
+    await page.waitForFunction(() => document.body.dataset.ranklandHydrated === 'true');
+    await page.waitForFunction(() => getComputedStyle(document.body).opacity === '1');
+    await expect(page.locator('[data-id="ranklist-content"][data-ranklist-id="no-problems-key"][data-row-count="2"]')).toBeVisible({
+      timeout: 20_000,
+    });
+
+    const renderedState = await page.evaluate(() => {
+      const headers = Array.from(document.querySelectorAll('.srk-main thead th')).map((header) =>
+        header.textContent?.trim() || '',
+      );
+      return {
+        hasDirtColumn: headers.includes('Dirt'),
+        hasProblemColumn: headers.includes('A'),
+        hasProblemStatisticsFooter: Boolean(document.querySelector('.srk-problem-statistics-footer-row')),
+        hasSEColumn: headers.includes('SE'),
+      };
+    });
+
+    expect(renderedState).toEqual({
+      hasDirtColumn: false,
+      hasProblemColumn: false,
+      hasProblemStatisticsFooter: false,
+      hasSEColumn: false,
+    });
+  });
+
   test('uses the shared Button component in the settings intro modal', async ({ page }) => {
     await page.goto('/ranklist/test-key');
 

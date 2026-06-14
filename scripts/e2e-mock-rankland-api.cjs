@@ -160,6 +160,32 @@ function createLocalizedRanklist() {
   };
 }
 
+function createProgressResetRanklist(baseRanklist, durationHours) {
+  return {
+    ...baseRanklist,
+    contest: {
+      ...baseRanklist.contest,
+      title: 'Progress Reset Fixture',
+      duration: [durationHours, 'h'],
+    },
+  };
+}
+
+function createNoProblemsRanklist(baseRanklist) {
+  return {
+    ...baseRanklist,
+    contest: {
+      ...baseRanklist.contest,
+      title: 'No Problems Fixture',
+    },
+    problems: [],
+    rows: baseRanklist.rows.map((row) => ({
+      ...row,
+      statuses: [],
+    })),
+  };
+}
+
 const largeRanklistInfo = {
   id: 'rid-large',
   uniqueKey: 'large-key',
@@ -181,6 +207,22 @@ const fixtures = {
   srk: readFixture('ranklist.srk.json'),
   statistics: readFixture('statistics.json'),
 };
+
+fixtures.progressResetShortSrk = createProgressResetRanklist(fixtures.srk, 3);
+fixtures.progressResetLongSrk = createProgressResetRanklist(fixtures.srk, 5);
+fixtures.noProblemsSrk = createNoProblemsRanklist(fixtures.srk);
+fixtures.collection.root.children[0].children[0].children.push(
+  {
+    type: 1,
+    uniqueKey: 'short-progress-key',
+    name: 'Progress Reset Fixture (3h)',
+  },
+  {
+    type: 1,
+    uniqueKey: 'long-progress-key',
+    name: 'Progress Reset Fixture (5h)',
+  },
+);
 
 function wrap(data) {
   return { code: 0, message: 'success', data };
@@ -239,6 +281,26 @@ const server = http.createServer((req, res) => {
       sendJson(res, wrap(largeRanklistInfo));
       return;
     }
+    if (key === 'short-progress-key' || key === 'long-progress-key') {
+      sendJson(res, wrap({
+        ...fixtures.ranklistInfo,
+        id: `rid-${key}`,
+        uniqueKey: key,
+        name: key === 'short-progress-key' ? 'Progress Reset Fixture (3h)' : 'Progress Reset Fixture (5h)',
+        fileID: key === 'short-progress-key' ? 'file-progress-reset-short' : 'file-progress-reset-long',
+      }));
+      return;
+    }
+    if (key === 'no-problems-key') {
+      sendJson(res, wrap({
+        ...fixtures.ranklistInfo,
+        id: 'rid-no-problems-key',
+        uniqueKey: key,
+        name: 'No Problems Fixture',
+        fileID: 'file-no-problems',
+      }));
+      return;
+    }
     const ranklistInfo = {
       ...fixtures.ranklistInfo,
       uniqueKey: key,
@@ -263,6 +325,18 @@ const server = http.createServer((req, res) => {
   if (pathname === '/file/download') {
     if (url.searchParams.get('id') === largeRanklistInfo.fileID) {
       sendJson(res, fixtures.largeSrk);
+      return;
+    }
+    if (url.searchParams.get('id') === 'file-progress-reset-short') {
+      sendJson(res, fixtures.progressResetShortSrk);
+      return;
+    }
+    if (url.searchParams.get('id') === 'file-progress-reset-long') {
+      sendJson(res, fixtures.progressResetLongSrk);
+      return;
+    }
+    if (url.searchParams.get('id') === 'file-no-problems') {
+      sendJson(res, fixtures.noProblemsSrk);
       return;
     }
     if (url.searchParams.get('id') === 'file-localized-v2') {
