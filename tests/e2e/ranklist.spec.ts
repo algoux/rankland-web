@@ -283,6 +283,30 @@ test.describe('/ranklist/:id', () => {
     });
   });
 
+  test('shows a plain export hint as the first download menu item', async ({ page }) => {
+    await page.addInitScript(() => {
+      window.localStorage.setItem('StyledRanklistSettingsIntroRead', 'true');
+    });
+    await page.goto('/ranklist/test-key');
+
+    await expect(page.locator('[data-id="ranklist-content"][data-ranklist-id="test-key"]')).toBeVisible({ timeout: 20_000 });
+    await page.locator('[data-id="ranklist-download-action"]').hover();
+    await expect(page.locator('[data-id="ranklist-download-menu"]')).toBeVisible();
+    const downloadMenuIntro = page.locator('[data-id="ranklist-download-menu-label"]');
+    await expect(downloadMenuIntro).toHaveText('导出为...');
+    const downloadMenuIntroState = await page.locator('[data-id="ranklist-download-menu"]').evaluate((menu) => {
+      const label = menu.querySelector('[data-id="ranklist-download-menu-label"]');
+      return {
+        isFirstMenuChild: label?.parentElement?.firstElementChild === label,
+        hasInteractiveChild: Boolean(label?.querySelector('button, a')),
+      };
+    });
+    expect(downloadMenuIntroState).toEqual({
+      isFirstMenuChild: true,
+      hasInteractiveChild: false,
+    });
+  });
+
   test('restores ranklist toolbar and title metadata interactions', async ({ page }) => {
     await page.addInitScript(() => {
       window.localStorage.setItem('StyledRanklistSettingsIntroRead', 'true');
@@ -577,6 +601,33 @@ test.describe('/ranklist/:id', () => {
     expect(splitTipBounds.right).toBeLessThanOrEqual(splitTipBounds.viewportWidth - 8);
   });
 
+  test('shows only one settings action when mobile CSS and width state disagree', async ({ page }) => {
+    await page.setViewportSize({ width: 390, height: 844 });
+    await page.addInitScript(() => {
+      window.localStorage.setItem('StyledRanklistSettingsIntroRead', 'true');
+      Object.defineProperty(window, 'innerWidth', {
+        configurable: true,
+        get: () => 1024,
+      });
+    });
+    await page.goto('/ranklist/test-key');
+
+    await expect(page.locator('[data-id="ranklist-content"][data-ranklist-id="test-key"]')).toBeVisible({ timeout: 20_000 });
+    await expect(page.locator('[data-id="ranklist-mobile-settings-action"]')).toBeVisible();
+
+    const visibleSettingsActionCount = await page.evaluate(() => {
+      const isVisible = (element: Element) => {
+        const rect = element.getBoundingClientRect();
+        const style = window.getComputedStyle(element);
+        return rect.width > 0 && rect.height > 0 && style.display !== 'none' && style.visibility !== 'hidden';
+      };
+      return Array.from(document.querySelectorAll('[data-id="ranklist-mobile-settings-action"], [data-id="ranklist-settings-action"]'))
+        .filter(isVisible).length;
+    });
+
+    expect(visibleSettingsActionCount).toBe(1);
+  });
+
   test('keeps ranklist dropdown menus open after mobile taps', async ({ page }) => {
     await page.setViewportSize({ width: 390, height: 844 });
     await page.addInitScript(() => {
@@ -601,6 +652,27 @@ test.describe('/ranklist/:id', () => {
       await page.keyboard.press('Escape');
       await expect(menu).toBeHidden();
     }
+  });
+
+  test('uses a 20px gap between organization filter and official-only toggle', async ({ page }) => {
+    await page.setViewportSize({ width: 390, height: 844 });
+    await page.addInitScript(() => {
+      window.localStorage.setItem('StyledRanklistSettingsIntroRead', 'true');
+    });
+    await page.goto('/ranklist/test-key');
+
+    await expect(page.locator('[data-id="ranklist-content"][data-ranklist-id="test-key"]')).toBeVisible({ timeout: 20_000 });
+
+    const gap = await page.evaluate(() => {
+      const select = document.querySelector('[data-id="ranklist-org-multi-select"]')?.getBoundingClientRect();
+      const official = document.querySelector('.srk-ranklist-official-filter')?.getBoundingClientRect();
+      if (!select || !official) {
+        return null;
+      }
+      return Math.round(official.left - select.right);
+    });
+
+    expect(gap).toBe(20);
   });
 
   test('keeps the restored ranklist toolbar inside a narrow mobile viewport', async ({ page }) => {

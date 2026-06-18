@@ -148,6 +148,7 @@ const initializationError = ref('');
 const showWelcome = ref(false);
 const remainingHeight = ref(640);
 const editorWidth = ref(500);
+const isMobileEditorLayout = ref(false);
 const isResizing = ref(false);
 const isFileDragActive = ref(false);
 const fileDragDepth = ref(0);
@@ -172,10 +173,11 @@ let dragStartEditorWidth = DEFAULT_EDITOR_WIDTH;
 
 const editorMaxWidth = computed(() => getEditorMaxWidth());
 const editorPaneStyle = computed(() => ({
-  width: `${editorWidth.value}px`,
+  width: isMobileEditorLayout.value ? '100%' : `${editorWidth.value}px`,
 }));
 
 onMounted(async () => {
+  updateEditorLayoutMode();
   updateRemainingHeight();
   restoreEditorWidth();
   window.addEventListener('resize', updateRemainingHeight);
@@ -306,12 +308,22 @@ function updateRemainingHeight() {
 
 function restoreEditorWidth() {
   const storedWidth = Number(window.localStorage.getItem(LocalStorageKey.PlaygroundEditorWidth));
-  editorWidth.value = clampEditorWidth(Number.isFinite(storedWidth) && storedWidth > 0 ? storedWidth : DEFAULT_EDITOR_WIDTH);
+  const nextWidth = Number.isFinite(storedWidth) && storedWidth > 0 ? Math.round(storedWidth) : DEFAULT_EDITOR_WIDTH;
+  editorWidth.value = isMobileEditorLayout.value ? nextWidth : clampEditorWidth(nextWidth);
 }
 
 function updateEditorWidthAfterResize() {
+  updateEditorLayoutMode();
+  if (isMobileEditorLayout.value) {
+    layoutEditor();
+    return;
+  }
   editorWidth.value = clampEditorWidth(editorWidth.value);
   layoutEditor();
+}
+
+function updateEditorLayoutMode() {
+  isMobileEditorLayout.value = isMobileLayout();
 }
 
 function startResize(event: MouseEvent) {
@@ -754,9 +766,10 @@ function handleWelcomeOpenChange(open: boolean) {
 
   .srk-playground-editor {
     width: 100%;
+    max-width: 100%;
     min-width: 0;
     height: 360px;
-    flex-basis: auto;
+    flex: 0 0 360px;
   }
 
   .srk-playground-resizer {

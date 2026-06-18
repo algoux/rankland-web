@@ -144,6 +144,10 @@
   white-space: nowrap;
 }
 
+.srk-ranklist-official-filter {
+  margin-left: 12px;
+}
+
 .srk-ranklist-filter-title {
   flex: none;
 }
@@ -361,6 +365,17 @@
   padding: 6px 10px;
   color: inherit;
   text-align: left;
+  white-space: nowrap;
+}
+
+.srk-ranklist-menu-label {
+  display: block;
+  padding: 6px 10px 4px;
+  color: hsl(var(--muted-foreground));
+  font-size: 12px;
+  line-height: 1.4;
+  pointer-events: none;
+  user-select: none;
   white-space: nowrap;
 }
 
@@ -803,7 +818,7 @@ html.dark .srk-ranklist-settings-modal {
   }
 
   .srk-ranklist-toolbar-with-filter .srk-ranklist-org-select {
-    width: clamp(104px, 30vw, 126px);
+    width: clamp(92px, 25vw, 126px);
     max-width: none;
     min-width: 0;
     flex: none;
@@ -816,13 +831,14 @@ html.dark .srk-ranklist-settings-modal {
   }
 
   .srk-ranklist-toolbar-with-filter .srk-ranklist-official-filter {
+    margin-left: 14px;
     gap: 4px;
     flex: 0 0 auto;
   }
 
   .srk-multi-select-dropdown {
-    width: clamp(104px, 30vw, 126px);
-    min-width: clamp(104px, 30vw, 126px);
+    width: clamp(92px, 42vw, 180px);
+    min-width: clamp(92px, 42vw, 180px);
     max-width: calc(100vw - 72px);
   }
 
@@ -847,6 +863,10 @@ html.dark .srk-ranklist-settings-modal {
     justify-content: center;
     flex: 0 0 auto;
     margin-left: auto;
+  }
+
+  .srk-ranklist-toolbar-with-filter .srk-ranklist-actions .srk-ranklist-settings-action {
+    display: none;
   }
 
   .srk-ranklist-toolbar-with-filter .srk-ranklist-actions {

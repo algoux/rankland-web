@@ -56,6 +56,7 @@ import {
   DropdownMenuContent,
   DropdownMenuGroup,
   DropdownMenuItem,
+  DropdownMenuLabel,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { getRanklandRuntimeConfig, ranklandRoutes } from '@/app/config';
@@ -1004,6 +1005,12 @@ function resolveDisplayText(text: Parameters<typeof resolveText>[0]) {
               @close-auto-focus.prevent
             >
               <DropdownMenuGroup>
+                <DropdownMenuLabel
+                  class="srk-ranklist-menu-label"
+                  data-id="ranklist-download-menu-label"
+                >
+                  导出为...
+                </DropdownMenuLabel>
                 <DropdownMenuItem as-child class="srk-ranklist-menu-item" @select.prevent="runDownloadAction(download)">
                   <button type="button">标准榜单格式 (srk)</button>
                 </DropdownMenuItem>

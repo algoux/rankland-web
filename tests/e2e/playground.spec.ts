@@ -285,6 +285,48 @@ test.describe('/playground', () => {
     })).toBe(620);
   });
 
+  test('uses a full-width editor pane on mobile', async ({ page }) => {
+    await page.setViewportSize({ width: 428, height: 844 });
+    await page.addInitScript(() => {
+      window.localStorage.setItem('PlaygroundWelcomeMessageRead', 'true');
+      window.localStorage.setItem('StyledRanklistSettingsIntroRead', 'true');
+      window.localStorage.setItem('PlaygroundEditorWidth', '500');
+    });
+    await page.goto('/playground');
+
+    await expect(page.locator('.monaco-editor').first()).toBeVisible({ timeout: 60_000 });
+    await expect(page.locator('[data-id="playground-preview"][data-row-count="3"]')).toBeVisible();
+
+    const layout = await page.evaluate(() => {
+      const container = document.querySelector('[data-id="srk-playground-container"]');
+      const editor = document.querySelector('[data-id="srk-playground-editor"]');
+      const resizer = document.querySelector('[data-id="srk-playground-resizer"]');
+      const preview = document.querySelector('.srk-playground-preview');
+      if (!container || !editor || !resizer || !preview) {
+        return null;
+      }
+      const containerRect = container.getBoundingClientRect();
+      const editorRect = editor.getBoundingClientRect();
+      const resizerRect = resizer.getBoundingClientRect();
+      const previewRect = preview.getBoundingClientRect();
+      return {
+        containerRight: Math.round(containerRect.right),
+        containerWidth: Math.round(containerRect.width),
+        editorRight: Math.round(editorRect.right),
+        editorWidth: Math.round(editorRect.width),
+        previewTop: Math.round(previewRect.top),
+        resizerWidth: Math.round(resizerRect.width),
+      };
+    });
+
+    expect(layout).not.toBeNull();
+    expect(layout!.containerWidth).toBe(428);
+    expect(layout!.editorWidth).toBe(layout!.containerWidth);
+    expect(layout!.editorRight).toBe(layout!.containerRight);
+    expect(layout!.resizerWidth).toBe(layout!.containerWidth);
+    expect(layout!.previewTop).toBeGreaterThan(0);
+  });
+
   test('keeps the ranklist table header flush with the preview scrollport while scrolling', async ({ page }) => {
     await page.addInitScript(() => {
       window.localStorage.setItem('PlaygroundWelcomeMessageRead', 'true');
