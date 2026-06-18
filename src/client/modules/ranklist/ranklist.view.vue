@@ -44,6 +44,7 @@
       :name="ranklistId"
       :id="ranklistId"
       :meta="ranklistData.info"
+      :srk-url="ranklistSrkUrl"
       show-footer
       show-filter
       table-class="rankland-ranklist-table-frame"
@@ -60,7 +61,7 @@ import type { IApiRanklist } from '@/services/ranklist-api';
 import { Button } from '@/components/ui/button';
 import Loading from '@/components/common/Loading.vue';
 import StyledRanklist from '@/components/ranklist/StyledRanklist.vue';
-import { getFullUrl, ranklandRoutes } from '@/app/config';
+import { getFullUrl, getSrkFileDownloadUrl, ranklandRoutes } from '@/app/config';
 import {
   RanklistPageErrorKind,
   shouldLogRanklistPageError,
@@ -96,6 +97,11 @@ export default class Ranklist extends Vue {
 
   get ranklistFullUrl() {
     return getFullUrl(ranklandRoutes.formatUrl('Ranklist', { id: this.ranklistId }));
+  }
+
+  get ranklistSrkUrl() {
+    const fileID = this.ranklistData?.info.fileID;
+    return fileID ? getSrkFileDownloadUrl(fileID) : undefined;
   }
 
   reloadPage() {

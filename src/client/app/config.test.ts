@@ -3,6 +3,7 @@ import {
   getRanklandBuildCommitLink,
   getFullUrl,
   getRanklandRuntimeConfig,
+  getSrkFileDownloadUrl,
   ranklandRoutes,
   ranklandSiteOrigin,
 } from './config';
@@ -55,7 +56,21 @@ describe('rankland runtime config', () => {
     expect(ranklandRoutes.formatUrl('Search', { kw: 'hello world' })).toBe('/search?kw=hello%20world');
     expect(ranklandRoutes.formatUrl('Search', { tag: ['a', 'b'] })).toBe('/search?tag=a&tag=b');
     expect(ranklandRoutes.formatUrl('Collection', { id: 'official', rankId: 'abc' })).toBe('/collection/official?rankId=abc');
+    expect(ranklandRoutes.formatUrl('Playground', {
+      src: 'https://rl-api.example/file/download?id=file-id',
+      id: 'rank key',
+    })).toBe('/playground?src=https%3A%2F%2Frl-api.example%2Ffile%2Fdownload%3Fid%3Dfile-id&id=rank%20key');
     expect(ranklandSiteOrigin('cnn')).toBe('https://rl.algoux.cn');
     expect(getFullUrl('/ranklist/foo')).toBe('https://rl.algoux.org/ranklist/foo');
+  });
+
+  it('formats client-visible srk file download URLs from file IDs', () => {
+    const config = {
+      ...getRanklandRuntimeConfig(),
+      cdnApiBaseClient: 'https://cdn-api.example/base/',
+    };
+
+    expect(getSrkFileDownloadUrl('file id/with?query', config))
+      .toBe('https://cdn-api.example/base/file/download?id=file%20id%2Fwith%3Fquery');
   });
 });

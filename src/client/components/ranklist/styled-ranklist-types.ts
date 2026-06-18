@@ -5,6 +5,7 @@ export interface StyledRanklistRendererProps {
   data: srk.Ranklist;
   name: string;
   id?: string;
+  srkUrl?: string;
   meta?: {
     viewCnt?: number;
   };

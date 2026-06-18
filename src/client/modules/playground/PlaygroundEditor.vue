@@ -53,10 +53,12 @@
         class="mt-8 mb-8"
         data-id="playground-preview"
         :data-row-count="String(parsedCode.data?.rows.length || 0)"
+        :data-ranklist-id="ranklistId || ''"
       >
         <StyledRanklist
           :data="parsedCode.data"
           name="playground"
+          :id="ranklistId || undefined"
           :show-progress="false"
           show-filter
         />
@@ -110,6 +112,7 @@ import { LocalStorageKey } from '@/app/local-storage-key.config';
 import {
   createDefaultPlaygroundCode,
   isLargePlaygroundDocument,
+  loadPlaygroundInitialCode,
   parsePlaygroundCode,
   shouldUseFastFullDocumentPaste,
 } from './playground-code';
@@ -131,6 +134,11 @@ type JsonDefaultsModule = {
   };
 };
 
+const props = defineProps<{
+  sourceUrl?: string;
+  ranklistId?: string;
+}>();
+
 const editorEl = ref<HTMLElement | null>(null);
 const containerEl = ref<HTMLElement | null>(null);
 const code = ref(createDefaultPlaygroundCode());
@@ -149,6 +157,7 @@ const PREVIEW_MIN_WIDTH = 360;
 const DEFAULT_EDITOR_WIDTH = 500;
 const RESIZER_WIDTH = 7;
 const INVALID_SRK_FILE_MESSAGE = '不是有效的 srk 文件';
+const SOURCE_LOAD_FAILED_MESSAGE = '无法加载 srk 文件，已回退到默认示例';
 
 let monacoApi: MonacoApi | null = null;
 let editor: MonacoEditorNamespace.IStandaloneCodeEditor | null = null;
@@ -178,6 +187,7 @@ onMounted(async () => {
   }
 
   await nextTick();
+  await initializeEditorCode();
   await mountEditor().catch((error) => {
     console.error('[Playground] failed to initialize Monaco:', error);
     initializationError.value = error instanceof Error ? error.message : 'Failed to initialize playground editor';
@@ -202,6 +212,18 @@ onBeforeUnmount(() => {
   changeSubscription?.dispose();
   editor?.dispose();
 });
+
+async function initializeEditorCode() {
+  const result = await loadPlaygroundInitialCode({
+    sourceUrl: props.sourceUrl,
+  });
+  code.value = result.code;
+  parsedCode.value = createPreviewCodeResult(result.code);
+  if (result.error) {
+    console.error('[Playground] failed to load srk source:', result.error);
+    toast.error(SOURCE_LOAD_FAILED_MESSAGE);
+  }
+}
 
 async function mountEditor() {
   if (!editorEl.value) {

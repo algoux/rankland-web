@@ -1,5 +1,8 @@
 import { expect, test, type Page } from '@playwright/test';
 
+const MOCK_API_PORT = Number(process.env.E2E_MOCK_API_PORT || 4322);
+const MOCK_API_BASE = `http://127.0.0.1:${MOCK_API_PORT}`;
+
 function createDroppedRanklistText() {
   return JSON.stringify({
     type: 'general',
@@ -139,6 +142,39 @@ test.describe('/playground', () => {
     await expect(page.locator('.monaco-editor').first()).toBeVisible({ timeout: 60_000 });
     await expect(page.locator('.monaco-editor .minimap').first()).toBeVisible();
     await expect(page.locator('[data-id="playground-preview"][data-row-count="3"]')).toBeVisible();
+  });
+
+  test('loads initial editor content from the src URL and passes id to the preview ranklist', async ({ page }) => {
+    await page.addInitScript(() => {
+      window.localStorage.setItem('PlaygroundWelcomeMessageRead', 'true');
+      window.localStorage.setItem('StyledRanklistSettingsIntroRead', 'true');
+    });
+    const src = `${MOCK_API_BASE}/file/download?id=file-localized-v2`;
+    await page.goto(`/playground?src=${encodeURIComponent(src)}&id=localized-key-v2`);
+
+    await expect(page.locator('.monaco-editor').first()).toBeVisible({ timeout: 60_000 });
+    await expect(page.locator('[data-id="playground-preview"][data-row-count="1"][data-ranklist-id="localized-key-v2"]')).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'Localized Contest' })).toBeVisible();
+  });
+
+  test('falls back to the default editor content when the src URL fails', async ({ page }) => {
+    await page.addInitScript(() => {
+      window.localStorage.setItem('PlaygroundWelcomeMessageRead', 'true');
+      window.localStorage.setItem('StyledRanklistSettingsIntroRead', 'true');
+    });
+    const src = `${MOCK_API_BASE}/file/download?id=missing-file`;
+    await page.route(src, (route) => route.fulfill({
+      status: 500,
+      contentType: 'application/json',
+      body: JSON.stringify({ message: 'missing file' }),
+    }));
+    await page.goto(`/playground?src=${encodeURIComponent(src)}&id=missing-rank`);
+
+    await expect(page.locator('.monaco-editor').first()).toBeVisible({ timeout: 60_000 });
+    await expect(page.locator('[data-id="playground-preview"][data-row-count="3"][data-ranklist-id="missing-rank"]')).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'ACM-ICPC World Finals 2018 (Excerpt Demo)' })).toBeVisible();
+    const errorToast = page.locator('[data-sonner-toast][data-type="error"]');
+    await expect(errorToast).toContainText('无法加载 srk 文件，已回退到默认示例');
   });
 
   test('shows the welcome message through the shared ranklist modal', async ({ page }) => {

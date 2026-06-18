@@ -112,3 +112,7 @@ export function ranklandSiteOrigin(siteAlias = getRanklandRuntimeConfig().siteAl
 export function getFullUrl(url: string, siteAlias = getRanklandRuntimeConfig().siteAlias) {
   return `${ranklandSiteOrigin(siteAlias)}${url.startsWith('/') ? url : `/${url}`}`;
 }
+
+export function getSrkFileDownloadUrl(fileID: string, config = getRanklandRuntimeConfig()) {
+  return `${config.cdnApiBaseClient.replace(/\/+$/, '')}/file/download?id=${encodeURIComponent(fileID)}`;
+}

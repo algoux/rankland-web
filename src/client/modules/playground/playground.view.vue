@@ -5,7 +5,7 @@
       <meta property="og:title" :content="pageTitle" />
     </Head>
     <ClientOnly>
-      <PlaygroundEditor />
+      <PlaygroundEditor :source-url="sourceUrl" :ranklist-id="ranklistId" />
     </ClientOnly>
   </section>
 </template>
@@ -16,6 +16,7 @@ import { View, RenderMethod, RenderMethodKind } from 'bwcx-client-vue3';
 import ClientOnly from '@/components/common/ClientOnly.vue';
 import { formatTitle } from '@/app/title-format';
 import PlaygroundEditor from './PlaygroundEditor.vue';
+import { getPlaygroundQueryValue } from './playground-code';
 
 @View('/playground')
 @RenderMethod(RenderMethodKind.CSR)
@@ -27,5 +28,13 @@ import PlaygroundEditor from './PlaygroundEditor.vue';
 })
 export default class Playground extends Vue {
   pageTitle = formatTitle('Playground');
+
+  get sourceUrl() {
+    return getPlaygroundQueryValue(this.$route.query.src);
+  }
+
+  get ranklistId() {
+    return getPlaygroundQueryValue(this.$route.query.id);
+  }
 }
 </script>

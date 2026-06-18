@@ -45,7 +45,7 @@ import {
 } from '@algoux/standard-ranklist-convert-to';
 import FileSaver from 'file-saver';
 import copy from 'copy-to-clipboard';
-import { ChevronDown, Download, Eye, Settings, Share2 } from 'lucide-vue-next';
+import { ChevronDown, Download, Eye, FilePenLine, Settings, Share2 } from 'lucide-vue-next';
 import { ToggleGroupItem, ToggleGroupRoot } from 'radix-vue';
 import { toast } from 'vue-sonner';
 import { THEME_TOKEN } from '@/lib/theme';
@@ -319,6 +319,15 @@ const fullUrl = computed(() => {
     pathname: route.path,
     query: route.query,
   }).fullUrl;
+});
+const editSrkUrl = computed(() => {
+  if (!props.srkUrl) {
+    return '';
+  }
+  return ranklandRoutes.formatUrl('Playground', {
+    src: props.srkUrl,
+    id: props.id || undefined,
+  });
 });
 const contributors = computed(() =>
   (staticData.value.contributors || [])
@@ -945,6 +954,23 @@ function resolveDisplayText(text: Parameters<typeof resolveText>[0]) {
       </span>
       <ClientOnly>
         <span v-if="hasMetaViewCount" class="srk-ranklist-meta-divider" />
+        <router-link
+          v-if="editSrkUrl"
+          :to="editSrkUrl"
+          class="srk-ranklist-action-menu srk-ranklist-action-trigger"
+          data-id="ranklist-edit-srk-action"
+          aria-label="编辑 srk"
+        >
+          <FilePenLine class="srk-ranklist-meta-icon srk-ranklist-action-icon" />
+          <span
+            class="srk-ranklist-action-tooltip"
+            data-id="ranklist-edit-srk-tooltip"
+            role="tooltip"
+          >
+            在演练场中编辑 srk
+          </span>
+        </router-link>
+        <span v-if="editSrkUrl" class="srk-ranklist-meta-divider" />
         <DropdownMenu
           :open="activeActionMenu === 'download'"
           :modal="false"

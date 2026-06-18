@@ -68,6 +68,30 @@
   color: rgb(var(--rankland-primary-rgb));
 }
 
+.srk-ranklist-action-tooltip {
+  display: none;
+  position: absolute;
+  z-index: 40;
+  top: calc(100% + 8px);
+  left: 50%;
+  transform: translateX(-50%);
+  border: 1px solid hsl(var(--border));
+  border-radius: 4px;
+  padding: 5px 8px;
+  background: hsl(var(--popover));
+  color: hsl(var(--popover-foreground));
+  box-shadow: 0 3px 6px -4px rgba(0, 0, 0, 0.12), 0 6px 16px rgba(0, 0, 0, 0.08), 0 9px 28px 8px rgba(0, 0, 0, 0.05);
+  font-size: 12px;
+  line-height: 1.5715;
+  pointer-events: none;
+  white-space: nowrap;
+}
+
+.srk-ranklist-action-trigger:hover .srk-ranklist-action-tooltip,
+.srk-ranklist-action-trigger:focus-within .srk-ranklist-action-tooltip {
+  display: block;
+}
+
 .srk-ranklist-meta-line,
 .srk-ranklist-time {
   margin: 0;

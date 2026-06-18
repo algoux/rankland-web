@@ -1,6 +1,9 @@
 import { expect, test } from '@playwright/test';
 import type { Page } from '@playwright/test';
 
+const MOCK_API_PORT = Number(process.env.E2E_MOCK_API_PORT || 4322);
+const MOCK_API_BASE = `http://127.0.0.1:${MOCK_API_PORT}`;
+
 async function expectPopoverPaintedOnTop(page: Page, dataId: string) {
   const paintState = await page.locator(`[data-id="${dataId}"]`).evaluate((element) => {
     const rect = element.getBoundingClientRect();
@@ -216,28 +219,67 @@ test.describe('/ranklist/:id', () => {
 
     await expect(page.locator('[data-id="ranklist-content"][data-ranklist-id="no-view-key"]')).toBeVisible({ timeout: 20_000 });
     await expect(page.locator('.srk-ranklist-meta-item')).toHaveCount(0);
-    await expect(page.locator('.srk-ranklist-meta-divider')).toHaveCount(1);
+    await expect(page.locator('.srk-ranklist-meta-divider')).toHaveCount(2);
     const metaLayout = await page.evaluate(() => {
       const meta = document.querySelector('.srk-ranklist-meta');
-      const divider = document.querySelector('.srk-ranklist-meta-divider');
+      const dividers = Array.from(document.querySelectorAll('.srk-ranklist-meta-divider'));
       const download = document.querySelector('[data-id="ranklist-download-action"]');
+      const edit = document.querySelector('[data-id="ranklist-edit-srk-action"]');
       const share = document.querySelector('[data-id="ranklist-share-action"]');
-      if (!meta || !divider || !download || !share) {
+      if (!meta || dividers.length !== 2 || !download || !edit || !share) {
         return null;
       }
-      const dividerRect = divider.getBoundingClientRect();
+      const firstDividerRect = dividers[0].getBoundingClientRect();
+      const secondDividerRect = dividers[1].getBoundingClientRect();
       const downloadRect = download.getBoundingClientRect();
+      const editRect = edit.getBoundingClientRect();
       const shareRect = share.getBoundingClientRect();
       return {
-        dividerAfterDownload: dividerRect.left > downloadRect.right,
-        dividerBeforeShare: dividerRect.right < shareRect.left,
-        firstMetaElementIsDownload: meta.firstElementChild === download,
+        firstDividerAfterEdit: firstDividerRect.left > editRect.right,
+        firstDividerBeforeDownload: firstDividerRect.right < downloadRect.left,
+        secondDividerAfterDownload: secondDividerRect.left > downloadRect.right,
+        secondDividerBeforeShare: secondDividerRect.right < shareRect.left,
+        firstMetaElementIsEdit: meta.firstElementChild === edit,
       };
     });
     expect(metaLayout).toEqual({
-      dividerAfterDownload: true,
-      dividerBeforeShare: true,
-      firstMetaElementIsDownload: true,
+      firstDividerAfterEdit: true,
+      firstDividerBeforeDownload: true,
+      secondDividerAfterDownload: true,
+      secondDividerBeforeShare: true,
+      firstMetaElementIsEdit: true,
+    });
+  });
+
+  test('opens playground editor with the current srk source URL', async ({ page }) => {
+    await page.addInitScript(() => {
+      window.localStorage.setItem('StyledRanklistSettingsIntroRead', 'true');
+      window.localStorage.setItem('PlaygroundWelcomeMessageRead', 'true');
+    });
+    await page.goto('/ranklist/test-key');
+
+    await expect(page.locator('[data-id="ranklist-content"][data-ranklist-id="test-key"]')).toBeVisible({ timeout: 20_000 });
+    const editAction = page.locator('[data-id="ranklist-edit-srk-action"]');
+    await expect(editAction).toBeVisible();
+    await expect(editAction).toHaveAttribute('aria-label', '编辑 srk');
+    await editAction.hover();
+    await expect(page.locator('[data-id="ranklist-edit-srk-tooltip"]')).toHaveText('在演练场中编辑 srk');
+
+    await editAction.click();
+    await expect(page).toHaveURL(/\/playground\?/);
+    const playgroundQuery = await page.evaluate(() => {
+      const url = new URL(window.location.href);
+      return {
+        path: url.pathname,
+        id: url.searchParams.get('id'),
+        src: url.searchParams.get('src'),
+      };
+    });
+
+    expect(playgroundQuery).toEqual({
+      path: '/playground',
+      id: 'test-key',
+      src: `${MOCK_API_BASE}/file/download?id=file-test-1`,
     });
   });
 

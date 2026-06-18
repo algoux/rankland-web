@@ -124,6 +124,7 @@
             :name="renderedRanklistId"
             :id="renderedRanklistId"
             :meta="collectionPageData.ranklist.info"
+            :srk-url="renderedRanklistSrkUrl"
             show-footer
             show-filter
           />
@@ -148,7 +149,7 @@ import type { IApiCollectionItem } from '@/services/ranklist-api';
 import { Button } from '@/components/ui/button';
 import Loading from '@/components/common/Loading.vue';
 import StyledRanklist from '@/components/ranklist/StyledRanklist.vue';
-import { getFullUrl, ranklandRoutes } from '@/app/config';
+import { getFullUrl, getSrkFileDownloadUrl, ranklandRoutes } from '@/app/config';
 import { LocalStorageKey } from '@/app/local-storage-key.config';
 import ranklandLogo from '@/assets/rankland-logo.png';
 import {
@@ -217,6 +218,11 @@ export default class Collection extends Vue {
 
   get renderedRanklistId() {
     return this.ranklistDataId || this.activeRankId || '';
+  }
+
+  get renderedRanklistSrkUrl() {
+    const fileID = this.collectionPageData?.ranklist?.info.fileID;
+    return fileID ? getSrkFileDownloadUrl(fileID) : undefined;
   }
 
   get pageTitle() {

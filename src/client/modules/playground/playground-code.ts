@@ -20,8 +20,66 @@ export interface PlaygroundDocumentSizeStats {
   lineCount: number;
 }
 
+interface PlaygroundSourceResponse {
+  ok: boolean;
+  status: number;
+  statusText: string;
+  text(): Promise<string>;
+}
+
+interface PlaygroundInitialCodeOptions {
+  sourceUrl: unknown;
+  fallbackCode?: string;
+  fetchImpl?: (url: string) => Promise<PlaygroundSourceResponse>;
+}
+
+export interface PlaygroundInitialCodeResult {
+  code: string;
+  sourceUrl: string;
+  error: Error | null;
+}
+
 export function createDefaultPlaygroundCode() {
   return defaultDemoCode;
+}
+
+export function getPlaygroundQueryValue(value: unknown) {
+  const firstValue = Array.isArray(value) ? value[0] : value;
+  return typeof firstValue === 'string' ? firstValue.trim() : '';
+}
+
+export async function loadPlaygroundInitialCode({
+  sourceUrl,
+  fallbackCode = createDefaultPlaygroundCode(),
+  fetchImpl = fetch,
+}: PlaygroundInitialCodeOptions): Promise<PlaygroundInitialCodeResult> {
+  const normalizedSourceUrl = getPlaygroundQueryValue(sourceUrl);
+  if (!normalizedSourceUrl) {
+    return {
+      code: fallbackCode,
+      error: null,
+      sourceUrl: '',
+    };
+  }
+
+  try {
+    const response = await fetchImpl(normalizedSourceUrl);
+    if (!response.ok) {
+      throw new Error(`Failed to download srk source: ${response.status} ${response.statusText}`);
+    }
+    const parsedSource = JSON.parse(await response.text());
+    return {
+      code: JSON.stringify(parsedSource, null, 2),
+      error: null,
+      sourceUrl: normalizedSourceUrl,
+    };
+  } catch (error) {
+    return {
+      code: fallbackCode,
+      error: error instanceof Error ? error : new Error(String(error)),
+      sourceUrl: normalizedSourceUrl,
+    };
+  }
 }
 
 export function shouldUseFastFullDocumentPaste({
