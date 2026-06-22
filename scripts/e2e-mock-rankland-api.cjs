@@ -186,6 +186,36 @@ function createNoProblemsRanklist(baseRanklist) {
   };
 }
 
+function createImplicitOfficialRanklist(baseRanklist) {
+  const { official: _official, ...implicitOfficialUser } = baseRanklist.rows[0].user;
+  return {
+    ...baseRanklist,
+    contest: {
+      ...baseRanklist.contest,
+      title: 'Implicit Official Fixture',
+    },
+    rows: [
+      {
+        ...baseRanklist.rows[0],
+        user: {
+          ...implicitOfficialUser,
+          id: 'implicit-official-team',
+          name: 'Implicit Official Team',
+        },
+      },
+      {
+        ...baseRanklist.rows[1],
+        user: {
+          ...baseRanklist.rows[1].user,
+          id: 'unofficial-team',
+          name: 'Unofficial Team',
+          official: false,
+        },
+      },
+    ],
+  };
+}
+
 const largeRanklistInfo = {
   id: 'rid-large',
   uniqueKey: 'large-key',
@@ -211,6 +241,7 @@ const fixtures = {
 fixtures.progressResetShortSrk = createProgressResetRanklist(fixtures.srk, 3);
 fixtures.progressResetLongSrk = createProgressResetRanklist(fixtures.srk, 5);
 fixtures.noProblemsSrk = createNoProblemsRanklist(fixtures.srk);
+fixtures.implicitOfficialSrk = createImplicitOfficialRanklist(fixtures.srk);
 fixtures.collection.root.children[0].children[0].children.push(
   {
     type: 1,
@@ -301,6 +332,16 @@ const server = http.createServer((req, res) => {
       }));
       return;
     }
+    if (key === 'implicit-official-key') {
+      sendJson(res, wrap({
+        ...fixtures.ranklistInfo,
+        id: 'rid-implicit-official-key',
+        uniqueKey: key,
+        name: 'Implicit Official Fixture',
+        fileID: 'file-implicit-official',
+      }));
+      return;
+    }
     const ranklistInfo = {
       ...fixtures.ranklistInfo,
       uniqueKey: key,
@@ -337,6 +378,10 @@ const server = http.createServer((req, res) => {
     }
     if (url.searchParams.get('id') === 'file-no-problems') {
       sendJson(res, fixtures.noProblemsSrk);
+      return;
+    }
+    if (url.searchParams.get('id') === 'file-implicit-official') {
+      sendJson(res, fixtures.implicitOfficialSrk);
       return;
     }
     if (url.searchParams.get('id') === 'file-localized-v2') {

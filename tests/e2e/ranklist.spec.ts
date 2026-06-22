@@ -186,6 +186,24 @@ test.describe('/ranklist/:id', () => {
     });
   });
 
+  test('keeps users with omitted official field when filtering official participants', async ({ page }) => {
+    await page.addInitScript(() => {
+      window.localStorage.setItem('StyledRanklistSettingsIntroRead', 'true');
+    });
+    await page.goto('/ranklist/implicit-official-key');
+
+    await expect(page.locator('[data-id="ranklist-content"][data-ranklist-id="implicit-official-key"]')).toBeVisible({
+      timeout: 20_000,
+    });
+    await expect(page.getByText('Implicit Official Team')).toBeVisible();
+    await expect(page.getByText('Unofficial Team')).toBeVisible();
+
+    await page.getByRole('switch', { name: '仅正式参赛' }).click();
+
+    await expect(page.getByText('Implicit Official Team')).toBeVisible();
+    await expect(page.getByText('Unofficial Team')).toHaveCount(0);
+  });
+
   test('uses the shared Button component in the settings intro modal', async ({ page }) => {
     await page.goto('/ranklist/test-key');
 

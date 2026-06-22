@@ -100,6 +100,7 @@ import type {
   StyledRanklistSettings,
 } from './styled-ranklist-settings';
 import type { StyledRanklistRendererProps } from './styled-ranklist-types';
+import { isOfficialParticipant } from './styled-ranklist-filter';
 import SearchableMultiSelect from './SearchableMultiSelect.vue';
 import SettingInfoTip from './SettingInfoTip.vue';
 import './styled-ranklist-renderer.less';
@@ -265,7 +266,7 @@ const filteredRows = computed(() => {
       ok = filter.organizations.includes(resolveDisplayText(row.user?.organization));
     }
     if (ok && filter.officialOnly) {
-      ok = row.user?.official === true;
+      ok = isOfficialParticipant(row.user);
     }
     if (ok && filter.marker) {
       ok = resolveUserMarkers(row.user, staticData.value.markers).some((marker) => marker.id === filter.marker);
