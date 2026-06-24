@@ -39,7 +39,8 @@
   "dependencies": {
     "@algoux/standard-ranklist": "^0.3.13",
     "@algoux/standard-ranklist-convert-to": "^0.2.2",
-    "@algoux/standard-ranklist-renderer-component-vue": "^0.6.3",
+    "@algoux/standard-ranklist-renderer-component-core": "^0.6.3",
+    "@algoux/standard-ranklist-renderer-component-vue": "^0.6.4",
     "@algoux/standard-ranklist-utils": "^0.3.1",
     "@antv/g2": "5.0.13",
     "@koa/cors": "^5.0.0",

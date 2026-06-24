@@ -23,6 +23,7 @@ import {
   Ranklist,
 } from '@algoux/standard-ranklist-renderer-component-vue';
 import type {
+  ProblemClickPayload,
   SolutionClickPayload,
   StaticRanklist,
   UserClickPayload,
@@ -33,6 +34,7 @@ import {
   convertToStaticRanklist,
   filterSolutionsUntil,
   getSortedCalculatedRawSolutions,
+  numberToAlphabet,
   regenerateRanklistBySolutions,
   resolveContributor,
   resolveText,
@@ -85,6 +87,7 @@ import BeianLink from '@/components/site/BeianLink.vue';
 import { SSR_REQUEST_LANGUAGES_TOKEN } from '@/app/request-languages';
 import SrkAssetImage from '@/components/ranklist/SrkAssetImage.vue';
 import UserInfoModal from '@/components/ranklist/UserInfoModal.vue';
+import ProblemInfoModal from '@/components/ranklist/ProblemInfoModal.vue';
 import { preloadRankCurveRenderer } from '@/components/ranklist/rank-curve-loader';
 import {
   DEFAULT_STYLED_RANKLIST_SETTINGS,
@@ -131,6 +134,8 @@ const currentShownUserId = ref('');
 const userModalOpen = ref(false);
 const activeUserPayload = ref<UserClickPayload | null>(null);
 const activeSolutionPayload = ref<SolutionClickPayload | null>(null);
+const problemModalOpen = ref(false);
+const activeProblemPayload = ref<ProblemClickPayload | null>(null);
 const settingsModalOpen = ref(false);
 const settingsIntroModalOpen = ref(false);
 const RANK_TIME_WORKER_RESET_MESSAGE = 'Rank time worker reset';
@@ -215,6 +220,8 @@ watch(
     userModalOpen.value = false;
     activeUserPayload.value = null;
     activeSolutionPayload.value = null;
+    problemModalOpen.value = false;
+    activeProblemPayload.value = null;
     currentShownUserId.value = '';
     timeTravelTime.value = null;
     rankTimeDataSet.value = createEmptyRankTimeDataSet();
@@ -353,6 +360,14 @@ const activeUserRowIndex = computed(() =>
 const activeUserRow = computed(() =>
   activeUserRowIndex.value >= 0 ? usingData.value.rows[activeUserRowIndex.value] : activeUserPayload.value?.row,
 );
+const activeProblemModalTitle = computed(() => {
+  if (!activeProblemPayload.value) {
+    return undefined;
+  }
+  const { problem, problemIndex } = activeProblemPayload.value;
+  const alias = problem.alias || numberToAlphabet(problemIndex);
+  return `Info of Problem ${alias}`;
+});
 const shouldRenderInlineSettingsAction = computed(() => props.showFilter && clientWidth.value <= 768);
 const hasExtraActionSlot = computed(() => !!slots['extra-action']);
 const shouldRenderActions = computed(() => !shouldRenderInlineSettingsAction.value || hasExtraActionSlot.value);
@@ -908,12 +923,24 @@ async function handleUserClick(payload: UserClickPayload) {
   activeUserPayload.value = payload;
   userModalOpen.value = true;
   activeSolutionPayload.value = null;
+  problemModalOpen.value = false;
+  activeProblemPayload.value = null;
   currentShownUserId.value = `${payload.user.id}`;
 }
 
 function handleSolutionClick(payload: SolutionClickPayload) {
   activeSolutionPayload.value = payload;
   userModalOpen.value = false;
+  problemModalOpen.value = false;
+  activeProblemPayload.value = null;
+  currentShownUserId.value = '';
+}
+
+function handleProblemClick(payload: ProblemClickPayload) {
+  activeProblemPayload.value = payload;
+  problemModalOpen.value = true;
+  userModalOpen.value = false;
+  activeSolutionPayload.value = null;
   currentShownUserId.value = '';
 }
 
@@ -1413,6 +1440,7 @@ function resolveDisplayText(text: Parameters<typeof resolveText>[0]) {
           :languages="textLanguages"
           @user-click="handleUserClick"
           @solution-click="handleSolutionClick"
+          @problem-click="handleProblemClick"
         />
       </div>
       <Modal
@@ -1432,6 +1460,23 @@ function resolveDisplayText(text: Parameters<typeof resolveText>[0]) {
           :assets-scope="id || ''"
           :filter-marker="filter.marker"
           :rank-time-data="rankTimeData"
+          :languages="textLanguages"
+        />
+      </Modal>
+      <Modal
+        :open="problemModalOpen && !!activeProblemPayload"
+        :title="activeProblemModalTitle"
+        :width="clientWidth >= 700 ? 680 : clientWidth - 20"
+        root-class-name="srk-general-modal-root"
+        @close="problemModalOpen = false"
+        @update:open="problemModalOpen = $event"
+      >
+        <ProblemInfoModal
+          v-if="activeProblemPayload"
+          :problem="activeProblemPayload.problem"
+          :problem-index="activeProblemPayload.problemIndex"
+          :ranklist="staticData as any"
+          :solutions="solutions"
           :languages="textLanguages"
         />
       </Modal>

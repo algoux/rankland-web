@@ -1,0 +1,122 @@
+.problem-modal {
+  --problem-modal-stat-bg: #f7f7f7;
+
+  .problem-modal-info {
+    font-size: 18px;
+    font-weight: 600;
+    line-height: 1.4;
+  }
+
+  .problem-modal-title-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .problem-modal-external-icon {
+    width: 16px;
+    height: 16px;
+    flex-shrink: 0;
+  }
+
+  .problem-modal-stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(80px, 1fr));
+    gap: 8px;
+  }
+
+  .problem-modal-stat {
+    padding: 8px 4px;
+    border-radius: 6px;
+    text-align: center;
+    background-color: var(--problem-modal-stat-bg);
+  }
+
+  .problem-modal-stat-label {
+    font-size: 12px;
+    opacity: 0.7;
+  }
+
+  .problem-modal-stat-primary {
+    margin-top: 2px;
+    font-size: 18px;
+    font-weight: 600;
+  }
+
+  .problem-modal-stat-secondary {
+    font-size: 12px;
+    opacity: 0.6;
+  }
+
+  .problem-modal-submissions-table {
+    width: 100%;
+    // Fix the Result/Time columns and let the User column take the remaining width.
+    table-layout: fixed;
+
+    .problem-modal-col-result {
+      width: 170px;
+
+      @media (max-width: 699px) {
+        width: 105px;
+      }
+    }
+
+    .problem-modal-col-time {
+      width: 65px;
+    }
+  }
+
+  // User column may overflow; clip long names/organizations with an ellipsis.
+  .problem-modal-submission-user,
+  .problem-modal-submission-org {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .problem-modal-submission-org {
+    font-size: 12px;
+    opacity: 0.6;
+  }
+
+  .problem-modal-submissions-empty {
+    padding: 16px 6px;
+    opacity: 0.6;
+  }
+
+  .problem-modal-pagination {
+    margin-top: 12px;
+  }
+
+  .problem-modal-pagination-list {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+  }
+}
+
+html.dark .problem-modal {
+  --problem-modal-stat-bg: #2a2a2a;
+
+  // Lighter neutral-gray pagination buttons in dark theme (scoped to this modal only).
+  // Pure grayscale (r=g=b) to match the dark theme's color scheme.
+  .problem-modal-pagination {
+    button {
+      background-color: #333333;
+      border-color: #424242;
+      color: #e4e4e4;
+    }
+
+    button:hover {
+      background-color: #424242;
+      border-color: #4f4f4f;
+    }
+
+    button[data-selected='true'] {
+      background-color: #585858;
+      border-color: #585858;
+      color: #ffffff;
+    }
+  }
+}
