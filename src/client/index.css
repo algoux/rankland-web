@@ -616,9 +616,16 @@
   }
 
   .rankland-collection-page {
-    width: 100vw;
+    --rankland-main-inline-padding: 50px;
+    width: calc(100% + var(--rankland-main-inline-padding) + var(--rankland-main-inline-padding));
     min-height: calc(100svh - 4rem);
-    margin: -2rem calc(50% - 50vw) 0;
+    margin: -2rem calc(0px - var(--rankland-main-inline-padding)) 0;
+  }
+
+  @media (max-width: 767px) {
+    .rankland-collection-page {
+      --rankland-main-inline-padding: 20px;
+    }
   }
 
   .rankland-collection-shell {

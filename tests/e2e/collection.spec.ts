@@ -20,6 +20,15 @@ async function readProgressSliderState(page: Page) {
 }
 
 test.describe('/collection/:id', () => {
+  test('keeps the full-bleed collection page shell independent of viewport width units', () => {
+    const css = fs.readFileSync(path.join(process.cwd(), 'src/client/index.css'), 'utf-8');
+    const pageShellRule = css.match(/\.rankland-collection-page\s*\{(?<body>[^}]*)\}/)?.groups?.body ?? '';
+
+    expect(pageShellRule).not.toBe('');
+    expect(pageShellRule).not.toContain('vw');
+    expect(pageShellRule).toContain('--rankland-main-inline-padding');
+  });
+
   test('renders the navigation menu and selected ranklist', async ({ page }) => {
     await page.emulateMedia({ colorScheme: 'dark' });
     await page.addInitScript(() => {
@@ -64,6 +73,36 @@ test.describe('/collection/:id', () => {
     expect(layout).not.toBeNull();
     expect(layout!.hiddenHeaderHeight).toBe(64);
     expect(layout!.ranklistTop).toBeGreaterThanOrEqual(64);
+  });
+
+  test('does not create document-level horizontal overflow from the full-bleed page shell', async ({ page }) => {
+    await page.setViewportSize({ width: 1280, height: 420 });
+    await page.addInitScript(() => {
+      window.localStorage.setItem('StyledRanklistSettingsIntroRead', 'true');
+    });
+    await page.goto('/collection/official?rankId=test-key');
+    await page.addStyleTag({ content: 'html { scrollbar-gutter: stable; }' });
+
+    await expect(page.locator('[data-id="collection-ranklist-content"][data-ranklist-id="test-key"]')).toBeVisible({
+      timeout: 20_000,
+    });
+
+    const metrics = await page.evaluate(() => {
+      const pageShell = document.querySelector('[data-id="collection-page"]')?.getBoundingClientRect();
+      return {
+        clientWidth: document.documentElement.clientWidth,
+        scrollWidth: document.documentElement.scrollWidth,
+        scrollHeight: document.documentElement.scrollHeight,
+        clientHeight: document.documentElement.clientHeight,
+        pageShellLeft: pageShell ? Math.round(pageShell.left) : null,
+        pageShellRight: pageShell ? Math.round(pageShell.right) : null,
+      };
+    });
+
+    expect(metrics.scrollHeight).toBeGreaterThan(metrics.clientHeight);
+    expect(metrics.scrollWidth).toBeLessThanOrEqual(metrics.clientWidth);
+    expect(metrics.pageShellLeft).toBe(0);
+    expect(metrics.pageShellRight).toBeLessThanOrEqual(metrics.clientWidth);
   });
 
   test('restores the original expanded collection sidebar menu metrics', async ({ page }) => {
