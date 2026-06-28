@@ -117,6 +117,8 @@
           <a href="https://algoux.org" target="_blank" rel="noopener">首页</a>
           <span class="mx-2">|</span>
           <a href="https://servicestatus.algoux.org" target="_blank" rel="noopener">服务状态</a>
+          <span class="mx-2">|</span>
+          <a :href="rssPath">RSS</a>
         </p>
         <p v-if="buildCommitLink">
           RankLand 构建版本
@@ -143,7 +145,13 @@ import { Card } from '@/components/ui/card';
 import BeianLink from '@/components/site/BeianLink.vue';
 import ContactUs from '@/components/site/ContactUs.vue';
 import { formatTitle } from '@/app/title-format';
-import { getFullUrl, getRanklandBuildCommitLink, getRanklandRuntimeConfig, ranklandRoutes } from '@/app/config';
+import {
+  getFullUrl,
+  getRanklandBuildCommitLink,
+  getRanklandRuntimeConfig,
+  RANKLAND_RSS_PATH,
+  ranklandRoutes,
+} from '@/app/config';
 import pasteThenACLogo from '@/assets/paste-then-ac_logo.png';
 import algoBootstrapLogo from '@/assets/algo-bootstrap_logo.png';
 
@@ -165,6 +173,7 @@ export default class Home extends Vue {
   algoBootstrapLogo = algoBootstrapLogo;
   explorePath = ranklandRoutes.formatUrl('Search');
   collectionPath = ranklandRoutes.formatUrl('Collection', { id: 'official' });
+  rssPath = RANKLAND_RSS_PATH;
 
   head = setup(() => {
     const homepageUrl = getFullUrl(ranklandRoutes.formatUrl('Home'));

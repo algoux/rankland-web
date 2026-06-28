@@ -17,6 +17,7 @@ import RankCurve from '@/components/ranklist/RankCurve.vue';
 import SrkAssetImage from '@/components/ranklist/SrkAssetImage.vue';
 import UserInfoModal from '@/components/ranklist/UserInfoModal.vue';
 import { SSR_REQUEST_LANGUAGES_TOKEN } from '@/app/request-languages';
+import { RANKLAND_RSS_PATH } from '@/app/config';
 
 describe('ranklist Vue components', () => {
   it('can be imported by Vite/Vitest so templates stay compilable before routes use them', () => {
@@ -65,6 +66,39 @@ describe('ranklist Vue components', () => {
 
     expect(html).toContain('Example Contest');
     expect(html).toContain('Alice');
+  });
+
+  it('SSR-renders the RSS feed link in the ranklist footer when footer is shown', async () => {
+    const data: srk.Ranklist = {
+      type: 'general',
+      version: '0.3.12',
+      contest: {
+        title: 'Footer Contest',
+        startAt: '2026-06-01T09:00:00+08:00',
+        duration: [5, 'h'],
+      },
+      problems: [{ alias: 'A' }],
+      series: [{ title: '#', rule: { preset: 'ICPC', options: { count: { value: [] } } } }],
+      rows: [],
+    };
+    const app = createSSRApp(StyledRanklist, {
+      data,
+      name: 'footer-example',
+      showProgress: false,
+      showFooter: true,
+    });
+    const router = createRouter({
+      history: createMemoryHistory(),
+      routes: [{ path: '/', component: { template: '<div />' } }],
+    });
+    app.use(router);
+    await router.push('/');
+    await router.isReady();
+
+    const html = await renderToString(app);
+
+    expect(html).toContain(`href="${RANKLAND_RSS_PATH}"`);
+    expect(html).toContain('RSS');
   });
 
   it('uses injected SSR request languages for ranklist i18n text during SSR', async () => {

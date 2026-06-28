@@ -1,83 +1,51 @@
 import { describe, expect, it, vi } from 'vitest';
 import HttpException from '@server/exceptions/http.exception';
 import {
-  SITEMAP_CACHE_KEY,
-  SITEMAP_CACHE_TTL_SECONDS,
   SITEMAP_PAGE_SIZE,
   SITEMAP_SITE_ORIGIN,
 } from '../sitemap.constants';
 import SitemapService from '../sitemap.service';
 
-type FetchMock = ReturnType<typeof vi.fn>;
-
-function createRedis(initial?: string) {
-  let value = initial;
+function makeRank(uniqueKey: string) {
   return {
-    status: 'ready',
-    get: vi.fn(async (_key: string) => value ?? null),
-    setex: vi.fn(async (_key: string, _seconds: number, nextValue: string) => {
-      value = nextValue;
-      return 'OK';
-    }),
+    id: uniqueKey,
+    uniqueKey,
+    name: uniqueKey,
+    fileID: `${uniqueKey}-file`,
+    viewCnt: 0,
+    content: '{}',
+    createdAt: '2026-06-01T00:00:00.000Z',
+    updatedAt: '2026-06-02T00:00:00.000Z',
   };
 }
 
-function createFetch(ranks: unknown[]): FetchMock {
-  return vi.fn(async () => ({
-    ok: true,
-    status: 200,
-    statusText: 'OK',
-    json: async () => ({
-      code: 0,
-      data: { ranks },
-    }),
-  }));
+function createRanklistService(uniqueKeys: string[]) {
+  return {
+    getAllRanklists: vi.fn(async () => uniqueKeys.map(makeRank)),
+  };
 }
 
 describe('SitemapService', () => {
-  it('reverses /rank/listall unique keys before caching them as newline-delimited keys', async () => {
-    const redis = createRedis();
-    const fetchMock = createFetch([
-      { uniqueKey: 'newest-rank', name: 'Newest', fileID: 'f1' },
-      { uniqueKey: 'middle-rank', content: '{"ignored":true}' },
-      { uniqueKey: 'oldest-rank' },
-      { uniqueKey: '' },
-      { uniqueKey: 123 },
-      {},
+  it('derives unique keys from the shared ranklist service and keeps sitemap reverse ordering', async () => {
+    const ranklistService = createRanklistService([
+      'newest-rank',
+      'middle-rank',
+      'oldest-rank',
     ]);
-    const service = new SitemapService(redis as any);
+    const service = new SitemapService(ranklistService as any);
 
-    await expect(service.getRanklistUniqueKeys({ fetchImpl: fetchMock as any })).resolves.toEqual([
+    await expect(service.getRanklistUniqueKeys()).resolves.toEqual([
       'oldest-rank',
       'middle-rank',
       'newest-rank',
     ]);
 
-    expect(fetchMock).toHaveBeenCalledTimes(1);
-    expect(fetchMock.mock.calls[0][0]).toBe('https://rl-api.algoux.cn/rank/listall');
-    expect(redis.setex).toHaveBeenCalledWith(
-      SITEMAP_CACHE_KEY,
-      SITEMAP_CACHE_TTL_SECONDS,
-      'oldest-rank\nmiddle-rank\nnewest-rank',
-    );
-  });
-
-  it('uses cached unique keys without calling the RL API', async () => {
-    const redis = createRedis('cached-a\ncached-b');
-    const fetchMock = createFetch([]);
-    const service = new SitemapService(redis as any);
-
-    await expect(service.getRanklistUniqueKeys({ fetchImpl: fetchMock as any })).resolves.toEqual([
-      'cached-a',
-      'cached-b',
-    ]);
-
-    expect(fetchMock).not.toHaveBeenCalled();
+    expect(ranklistService.getAllRanklists).toHaveBeenCalledTimes(1);
   });
 
   it('builds fixed-cn sitemap index and text pages with 10000 locs per file', async () => {
     const keys = Array.from({ length: 20_001 }, (_item, index) => `rank-${index + 1}`);
-    const service = new SitemapService(createRedis(keys.join('\n')) as any);
+    const service = new SitemapService(createRanklistService([...keys].reverse()) as any);
 
     const indexXml = await service.getSitemapIndexXml();
     expect(indexXml).toContain(`${SITEMAP_SITE_ORIGIN}/sitemap_ranklist_vol_1.txt`);
@@ -98,47 +66,24 @@ describe('SitemapService', () => {
   });
 
   it('URL-encodes unique keys in text sitemap locs', async () => {
-    const service = new SitemapService(createRedis('a/b\nx y') as any);
+    const service = new SitemapService(createRanklistService(['x y', 'a/b']) as any);
 
     await expect(service.getRanklistSitemapText(1)).resolves.toBe(
       `${SITEMAP_SITE_ORIGIN}/ranklist/a%2Fb\n${SITEMAP_SITE_ORIGIN}/ranklist/x%20y\n`,
     );
   });
 
-  it('falls back to the RL API when Redis read or write fails', async () => {
+  it('throws HTTP 502 when the shared ranklist service cannot provide data', async () => {
     const warn = vi.spyOn(console, 'warn').mockImplementation(() => undefined);
-    const redis = {
-      status: 'ready',
-      get: vi.fn(async () => {
-        throw new Error('redis get failed');
-      }),
-      setex: vi.fn(async () => {
-        throw new Error('redis set failed');
+    const ranklistService = {
+      getAllRanklists: vi.fn(async () => {
+        throw new Error('upstream failed');
       }),
     };
-    const fetchMock = createFetch([{ uniqueKey: 'from-api' }]);
-    const service = new SitemapService(redis as any);
+    const service = new SitemapService(ranklistService as any);
 
     try {
-      await expect(service.getRanklistUniqueKeys({ fetchImpl: fetchMock as any })).resolves.toEqual(['from-api']);
-      expect(fetchMock).toHaveBeenCalledTimes(1);
-    } finally {
-      warn.mockRestore();
-    }
-  });
-
-  it('throws HTTP 502 when the RL API cannot provide a cache miss', async () => {
-    const warn = vi.spyOn(console, 'warn').mockImplementation(() => undefined);
-    const fetchMock = vi.fn(async () => ({
-      ok: false,
-      status: 503,
-      statusText: 'Service Unavailable',
-      json: async () => ({}),
-    }));
-    const service = new SitemapService(createRedis() as any);
-
-    try {
-      await expect(service.getRanklistUniqueKeys({ fetchImpl: fetchMock as any })).rejects.toMatchObject<HttpException>({
+      await expect(service.getRanklistUniqueKeys()).rejects.toMatchObject<HttpException>({
         code: 502,
       });
     } finally {
@@ -147,7 +92,7 @@ describe('SitemapService', () => {
   });
 
   it('throws HTTP 404 for pages outside the available sitemap range', async () => {
-    const service = new SitemapService(createRedis('only-one') as any);
+    const service = new SitemapService(createRanklistService(['only-one']) as any);
 
     await expect(service.getRanklistSitemapText(0)).rejects.toMatchObject<HttpException>({ code: 404 });
     await expect(service.getRanklistSitemapText(2)).rejects.toMatchObject<HttpException>({ code: 404 });

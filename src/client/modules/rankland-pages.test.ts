@@ -1,6 +1,11 @@
 import { describe, expect, it, vi } from 'vitest';
+import { createHead } from '@vueuse/head';
+import { createSSRApp } from 'vue';
+import { renderToString } from '@vue/server-renderer';
+import { createMemoryHistory, createRouter } from 'vue-router';
 import { SSR_SKIP_CACHE_HEADER } from '@common/ssr-cache';
 import { CollectionItemType } from '@/services/ranklist-api';
+import { RANKLAND_RSS_PATH } from '@/app/config';
 import Home from './home/home.view.vue';
 import Search from './search/search.view.vue';
 import Ranklist from './ranklist/ranklist.view.vue';
@@ -55,6 +60,33 @@ describe('rankland migrated pages', () => {
         [SSR_SKIP_CACHE_HEADER]: '1',
       },
     });
+  });
+
+  it('SSR-renders the RSS feed link in the home footer other links', async () => {
+    const app = createSSRApp(Home, {
+      statistics: {
+        totalSrkCount: 1,
+        totalViewCount: 2,
+      },
+    });
+    const router = createRouter({
+      history: createMemoryHistory(),
+      routes: [
+        { path: '/', component: Home },
+        { path: '/search', component: { template: '<div />' } },
+        { path: '/collection/:id', component: { template: '<div />' } },
+      ],
+    });
+    app.use(createHead());
+    app.use(router);
+    await router.push('/');
+    await router.isReady();
+
+    const html = await renderToString(app);
+
+    expect(html).toContain('其他链接');
+    expect(html).toContain(`href="${RANKLAND_RSS_PATH}"`);
+    expect(html).toContain('RSS');
   });
 });
 

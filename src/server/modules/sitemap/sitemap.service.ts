@@ -1,57 +1,35 @@
 import { Inject, Provide } from 'bwcx-core';
-import type Redis from 'ioredis';
 import HttpException from '@server/exceptions/http.exception';
-import { RedisClientId } from '@server/container-ids';
+import RanklistService from '@server/modules/ranklist/ranklist.service';
 import {
-  RANKLAND_API_BASE_SERVER,
-  SITEMAP_CACHE_KEY,
-  SITEMAP_CACHE_TTL_SECONDS,
   SITEMAP_PAGE_SIZE,
   SITEMAP_SITE_ORIGIN,
 } from './sitemap.constants';
 
-type RedisLike = Pick<Redis, 'get' | 'setex'> & { status?: Redis['status'] };
-type FetchLike = typeof fetch;
-
-interface SitemapRequestOptions {
-  apiBaseServer?: string;
-  fetchImpl?: FetchLike;
-  timeoutMs?: number;
-}
-
-interface RankListAllResponse {
-  code?: number;
-  message?: string;
-  data?: {
-    ranks?: Array<{ uniqueKey?: unknown }>;
-  };
-}
-
 @Provide()
 export default class SitemapService {
   public constructor(
-    @Inject(RedisClientId)
-    private readonly redis?: RedisLike,
+    @Inject(RanklistService)
+    private readonly ranklistService: RanklistService,
   ) {}
 
-  public async getRanklistUniqueKeys(options: SitemapRequestOptions = {}): Promise<string[]> {
-    const cached = await this.readCachedUniqueKeys();
-    if (cached) {
-      return cached;
-    }
-
+  public async getRanklistUniqueKeys(): Promise<string[]> {
     try {
-      const keys = await this.fetchRanklistUniqueKeys(options);
-      await this.writeCachedUniqueKeys(keys);
-      return keys;
+      const ranklists = await this.ranklistService.getAllRanklists();
+      return ranklists
+        .flatMap((ranklist) => {
+          const uniqueKey = ranklist.uniqueKey.trim();
+          return uniqueKey ? [uniqueKey] : [];
+        })
+        .reverse();
     } catch (error) {
-      console.warn('[Sitemap] failed to refresh ranklist unique keys:', error);
+      console.warn('[Sitemap] failed to load ranklist list:', error);
       throw new HttpException(502);
     }
   }
 
-  public async getSitemapIndexXml(options: SitemapRequestOptions = {}) {
-    const keys = await this.getRanklistUniqueKeys(options);
+  public async getSitemapIndexXml() {
+    const keys = await this.getRanklistUniqueKeys();
     const pageCount = getSitemapPageCount(keys.length);
     const sitemapEntries = Array.from({ length: pageCount }, (_item, index) => {
       const loc = `${SITEMAP_SITE_ORIGIN}/sitemap_ranklist_vol_${index + 1}.txt`;
@@ -67,12 +45,12 @@ export default class SitemapService {
     ].join('\n');
   }
 
-  public async getRanklistSitemapText(page: number, options: SitemapRequestOptions = {}) {
+  public async getRanklistSitemapText(page: number) {
     if (!Number.isInteger(page) || page < 1) {
       throw new HttpException(404);
     }
 
-    const keys = await this.getRanklistUniqueKeys(options);
+    const keys = await this.getRanklistUniqueKeys();
     const pageCount = getSitemapPageCount(keys.length);
     if (page > pageCount) {
       throw new HttpException(404);
@@ -81,68 +59,6 @@ export default class SitemapService {
     const start = (page - 1) * SITEMAP_PAGE_SIZE;
     const pageKeys = keys.slice(start, start + SITEMAP_PAGE_SIZE);
     return `${pageKeys.map(formatRanklistLoc).join('\n')}\n`;
-  }
-
-  private async readCachedUniqueKeys() {
-    if (!this.isRedisReady()) {
-      return undefined;
-    }
-
-    try {
-      const cached = await this.redis.get(SITEMAP_CACHE_KEY);
-      if (typeof cached !== 'string') {
-        return undefined;
-      }
-      return parseUniqueKeyCache(cached);
-    } catch (error) {
-      console.warn('[Sitemap] failed to read Redis cache, falling back to RL API:', error);
-      return undefined;
-    }
-  }
-
-  private async writeCachedUniqueKeys(keys: string[]) {
-    if (!this.isRedisReady()) {
-      return;
-    }
-
-    try {
-      await this.redis.setex(SITEMAP_CACHE_KEY, SITEMAP_CACHE_TTL_SECONDS, keys.join('\n'));
-    } catch (error) {
-      console.warn('[Sitemap] failed to write Redis cache, continuing without cache:', error);
-    }
-  }
-
-  private async fetchRanklistUniqueKeys(options: SitemapRequestOptions) {
-    const fetchImpl = options.fetchImpl || fetch;
-    const apiBaseServer = options.apiBaseServer || RANKLAND_API_BASE_SERVER;
-    const response = await fetchWithTimeout(
-      fetchImpl,
-      joinUrl(apiBaseServer, '/rank/listall'),
-      options.timeoutMs || 5_000,
-    );
-
-    if (!response.ok) {
-      throw new Error(`RL API responded with ${response.status} ${response.statusText}`);
-    }
-
-    const payload = await response.json() as RankListAllResponse;
-    if (payload.code !== 0 || !Array.isArray(payload.data?.ranks)) {
-      throw new Error(`RL API returned an invalid /rank/listall payload: ${payload.message || 'unknown error'}`);
-    }
-
-    return payload.data.ranks
-      .flatMap((rank) => {
-        if (typeof rank.uniqueKey !== 'string') {
-          return [];
-        }
-        const uniqueKey = rank.uniqueKey.trim();
-        return uniqueKey ? [uniqueKey] : [];
-      })
-      .reverse();
-  }
-
-  private isRedisReady() {
-    return Boolean(this.redis && (!this.redis.status || this.redis.status === 'ready'));
   }
 }
 
@@ -154,13 +70,6 @@ export function formatRanklistLoc(uniqueKey: string) {
   return `${SITEMAP_SITE_ORIGIN}/ranklist/${encodeURIComponent(uniqueKey)}`;
 }
 
-function parseUniqueKeyCache(cached: string) {
-  if (!cached) {
-    return [];
-  }
-  return cached.split('\n').filter((key) => key.length > 0);
-}
-
 function escapeXml(value: string) {
   return value
     .replace(/&/g, '&amp;')
@@ -168,18 +77,4 @@ function escapeXml(value: string) {
     .replace(/>/g, '&gt;')
     .replace(/"/g, '&quot;')
     .replace(/'/g, '&apos;');
-}
-
-async function fetchWithTimeout(fetchImpl: FetchLike, url: string, timeoutMs: number) {
-  const controller = new AbortController();
-  const timeout = setTimeout(() => controller.abort(), timeoutMs);
-  try {
-    return await fetchImpl(url, { signal: controller.signal });
-  } finally {
-    clearTimeout(timeout);
-  }
-}
-
-function joinUrl(baseUrl: string, pathname: string) {
-  return `${baseUrl.replace(/\/+$/, '')}/${pathname.replace(/^\/+/, '')}`;
 }

@@ -61,7 +61,7 @@ import {
   DropdownMenuLabel,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { getRanklandRuntimeConfig, ranklandRoutes } from '@/app/config';
+import { getRanklandRuntimeConfig, RANKLAND_RSS_PATH, ranklandRoutes } from '@/app/config';
 import { formatCurrentUrl } from '@/app/current-url';
 import {
   registerInitialHydrationTask,
@@ -1503,6 +1503,9 @@ function resolveDisplayText(text: Parameters<typeof resolveText>[0]) {
       <p class="mt-1 mb-0">
         欢迎补充榜单数据至
         <a href="https://github.com/algoux/srk-collection" target="_blank" rel="noopener">榜单合集</a>
+      </p>
+      <p class="mt-1 mb-0">
+        榜单更新订阅：<a :href="RANKLAND_RSS_PATH">RSS</a>
       </p>
       <p class="mt-1 mb-0">
         需要专业的赛事外榜托管？

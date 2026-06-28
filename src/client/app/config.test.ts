@@ -4,6 +4,7 @@ import {
   getFullUrl,
   getRanklandRuntimeConfig,
   getSrkFileDownloadUrl,
+  RANKLAND_RSS_PATH,
   ranklandRoutes,
   ranklandSiteOrigin,
 } from './config';
@@ -72,5 +73,9 @@ describe('rankland runtime config', () => {
 
     expect(getSrkFileDownloadUrl('file id/with?query', config))
       .toBe('https://cdn-api.example/base/file/download?id=file%20id%2Fwith%3Fquery');
+  });
+
+  it('exposes the relative RSS feed path for client-visible links', () => {
+    expect(RANKLAND_RSS_PATH).toBe('/rss.xml');
   });
 });

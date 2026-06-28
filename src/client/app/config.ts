@@ -2,6 +2,8 @@ type RanklandRouteName = 'Home' | 'Search' | 'Ranklist' | 'Collection' | 'Playgr
 
 declare const __RANKLAND_CLIENT_ENV__: Record<string, string | undefined> | undefined;
 
+export const RANKLAND_RSS_PATH = '/rss.xml';
+
 export interface RanklandRuntimeConfig {
   apiBaseClient: string;
   apiBaseServer: string;
