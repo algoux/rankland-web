@@ -70,24 +70,22 @@
       <h2 class="rankland-section-title">资源和生态</h2>
       <ul class="rankland-home-list">
         <li>
-          <a href="https://srk.algoux.org/?utm_source=rankland" target="_blank" rel="noopener">Standard Ranklist</a>
-          ：标准榜单格式（srk）旨在标准化榜单数据，欢迎了解和共建生态
+          <a href="https://srk.algoux.org/?utm_source=rankland" target="_blank" rel="noopener">Standard Ranklist</a>：标准榜单格式（srk）旨在标准化榜单数据，欢迎了解和共建生态
         </li>
         <li>
-          <a href="https://github.com/algoux/srk-collection" target="_blank" rel="noopener">collection</a>
-          ：长期维护的历年算竞榜单合集
+          <a href="https://github.com/algoux/srk-collection" target="_blank" rel="noopener">srk-collection</a>：长期维护的历年算竞榜单合集数据
         </li>
         <li>
-          <a href="https://github.com/algoux/standard-ranklist-renderer-component" target="_blank" rel="noopener">renderer-component</a>
-          ：在 Web 项目中使用渲染组件展示标准榜单
+          <a href="https://github.com/algoux/standard-ranklist-renderer-component" target="_blank" rel="noopener">renderer-component</a>：在 Web 项目中使用渲染组件展示标准榜单
         </li>
         <li>
-          <a href="https://github.com/algoux/standard-ranklist-utils" target="_blank" rel="noopener">utils</a>
-          ：标准榜单开发实用工具库
+          <a href="https://github.com/algoux/standard-ranklist-cli" target="_blank" rel="noopener">cli</a>：srk 命令行工具
         </li>
         <li>
-          <a href="https://github.com/algoux/standard-ranklist-convert-to" target="_blank" rel="noopener">convert-to</a>
-          ：转换标准榜单到 Excel、Gym Ghost、VJ 等其他格式
+          <a href="https://github.com/algoux/standard-ranklist-utils" target="_blank" rel="noopener">utils</a>：标准榜单开发实用工具库
+        </li>
+        <li>
+          <a href="https://github.com/algoux/standard-ranklist-convert-to" target="_blank" rel="noopener">convert-to</a>：转换标准榜单到 Excel、Gym Ghost、VJ 等其他格式
         </li>
       </ul>
     </section>
