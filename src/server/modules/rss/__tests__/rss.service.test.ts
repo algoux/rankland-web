@@ -18,8 +18,8 @@ function makeRank(patch: Partial<IApiRanklistInfo> & Pick<IApiRanklistInfo, 'uni
 
 describe('RssService', () => {
   it('builds an RSS 2.0 feed using createdAt in the server timezone', async () => {
-    const originalTimezone = process.env.TZ;
-    process.env.TZ = 'Asia/Shanghai';
+    const firstCreatedAt = new Date('2026-06-01T00:00:00.000Z');
+    const secondCreatedAt = new Date('2026-05-01T00:00:00.000Z');
     const ranklistService = {
       getAllRanklists: vi.fn(async () => [
         makeRank({
@@ -43,34 +43,26 @@ describe('RssService', () => {
     };
     const service = new RssService(ranklistService as any);
 
-    try {
-      const xml = await service.getRanklistRssXml();
+    const xml = await service.getRanklistRssXml();
 
-      expect(ranklistService.getAllRanklists).toHaveBeenCalledTimes(1);
-      expect(xml).toContain('<?xml version="1.0" encoding="UTF-8"?>');
-      expect(xml).toContain('<rss version="2.0">');
-      expect(xml).toContain('<title>RankLand 榜单更新</title>');
-      expect(xml).toContain(`<link>${SITEMAP_SITE_ORIGIN}</link>`);
-      expect(xml).toContain('<title>A&amp;B &lt;Contest&gt;</title>');
-      expect(xml).toContain(`<link>${SITEMAP_SITE_ORIGIN}/ranklist/hello%2Fworld</link>`);
-      expect(xml).toContain('<guid isPermaLink="false">rankland:ranklist:hello/world</guid>');
-      expect(xml).toContain('<description>hello/world · 收录于 2026-06-01</description>');
-      expect(xml).toContain('<pubDate>Mon, 01 Jun 2026 08:00:00 +0800</pubDate>');
-      expect(xml).toContain('<title>fallback-date</title>');
-      expect(xml).toContain('<description>fallback-date · 收录于 2026-05-01</description>');
-      expect(xml).toContain('<pubDate>Fri, 01 May 2026 08:00:00 +0800</pubDate>');
-      expect(xml).toContain('<title>No Date</title>');
-      expect(xml).toContain('<description>no-date · 收录于 </description>');
-      expect(xml).not.toContain('2026-06-02T03:04:05.000Z');
-      expect(xml).not.toContain('not-a-date');
-      expect(xml).not.toContain('also-not-a-date');
-    } finally {
-      if (originalTimezone === undefined) {
-        delete process.env.TZ;
-      } else {
-        process.env.TZ = originalTimezone;
-      }
-    }
+    expect(ranklistService.getAllRanklists).toHaveBeenCalledTimes(1);
+    expect(xml).toContain('<?xml version="1.0" encoding="UTF-8"?>');
+    expect(xml).toContain('<rss version="2.0">');
+    expect(xml).toContain('<title>RankLand 榜单更新</title>');
+    expect(xml).toContain(`<link>${SITEMAP_SITE_ORIGIN}</link>`);
+    expect(xml).toContain('<title>A&amp;B &lt;Contest&gt;</title>');
+    expect(xml).toContain(`<link>${SITEMAP_SITE_ORIGIN}/ranklist/hello%2Fworld</link>`);
+    expect(xml).toContain('<guid isPermaLink="false">rankland:ranklist:hello/world</guid>');
+    expect(xml).toContain(`<description>hello/world · 收录于 ${formatExpectedServerDate(firstCreatedAt)}</description>`);
+    expect(xml).toContain(`<pubDate>${formatExpectedRssPubDate(firstCreatedAt)}</pubDate>`);
+    expect(xml).toContain('<title>fallback-date</title>');
+    expect(xml).toContain(`<description>fallback-date · 收录于 ${formatExpectedServerDate(secondCreatedAt)}</description>`);
+    expect(xml).toContain(`<pubDate>${formatExpectedRssPubDate(secondCreatedAt)}</pubDate>`);
+    expect(xml).toContain('<title>No Date</title>');
+    expect(xml).toContain('<description>no-date · 收录于 </description>');
+    expect(xml).not.toContain('2026-06-02T03:04:05.000Z');
+    expect(xml).not.toContain('not-a-date');
+    expect(xml).not.toContain('also-not-a-date');
   });
 
   it('limits the RSS feed to the first 50 ranklists in API order', async () => {
@@ -91,3 +83,32 @@ describe('RssService', () => {
     expect(xml).not.toContain('<title>Rank 55</title>');
   });
 });
+
+const RSS_WEEKDAYS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+const RSS_MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+
+function formatExpectedServerDate(date: Date) {
+  return `${date.getFullYear()}-${pad2(date.getMonth() + 1)}-${pad2(date.getDate())}`;
+}
+
+function formatExpectedRssPubDate(date: Date) {
+  return [
+    `${RSS_WEEKDAYS[date.getDay()]},`,
+    pad2(date.getDate()),
+    RSS_MONTHS[date.getMonth()],
+    String(date.getFullYear()),
+    `${pad2(date.getHours())}:${pad2(date.getMinutes())}:${pad2(date.getSeconds())}`,
+    formatExpectedTimezoneOffset(date),
+  ].join(' ');
+}
+
+function formatExpectedTimezoneOffset(date: Date) {
+  const offsetMinutes = -date.getTimezoneOffset();
+  const sign = offsetMinutes >= 0 ? '+' : '-';
+  const absOffsetMinutes = Math.abs(offsetMinutes);
+  return `${sign}${pad2(Math.floor(absOffsetMinutes / 60))}${pad2(absOffsetMinutes % 60)}`;
+}
+
+function pad2(value: number) {
+  return String(value).padStart(2, '0');
+}
