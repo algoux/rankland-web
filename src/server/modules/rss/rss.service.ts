@@ -4,6 +4,8 @@ import type { IApiRanklistInfo } from '@server/modules/ranklist/ranklist.service
 import { SITEMAP_SITE_ORIGIN } from '@server/modules/sitemap/sitemap.constants';
 
 export const RANKLIST_RSS_ITEM_LIMIT = 50;
+const RSS_WEEKDAYS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+const RSS_MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 
 @Provide()
 export default class RssService {
@@ -38,35 +40,21 @@ function formatRanklistItemXml(ranklist: IApiRanklistInfo) {
   const uniqueKey = ranklist.uniqueKey.trim();
   const title = ranklist.name.trim() || uniqueKey;
   const ranklistUrl = `${SITEMAP_SITE_ORIGIN}/ranklist/${encodeURIComponent(uniqueKey)}`;
-  const date = resolveRanklistDate(ranklist);
+  const createdAt = parseValidDate(ranklist.createdAt);
   const lines = [
     '<item>',
     `<title>${escapeXml(title)}</title>`,
     `<link>${escapeXml(ranklistUrl)}</link>`,
     `<guid isPermaLink="false">${escapeXml(`rankland:ranklist:${uniqueKey}`)}</guid>`,
-    `<description>${escapeXml(formatDescription(title, date?.source))}</description>`,
+    `<description>${escapeXml(formatDescription(uniqueKey, createdAt))}</description>`,
   ];
 
-  if (date) {
-    lines.push(`<pubDate>${escapeXml(date.date.toUTCString())}</pubDate>`);
+  if (createdAt) {
+    lines.push(`<pubDate>${escapeXml(formatRssPubDate(createdAt))}</pubDate>`);
   }
 
   lines.push('</item>');
   return lines.join('\n');
-}
-
-function resolveRanklistDate(ranklist: IApiRanklistInfo) {
-  const updatedAt = parseValidDate(ranklist.updatedAt);
-  if (updatedAt) {
-    return { date: updatedAt, source: ranklist.updatedAt };
-  }
-
-  const createdAt = parseValidDate(ranklist.createdAt);
-  if (createdAt) {
-    return { date: createdAt, source: ranklist.createdAt };
-  }
-
-  return undefined;
 }
 
 function parseValidDate(value: string) {
@@ -74,8 +62,34 @@ function parseValidDate(value: string) {
   return Number.isNaN(date.getTime()) ? undefined : date;
 }
 
-function formatDescription(title: string, dateSource?: string) {
-  return dateSource ? `${title} 更新于 ${dateSource}` : `${title} 已更新`;
+function formatDescription(uniqueKey: string, createdAt?: Date) {
+  return `${uniqueKey} · 收录于 ${createdAt ? formatServerDate(createdAt) : ''}`;
+}
+
+function formatServerDate(date: Date) {
+  return `${date.getFullYear()}-${pad2(date.getMonth() + 1)}-${pad2(date.getDate())}`;
+}
+
+function formatRssPubDate(date: Date) {
+  return [
+    `${RSS_WEEKDAYS[date.getDay()]},`,
+    pad2(date.getDate()),
+    RSS_MONTHS[date.getMonth()],
+    String(date.getFullYear()),
+    `${pad2(date.getHours())}:${pad2(date.getMinutes())}:${pad2(date.getSeconds())}`,
+    formatTimezoneOffset(date),
+  ].join(' ');
+}
+
+function formatTimezoneOffset(date: Date) {
+  const offsetMinutes = -date.getTimezoneOffset();
+  const sign = offsetMinutes >= 0 ? '+' : '-';
+  const absOffsetMinutes = Math.abs(offsetMinutes);
+  return `${sign}${pad2(Math.floor(absOffsetMinutes / 60))}${pad2(absOffsetMinutes % 60)}`;
+}
+
+function pad2(value: number) {
+  return String(value).padStart(2, '0');
 }
 
 function escapeXml(value: string) {

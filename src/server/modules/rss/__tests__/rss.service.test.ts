@@ -17,7 +17,9 @@ function makeRank(patch: Partial<IApiRanklistInfo> & Pick<IApiRanklistInfo, 'uni
 }
 
 describe('RssService', () => {
-  it('builds an RSS 2.0 feed from recent ranklists returned by the shared list service', async () => {
+  it('builds an RSS 2.0 feed using createdAt in the server timezone', async () => {
+    const originalTimezone = process.env.TZ;
+    process.env.TZ = 'Asia/Shanghai';
     const ranklistService = {
       getAllRanklists: vi.fn(async () => [
         makeRank({
@@ -41,23 +43,34 @@ describe('RssService', () => {
     };
     const service = new RssService(ranklistService as any);
 
-    const xml = await service.getRanklistRssXml();
+    try {
+      const xml = await service.getRanklistRssXml();
 
-    expect(ranklistService.getAllRanklists).toHaveBeenCalledTimes(1);
-    expect(xml).toContain('<?xml version="1.0" encoding="UTF-8"?>');
-    expect(xml).toContain('<rss version="2.0">');
-    expect(xml).toContain('<title>RankLand 榜单更新</title>');
-    expect(xml).toContain(`<link>${SITEMAP_SITE_ORIGIN}</link>`);
-    expect(xml).toContain('<title>A&amp;B &lt;Contest&gt;</title>');
-    expect(xml).toContain(`<link>${SITEMAP_SITE_ORIGIN}/ranklist/hello%2Fworld</link>`);
-    expect(xml).toContain('<guid isPermaLink="false">rankland:ranklist:hello/world</guid>');
-    expect(xml).toContain('<description>A&amp;B &lt;Contest&gt; 更新于 2026-06-02T03:04:05.000Z</description>');
-    expect(xml).toContain('<pubDate>Tue, 02 Jun 2026 03:04:05 GMT</pubDate>');
-    expect(xml).toContain('<title>fallback-date</title>');
-    expect(xml).toContain('<pubDate>Fri, 01 May 2026 00:00:00 GMT</pubDate>');
-    expect(xml).toContain('<title>No Date</title>');
-    expect(xml).not.toContain('not-a-date');
-    expect(xml).not.toContain('also-not-a-date');
+      expect(ranklistService.getAllRanklists).toHaveBeenCalledTimes(1);
+      expect(xml).toContain('<?xml version="1.0" encoding="UTF-8"?>');
+      expect(xml).toContain('<rss version="2.0">');
+      expect(xml).toContain('<title>RankLand 榜单更新</title>');
+      expect(xml).toContain(`<link>${SITEMAP_SITE_ORIGIN}</link>`);
+      expect(xml).toContain('<title>A&amp;B &lt;Contest&gt;</title>');
+      expect(xml).toContain(`<link>${SITEMAP_SITE_ORIGIN}/ranklist/hello%2Fworld</link>`);
+      expect(xml).toContain('<guid isPermaLink="false">rankland:ranklist:hello/world</guid>');
+      expect(xml).toContain('<description>hello/world · 收录于 2026-06-01</description>');
+      expect(xml).toContain('<pubDate>Mon, 01 Jun 2026 08:00:00 +0800</pubDate>');
+      expect(xml).toContain('<title>fallback-date</title>');
+      expect(xml).toContain('<description>fallback-date · 收录于 2026-05-01</description>');
+      expect(xml).toContain('<pubDate>Fri, 01 May 2026 08:00:00 +0800</pubDate>');
+      expect(xml).toContain('<title>No Date</title>');
+      expect(xml).toContain('<description>no-date · 收录于 </description>');
+      expect(xml).not.toContain('2026-06-02T03:04:05.000Z');
+      expect(xml).not.toContain('not-a-date');
+      expect(xml).not.toContain('also-not-a-date');
+    } finally {
+      if (originalTimezone === undefined) {
+        delete process.env.TZ;
+      } else {
+        process.env.TZ = originalTimezone;
+      }
+    }
   });
 
   it('limits the RSS feed to the first 50 ranklists in API order', async () => {
