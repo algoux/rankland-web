@@ -203,7 +203,7 @@ export const COMPLETENESS_LABELS_ZH: Record<keyof RanklistCompletenessItems, str
   userAvatar: '参赛者徽标',
   userPhoto: '参赛者照片',
   teamMembers: '队伍成员',
-  coachRole: '教练角色',
+  coachRole: '教练信息',
   i18n: '多语言文本',
   statuses: '题目状态',
   solutions: '提交记录',
