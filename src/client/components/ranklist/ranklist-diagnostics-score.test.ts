@@ -330,6 +330,6 @@ describe('format helpers', () => {
   it('formats unknown precision as placeholders', () => {
     expect(
       formatPrecisionText(makePrecision({ actualUnit: null, declaredUnits: [], sampleCount: 0, invalidCount: 3 })),
-    ).toBe('检测单位：未知 · 声明单位：无（无效数量：3）');
+    ).toBe('检测单位：未知 · 声明单位：无 (无效：3)');
   });
 });

@@ -270,5 +270,5 @@ export function formatCorrectnessCount(check: RanklistDiagnosticCheck): string {
 export function formatPrecisionText(precision: RanklistDiagnosticPrecision): string {
   const actual = precision.actualUnit ? precision.actualUnit : '未知';
   const declared = precision.declaredUnits.length > 0 ? precision.declaredUnits.join(', ') : '无';
-  return `检测单位：${actual} · 声明单位：${declared}${precision.invalidCount > 0 ? `（无效数量：${precision.invalidCount}）` : ''}`;
+  return `检测单位：${actual} · 声明单位：${declared}${precision.invalidCount > 0 ? ` (无效：${precision.invalidCount})` : ''}`;
 }

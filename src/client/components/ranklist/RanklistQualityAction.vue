@@ -144,20 +144,20 @@ const correctnessRows = computed(() => {
         variant="ghost"
         :class="['srk-ranklist-quality-action-button h-6 gap-1 rounded-md px-1.5 text-xs font-normal', buttonToneClass]"
         :disabled="score === null"
-        aria-label="数据完备度"
+        aria-label="数据完整度"
         @click="modalOpen = true"
       >
         <RanklistQualityScoreRing :score="score" :size="16" />
         <span v-if="score !== null">{{ score }}%</span>
       </Button>
       <span class="srk-ranklist-action-tooltip" data-id="ranklist-quality-tooltip" role="tooltip">
-        数据完备度
+        数据完整度
       </span>
     </span>
 
     <Modal
       :open="modalOpen"
-      title="榜单数据完备度"
+      title="榜单数据完整度"
       :width="clientWidth >= 640 ? 380 : Math.max(clientWidth - 20, 280)"
       root-class-name="srk-general-modal-root"
       @close="modalOpen = false"
@@ -165,7 +165,7 @@ const correctnessRows = computed(() => {
     >
       <div v-if="score !== null" class="srk-ranklist-quality-modal" data-id="ranklist-quality-modal">
         <div :class="['srk-ranklist-quality-score', scoreToneClass]">
-          <RanklistQualityScoreRing :score="score" :size="48" />
+          <RanklistQualityScoreRing :score="score" :size="42" />
           <div class="srk-ranklist-quality-score-text">
             <span class="srk-ranklist-quality-score-value">{{ score }}%</span>
             <!-- <span class="srk-ranklist-quality-score-caption">综合得分</span> -->
