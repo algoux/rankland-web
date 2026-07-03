@@ -106,6 +106,7 @@ import type { StyledRanklistRendererProps } from './styled-ranklist-types';
 import { isOfficialParticipant } from './styled-ranklist-filter';
 import SearchableMultiSelect from './SearchableMultiSelect.vue';
 import SettingInfoTip from './SettingInfoTip.vue';
+import RanklistQualityAction from './RanklistQualityAction.vue';
 import './styled-ranklist-renderer.less';
 
 const props = withDefaults(defineProps<StyledRanklistRendererProps>(), {
@@ -1097,6 +1098,7 @@ function resolveDisplayText(text: Parameters<typeof resolveText>[0]) {
               </DropdownMenuGroup>
             </DropdownMenuContent>
         </DropdownMenu>
+        <RanklistQualityAction :data="memorizedData" :client-width="clientWidth" />
       </ClientOnly>
       <p v-if="contributors.length > 0" class="srk-ranklist-meta-line">
         贡献者：

@@ -8,7 +8,8 @@ import { rankland_live_contest_common } from '@common/proto/rankland_live_contes
 export default class MiscUtils {
   public getIp(ctx: RequestContext): string {
     const ssrIp = ctx.req.socket.remoteAddress === '127.0.0.1' ? (ctx.request.headers.server_render_ip as string) : '';
-    let ip = ssrIp || (ctx.request.headers['x-forwarded-for'] as string) || ctx.ip;
+    // ctx.ip/remoteAddress can be undefined once the client socket is destroyed mid-request
+    let ip = ssrIp || (ctx.request.headers['x-forwarded-for'] as string) || ctx.ip || '';
     if (ip.substr(0, 7) === '::ffff:') {
       ip = ip.substr(7);
     }

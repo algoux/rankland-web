@@ -23,7 +23,8 @@ export default viteSSR(App, { routes }, (hookParams) => {
   // init api
   const getIp = (req: typeof request): string => {
     const ssrIp = req.socket.remoteAddress === '127.0.0.1' ? (request.headers.server_render_ip as string) : '';
-    let ip = ssrIp || (request.headers['x-forwarded-for'] as string) || req.socket.remoteAddress;
+    // remoteAddress is undefined once the client socket is destroyed (e.g. reload mid-render)
+    let ip = ssrIp || (request.headers['x-forwarded-for'] as string) || req.socket.remoteAddress || '';
     if (ip.substr(0, 7) === '::ffff:') {
       ip = ip.substr(7);
     }

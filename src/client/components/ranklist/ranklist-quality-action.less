@@ -1,0 +1,98 @@
+.srk-ranklist-quality-action-button {
+  font-variant-numeric: tabular-nums;
+}
+
+.srk-ranklist-quality-ring {
+  flex: none;
+}
+
+.srk-ranklist-quality-modal {
+  .srk-ranklist-quality-score {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 20px;
+  }
+
+  .srk-ranklist-quality-score-text {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+
+  .srk-ranklist-quality-score-value {
+    font-size: 28px;
+    font-weight: 700;
+    line-height: 1;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .srk-ranklist-quality-score-caption {
+    color: hsl(var(--muted-foreground));
+    font-size: 12px;
+  }
+
+  .srk-ranklist-quality-section + .srk-ranklist-quality-section {
+    margin-top: 24px;
+  }
+
+  h3 {
+    margin-bottom: 8px;
+    border-bottom: 1px solid hsl(var(--border));
+    padding: 0 0 8px;
+    color: hsl(var(--foreground));
+    font-size: 16px;
+    font-weight: 700;
+    line-height: 22px;
+  }
+
+  .srk-ranklist-quality-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 6px 0;
+    font-size: 13px;
+  }
+
+  // uniform label column so every value field starts at the same x across sections
+  .srk-ranklist-quality-item-label {
+    flex: none;
+    width: 9em;
+    white-space: nowrap;
+  }
+
+  .srk-ranklist-quality-item-value {
+    display: inline-flex;
+    flex: 1;
+    min-width: 0;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 8px;
+    text-align: left;
+  }
+
+  // fixed width (fits 3 CJK chars) so the count text after the badge starts at the same x
+  .srk-ranklist-quality-badge {
+    display: inline-flex;
+    flex: none;
+    align-items: center;
+    justify-content: center;
+    width: 4.5em;
+    border-radius: 999px;
+    padding: 1px 4px;
+    font-size: 12px;
+    line-height: 18px;
+  }
+
+  .srk-ranklist-quality-count {
+    color: hsl(var(--muted-foreground));
+    font-size: 12px;
+    font-variant-numeric: tabular-nums;
+  }
+}
+
+@media screen and (max-width: 768px) {
+  .srk-ranklist-quality-modal .srk-ranklist-quality-item {
+    flex-wrap: wrap;
+  }
+}
