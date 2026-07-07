@@ -22,8 +22,8 @@ export const COMPLETENESS_LEVEL_CREDITS: Record<CompletenessLevel, number> = {
 };
 
 /**
- * Share of a check's weight earned per correctness status (notApplicable earns 0 like an error,
- * except mockSolutions/markers where N/A is neutral and excluded from scoring entirely).
+ * Share of a check's weight earned per correctness status. notApplicable earns 0 unless the
+ * check is neutral for the current ranklist shape, in which case it is excluded from scoring.
  */
 export const CORRECTNESS_STATUS_CREDITS: Record<DiagnosticCheckStatus, number> = {
   pass: 1,
@@ -61,9 +61,24 @@ export const CORRECTNESS_WEIGHTS: Record<keyof RanklistCorrectnessChecks, number
 
 /**
  * Checks whose unverifiable state is neutral rather than an error: having no solutions to
- * inspect for mocks or no markers to validate is not a data defect.
+ * inspect for mocks, no markers to validate, or no problem statistics to compare is not a
+ * data defect.
  */
-const UNVERIFIED_NEUTRAL_CHECK_KEYS: ReadonlySet<string> = new Set(['mockSolutions', 'markers']);
+const UNVERIFIED_NEUTRAL_CHECK_KEYS: ReadonlySet<string> = new Set(['mockSolutions', 'markers', 'problemStatistics']);
+
+const NON_ICPC_NOT_APPLICABLE_REASON = 'Ranklist sorter is not ICPC';
+
+/**
+ * ICPC-only checks that standard-ranklist-utils marks N/A for score-based ranklists.
+ * They are successful no-ops for non-ICPC data, just like marker validation with no markers.
+ */
+const NON_ICPC_NEUTRAL_CHECK_KEYS: ReadonlySet<string> = new Set([
+  'firstBlood',
+  'statusSummaries',
+  'scores',
+  'rowOrder',
+  'sorterConfig',
+]);
 
 /**
  * Completeness items whose notApplicable level is neutral rather than an error: a non-ICPC
@@ -79,13 +94,24 @@ function isUnverifiedCheck(check: RanklistDiagnosticCheck): boolean {
   return check.status === 'notApplicable' || (check.status === 'pass' && check.checkedCount <= 0);
 }
 
+function isNonICPCNotApplicableCheck(check: RanklistDiagnosticCheck): boolean {
+  return check.status === 'notApplicable'
+    && NON_ICPC_NEUTRAL_CHECK_KEYS.has(check.key)
+    && check.details?.reason === NON_ICPC_NOT_APPLICABLE_REASON;
+}
+
+function isNeutralUnverifiedCheck(check: RanklistDiagnosticCheck): boolean {
+  return isUnverifiedCheck(check)
+    && (UNVERIFIED_NEUTRAL_CHECK_KEYS.has(check.key) || isNonICPCNotApplicableCheck(check));
+}
+
 /**
  * Overall data quality score in [0, 100] (floored), as a weighted average over completeness
  * items and correctness checks. Unverifiable entries (notApplicable, or a pass that checked
  * nothing) earn 0 credit like errors — missing the data needed to even check is itself an
- * incompleteness signal. Exceptions, excluded from both sides of the ratio: the mockSolutions
- * check when unverifiable (no solutions to inspect is neutral), and optional completeness
- * items that are fully missing (uncolored in the CLI output).
+ * incompleteness signal. Exceptions are excluded from both sides of the ratio: neutral
+ * mockSolutions/markers/problemStatistics checks, non-ICPC no-op checks, and optional
+ * completeness items that are fully missing (uncolored in the CLI output).
  */
 export function calculateRanklistQualityScore(diagnostics: RanklistDiagnostics): number {
   let earned = 0;
@@ -109,7 +135,7 @@ export function calculateRanklistQualityScore(diagnostics: RanklistDiagnostics):
     if (!check) {
       continue;
     }
-    if (UNVERIFIED_NEUTRAL_CHECK_KEYS.has(key) && isUnverifiedCheck(check)) {
+    if (isNeutralUnverifiedCheck(check)) {
       continue;
     }
     total += CORRECTNESS_WEIGHTS[key];
@@ -173,9 +199,9 @@ export function getCompletenessBadgeTone(item: RanklistDiagnosticCompletenessIte
 
 export function getCorrectnessBadgeTone(check: RanklistDiagnosticCheck): RanklistQualityTone {
   if (isUnverifiedCheck(check)) {
-    // Nothing to inspect is neutral for mocks/markers; anything else unverifiable means the
-    // data is too incomplete to check.
-    return UNVERIFIED_NEUTRAL_CHECK_KEYS.has(check.key) ? 'good' : 'poor';
+    // Nothing to inspect is neutral only for true no-op checks; other unverifiable states mean
+    // the data is too incomplete to check.
+    return isNeutralUnverifiedCheck(check) ? 'good' : 'poor';
   }
   switch (check.status) {
     case 'pass':

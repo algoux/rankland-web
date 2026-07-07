@@ -45,6 +45,15 @@ const CORRECTNESS_KEYS: (keyof RanklistCorrectnessChecks)[] = [
   'markers',
 ];
 
+const NON_ICPC_NOT_APPLICABLE_REASON = 'Ranklist sorter is not ICPC';
+const NON_ICPC_NEUTRAL_CORRECTNESS_KEYS: (keyof RanklistCorrectnessChecks)[] = [
+  'firstBlood',
+  'statusSummaries',
+  'scores',
+  'rowOrder',
+  'sorterConfig',
+];
+
 function makeCompletenessItem(
   key: string,
   overrides: Partial<RanklistDiagnosticCompletenessItem> = {},
@@ -146,6 +155,27 @@ describe('calculateRanklistQualityScore', () => {
       correctness: { markers: { status: 'notApplicable', checkedCount: 0 } },
     });
     // markers (weight 1) drops out entirely: 36/36 earns full credit
+    expect(calculateRanklistQualityScore(diagnostics)).toBe(100);
+  });
+
+  it('treats non-ICPC notApplicable correctness checks as neutral success', () => {
+    const correctness: Partial<Record<keyof RanklistCorrectnessChecks, Partial<RanklistDiagnosticCheck>>> = {};
+    for (const key of NON_ICPC_NEUTRAL_CORRECTNESS_KEYS) {
+      correctness[key] = {
+        status: 'notApplicable',
+        checkedCount: 0,
+        failedCount: 0,
+        details: { reason: NON_ICPC_NOT_APPLICABLE_REASON },
+      };
+    }
+    const diagnostics = makeDiagnostics({ correctness });
+    expect(calculateRanklistQualityScore(diagnostics)).toBe(100);
+  });
+
+  it('treats notApplicable problemStatistics as neutral success', () => {
+    const diagnostics = makeDiagnostics({
+      correctness: { problemStatistics: { status: 'notApplicable', checkedCount: 0 } },
+    });
     expect(calculateRanklistQualityScore(diagnostics)).toBe(100);
   });
 
@@ -271,11 +301,23 @@ describe('badge tones', () => {
     ).toBe('muted');
   });
 
-  it('maps correctness statuses to tones (N/A is an error except mockSolutions/markers)', () => {
+  it('maps correctness statuses to tones (N/A is an error except neutral checks)', () => {
     expect(getCorrectnessBadgeTone(makeCorrectnessCheck('x', { status: 'pass' }))).toBe('good');
     expect(getCorrectnessBadgeTone(makeCorrectnessCheck('x', { status: 'notApplicable' }))).toBe('poor');
     expect(getCorrectnessBadgeTone(makeCorrectnessCheck('mockSolutions', { status: 'notApplicable' }))).toBe('good');
     expect(getCorrectnessBadgeTone(makeCorrectnessCheck('markers', { status: 'notApplicable' }))).toBe('good');
+    expect(getCorrectnessBadgeTone(makeCorrectnessCheck('problemStatistics', { status: 'notApplicable' }))).toBe('good');
+    for (const key of NON_ICPC_NEUTRAL_CORRECTNESS_KEYS) {
+      expect(
+        getCorrectnessBadgeTone(
+          makeCorrectnessCheck(key, {
+            status: 'notApplicable',
+            checkedCount: 0,
+            details: { reason: NON_ICPC_NOT_APPLICABLE_REASON },
+          }),
+        ),
+      ).toBe('good');
+    }
     expect(getCorrectnessBadgeTone(makeCorrectnessCheck('x', { status: 'warning' }))).toBe('fair');
     expect(getCorrectnessBadgeTone(makeCorrectnessCheck('x', { status: 'fail' }))).toBe('poor');
   });

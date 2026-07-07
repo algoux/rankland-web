@@ -17,6 +17,7 @@ vi.mock('@algoux/standard-ranklist-renderer-component-vue', async () => {
         showDirtColumn: { type: Boolean, default: false },
         showProblemStatisticsFooter: { type: Boolean, default: false },
         showSEColumn: { type: Boolean, default: false },
+        statusColorAsText: { type: Boolean, default: false },
       },
       setup: (props) => () =>
         h('div', {
@@ -24,6 +25,7 @@ vi.mock('@algoux/standard-ranklist-renderer-component-vue', async () => {
           'data-show-dirt-column': String(props.showDirtColumn),
           'data-show-problem-statistics-footer': String(props.showProblemStatisticsFooter),
           'data-show-s-e-column': String(props.showSEColumn),
+          'data-status-color-as-text': String(props.statusColorAsText),
         }),
     }),
   };
@@ -51,13 +53,41 @@ describe('StyledRanklistRenderer Ranklist props', () => {
     expect(html).toContain('data-show-dirt-column="false"');
     expect(html).toContain('data-show-s-e-column="false"');
   });
+
+  it('forces status colors to text for score sorter ranklists', async () => {
+    const html = await renderStyledRanklistWithProfessionalMode(
+      createRanklistFixture({
+        problems: [{ alias: 'A' }],
+        statuses: [{ result: 'AC', time: [10, 'min'], tries: 1 }],
+        sorter: { algorithm: 'score', config: {} },
+      }),
+      { statusColorAsText: false },
+    );
+
+    expect(html).toContain('data-status-color-as-text="true"');
+  });
+
+  it('keeps saved status color mode for non-score sorter ranklists', async () => {
+    const html = await renderStyledRanklistWithProfessionalMode(
+      createRanklistFixture({
+        problems: [{ alias: 'A' }],
+        statuses: [{ result: 'AC', time: [10, 'min'], tries: 1 }],
+        sorter: { algorithm: 'ICPC', config: {} },
+      }),
+      { statusColorAsText: false },
+    );
+
+    expect(html).toContain('data-status-color-as-text="false"');
+  });
 });
 
 function createRanklistFixture({
   problems,
+  sorter,
   statuses,
 }: {
   problems: srk.Problem[];
+  sorter?: srk.Sorter;
   statuses: srk.Status[];
 }): srk.Ranklist {
   return {
@@ -77,10 +107,16 @@ function createRanklistFixture({
         statuses,
       },
     ],
+    sorter,
   };
 }
 
-async function renderStyledRanklistWithProfessionalMode(data: srk.Ranklist) {
+async function renderStyledRanklistWithProfessionalMode(
+  data: srk.Ranklist,
+  settings?: Partial<{
+    statusColorAsText: boolean;
+  }>,
+) {
   const { default: StyledRanklistRenderer } = await import('./StyledRanklistRenderer.vue');
   const localStorage = {
     getItem: (key: string) =>
@@ -94,6 +130,7 @@ async function renderStyledRanklistWithProfessionalMode(data: srk.Ranklist) {
           emptyStatusPlaceholder: 'dash',
           splitOrganization: true,
           userAvatarPlacement: 'user',
+          ...settings,
         })
         : undefined,
     setItem: () => {},

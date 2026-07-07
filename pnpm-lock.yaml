@@ -19,11 +19,11 @@ importers:
         specifier: ^0.2.2
         version: 0.2.2(@algoux/standard-ranklist@0.3.13)
       '@algoux/standard-ranklist-renderer-component-core':
-        specifier: ^0.6.3
-        version: 0.6.3(@algoux/standard-ranklist@0.3.13)
-      '@algoux/standard-ranklist-renderer-component-vue':
         specifier: ^0.6.4
-        version: 0.6.4(@algoux/standard-ranklist@0.3.13)(vue@3.5.35(typescript@5.9.3))
+        version: 0.6.4(@algoux/standard-ranklist@0.3.13)
+      '@algoux/standard-ranklist-renderer-component-vue':
+        specifier: ^0.6.5
+        version: 0.6.5(@algoux/standard-ranklist@0.3.13)(vue@3.5.35(typescript@5.9.3))
       '@algoux/standard-ranklist-utils':
         specifier: ^0.3.3
         version: 0.3.3(@algoux/standard-ranklist@0.3.13)
@@ -298,16 +298,16 @@ packages:
     peerDependencies:
       '@algoux/standard-ranklist': '*'
 
-  '@algoux/standard-ranklist-renderer-component-core@0.6.3':
-    resolution: {integrity: sha512-aWg2+NUIVK7qQYetexVeRfjf16R3sIv/auOPauwl3heJzuMQan2uEpXkP6jRA3Ba+q9qkm4xPWHDYhDJk43mkg==}
+  '@algoux/standard-ranklist-renderer-component-core@0.6.4':
+    resolution: {integrity: sha512-ziV1SasbonG27hozBVsYRLKC7OkhVT14dQZ2ARg2xMwE04ygBptvfIP8W5uNPl62pzio6a8oe+owX7YqXkW8UA==}
     peerDependencies:
       '@algoux/standard-ranklist': '*'
 
-  '@algoux/standard-ranklist-renderer-component-styles@0.6.1':
-    resolution: {integrity: sha512-8wNEtNLVqyuCdpQhqm0IB9y5PU7+AD5LAEjx0muFB+N/X7tTI7pstftRndx2i6drIs5aGlWmFVHq9N0E54rKxw==}
+  '@algoux/standard-ranklist-renderer-component-styles@0.6.2':
+    resolution: {integrity: sha512-Ue0Br/DBvrIMnVt9WDpn415tlgZuW7jStMaDeLLZxPaNJMsFqmczv0toNLyIu8iEXjP9fek+bmZiSXmeueXi3Q==}
 
-  '@algoux/standard-ranklist-renderer-component-vue@0.6.4':
-    resolution: {integrity: sha512-6V2rClh5GloK17QyD+uYJBAVMvxCHGIIf5s9RX0v/2WwWdpTJgrOkA1XDmpVIte/f5Fllqozfe3y814+biag4w==}
+  '@algoux/standard-ranklist-renderer-component-vue@0.6.5':
+    resolution: {integrity: sha512-4vObsMnuskqB1izaynNgASq+rvxmbLPhZ9ooxllKNORZt05a9nXpJn5PCe4Qg566NMHGNpoNbf6pV0yaTlFJNg==}
     peerDependencies:
       '@algoux/standard-ranklist': '*'
       vue: '>=3.4.0'
@@ -5087,20 +5087,20 @@ snapshots:
       '@algoux/standard-ranklist-utils': 0.2.13(@algoux/standard-ranklist@0.3.13)
       xlsx: 0.18.5
 
-  '@algoux/standard-ranklist-renderer-component-core@0.6.3(@algoux/standard-ranklist@0.3.13)':
+  '@algoux/standard-ranklist-renderer-component-core@0.6.4(@algoux/standard-ranklist@0.3.13)':
     dependencies:
       '@algoux/standard-ranklist': 0.3.13
       '@algoux/standard-ranklist-utils': 0.3.3(@algoux/standard-ranklist@0.3.13)
       color: 4.2.3
       semver: 7.5.4
 
-  '@algoux/standard-ranklist-renderer-component-styles@0.6.1': {}
+  '@algoux/standard-ranklist-renderer-component-styles@0.6.2': {}
 
-  '@algoux/standard-ranklist-renderer-component-vue@0.6.4(@algoux/standard-ranklist@0.3.13)(vue@3.5.35(typescript@5.9.3))':
+  '@algoux/standard-ranklist-renderer-component-vue@0.6.5(@algoux/standard-ranklist@0.3.13)(vue@3.5.35(typescript@5.9.3))':
     dependencies:
       '@algoux/standard-ranklist': 0.3.13
-      '@algoux/standard-ranklist-renderer-component-core': 0.6.3(@algoux/standard-ranklist@0.3.13)
-      '@algoux/standard-ranklist-renderer-component-styles': 0.6.1
+      '@algoux/standard-ranklist-renderer-component-core': 0.6.4(@algoux/standard-ranklist@0.3.13)
+      '@algoux/standard-ranklist-renderer-component-styles': 0.6.2
       '@algoux/standard-ranklist-utils': 0.3.3(@algoux/standard-ranklist@0.3.13)
       vue: 3.5.35(typescript@5.9.3)
 

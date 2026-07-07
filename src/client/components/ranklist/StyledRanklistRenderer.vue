@@ -178,9 +178,17 @@ const memorizedData = shallowRef<srk.Ranklist>(toRanklistPayloadWithoutVolatileF
 const rankTimeDataVersion = ref(0);
 
 const ranklistSettings = computed(() => normalizeStyledRanklistSettings(storedRanklistSettings.value));
-const renderedRanklistSettings = computed(() =>
-  ranklistClientRenderReady.value ? ranklistSettings.value : DEFAULT_STYLED_RANKLIST_SETTINGS,
-);
+const isScoreSorterRanklist = computed(() => memorizedData.value.sorter?.algorithm === 'score');
+const renderedRanklistSettings = computed<StyledRanklistSettings>(() => {
+  const settings = ranklistClientRenderReady.value ? ranklistSettings.value : DEFAULT_STYLED_RANKLIST_SETTINGS;
+  if (!isScoreSorterRanklist.value) {
+    return settings;
+  }
+  return {
+    ...settings,
+    statusColorAsText: true,
+  };
+});
 const emptyStatusPlaceholder = computed(() =>
   getEmptyStatusPlaceholder(renderedRanklistSettings.value.emptyStatusPlaceholder),
 );
