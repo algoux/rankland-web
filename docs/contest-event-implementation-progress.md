@@ -27,7 +27,8 @@ Updated: 2026-05-29
 - Reworked the initial migration directly; no incremental migration was added for the table rename.
 - Kept `uk` unique on `contest` and removed redundant `uk` storage from `contest_event_stream`.
 - Switched MySQL column names to snake_case while keeping TypeScript DTO/service/entity properties in camelCase through explicit TypeORM column mappings.
-- Changed string-capable contest user JSON fields (`name`, `avatar`, `photo`, `organization`) to TypeORM `simple-json` backed by MySQL `text`, avoiding MySQL JSON scalar string hydration failures.
+- Changed string-capable contest user fields (`name`, `avatar`, `photo`, `organization`) to MySQL `text` with a transformer that keeps scalar strings unquoted while preserving JSON-backed I18N values and legacy reads.
+- Standardized all eight `datetime` columns across the four contest tables on microsecond precision (`datetime(6)`).
 - Replaced contest persistence with MySQL-backed TypeORM repositories.
 - Added append-only event stream logic:
   - batch protobuf decode and verification

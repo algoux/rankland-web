@@ -33,9 +33,9 @@ export class ContestEntity {
   @Column({ type: 'json', nullable: true, transformer: nullableOutputTransformer })
   public contributors?: Contributor[] | null;
 
-  @CreateDateColumn({ name: 'created_at', type: 'datetime', precision: 3 })
+  @CreateDateColumn({ name: 'created_at', type: 'datetime', precision: 6 })
   public createdAt: Date;
 
-  @UpdateDateColumn({ name: 'updated_at', type: 'datetime', precision: 3 })
+  @UpdateDateColumn({ name: 'updated_at', type: 'datetime', precision: 6 })
   public updatedAt: Date;
 }

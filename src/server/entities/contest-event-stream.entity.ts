@@ -14,12 +14,12 @@ export class ContestEventStreamEntity {
   @Column({ name: 'producer_id', type: 'varchar', length: 128, nullable: true })
   public producerId?: string | null;
 
-  @Column({ name: 'producer_locked_at', type: 'datetime', precision: 3, nullable: true })
+  @Column({ name: 'producer_locked_at', type: 'datetime', precision: 6, nullable: true })
   public producerLockedAt?: Date | null;
 
-  @CreateDateColumn({ name: 'created_at', type: 'datetime', precision: 3 })
+  @CreateDateColumn({ name: 'created_at', type: 'datetime', precision: 6 })
   public createdAt: Date;
 
-  @UpdateDateColumn({ name: 'updated_at', type: 'datetime', precision: 3 })
+  @UpdateDateColumn({ name: 'updated_at', type: 'datetime', precision: 6 })
   public updatedAt: Date;
 }

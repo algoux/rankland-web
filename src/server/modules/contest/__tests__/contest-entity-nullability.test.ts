@@ -15,8 +15,13 @@ function findColumnTransformer(target: Function, propertyName: string) {
 function expectNullableOutputTransformer(target: Function, propertyNames: string[]) {
   for (const propertyName of propertyNames) {
     const transformer = findColumnTransformer(target, propertyName);
-    expect(transformer, `${target.name}.${propertyName}`).toBe(nullableOutputTransformer);
-    expect((transformer as ValueTransformer).from(null), `${target.name}.${propertyName}`).toBeUndefined();
+    const transformers = (Array.isArray(transformer) ? transformer : [transformer]) as ValueTransformer[];
+    expect(transformers, `${target.name}.${propertyName}`).toContain(nullableOutputTransformer);
+    const transformed = transformers
+      .slice()
+      .reverse()
+      .reduce((value, currentTransformer) => currentTransformer.from(value), null as any);
+    expect(transformed, `${target.name}.${propertyName}`).toBeUndefined();
   }
 }
 

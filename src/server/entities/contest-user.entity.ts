@@ -2,6 +2,7 @@ import { Column, CreateDateColumn, Entity, Index, PrimaryGeneratedColumn, Update
 import type { ExternalUser, Image, I18NStringSet, Text } from '@algoux/standard-ranklist';
 
 import { nullableOutputTransformer } from './nullable-output.transformer';
+import { stringOrJsonTransformer } from './string-or-json.transformer';
 
 @Entity('contest_user')
 @Index('IDX_contest_user_contest_user', ['contestId', 'userId'], { unique: true })
@@ -18,16 +19,16 @@ export class ContestUserEntity {
   @Column({ name: 'user_id', type: 'varchar', length: 128 })
   public userId: string;
 
-  @Column({ type: 'simple-json' })
+  @Column({ type: 'text', transformer: stringOrJsonTransformer })
   public name: Text | I18NStringSet;
 
-  @Column({ type: 'simple-json', nullable: true, transformer: nullableOutputTransformer })
+  @Column({ type: 'text', nullable: true, transformer: [nullableOutputTransformer, stringOrJsonTransformer] })
   public avatar?: Image | string | null;
 
-  @Column({ type: 'simple-json', nullable: true, transformer: nullableOutputTransformer })
+  @Column({ type: 'text', nullable: true, transformer: [nullableOutputTransformer, stringOrJsonTransformer] })
   public photo?: Image | string | null;
 
-  @Column({ type: 'simple-json', nullable: true, transformer: nullableOutputTransformer })
+  @Column({ type: 'text', nullable: true, transformer: [nullableOutputTransformer, stringOrJsonTransformer] })
   public organization?: Text | I18NStringSet | null;
 
   @Column({ type: 'varchar', length: 255, nullable: true, transformer: nullableOutputTransformer })
@@ -51,9 +52,9 @@ export class ContestUserEntity {
   @Column({ name: 'sort_index', type: 'int', unsigned: true })
   public sortIndex: number;
 
-  @CreateDateColumn({ name: 'created_at', type: 'datetime', precision: 3 })
+  @CreateDateColumn({ name: 'created_at', type: 'datetime', precision: 6 })
   public createdAt: Date;
 
-  @UpdateDateColumn({ name: 'updated_at', type: 'datetime', precision: 3 })
+  @UpdateDateColumn({ name: 'updated_at', type: 'datetime', precision: 6 })
   public updatedAt: Date;
 }

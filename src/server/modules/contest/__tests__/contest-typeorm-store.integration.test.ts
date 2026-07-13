@@ -1,4 +1,5 @@
 import { DataSource } from 'typeorm';
+import MysqlConfig from '@server/configs/mysql/mysql.config';
 import { getMysqlDataSourceOptions } from '@server/database/typeorm-data-source';
 import { ContestEntity } from '@server/entities/contest.entity';
 import { ContestEventStreamEntity } from '@server/entities/contest-event-stream.entity';
@@ -22,7 +23,7 @@ describe.runIf(runMysqlTests)('contest TypeORM event store', () => {
 
   beforeAll(async () => {
     dataSource = new DataSource({
-      ...getMysqlDataSourceOptions(),
+      ...getMysqlDataSourceOptions(new MysqlConfig()),
       migrationsRun: false,
       migrations: [],
     });
@@ -189,7 +190,7 @@ describe.runIf(runMysqlTests)('contest TypeORM event store', () => {
     });
   });
 
-  it('stores string user fields as valid JSON and reads them back through the service', async () => {
+  it('stores string user fields as plain text and reads them back through the service', async () => {
     const serviceUk = `${uk}-users`;
     createdUks.add(serviceUk);
     const service = new ContestService({ getDataSource: () => dataSource } as TypeOrmClient, new MiscUtils());
@@ -211,10 +212,16 @@ describe.runIf(runMysqlTests)('contest TypeORM event store', () => {
     });
 
     const users = await service.findContestUsers(serviceUk);
+    const [storedUser] = await dataSource.query(
+      'SELECT contest_user.name, contest_user.organization FROM contest_user INNER JOIN contest ON contest.id = contest_user.contest_id WHERE contest.uk = ? AND contest_user.user_id = ?',
+      [serviceUk, 'u1'],
+    );
 
     expect(users).toHaveLength(1);
     expect(users[0].name).toBe('User One');
     expect(users[0].organization).toBe('Org One');
+    expect(storedUser.name).toBe('User One');
+    expect(storedUser.organization).toBe('Org One');
   });
 
   it('denormalizes submit time and filters frozen non-new events during catch-up', async () => {

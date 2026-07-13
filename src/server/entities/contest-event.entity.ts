@@ -49,7 +49,7 @@ export class ContestEventEntity {
   @Column({ name: 'solution_submit_time_ns', type: 'bigint', nullable: true })
   public solutionSubmitTimeNs?: string | null;
 
-  @CreateDateColumn({ name: 'created_at', type: 'datetime', precision: 3 })
+  @CreateDateColumn({ name: 'created_at', type: 'datetime', precision: 6 })
   public createdAt: Date;
 
   @Column({ name: 'payload_hash', type: 'char', length: 64 })
