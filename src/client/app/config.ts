@@ -10,6 +10,7 @@ export interface RanklandRuntimeConfig {
   cdnApiBaseClient: string;
   cdnApiBaseServer: string;
   srkStorageBase: string;
+  vinUrl: string;
   hostGlobal: string;
   hostCN: string;
   siteAlias: string;
@@ -61,6 +62,7 @@ export function getRanklandRuntimeConfig(env: Record<string, string | undefined>
     cdnApiBaseClient: env.CDN_API_BASE_CLIENT || 'https://rl-api.algoux.cn',
     cdnApiBaseServer: env.CDN_API_BASE_SERVER || 'https://rl-api.algoux.cn',
     srkStorageBase: env.SRK_STORAGE_BASE || 'https://cdn.algoux.cn/srk-storage',
+    vinUrl: env.VIN_URL || 'https://cdn.algoux.cn/rankland/vin.txt',
     hostGlobal: env.HOST_GLOBAL || 'rl.algoux.org',
     hostCN: env.HOST_CN || 'rl.algoux.cn',
     siteAlias: env.SITE_ALIAS || 'global',

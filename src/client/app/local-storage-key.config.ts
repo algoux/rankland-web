@@ -5,4 +5,5 @@ export enum LocalStorageKey {
   StyledRanklistSettings = 'StyledRanklistSettings',
   StyledRanklistSettingsIntroRead = 'StyledRanklistSettingsIntroRead',
   ThemeMode = 'RanklandThemeMode',
+  VinReadIds = 'RanklandVinReadIds',
 }

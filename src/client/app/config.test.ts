@@ -18,6 +18,7 @@ describe('rankland runtime config', () => {
     expect(config.hostGlobal).toBe('rl.algoux.org');
     expect(config.hostCN).toBe('rl.algoux.cn');
     expect(config.livePollingInterval).toBe(10_000);
+    expect(config.vinUrl).toBe('https://cdn.algoux.cn/rankland/vin.txt');
   });
 
   it('uses runtime environment overrides when provided by the server process', () => {
@@ -27,6 +28,7 @@ describe('rankland runtime config', () => {
       SITE_ALIAS: 'cnn',
       GTAG: 'G-RUNTIME',
       BUILD_COMMIT: '1234567890abcdef',
+      VIN_URL: 'https://cdn.example.com/custom-vin.txt',
     });
 
     expect(config.apiBaseServer).toBe('http://runtime-api');
@@ -34,6 +36,7 @@ describe('rankland runtime config', () => {
     expect(config.siteAlias).toBe('cnn');
     expect(config.gtag).toBe('G-RUNTIME');
     expect(config.buildCommit).toBe('1234567890abcdef');
+    expect(config.vinUrl).toBe('https://cdn.example.com/custom-vin.txt');
   });
 
   it('builds an optional GitHub commit link with an eight-character label', () => {

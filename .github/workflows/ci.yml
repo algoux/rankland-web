@@ -54,6 +54,7 @@ jobs:
           API_BASE_CLIENT: ${{ vars.API_BASE_CLIENT }}
           CDN_API_BASE_CLIENT: ${{ vars.CDN_API_BASE_CLIENT }}
           SRK_STORAGE_BASE: ${{ vars.SRK_STORAGE_BASE }}
+          VIN_URL: ${{ vars.VIN_URL }}
           HOST_GLOBAL: ${{ vars.HOST_GLOBAL }}
           HOST_CN: ${{ vars.HOST_CN }}
           SITE_ALIAS: ${{ vars.SITE_ALIAS }}

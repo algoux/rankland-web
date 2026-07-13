@@ -9,6 +9,7 @@ function buildClientEnv() {
     API_BASE_CLIENT: process.env.API_BASE_CLIENT || 'https://rl-api.algoux.cn',
     CDN_API_BASE_CLIENT: process.env.CDN_API_BASE_CLIENT || 'https://rl-api.algoux.cn',
     SRK_STORAGE_BASE: process.env.SRK_STORAGE_BASE || 'https://cdn.algoux.cn/srk-storage',
+    VIN_URL: process.env.VIN_URL || 'https://cdn.algoux.cn/rankland/vin.txt',
     HOST_GLOBAL: process.env.HOST_GLOBAL || 'rl.algoux.org',
     HOST_CN: process.env.HOST_CN || 'rl.algoux.cn',
     SITE_ALIAS: process.env.SITE_ALIAS || 'global',

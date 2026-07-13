@@ -1,5 +1,8 @@
 <template>
   <Sonner />
+  <ClientOnly>
+    <VinNotice />
+  </ClientOnly>
 
   <router-view v-if="focusMode" v-slot="{ Component }">
     <Suspense>
@@ -35,15 +38,19 @@ import { Options, Vue } from 'vue-class-component';
 import BackTop from './components/layout/BackTop.vue';
 import NavMenu from './components/layout/NavMenu.vue';
 import RightMenu from './components/layout/RightMenu.vue';
+import ClientOnly from './components/common/ClientOnly.vue';
+import VinNotice from './components/site/VinNotice.vue';
 import { Sonner } from './components/ui/sonner';
 import { revealBodyAfterInitialHydration } from './app/hydration-flicker-guard';
 
 @Options({
   components: {
     BackTop,
+    ClientOnly,
     NavMenu,
     RightMenu,
     Sonner,
+    VinNotice,
   },
 })
 export default class App extends Vue {

@@ -115,6 +115,7 @@ CDN_API_BASE_SERVER=https://rl-api.algoux.cn
 API_BASE_CLIENT=https://rl-api.algoux.cn
 CDN_API_BASE_CLIENT=https://rl-api.algoux.cn
 SRK_STORAGE_BASE=https://srk-assets.algoux.cn
+VIN_URL=https://cdn.algoux.cn/rankland/vin.txt
 HOST_GLOBAL=rl.algoux.org
 HOST_CN=rl.algoux.cn
 SITE_ALIAS=global
@@ -124,7 +125,7 @@ GTAG=
 BEIAN=
 ```
 
-`*_SERVER` 在 SSR 服务运行时读取；`*_CLIENT` 会在 Vite 构建时写入浏览器包。
+`*_SERVER` 在 SSR 服务运行时读取；`*_CLIENT` 和 `VIN_URL` 会在 Vite 构建时写入浏览器包。
 如果切换 mock 或环境地址，需要重新运行 client build。
 
 ## 测试
