@@ -1,4 +1,4 @@
-import { Column, CreateDateColumn, Entity, Index, PrimaryGeneratedColumn, UpdateDateColumn } from 'typeorm';
+import { Column, CreateDateColumn, Entity, Index, PrimaryColumn } from 'typeorm';
 import type { Contest, Contributor, Marker, Problem, RankSeries, Sorter } from '@algoux/standard-ranklist';
 
 import { nullableOutputTransformer } from './nullable-output.transformer';
@@ -6,7 +6,7 @@ import { nullableOutputTransformer } from './nullable-output.transformer';
 @Entity('contest')
 @Index('IDX_contest_uk', ['uk'], { unique: true })
 export class ContestEntity {
-  @PrimaryGeneratedColumn('uuid')
+  @PrimaryColumn({ type: 'bigint', unsigned: true })
   public id: string;
 
   @Column({ type: 'varchar', length: 64 })
@@ -36,6 +36,14 @@ export class ContestEntity {
   @CreateDateColumn({ name: 'created_at', type: 'datetime', precision: 6 })
   public createdAt: Date;
 
-  @UpdateDateColumn({ name: 'updated_at', type: 'datetime', precision: 6 })
+  // Let MySQL own updates: TypeORM 0.3.26 emits second-precision CURRENT_TIMESTAMP for UpdateDateColumn.
+  @Column({
+    name: 'updated_at',
+    type: 'datetime',
+    precision: 6,
+    default: () => 'CURRENT_TIMESTAMP(6)',
+    onUpdate: 'CURRENT_TIMESTAMP(6)',
+    update: false,
+  })
   public updatedAt: Date;
 }

@@ -1,26 +1,49 @@
+x-rankland-image: &rankland-image ${RANKLAND_IMAGE:-algoux/rankland-web:latest}
+
+x-database-environment: &database-environment
+  # MYSQL_HOST must be a service name or address reachable from containers;
+  # 127.0.0.1 points to the current container in the default bridge network.
+  MYSQL_HOST: ${MYSQL_HOST:?MYSQL_HOST is required}
+  MYSQL_PORT: ${MYSQL_PORT:-3306}
+  MYSQL_DB: ${MYSQL_DB:?MYSQL_DB is required}
+  MYSQL_USER: ${MYSQL_USER:?MYSQL_USER is required}
+  MYSQL_PASS: ${MYSQL_PASS:?MYSQL_PASS is required}
+
+x-app-service: &app-service
+  image: *rankland-image
+  restart: unless-stopped
+  depends_on:
+    migrate:
+      condition: service_completed_successfully
+  environment:
+    <<: *database-environment
+    TZ: Asia/Shanghai
+    SERVER_HOST: 0.0.0.0
+    SERVER_PORT: 3000
+    # The same bridge-network rule applies here when Redis runs externally.
+    REDIS_HOST: ${REDIS_HOST:-127.0.0.1}
+    REDIS_PORT: ${REDIS_PORT:-6379}
+    REDIS_DB: ${REDIS_DB:-0}
+    REDIS_PASS: ${REDIS_PASS:-}
+    AUTH_TOKEN: ${AUTH_TOKEN:?AUTH_TOKEN is required}
+  healthcheck:
+    test: ['CMD', 'curl', '-f', 'http://localhost:3000/api/checkHealth']
+    interval: 3s
+    timeout: 5s
+    retries: 3
+
 services:
+  migrate:
+    image: *rankland-image
+    restart: 'no'
+    command: ['npm', 'run', 'db:migration:run:prod']
+    environment: *database-environment
+
+  # Copy this block as app-2/app-3 when running more processes.
+  # Keep the app-service anchor and give every copy a unique
+  # service name, container_name, and host port.
   app:
-    image: algoux/rankland-web:latest
+    <<: *app-service
     container_name: rankland-web
-    restart: unless-stopped
     ports:
       - 3000:3000
-    environment:
-      TZ: Asia/Shanghai
-      SERVER_HOST: 0.0.0.0
-      SERVER_PORT: 3000
-      MYSQL_HOST: 127.0.0.1
-      MYSQL_PORT: 3306
-      MYSQL_DB: rankland
-      MYSQL_USER: blue
-      MYSQL_PASS: test
-      REDIS_HOST: 127.0.0.1
-      REDIS_PORT: 6379
-      REDIS_DB: 0
-      REDIS_PASS:
-      AUTH_TOKEN: your-auth-token
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:3000/api/checkHealth"]
-      interval: 3s
-      timeout: 5s
-      retries: 3

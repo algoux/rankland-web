@@ -16,10 +16,14 @@ import {
 } from './contest-event-store';
 import LogicException from '@server/exceptions/logic.exception';
 import { ErrCode } from '@common/enums/err-code.enum';
+import IdGeneratorService, { IdGenerator } from '@server/services/id-generator.service';
 
 @Provide()
 export default class TypeOrmContestEventStore implements ContestEventStore {
-  public constructor(@Inject(TypeOrmClient) private readonly typeOrmClient: TypeOrmClient) {}
+  public constructor(
+    @Inject(TypeOrmClient) private readonly typeOrmClient: TypeOrmClient,
+    @Inject(IdGeneratorService) private readonly idGenerator: IdGenerator,
+  ) {}
 
   public async runInStreamTransaction<T>(
     uk: string,
@@ -27,7 +31,7 @@ export default class TypeOrmContestEventStore implements ContestEventStore {
   ): Promise<T> {
     return this.typeOrmClient.getDataSource().transaction(async (manager) => {
       const stream = await this.findLockedStream(manager, uk);
-      const transaction = new TypeOrmContestEventTransaction(manager, stream, uk);
+      const transaction = new TypeOrmContestEventTransaction(manager, stream, uk, this.idGenerator);
       return runner(transaction);
     });
   }
@@ -126,6 +130,7 @@ class TypeOrmContestEventTransaction implements ContestEventTransaction {
     private readonly manager: EntityManager,
     private readonly streamEntity: ContestEventStreamEntity,
     uk: string,
+    private readonly idGenerator: IdGenerator,
   ) {
     this.stream = streamEntityToState(streamEntity, uk);
   }
@@ -176,6 +181,7 @@ class TypeOrmContestEventTransaction implements ContestEventTransaction {
     const entities = this.manager.getRepository(ContestEventEntity).create(
       inputs.map((input) => ({
         ...input,
+        id: this.idGenerator.nextId(),
         contestId: this.stream.contestId,
         streamRevision: this.stream.streamRevision,
         payloadBytes: Buffer.from(input.payloadBytes),

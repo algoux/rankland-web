@@ -14,6 +14,7 @@
     "gen:proto": "pbjs -t static-module -w commonjs -r rankland_live_contest_client --force-long -o src/common/proto/rankland_live_contest.js src/common/shared/proto/rankland_live_contest/*.proto && pbts -o src/common/proto/rankland_live_contest.d.ts src/common/proto/rankland_live_contest.js",
     "db:migration:generate": "tsx ./node_modules/typeorm/cli.js migration:generate -d src/server/database/typeorm-cli-data-source.ts src/server/database/migrations/ContestEventSchema",
     "db:migration:run": "tsx ./node_modules/typeorm/cli.js migration:run -d src/server/database/typeorm-cli-data-source.ts",
+    "db:migration:run:prod": "node --require ./app/server/register-module-aliases.js ./node_modules/typeorm/cli.js migration:run -d ./app/server/database/typeorm-cli-data-source.js",
     "build:client": "rimraf dist && vite-ssr build --ssr src/client/entry-server.ts",
     "build:server": "rimraf app && tsc -p src/server/tsconfig.json && copyfiles -u1 \"src/**/*.js\" app",
     "build": "npm run build:client && npm run build:server",

@@ -2,10 +2,7 @@
 import 'reflect-metadata';
 
 const isProd = process.env.NODE_ENV === 'production';
-const moduleAlias = require('module-alias');
-
-moduleAlias.addAlias('@server', __dirname);
-moduleAlias.addAlias('@common', require('path').join(__dirname, '../common'));
+require('./register-module-aliases');
 
 import { getDependency } from 'bwcx-core';
 import type { IAppConfig, IAppWiredData } from 'bwcx-ljsm';
@@ -32,6 +29,7 @@ import { clientRoutesMap } from '@common/router/client-routes';
 import TypeOrmClient from './database/typeorm-client';
 import RedisConfig from './configs/redis/redis.config';
 import { RedisClientId } from './container-ids';
+import IdGeneratorService from './services/id-generator.service';
 
 export default class OurApp extends App {
   protected baseDir = path.join(__dirname, '..');
@@ -85,6 +83,9 @@ export default class OurApp extends App {
 
   private pageRenderer: IPageRenderer;
   private redisClient: Redis;
+  private typeOrmClient: TypeOrmClient;
+  private idGeneratorService: IdGeneratorService;
+  private disposePromise?: Promise<void>;
 
   public constructor() {
     super();
@@ -107,7 +108,7 @@ export default class OurApp extends App {
     this.redisClient.on('error', (error) => {
       console.warn('[Redis] client error:', error);
     });
-    void this.redisClient.connect().catch((error) => {
+    this.redisClient.connect().catch((error) => {
       console.warn('[Redis] initial connection failed, SSR cache will be skipped until Redis recovers:', error);
     });
     if (!this.container.isBound(RedisClientId)) {
@@ -158,8 +159,10 @@ export default class OurApp extends App {
       }
     });
 
-    const typeOrmClient = getDependency<TypeOrmClient>(TypeOrmClient, this.container);
-    await typeOrmClient.init();
+    this.typeOrmClient = getDependency<TypeOrmClient>(TypeOrmClient, this.container);
+    await this.typeOrmClient.init();
+    this.idGeneratorService = getDependency<IdGeneratorService>(IdGeneratorService, this.container);
+    await this.idGeneratorService.init();
   }
 
   protected async afterStart() {
@@ -178,24 +181,57 @@ export default class OurApp extends App {
     }
   }
 
+  public dispose(): Promise<void> {
+    this.disposePromise ??= this.disposeResources();
+    return this.disposePromise;
+  }
+
   protected async beforeExit() {
-    await this.pageRenderer?.destory?.();
-    await this.redisClient?.quit().catch((error) => {
-      console.warn('[Redis] quit failed:', error);
+    await this.dispose();
+  }
+
+  private async disposeResources(): Promise<void> {
+    if (this.server) {
+      await this.stop().catch((error: unknown) => {
+        console.warn('[Shutdown] HTTP server close failed:', error);
+      });
+    }
+    await this.pageRenderer?.destory?.().catch((error: unknown) => {
+      console.warn('[Shutdown] page renderer close failed:', error);
+    });
+    await this.idGeneratorService?.dispose().catch((error: unknown) => {
+      console.warn('[Shutdown] ID generator close failed:', error);
+    });
+    await this.typeOrmClient?.destroy().catch((error: unknown) => {
+      console.warn('[Shutdown] TypeORM close failed:', error);
+    });
+    await this.redisClient?.quit().catch((error: unknown) => {
+      console.warn('[Shutdown] Redis close failed:', error);
     });
   }
 }
 
 const app = new OurApp();
 app.scan();
-app.bootstrap().then(async () => {
-  await app.startManually(async () => {
-    const httpServer = http.createServer(app.instance.callback());
-    const listenPromise = new Promise((resolve, _reject) => {
-      httpServer.listen(app.port, app.hostname, () => {
-        resolve(true);
+app
+  .bootstrap()
+  .then(async () => {
+    await app.startManually(async () => {
+      const httpServer = http.createServer(app.instance.callback());
+      app.server = httpServer;
+      const listenPromise = new Promise((resolve, _reject) => {
+        httpServer.listen(app.port, app.hostname, () => {
+          resolve(true);
+        });
       });
+      await listenPromise;
     });
-    await listenPromise;
+  })
+  .catch(async (error: unknown) => {
+    console.error('[Startup] application failed to start:', error);
+    process.exitCode = 1;
+    await app.dispose().catch((cleanupError: unknown) => {
+      console.error('[Startup] resource cleanup failed:', cleanupError);
+    });
+    process.exit(1);
   });
-});

@@ -1,6 +1,6 @@
 # Contest Event Refactor Implementation Progress
 
-Updated: 2026-05-29
+Updated: 2026-07-14
 
 ## Decisions
 
@@ -29,6 +29,8 @@ Updated: 2026-05-29
 - Switched MySQL column names to snake_case while keeping TypeScript DTO/service/entity properties in camelCase through explicit TypeORM column mappings.
 - Changed string-capable contest user fields (`name`, `avatar`, `photo`, `organization`) to MySQL `text` with a transformer that keeps scalar strings unquoted while preserving JSON-backed I18N values and legacy reads.
 - Standardized all eight `datetime` columns across the four contest tables on microsecond precision (`datetime(6)`).
+- Migrated contest, contest-user, and contest-event row identities plus all `contest_id` references from UUID/varchar columns to Snowflake `BIGINT UNSIGNED` columns while retaining decimal strings in TypeScript and JSON.
+- Added `id_worker_registry`, a process-level generator service, MySQL named-lock worker ownership, and persistent logical timestamp fencing. See [Contest ID Generation](contest-id-generation.md).
 - Replaced contest persistence with MySQL-backed TypeORM repositories.
 - Added append-only event stream logic:
   - batch protobuf decode and verification
@@ -80,6 +82,7 @@ Updated: 2026-05-29
 - Regenerated `src/common/api/api-client.ts` so JSON contest APIs are available to clients.
 - Reset the local `rankland` database and reran the rewritten initial migration.
 - Smoke-tested v2 create/read/users/stream/append/catch-up/SSE paths locally.
+- Smoke-tested Snowflake-backed create/read/admin stream/append/catch-up paths with IDs above `Number.MAX_SAFE_INTEGER`.
 
 ## Commands
 
@@ -98,6 +101,7 @@ pnpm run build
 - `contest_event` includes `solution_submit_time_ns` and `IDX_contest_event_solution_type_lookup` for efficient append-time submit-time lookup.
 - All table columns in the initial migration use snake_case. TypeORM maps them back to camelCase entity properties. This is covered by the MySQL integration schema regression test.
 - Future schema changes should be made on entities first, then generated with `pnpm run db:migration:generate`, reviewed, and committed.
+- `1784000000000-ContestSnowflakeIds.ts` is a deliberately destructive migration that rebuilds the four contest tables, creates `id_worker_registry`, and retains the post-precision `datetime(6)` schema. Its down migration is destructive as well.
 - TypeORM tracks executed migrations in the `typeorm_migrations` table. `pnpm run db:migration:run` compares this table with files in `src/server/database/migrations`, then executes only files that have not been recorded yet, in timestamp order.
 - Runtime startup does not execute migrations. Operators must run `pnpm run db:migration:run` as an explicit deployment step before or alongside application rollout.
 

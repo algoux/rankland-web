@@ -1,4 +1,4 @@
-import { Column, CreateDateColumn, Entity, Index, PrimaryGeneratedColumn } from 'typeorm';
+import { Column, CreateDateColumn, Entity, Index, PrimaryColumn } from 'typeorm';
 import { rankland_live_contest_common } from '@common/proto/rankland_live_contest';
 
 @Entity('contest_event')
@@ -7,10 +7,10 @@ import { rankland_live_contest_common } from '@common/proto/rankland_live_contes
 @Index('IDX_contest_event_type', ['contestId', 'type'])
 @Index('IDX_contest_event_solution_type_lookup', ['contestId', 'streamRevision', 'type', 'solutionId'])
 export class ContestEventEntity {
-  @PrimaryGeneratedColumn('uuid')
+  @PrimaryColumn({ type: 'bigint', unsigned: true })
   public id: string;
 
-  @Column({ name: 'contest_id', type: 'varchar', length: 36 })
+  @Column({ name: 'contest_id', type: 'bigint', unsigned: true })
   public contestId: string;
 
   @Column({ name: 'event_id', type: 'int', unsigned: true })

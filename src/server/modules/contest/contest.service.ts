@@ -8,6 +8,7 @@ import { ContestUserEntity } from '@server/entities/contest-user.entity';
 import { ContestEventStreamEntity } from '@server/entities/contest-event-stream.entity';
 import LogicException from '@server/exceptions/logic.exception';
 import { ErrCode } from '@common/enums/err-code.enum';
+import IdGeneratorService, { IdGenerator } from '@server/services/id-generator.service';
 
 export type ContestUserInput = srk.User & {
   banned?: boolean;
@@ -32,6 +33,7 @@ type ContestUpdateInput = Partial<
 export default class ContestService {
   public constructor(
     @Inject(TypeOrmClient) private readonly typeOrmClient: TypeOrmClient,
+    @Inject(IdGeneratorService) private readonly idGenerator: IdGenerator,
   ) {}
 
   private contestIdCacheMap = new Map<string, string>();
@@ -71,6 +73,7 @@ export default class ContestService {
       }
 
       const contest = manager.getRepository(ContestEntity).create({
+        id: this.idGenerator.nextId(),
         uk: data.uk,
         name: data.name,
         contest: data.contest,
@@ -299,6 +302,7 @@ export default class ContestService {
       });
       const entity = manager.getRepository(ContestUserEntity).create({
         ...(existed || {}),
+        id: existed?.id ?? this.idGenerator.nextId(),
         contestId,
         userId: user.id,
         name: user.name,

@@ -28,7 +28,32 @@ async function validationProperties(instance: object): Promise<string[]> {
   return errors.map((error) => error.property);
 }
 
-describe('contest event API contract', () => {
+describe('contest API contract', () => {
+  it('keeps the created contest Snowflake id as a decimal string', async () => {
+    const request = vi.fn(async () => ({
+      success: true,
+      code: 0,
+      data: { _id: '70346717215600640' },
+    }));
+    const responseParser = {
+      pat: vi.fn((_dto, resp) => resp.data),
+    };
+    const client = new ApiClient({ request }, responseParser as any);
+
+    const result = await client.createContest({
+      uk: 'contest-a',
+      name: 'Contest A',
+      contest: { title: 'Contest A', startAt: '2026-01-01T00:00:00Z', duration: [5, 'h'] },
+      problems: [],
+      users: [],
+      markers: [],
+      series: [],
+    });
+
+    expect(result._id).toBe('70346717215600640');
+    expect(typeof result._id).toBe('string');
+  });
+
   it('requires streamRevision on append requests', async () => {
     const missing = plainToInstance(AppendContestEventsReqDTO, {
       uk: 'contest-a',
@@ -173,7 +198,7 @@ describe('contest event API contract', () => {
     const request = vi.fn(async () => ({
       success: true,
       code: 0,
-      data: { contestId: 'contest-id', uk: 'contest-a', lastEventId: 12, streamRevision: 3, producerId: null },
+      data: { contestId: '70346717215600640', uk: 'contest-a', lastEventId: 12, streamRevision: 3, producerId: null },
     }));
     const responseParser = {
       pat: vi.fn((_dto, resp) => resp.data),
@@ -194,7 +219,7 @@ describe('contest event API contract', () => {
       }),
     );
     expect(result).toEqual({
-      contestId: 'contest-id',
+      contestId: '70346717215600640',
       uk: 'contest-a',
       lastEventId: 12,
       streamRevision: 3,
@@ -206,7 +231,7 @@ describe('contest event API contract', () => {
     const request = vi.fn(async () => ({
       success: true,
       code: 0,
-      data: { contestId: 'contest-id', uk: 'contest-a', lastEventId: 12, streamRevision: 3, producerId: null },
+      data: { contestId: '70346717215600640', uk: 'contest-a', lastEventId: 12, streamRevision: 3, producerId: null },
     }));
     const responseParser = {
       pat: vi.fn((_dto, resp) => resp.data),

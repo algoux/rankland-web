@@ -1,6 +1,6 @@
 # Contest Event Architecture
 
-Updated: 2026-05-28
+Updated: 2026-07-14
 
 ## Goals
 
@@ -40,8 +40,11 @@ Tables:
 - `contest_user`: contest users. `(contest_id, user_id)` is unique.
 - `contest_event_stream`: one row per contest event stream. It stores `contest_id`, `last_event_id`, `stream_revision`, and producer lock fields. It does not store `uk`.
 - `contest_event`: append-only event log keyed by `(contest_id, stream_revision, event_id)`. It stores normalized `time_ns` and denormalized `solution_submit_time_ns` so consumer catch-up can filter frozen submissions without querying `NEW_SOLUTION` for every request. Older revisions remain in this table as retained history after reset.
+- `id_worker_registry`: Snowflake worker-registration audit and logical timestamp fencing.
 
 `contest_event_stream` is intentionally normalized through the TypeScript `contestId` property, mapped to the `contest_id` column. Services resolve `contest.uk` to `contest.id` before touching stream or event rows.
+
+Contest row IDs and every `contest_id` reference are `BIGINT UNSIGNED` in MySQL and decimal strings in TypeScript/JSON. The generator, MySQL named-lock ownership, timestamp fencing, and deployment constraints are documented in [Contest ID Generation](contest-id-generation.md).
 
 Schema changes are made through migrations only. Runtime startup does not run migrations.
 

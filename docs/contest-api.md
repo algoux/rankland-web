@@ -185,8 +185,11 @@ Body:
 Data:
 
 ```json
-{ "_id": "contest-uuid" }
+{ "_id": "70346717215600640" }
 ```
+
+`_id` 是 Snowflake `BIGINT` 的十进制字符串。不要转成 JSON number；正常值会超过
+`Number.MAX_SAFE_INTEGER`。查询比赛返回的 `_id` 以及管理端 event-stream 返回的 `contestId` 使用相同格式。
 
 创建比赛会同时创建一行 `contest_event_stream`，初始 `lastEventId=0`、`streamRevision=1`、无 producer lock。
 

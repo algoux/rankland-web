@@ -21,4 +21,10 @@ export default class TypeOrmClient {
   public getDataSource(): DataSource {
     return this.dataSource;
   }
+
+  public async destroy(): Promise<void> {
+    if (this.dataSource.isInitialized) {
+      await this.dataSource.destroy();
+    }
+  }
 }

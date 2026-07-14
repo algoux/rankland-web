@@ -3,8 +3,12 @@ import MysqlConfig from '@server/configs/mysql/mysql.config';
 import { getMysqlDataSourceOptions } from '@server/database/typeorm-data-source';
 import { ContestEntity } from '@server/entities/contest.entity';
 import { ContestEventStreamEntity } from '@server/entities/contest-event-stream.entity';
+import { ContestUserEntity } from '@server/entities/contest-user.entity';
+import { IdWorkerRegistryEntity } from '@server/entities/id-worker-registry.entity';
 import TypeOrmClient from '@server/database/typeorm-client';
-import MiscUtils from '@server/utils/misc.util';
+import type IdGeneratorConfig from '@server/configs/id-generator/id-generator.config';
+import { SNOWFLAKE_EPOCH_MS, SnowflakeIdGenerator } from '@server/lib/snowflake-id';
+import IdGeneratorService from '@server/services/id-generator.service';
 import ContestService from '../contest.service';
 import TypeOrmContestEventStore from '../contest-event-store.typeorm';
 import ContestEventStreamService from '../contest-event-stream.service';
@@ -15,6 +19,7 @@ import { parseProducerBatchJson } from '../contest-event-codec';
 import { ContestClientEventBO } from '../contest-event-bo';
 
 const runMysqlTests = process.env.RUN_MYSQL_TESTS === 'true';
+const testIdGenerator = new SnowflakeIdGenerator({ workerId: 1023 });
 
 describe.runIf(runMysqlTests)('contest TypeORM event store', () => {
   const uk = `vitest-${Date.now()}`;
@@ -30,6 +35,7 @@ describe.runIf(runMysqlTests)('contest TypeORM event store', () => {
     await dataSource.initialize();
     const contest = await dataSource.getRepository(ContestEntity).save(
       dataSource.getRepository(ContestEntity).create({
+        id: testIdGenerator.nextId(),
         uk,
         name: uk,
         contest: { title: uk, startAt: '2026-01-01T00:00:00Z', duration: [5, 'h'] } as any,
@@ -71,7 +77,7 @@ describe.runIf(runMysqlTests)('contest TypeORM event store', () => {
   });
 
   it('persists append results transactionally and keeps duplicate retries idempotent', async () => {
-    const store = new TypeOrmContestEventStore({ getDataSource: () => dataSource } as TypeOrmClient);
+    const store = new TypeOrmContestEventStore(typeOrmClientFor(dataSource), testIdGenerator);
     const service = new ContestEventStreamService(store);
     const batch = parseProducerBatchJson({
       streamRevision: 1,
@@ -87,18 +93,30 @@ describe.runIf(runMysqlTests)('contest TypeORM event store', () => {
 
     const first = await service.appendProducerEvents({ uk, producerId: 'producer-a', batch });
     const retry = await service.appendProducerEvents({ uk, producerId: 'producer-a', batch });
-    const page = await service.getClientEvents({ uk, afterEventId: 0, limit: 10, streamRevision: 1, compactProgress: false });
+    const page = await service.getClientEvents({
+      uk,
+      afterEventId: 0,
+      limit: 10,
+      streamRevision: 1,
+      compactProgress: false,
+    });
+    const storedIds = await dataSource.query('SELECT id FROM contest_event WHERE contest_id = ? ORDER BY event_id', [
+      (await dataSource.getRepository(ContestEntity).findOneByOrFail({ uk })).id,
+    ]);
 
     expect(page.uk).toBe(uk);
     expect(first.acceptedEventIds).toEqual([1, 2]);
     expect(retry.duplicateEventIds).toEqual([1, 2]);
     expect(page.latestEventId).toBe(2);
     expect(page.checkpointEventId).toBe(2);
+    expect(storedIds.map((row) => String(row.id))).toHaveLength(2);
+    expect(storedIds.every((row) => /^\d+$/.test(String(row.id)))).toBe(true);
+    expect(BigInt(storedIds[1].id)).toBeGreaterThan(BigInt(storedIds[0].id));
   });
 
   it('uses normalized table and column names while keeping uk only on contest', async () => {
     const tables = await dataSource.query(
-      "SELECT TABLE_NAME AS tableName FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME IN ('contest', 'contest_user', 'contest_event_stream', 'contest_event')",
+      "SELECT TABLE_NAME AS tableName FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME IN ('contest', 'contest_user', 'contest_event_stream', 'contest_event', 'id_worker_registry')",
     );
     const streamUkColumns = await dataSource.query(
       "SELECT COLUMN_NAME AS columnName FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'contest_event_stream' AND COLUMN_NAME = 'uk'",
@@ -110,7 +128,19 @@ describe.runIf(runMysqlTests)('contest TypeORM event store', () => {
       "SELECT INDEX_NAME AS indexName FROM INFORMATION_SCHEMA.STATISTICS WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'contest_event' AND INDEX_NAME = 'IDX_contest_event_revision_event'",
     );
     const columns = await dataSource.query(
-      "SELECT TABLE_NAME AS tableName, COLUMN_NAME AS columnName FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME IN ('contest', 'contest_user', 'contest_event_stream', 'contest_event') ORDER BY TABLE_NAME, ORDINAL_POSITION",
+      "SELECT TABLE_NAME AS tableName, COLUMN_NAME AS columnName FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME IN ('contest', 'contest_user', 'contest_event_stream', 'contest_event', 'id_worker_registry') ORDER BY TABLE_NAME, ORDINAL_POSITION",
+    );
+    const idColumnDefinitions = await dataSource.query(
+      `SELECT TABLE_NAME AS tableName, COLUMN_NAME AS columnName, COLUMN_TYPE AS columnType,
+              COLUMN_KEY AS columnKey, EXTRA AS extra
+       FROM INFORMATION_SCHEMA.COLUMNS
+       WHERE TABLE_SCHEMA = DATABASE()
+         AND ((TABLE_NAME = 'contest' AND COLUMN_NAME = 'id')
+           OR (TABLE_NAME = 'contest_user' AND COLUMN_NAME IN ('id', 'contest_id'))
+           OR (TABLE_NAME = 'contest_event' AND COLUMN_NAME IN ('id', 'contest_id'))
+           OR (TABLE_NAME = 'contest_event_stream' AND COLUMN_NAME = 'contest_id')
+           OR (TABLE_NAME = 'id_worker_registry' AND COLUMN_NAME IN ('id', 'worker_id', 'reserved_until_ms')))
+       ORDER BY TABLE_NAME, ORDINAL_POSITION`,
     );
 
     expect(tables.map((row) => row.tableName).sort()).toEqual([
@@ -118,6 +148,7 @@ describe.runIf(runMysqlTests)('contest TypeORM event store', () => {
       'contest_event',
       'contest_event_stream',
       'contest_user',
+      'id_worker_registry',
     ]);
     expect(streamUkColumns).toEqual([]);
     expect(lookupIndexColumns.map((row) => row.columnName)).toEqual([
@@ -187,13 +218,68 @@ describe.runIf(runMysqlTests)('contest TypeORM event store', () => {
         'created_at',
         'updated_at',
       ],
+      id_worker_registry: ['id', 'worker_id', 'reserved_until_ms', 'host', 'pid', 'created_at', 'updated_at'],
     });
+    expect(idColumnDefinitions).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          tableName: 'contest',
+          columnName: 'id',
+          columnType: 'bigint unsigned',
+          columnKey: 'PRI',
+          extra: '',
+        }),
+        expect.objectContaining({
+          tableName: 'contest_user',
+          columnName: 'id',
+          columnType: 'bigint unsigned',
+          columnKey: 'PRI',
+          extra: '',
+        }),
+        expect.objectContaining({ tableName: 'contest_user', columnName: 'contest_id', columnType: 'bigint unsigned' }),
+        expect.objectContaining({
+          tableName: 'contest_event',
+          columnName: 'id',
+          columnType: 'bigint unsigned',
+          columnKey: 'PRI',
+          extra: '',
+        }),
+        expect.objectContaining({
+          tableName: 'contest_event',
+          columnName: 'contest_id',
+          columnType: 'bigint unsigned',
+        }),
+        expect.objectContaining({
+          tableName: 'contest_event_stream',
+          columnName: 'contest_id',
+          columnType: 'bigint unsigned',
+          columnKey: 'PRI',
+        }),
+        expect.objectContaining({
+          tableName: 'id_worker_registry',
+          columnName: 'id',
+          columnType: 'bigint unsigned',
+          columnKey: 'PRI',
+          extra: 'auto_increment',
+        }),
+        expect.objectContaining({
+          tableName: 'id_worker_registry',
+          columnName: 'worker_id',
+          columnType: 'smallint unsigned',
+        }),
+        expect.objectContaining({
+          tableName: 'id_worker_registry',
+          columnName: 'reserved_until_ms',
+          columnType: 'bigint unsigned',
+        }),
+      ]),
+    );
   });
 
   it('stores string user fields as plain text and reads them back through the service', async () => {
     const serviceUk = `${uk}-users`;
     createdUks.add(serviceUk);
-    const service = new ContestService({ getDataSource: () => dataSource } as TypeOrmClient, new MiscUtils());
+    const service = new ContestService(typeOrmClientFor(dataSource), testIdGenerator);
 
     await service.createContest({
       uk: serviceUk,
@@ -233,7 +319,9 @@ describe.runIf(runMysqlTests)('contest TypeORM event store', () => {
       duration: [5, 'h'],
       frozenDuration: [1, 'h'],
     });
-    const service = new ContestEventStreamService(new TypeOrmContestEventStore({ getDataSource: () => dataSource } as TypeOrmClient));
+    const service = new ContestEventStreamService(
+      new TypeOrmContestEventStore(typeOrmClientFor(dataSource), testIdGenerator),
+    );
 
     await service.appendProducerEvents({
       uk: frozenUk,
@@ -273,7 +361,124 @@ describe.runIf(runMysqlTests)('contest TypeORM event store', () => {
     expect(clientEventIds(page.events)).toEqual([1, 4, 5]);
     expect(page.checkpointEventId).toBe(5);
   });
+
+  it('assigns disjoint worker slots to concurrently initialized generators', async () => {
+    const typeOrmClient = typeOrmClientFor(dataSource);
+    const generatorConfig: IdGeneratorConfig = { workerIdOverride: undefined };
+    const first = new IdGeneratorService(typeOrmClient, generatorConfig);
+    const second = new IdGeneratorService(typeOrmClient, generatorConfig);
+
+    try {
+      await Promise.all([first.init(), second.init()]);
+      const firstIds = Array.from({ length: 100 }, () => first.nextId());
+      const secondIds = Array.from({ length: 100 }, () => second.nextId());
+      const allIds = [...firstIds, ...secondIds];
+      const firstWorker = (BigInt(firstIds[0]) >> 12n) & 0x3ffn;
+      const secondWorker = (BigInt(secondIds[0]) >> 12n) & 0x3ffn;
+      const earliestTimestampMs = Math.min(...allIds.map((id) => Number(BigInt(id) >> 22n) + SNOWFLAKE_EPOCH_MS));
+
+      expect(firstWorker).not.toBe(secondWorker);
+      expect(new Set(allIds)).toHaveLength(200);
+      expect(earliestTimestampMs).toBeGreaterThanOrEqual(SNOWFLAKE_EPOCH_MS);
+    } finally {
+      await Promise.all([first.dispose(), second.dispose()]);
+    }
+  });
+
+  it('preserves updated_at microseconds when TypeORM updates business rows', async () => {
+    const contest = await dataSource.getRepository(ContestEntity).findOneByOrFail({ uk });
+    const user = await dataSource.getRepository(ContestUserEntity).save(
+      dataSource.getRepository(ContestUserEntity).create({
+        id: testIdGenerator.nextId(),
+        contestId: contest.id,
+        userId: 'updated-at-user',
+        name: 'Before update',
+        official: true,
+        banned: false,
+        sortIndex: 0,
+      }),
+    );
+    const registration = await dataSource.getRepository(IdWorkerRegistryEntity).save(
+      dataSource.getRepository(IdWorkerRegistryEntity).create({
+        workerId: null,
+        reservedUntilMs: null,
+        host: 'vitest',
+        pid: process.pid,
+      }),
+    );
+
+    try {
+      await waitForMysqlFractionalSecond(dataSource);
+      await dataSource.getRepository(ContestEntity).update({ id: contest.id }, { name: `${uk}-updated` });
+      await waitForMysqlFractionalSecond(dataSource);
+      user.name = 'After update';
+      await dataSource.getRepository(ContestUserEntity).save(user);
+      const [firstUserUpdate] = await dataSource.query(
+        'SELECT CAST(updated_at AS CHAR(26)) AS updatedAt FROM contest_user WHERE id = ?',
+        [user.id],
+      );
+      await waitForMysqlTimestampAfter(dataSource, firstUserUpdate.updatedAt);
+      user.official = false;
+      await dataSource.getRepository(ContestUserEntity).save(user);
+      await waitForMysqlFractionalSecond(dataSource);
+      const stream = await dataSource
+        .getRepository(ContestEventStreamEntity)
+        .findOneByOrFail({ contestId: contest.id });
+      stream.lastEventId += 1;
+      await dataSource.getRepository(ContestEventStreamEntity).save(stream);
+      await waitForMysqlFractionalSecond(dataSource);
+      await dataSource
+        .getRepository(IdWorkerRegistryEntity)
+        .update({ id: registration.id }, { reservedUntilMs: String(Date.now() + 10_000) });
+
+      const rows = await dataSource.query(
+        `SELECT 'contest' AS tableName, MICROSECOND(updated_at) AS microseconds FROM contest WHERE id = ?
+         UNION ALL
+         SELECT 'contest_user', MICROSECOND(updated_at) FROM contest_user WHERE id = ?
+         UNION ALL
+         SELECT 'contest_event_stream', MICROSECOND(updated_at) FROM contest_event_stream WHERE contest_id = ?
+         UNION ALL
+         SELECT 'id_worker_registry', MICROSECOND(updated_at) FROM id_worker_registry WHERE id = ?`,
+        [contest.id, user.id, contest.id, registration.id],
+      );
+      const [secondUserUpdate] = await dataSource.query(
+        'SELECT CAST(updated_at AS CHAR(26)) AS updatedAt FROM contest_user WHERE id = ?',
+        [user.id],
+      );
+      const secondPrecisionTables = rows
+        .filter((row) => Number(row.microseconds) === 0)
+        .map((row) => row.tableName);
+
+      expect(secondPrecisionTables).toEqual([]);
+      expect(secondUserUpdate.updatedAt > firstUserUpdate.updatedAt).toBe(true);
+    } finally {
+      await dataSource.getRepository(IdWorkerRegistryEntity).delete({ id: registration.id });
+    }
+  });
 });
+
+async function waitForMysqlFractionalSecond(dataSource: DataSource): Promise<void> {
+  for (;;) {
+    const [row] = await dataSource.query('SELECT MICROSECOND(CURRENT_TIMESTAMP(6)) AS microseconds');
+    const microseconds = Number(row.microseconds);
+    if (microseconds >= 100_000 && microseconds <= 800_000) {
+      return;
+    }
+    await new Promise((resolve) => setTimeout(resolve, 10));
+  }
+}
+
+async function waitForMysqlTimestampAfter(dataSource: DataSource, timestamp: string): Promise<void> {
+  for (;;) {
+    const [row] = await dataSource.query(
+      'SELECT CAST(CURRENT_TIMESTAMP(6) AS CHAR(26)) AS currentTimestamp',
+    );
+    if (row.currentTimestamp > timestamp) {
+      return;
+    }
+    await new Promise((resolve) => setTimeout(resolve, 1));
+  }
+}
 
 function groupColumnsByTable(rows: Array<{ tableName: string; columnName: string }>): Record<string, string[]> {
   return rows.reduce<Record<string, string[]>>((acc, row) => {
@@ -286,6 +491,7 @@ function groupColumnsByTable(rows: Array<{ tableName: string; columnName: string
 async function createContestWithStream(dataSource: DataSource, uk: string, contestConfig: Record<string, unknown>) {
   const contest = await dataSource.getRepository(ContestEntity).save(
     dataSource.getRepository(ContestEntity).create({
+      id: testIdGenerator.nextId(),
       uk,
       name: uk,
       contest: contestConfig as any,
@@ -340,4 +546,10 @@ function settle(eventId: number, solutionId: number, timeValue = 0) {
 
 function clientEventIds(events: ContestClientEventBO[]): number[] {
   return events.map((event) => event.eventId);
+}
+
+function typeOrmClientFor(dataSource: DataSource): TypeOrmClient {
+  const client = Object.create(TypeOrmClient.prototype) as TypeOrmClient;
+  client.getDataSource = () => dataSource;
+  return client;
 }
