@@ -3,6 +3,7 @@ import type { IBwcxResponseHandler, RequestContext } from 'bwcx-ljsm';
 import { ResponseContentType, contentTypeHeaderValue } from '@server/http/content-type';
 import { writeRlSuccessHeaders } from '@server/http/rl-response';
 import { getProtobufContract } from '@server/decorators/protobuf-contract.decorator';
+import { normalizeJsonDatesForApi } from '@server/utils/datetime.util';
 
 /**
  * Generic, business-agnostic success response handler. It wraps the route
@@ -37,7 +38,7 @@ export default class DefaultResponseHandler implements IBwcxResponseHandler {
     return {
       success: true,
       code: 0,
-      data: response,
+      data: normalizeJsonDatesForApi(response),
     };
   }
 }

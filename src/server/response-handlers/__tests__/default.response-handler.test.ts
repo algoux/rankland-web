@@ -3,6 +3,7 @@ import DefaultResponseHandler from '../default.response-handler';
 import { ResponseContentType } from '@server/http/content-type';
 import { ProtobufContract } from '@server/decorators/protobuf-contract.decorator';
 import { rankland_live_contest_client } from '@common/proto/rankland_live_contest';
+import { formatDateTimeForApi } from '@server/utils/datetime.util';
 
 function decorate(decorator: MethodDecorator, target: any, key: string) {
   decorator(target.prototype, key, Object.getOwnPropertyDescriptor(target.prototype, key)!);
@@ -52,6 +53,48 @@ describe('DefaultResponseHandler', () => {
     const ctx = createCtx({});
     const result = handler.handle({ value: 1 }, ctx);
     expect(result).toEqual({ success: true, code: 0, data: { value: 1 } });
+  });
+
+  it('formats only real Dates in json response graphs using the server timezone', () => {
+    const createdAt = new Date('2026-01-01T00:00:00.000Z');
+    const nestedAt = new Date('2026-01-01T00:00:00.123Z');
+    const buffer = Buffer.from([1, 2]);
+    const custom = {
+      date: new Date('2026-01-01T00:00:00.000Z'),
+      toJSON() {
+        return { custom: true };
+      },
+    };
+    const ctx = createCtx({ respContentType: ResponseContentType.Json });
+    const result = handler.handle(
+      {
+        createdAt,
+        nested: [nestedAt],
+        text: '2026-01-01T00:00:00.000Z',
+        buffer,
+        custom,
+      },
+      ctx,
+    ) as any;
+
+    expect(result.data).toEqual({
+      createdAt: formatDateTimeForApi(createdAt),
+      nested: [formatDateTimeForApi(nestedAt)],
+      text: '2026-01-01T00:00:00.000Z',
+      buffer,
+      custom,
+    });
+    expect(result.data.buffer).toBe(buffer);
+    expect(result.data.custom).toBe(custom);
+  });
+
+  it('keeps string json response values unchanged', () => {
+    const ctx = createCtx({ respContentType: ResponseContentType.Json });
+    expect(handler.handle('already serialized by the route', ctx)).toEqual({
+      success: true,
+      code: 0,
+      data: 'already serialized by the route',
+    });
   });
 
   it('serializes protobuf responses to binary using the declared message', () => {

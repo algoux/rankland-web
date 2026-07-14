@@ -8,6 +8,9 @@ x-database-environment: &database-environment
   MYSQL_DB: ${MYSQL_DB:?MYSQL_DB is required}
   MYSQL_USER: ${MYSQL_USER:?MYSQL_USER is required}
   MYSQL_PASS: ${MYSQL_PASS:?MYSQL_PASS is required}
+  # Controls Node's local-time input interpretation and API presentation only.
+  # MySQL DATETIME/TIMESTAMP storage sessions are always initialized to UTC.
+  TZ: ${TZ:-Asia/Shanghai}
 
 x-app-service: &app-service
   image: *rankland-image
@@ -17,7 +20,6 @@ x-app-service: &app-service
       condition: service_completed_successfully
   environment:
     <<: *database-environment
-    TZ: Asia/Shanghai
     SERVER_HOST: 0.0.0.0
     SERVER_PORT: 3000
     # The same bridge-network rule applies here when Redis runs externally.

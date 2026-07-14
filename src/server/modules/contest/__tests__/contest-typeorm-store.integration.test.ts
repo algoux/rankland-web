@@ -367,21 +367,43 @@ describe.runIf(runMysqlTests)('contest TypeORM event store', () => {
     const generatorConfig: IdGeneratorConfig = { workerIdOverride: undefined };
     const first = new IdGeneratorService(typeOrmClient, generatorConfig);
     const second = new IdGeneratorService(typeOrmClient, generatorConfig);
+    const existingRegistrationRows = await dataSource.query('SELECT id FROM id_worker_registry WHERE pid = ?', [
+      process.pid,
+    ]);
+    const existingRegistrationIds = new Set(existingRegistrationRows.map((row) => String(row.id)));
 
     try {
-      await Promise.all([first.init(), second.init()]);
+      const initializationResults = await Promise.allSettled([first.init(), second.init()]);
+      const initializationFailure = initializationResults.find(
+        (result): result is PromiseRejectedResult => result.status === 'rejected',
+      );
+      if (initializationFailure) {
+        throw initializationFailure.reason;
+      }
       const firstIds = Array.from({ length: 100 }, () => first.nextId());
       const secondIds = Array.from({ length: 100 }, () => second.nextId());
       const allIds = [...firstIds, ...secondIds];
       const firstWorker = (BigInt(firstIds[0]) >> 12n) & 0x3ffn;
       const secondWorker = (BigInt(secondIds[0]) >> 12n) & 0x3ffn;
+      const createdRegistrationIds = await findNewRegistryIdsForProcess(dataSource, existingRegistrationIds);
       const earliestTimestampMs = Math.min(...allIds.map((id) => Number(BigInt(id) >> 22n) + SNOWFLAKE_EPOCH_MS));
 
       expect(firstWorker).not.toBe(secondWorker);
+      expect(createdRegistrationIds).toHaveLength(2);
       expect(new Set(allIds)).toHaveLength(200);
       expect(earliestTimestampMs).toBeGreaterThanOrEqual(SNOWFLAKE_EPOCH_MS);
     } finally {
-      await Promise.all([first.dispose(), second.dispose()]);
+      try {
+        await Promise.all([first.dispose(), second.dispose()]);
+      } finally {
+        const createdRegistrationIds = await findNewRegistryIdsForProcess(dataSource, existingRegistrationIds);
+        if (createdRegistrationIds.length > 0) {
+          await dataSource.query(
+            `DELETE FROM id_worker_registry WHERE id IN (${createdRegistrationIds.map(() => '?').join(', ')})`,
+            createdRegistrationIds,
+          );
+        }
+      }
     }
   });
 
@@ -456,6 +478,14 @@ describe.runIf(runMysqlTests)('contest TypeORM event store', () => {
     }
   });
 });
+
+async function findNewRegistryIdsForProcess(
+  dataSource: DataSource,
+  existingRegistrationIds: ReadonlySet<string>,
+): Promise<string[]> {
+  const rows = await dataSource.query('SELECT id FROM id_worker_registry WHERE pid = ?', [process.pid]);
+  return rows.map((row) => String(row.id)).filter((id) => !existingRegistrationIds.has(id));
+}
 
 async function waitForMysqlFractionalSecond(dataSource: DataSource): Promise<void> {
   for (;;) {

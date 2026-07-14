@@ -94,6 +94,7 @@ pnpm run db:migration:generate
 - [Contest v2 API 文档](docs/contest-api.md)
 - [生产者 / 消费者实现指导](docs/contest-producer-consumer-guide.md)
 - [Contest 事件实现进度](docs/contest-event-implementation-progress.md)
+- [MySQL DATETIME UTC 约定](docs/mysql-datetime-utc.md)
 - [Redis SSR 页面缓存](docs/ssr-redis-cache.md)
 
 ## RankLand 前端

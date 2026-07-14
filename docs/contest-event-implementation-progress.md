@@ -14,6 +14,7 @@ Updated: 2026-07-14
 - Realtime channel: SSE notifications plus HTTP catch-up. SSE sends only `latestEventId` and `streamRevision`.
 - Producer identity: every append request must include `x-token` and `x-producer-id`. The first producer claims the stream lock. Administrators release the lock through HTTP API.
 - Event time: stored and emitted as nanoseconds using int64-compatible values.
+- Database wall-clock time: every `DATETIME(6)` column stores a UTC wall-clock value. mysql2 encodes/decodes JavaScript `Date` values as UTC and every acquired MySQL session is initialized to `+00:00`; see [MySQL DATETIME UTC](mysql-datetime-utc.md).
 - Frozen submissions: consumer catch-up hides progress/result events for solutions whose `NEW_SOLUTION.time` is inside the frozen window; write-side denormalization keeps this cheap for many consumers.
 
 ## Implemented
@@ -29,6 +30,7 @@ Updated: 2026-07-14
 - Switched MySQL column names to snake_case while keeping TypeScript DTO/service/entity properties in camelCase through explicit TypeORM column mappings.
 - Changed string-capable contest user fields (`name`, `avatar`, `photo`, `organization`) to MySQL `text` with a transformer that keeps scalar strings unquoted while preserving JSON-backed I18N values and legacy reads.
 - Standardized all eight `datetime` columns across the four contest tables on microsecond precision (`datetime(6)`).
+- Standardized UTC semantics for those eight contest `datetime(6)` columns plus the two `id_worker_registry` columns without changing their schema or rewriting historical rows.
 - Migrated contest, contest-user, and contest-event row identities plus all `contest_id` references from UUID/varchar columns to Snowflake `BIGINT UNSIGNED` columns while retaining decimal strings in TypeScript and JSON.
 - Added `id_worker_registry`, a process-level generator service, MySQL named-lock worker ownership, and persistent logical timestamp fencing. See [Contest ID Generation](contest-id-generation.md).
 - Replaced contest persistence with MySQL-backed TypeORM repositories.

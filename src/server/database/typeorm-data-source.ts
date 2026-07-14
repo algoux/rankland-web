@@ -7,6 +7,7 @@ import { ContestUserEntity } from '@server/entities/contest-user.entity';
 import { ContestEventStreamEntity } from '@server/entities/contest-event-stream.entity';
 import { IdWorkerRegistryEntity } from '@server/entities/id-worker-registry.entity';
 import MysqlConfig from '@server/configs/mysql/mysql.config';
+import { mysql2UtcConnector } from './mysql2-utc-connector';
 
 export type MysqlDataSourceConfig = Pick<MysqlConfig, 'host' | 'port' | 'username' | 'password' | 'database'>;
 
@@ -18,6 +19,9 @@ export function getMysqlDataSourceOptions(mysqlConfig: MysqlDataSourceConfig): D
     username: mysqlConfig.username,
     password: mysqlConfig.password,
     database: mysqlConfig.database,
+    connectorPackage: 'mysql2',
+    driver: mysql2UtcConnector,
+    timezone: 'Z',
     supportBigNumbers: true,
     bigNumberStrings: true,
     synchronize: false,
