@@ -6,8 +6,7 @@ const { isSameOriginWorkerAsset, toSameOriginWorkerAssetUrl } = require('./scrip
 
 function buildClientEnv() {
   return {
-    API_BASE_CLIENT: process.env.API_BASE_CLIENT || 'https://rl-api.algoux.cn',
-    CDN_API_BASE_CLIENT: process.env.CDN_API_BASE_CLIENT || 'https://rl-api.algoux.cn',
+    LEGACY_API_BASE_CLIENT: process.env.LEGACY_API_BASE_CLIENT || 'https://rl-api.algoux.cn',
     SRK_STORAGE_BASE: process.env.SRK_STORAGE_BASE || 'https://cdn.algoux.cn/srk-storage',
     VIN_URL: process.env.VIN_URL || 'https://cdn.algoux.cn/rankland/vin.txt',
     HOST_GLOBAL: process.env.HOST_GLOBAL || 'rl.algoux.org',

@@ -32,6 +32,7 @@ import {
   UpdateContestUserReqDTO,
   StreamPublicContestEventStreamNotificationsReqDTO,
   GetPublicContestsRespDTO,
+  GetPublicStatisticsRespDTO,
   GetContestsRespDTO,
   ReportPublicContestViewReqDTO,
   DeleteContestReqDTO,
@@ -97,6 +98,13 @@ export default class ContestController {
   @Contract(null, GetPublicContestsRespDTO)
   public async getPublicContests(): Promise<GetPublicContestsRespDTO> {
     return this.service.listContests(false) as Promise<GetPublicContestsRespDTO>;
+  }
+
+  @Api.Summary('公开查询榜单统计')
+  @Get('/public/statistics')
+  @Contract(null, GetPublicStatisticsRespDTO)
+  public async getPublicStatistics(): Promise<GetPublicStatisticsRespDTO> {
+    return this.service.getPublicStatistics();
   }
 
   @Api.Summary('上报一次实时比赛浏览')

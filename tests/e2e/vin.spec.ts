@@ -1,4 +1,4 @@
-import { expect, test } from '@playwright/test';
+import { expect, test } from './test';
 
 const VIN_ROUTE = '**/vin.txt';
 const VIN_TOAST = '[data-sonner-toast][data-type="warning"]';

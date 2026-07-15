@@ -1,17 +1,16 @@
 import { getRanklandRuntimeConfig } from '@/app/config';
+import type { ApiClientType } from '@/api';
 import { ApiService } from './api-service';
-import { createFetchRequestAdapter } from './request';
+import { createFetchRequestAdapter, createFetchResponseLoader } from './request';
 
-export function createClientRanklandApi() {
+export function createClientRanklandApi(apiClient: ApiClientType) {
   const config = getRanklandRuntimeConfig();
   return new ApiService({
-    api: createFetchRequestAdapter({
-      baseUrl: config.apiBaseClient,
+    legacyApi: createFetchRequestAdapter({
+      baseUrl: config.legacyApiBaseClient,
       timeoutMs: 30_000,
     }),
-    cdnApi: createFetchRequestAdapter({
-      baseUrl: config.cdnApiBaseClient,
-      timeoutMs: 30_000,
-    }),
+    apiClient,
+    fetchFile: createFetchResponseLoader({ timeoutMs: 30_000 }),
   });
 }

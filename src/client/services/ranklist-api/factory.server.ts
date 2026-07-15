@@ -1,21 +1,23 @@
 import { getRanklandRuntimeConfig } from '@/app/config';
+import { getServerLoopbackOrigin } from '@/api/api-factory.server';
+import type { ApiClientType } from '@/api';
 import { ApiService } from './api-service';
 import { MemoryCacheManager } from './cache-manager';
-import { createFetchRequestAdapter } from './request';
+import { createFetchRequestAdapter, createFetchResponseLoader } from './request';
 
 const cacheManager = new MemoryCacheManager();
 
-export function createServerRanklandApi() {
+export function createServerRanklandApi(apiClient: ApiClientType) {
   const config = getRanklandRuntimeConfig();
+  const loopbackOrigin = getServerLoopbackOrigin();
   return new ApiService({
-    api: createFetchRequestAdapter({
-      baseUrl: config.apiBaseServer,
+    legacyApi: createFetchRequestAdapter({
+      baseUrl: config.legacyApiBaseServer,
       timeoutMs: 5_000,
     }),
-    cdnApi: createFetchRequestAdapter({
-      baseUrl: config.cdnApiBaseServer,
-      timeoutMs: 5_000,
-    }),
+    apiClient,
+    fetchFile: createFetchResponseLoader({ timeoutMs: 5_000 }),
+    resolveFileUrl: (url) => new URL(url, loopbackOrigin).toString(),
     cacheManager,
   });
 }

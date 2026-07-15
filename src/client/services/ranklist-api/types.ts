@@ -19,14 +19,15 @@ export interface IApiRanklistInfo {
   name: string;
   fileID: string;
   viewCnt: number;
-  content: string;
-  createdAt: string;
-  updatedAt: string;
+  content?: string;
+  createdAt?: string;
+  updatedAt?: string;
 }
 
 export interface IApiRanklist {
   info: IApiRanklistInfo;
   srk: srk.Ranklist;
+  srkUrl: string;
 }
 
 export enum CollectionItemType {

@@ -5,10 +5,8 @@ declare const __RANKLAND_CLIENT_ENV__: Record<string, string | undefined> | unde
 export const RANKLAND_RSS_PATH = '/rss.xml';
 
 export interface RanklandRuntimeConfig {
-  apiBaseClient: string;
-  apiBaseServer: string;
-  cdnApiBaseClient: string;
-  cdnApiBaseServer: string;
+  legacyApiBaseClient: string;
+  legacyApiBaseServer: string;
   srkStorageBase: string;
   vinUrl: string;
   hostGlobal: string;
@@ -57,10 +55,8 @@ export const ranklandRoutes = {
 
 export function getRanklandRuntimeConfig(env: Record<string, string | undefined> = resolveRanklandRuntimeEnv()): RanklandRuntimeConfig {
   return {
-    apiBaseClient: env.API_BASE_CLIENT || 'https://rl-api.algoux.cn',
-    apiBaseServer: env.API_BASE_SERVER || 'https://rl-api.algoux.cn',
-    cdnApiBaseClient: env.CDN_API_BASE_CLIENT || 'https://rl-api.algoux.cn',
-    cdnApiBaseServer: env.CDN_API_BASE_SERVER || 'https://rl-api.algoux.cn',
+    legacyApiBaseClient: env.LEGACY_API_BASE_CLIENT || 'https://rl-api.algoux.cn',
+    legacyApiBaseServer: env.LEGACY_API_BASE_SERVER || 'https://rl-api.algoux.cn',
     srkStorageBase: env.SRK_STORAGE_BASE || 'https://cdn.algoux.cn/srk-storage',
     vinUrl: env.VIN_URL || 'https://cdn.algoux.cn/rankland/vin.txt',
     hostGlobal: env.HOST_GLOBAL || 'rl.algoux.org',
@@ -115,8 +111,4 @@ export function ranklandSiteOrigin(siteAlias = getRanklandRuntimeConfig().siteAl
 
 export function getFullUrl(url: string, siteAlias = getRanklandRuntimeConfig().siteAlias) {
   return `${ranklandSiteOrigin(siteAlias)}${url.startsWith('/') ? url : `/${url}`}`;
-}
-
-export function getSrkFileDownloadUrl(fileID: string, config = getRanklandRuntimeConfig()) {
-  return `${config.cdnApiBaseClient.replace(/\/+$/, '')}/file/download?id=${encodeURIComponent(fileID)}`;
 }

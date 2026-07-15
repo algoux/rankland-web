@@ -1,8 +1,13 @@
-import { expect, test } from '@playwright/test';
-import type { Page } from '@playwright/test';
+import { blockPublicContestViewReports, expect, PUBLIC_CONTEST_VIEW_ROUTE, test } from './test';
+import type { APIRequestContext, Page } from '@playwright/test';
 
-const MOCK_API_PORT = Number(process.env.E2E_MOCK_API_PORT || 4322);
-const MOCK_API_BASE = `http://127.0.0.1:${MOCK_API_PORT}`;
+async function getPublicContestViewCount(request: APIRequestContext, uk: string): Promise<number> {
+  const response = await request.get(`/api/v2/public/contests/${uk}`);
+  expect(response.ok()).toBe(true);
+  const envelope = await response.json();
+  expect(envelope).toMatchObject({ success: true, code: 0 });
+  return envelope.data.viewCount;
+}
 
 async function expectPopoverPaintedOnTop(page: Page, dataId: string) {
   const paintState = await page.locator(`[data-id="${dataId}"]`).evaluate((element) => {
@@ -41,6 +46,29 @@ test.describe('/ranklist/:id', () => {
     await expect(page.locator('.srk-ranklist-client-render-region')).toHaveCount(0);
   });
 
+  test('reports exactly one browser view after hydration and never reports during SSR', async ({ page, request }) => {
+    let reportCount = 0;
+    const serverViewCountBefore = await getPublicContestViewCount(request, 'test-key');
+    await page.unroute(PUBLIC_CONTEST_VIEW_ROUTE);
+    await page.route(PUBLIC_CONTEST_VIEW_ROUTE, async (route) => {
+      reportCount += 1;
+      await route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify({ success: true, code: 0, data: null }),
+      });
+    });
+
+    await page.goto('/ranklist/test-key');
+    await expect(page.locator('[data-id="ranklist-content"][data-ranklist-id="test-key"]')).toBeVisible({
+      timeout: 20_000,
+    });
+    await expect.poll(() => reportCount).toBe(1);
+    await page.waitForTimeout(300);
+    expect(reportCount).toBe(1);
+    await expect.poll(() => getPublicContestViewCount(request, 'test-key')).toBe(serverViewCountBefore);
+  });
+
   test('keeps request-language SSR output hydration-clean and cache-isolated', async ({ browser, baseURL }) => {
     const enContext = await browser.newContext({
       baseURL,
@@ -60,6 +88,7 @@ test.describe('/ranklist/:id', () => {
 
     try {
       const enPage = await enContext.newPage();
+      await blockPublicContestViewReports(enPage);
       enPage.on('console', (message) => {
         const text = message.text();
         if (/hydration|mismatch/i.test(text)) {
@@ -72,6 +101,7 @@ test.describe('/ranklist/:id', () => {
       await expect(enPage.getByText('中文本地化比赛')).toHaveCount(0);
 
       const zhPage = await zhContext.newPage();
+      await blockPublicContestViewReports(zhPage);
       zhPage.on('console', (message) => {
         const text = message.text();
         if (/hydration|mismatch/i.test(text)) {
@@ -229,43 +259,44 @@ test.describe('/ranklist/:id', () => {
     await expect(intro).toBeHidden();
   });
 
-  test('hides the leading metadata divider when the view count is absent', async ({ page }) => {
+  test('shows the v2 view count and increments it locally after a successful report', async ({ page }) => {
     await page.addInitScript(() => {
       window.localStorage.setItem('StyledRanklistSettingsIntroRead', 'true');
     });
     await page.goto('/ranklist/no-view-key');
 
     await expect(page.locator('[data-id="ranklist-content"][data-ranklist-id="no-view-key"]')).toBeVisible({ timeout: 20_000 });
-    await expect(page.locator('.srk-ranklist-meta-item')).toHaveCount(0);
-    await expect(page.locator('.srk-ranklist-meta-divider')).toHaveCount(2);
+    await expect(page.locator('.srk-ranklist-meta-item')).toHaveText('1');
+    await expect(page.locator('.srk-ranklist-meta-divider')).toHaveCount(3);
     const metaLayout = await page.evaluate(() => {
       const meta = document.querySelector('.srk-ranklist-meta');
       const dividers = Array.from(document.querySelectorAll('.srk-ranklist-meta-divider'));
+      const viewCount = document.querySelector('.srk-ranklist-meta-item');
       const download = document.querySelector('[data-id="ranklist-download-action"]');
       const edit = document.querySelector('[data-id="ranklist-edit-srk-action"]');
       const share = document.querySelector('[data-id="ranklist-share-action"]');
-      if (!meta || dividers.length !== 2 || !download || !edit || !share) {
+      if (!meta || dividers.length !== 3 || !viewCount || !download || !edit || !share) {
         return null;
       }
-      const firstDividerRect = dividers[0].getBoundingClientRect();
-      const secondDividerRect = dividers[1].getBoundingClientRect();
+      const editDividerRect = dividers[1].getBoundingClientRect();
+      const downloadDividerRect = dividers[2].getBoundingClientRect();
       const downloadRect = download.getBoundingClientRect();
       const editRect = edit.getBoundingClientRect();
       const shareRect = share.getBoundingClientRect();
       return {
-        firstDividerAfterEdit: firstDividerRect.left > editRect.right,
-        firstDividerBeforeDownload: firstDividerRect.right < downloadRect.left,
-        secondDividerAfterDownload: secondDividerRect.left > downloadRect.right,
-        secondDividerBeforeShare: secondDividerRect.right < shareRect.left,
-        firstMetaElementIsEdit: meta.firstElementChild === edit,
+        editDividerAfterEdit: editDividerRect.left > editRect.right,
+        editDividerBeforeDownload: editDividerRect.right < downloadRect.left,
+        downloadDividerAfterDownload: downloadDividerRect.left > downloadRect.right,
+        downloadDividerBeforeShare: downloadDividerRect.right < shareRect.left,
+        firstMetaElementIsViewCount: meta.firstElementChild === viewCount,
       };
     });
     expect(metaLayout).toEqual({
-      firstDividerAfterEdit: true,
-      firstDividerBeforeDownload: true,
-      secondDividerAfterDownload: true,
-      secondDividerBeforeShare: true,
-      firstMetaElementIsEdit: true,
+      editDividerAfterEdit: true,
+      editDividerBeforeDownload: true,
+      downloadDividerAfterDownload: true,
+      downloadDividerBeforeShare: true,
+      firstMetaElementIsViewCount: true,
     });
   });
 
@@ -297,7 +328,7 @@ test.describe('/ranklist/:id', () => {
     expect(playgroundQuery).toEqual({
       path: '/playground',
       id: 'test-key',
-      src: `${MOCK_API_BASE}/file/download?id=file-test-1`,
+      src: '/file/2001/test-key.srk.json',
     });
   });
 
@@ -809,7 +840,7 @@ test.describe('/ranklist/:id', () => {
     expect(desktopLayout.tableFrame?.left).toBe(66);
   });
 
-  test('shows Ranklist Not Found when API returns code=11', async ({ page }) => {
+  test('shows Ranklist Not Found when the v2 contest does not exist', async ({ page }) => {
     await page.goto('/ranklist/missing-key');
 
     await expect(page.locator('[data-id="ranklist-not-found"]')).toBeVisible({ timeout: 20_000 });

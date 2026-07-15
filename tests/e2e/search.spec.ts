@@ -1,4 +1,4 @@
-import { expect, test } from '@playwright/test';
+import { expect, test } from './test';
 
 test.describe('/search', () => {
   test('initial state shows recent ranklists', async ({ page }) => {

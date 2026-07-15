@@ -1,10 +1,7 @@
 import { Inject, Provide } from 'bwcx-core';
 import HttpException from '@server/exceptions/http.exception';
 import RanklistService from '@server/modules/ranklist/ranklist.service';
-import {
-  SITEMAP_PAGE_SIZE,
-  SITEMAP_SITE_ORIGIN,
-} from './sitemap.constants';
+import { SITEMAP_PAGE_SIZE, SITEMAP_SITE_ORIGIN } from './sitemap.constants';
 
 @Provide()
 export default class SitemapService {

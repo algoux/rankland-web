@@ -43,7 +43,7 @@
       :data="ranklistData.srk"
       :name="ranklistId"
       :id="ranklistId"
-      :meta="ranklistData.info"
+      :meta="renderedRanklistMeta"
       :srk-url="ranklistSrkUrl"
       show-footer
       show-filter
@@ -61,13 +61,14 @@ import type { IApiRanklist } from '@/services/ranklist-api';
 import { Button } from '@/components/ui/button';
 import Loading from '@/components/common/Loading.vue';
 import StyledRanklist from '@/components/ranklist/StyledRanklist.vue';
-import { getFullUrl, getSrkFileDownloadUrl, ranklandRoutes } from '@/app/config';
+import { getFullUrl, ranklandRoutes } from '@/app/config';
 import {
   RanklistPageErrorKind,
   shouldLogRanklistPageError,
   writeRanklistPageErrorResponse,
 } from '@/domain/ranklist/page-error';
 import { formatTitle } from '@/app/title-format';
+import { RanklistViewReporter } from '@/domain/ranklist/view-reporter';
 
 @View('/ranklist/:id')
 @RenderMethod(RenderMethodKind.SSR)
@@ -85,6 +86,8 @@ export default class Ranklist extends Vue {
   RanklistPageErrorKind = RanklistPageErrorKind;
   fallbackTitle = formatTitle();
   notFoundTitle = formatTitle('Not Found');
+  reportedViewCountUK = '';
+  private readonly viewReporter = new RanklistViewReporter();
 
   get ranklistId() {
     const id = this.$route.params.id;
@@ -100,8 +103,23 @@ export default class Ranklist extends Vue {
   }
 
   get ranklistSrkUrl() {
-    const fileID = this.ranklistData?.info.fileID;
-    return fileID ? getSrkFileDownloadUrl(fileID) : undefined;
+    return this.ranklistData?.srkUrl;
+  }
+
+  get renderedRanklistMeta() {
+    const info = this.ranklistData?.info;
+    if (!info || this.reportedViewCountUK !== info.uniqueKey) {
+      return info;
+    }
+    return { ...info, viewCnt: info.viewCnt + 1 };
+  }
+
+  mounted() {
+    this.reportRenderedRanklistView();
+  }
+
+  updated() {
+    this.reportRenderedRanklistView();
   }
 
   reloadPage() {
@@ -127,6 +145,20 @@ export default class Ranklist extends Vue {
         errorKind: writeRanklistPageErrorResponse(error, { isClient, writeResponse }),
       };
     }
+  }
+
+  private reportRenderedRanklistView() {
+    void this.viewReporter.report({
+      routeUK: this.ranklistId,
+      loadedUK: this.ranklistData?.info.uniqueKey,
+      report: (uk) => this.$api.reportPublicContestView({ uk }),
+      onSuccess: (uk) => {
+        if (this.ranklistId === uk && this.ranklistData?.info.uniqueKey === uk) {
+          this.reportedViewCountUK = uk;
+        }
+      },
+      onError: (error, uk) => console.error(`[ranklist] failed to report view for ${uk}`, error),
+    });
   }
 }
 </script>

@@ -3,7 +3,6 @@ import {
   getRanklandBuildCommitLink,
   getFullUrl,
   getRanklandRuntimeConfig,
-  getSrkFileDownloadUrl,
   RANKLAND_RSS_PATH,
   ranklandRoutes,
   ranklandSiteOrigin,
@@ -13,8 +12,12 @@ describe('rankland runtime config', () => {
   it('provides production-safe defaults for external services', () => {
     const config = getRanklandRuntimeConfig();
 
-    expect(config.apiBaseClient).toBe('https://rl-api.algoux.cn');
-    expect(config.cdnApiBaseServer).toBe('https://rl-api.algoux.cn');
+    expect(config.legacyApiBaseClient).toBe('https://rl-api.algoux.cn');
+    expect(config.legacyApiBaseServer).toBe('https://rl-api.algoux.cn');
+    expect(config).not.toHaveProperty('apiBaseClient');
+    expect(config).not.toHaveProperty('apiBaseServer');
+    expect(config).not.toHaveProperty('cdnApiBaseClient');
+    expect(config).not.toHaveProperty('cdnApiBaseServer');
     expect(config.hostGlobal).toBe('rl.algoux.org');
     expect(config.hostCN).toBe('rl.algoux.cn');
     expect(config.livePollingInterval).toBe(10_000);
@@ -23,16 +26,18 @@ describe('rankland runtime config', () => {
 
   it('uses runtime environment overrides when provided by the server process', () => {
     const config = getRanklandRuntimeConfig({
-      API_BASE_SERVER: 'http://runtime-api',
-      CDN_API_BASE_SERVER: 'http://runtime-cdn',
+      LEGACY_API_BASE_CLIENT: 'http://client-legacy-api',
+      LEGACY_API_BASE_SERVER: 'http://server-legacy-api',
+      API_BASE_SERVER: 'http://ignored-old-api',
+      CDN_API_BASE_SERVER: 'http://ignored-old-cdn',
       SITE_ALIAS: 'cnn',
       GTAG: 'G-RUNTIME',
       BUILD_COMMIT: '1234567890abcdef',
       VIN_URL: 'https://cdn.example.com/custom-vin.txt',
     });
 
-    expect(config.apiBaseServer).toBe('http://runtime-api');
-    expect(config.cdnApiBaseServer).toBe('http://runtime-cdn');
+    expect(config.legacyApiBaseClient).toBe('http://client-legacy-api');
+    expect(config.legacyApiBaseServer).toBe('http://server-legacy-api');
     expect(config.siteAlias).toBe('cnn');
     expect(config.gtag).toBe('G-RUNTIME');
     expect(config.buildCommit).toBe('1234567890abcdef');
@@ -61,21 +66,11 @@ describe('rankland runtime config', () => {
     expect(ranklandRoutes.formatUrl('Search', { tag: ['a', 'b'] })).toBe('/search?tag=a&tag=b');
     expect(ranklandRoutes.formatUrl('Collection', { id: 'official', rankId: 'abc' })).toBe('/collection/official?rankId=abc');
     expect(ranklandRoutes.formatUrl('Playground', {
-      src: 'https://rl-api.example/file/download?id=file-id',
+      src: 'https://example.com/files/file-id.srk.json',
       id: 'rank key',
-    })).toBe('/playground?src=https%3A%2F%2Frl-api.example%2Ffile%2Fdownload%3Fid%3Dfile-id&id=rank%20key');
+    })).toBe('/playground?src=https%3A%2F%2Fexample.com%2Ffiles%2Ffile-id.srk.json&id=rank%20key');
     expect(ranklandSiteOrigin('cnn')).toBe('https://rl.algoux.cn');
     expect(getFullUrl('/ranklist/foo')).toBe('https://rl.algoux.org/ranklist/foo');
-  });
-
-  it('formats client-visible srk file download URLs from file IDs', () => {
-    const config = {
-      ...getRanklandRuntimeConfig(),
-      cdnApiBaseClient: 'https://cdn-api.example/base/',
-    };
-
-    expect(getSrkFileDownloadUrl('file id/with?query', config))
-      .toBe('https://cdn-api.example/base/file/download?id=file%20id%2Fwith%3Fquery');
   });
 
   it('exposes the relative RSS feed path for client-visible links', () => {

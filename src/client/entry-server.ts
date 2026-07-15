@@ -36,7 +36,7 @@ export default viteSSR(App, { routes }, (hookParams) => {
     ua: request.headers['user-agent'],
   });
   const apiClient = ApiClientFactory.createInstance(apiRequest);
-  const api = createServerRanklandApi();
+  const api = createServerRanklandApi(apiClient);
   app.provide(API_REQUEST_TOKEN, apiRequest);
   app.provide(API_CLIENT_TOKEN, apiClient);
   app.provide(RANKLAND_API_TOKEN, api);

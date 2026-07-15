@@ -4,8 +4,9 @@ import type { ICreateApiOpts } from './interfaces';
 
 export class ApiFactory {
   static createInstance(opts: ICreateApiOpts = {}): ApiType {
+    const origin = getServerLoopbackOrigin();
     return Axios.create({
-      baseURL: 'http://127.0.0.1:3000/api/',
+      baseURL: `${origin}/api/`,
       timeout: 5000,
       headers: {
         Cookie: opts.cookie || '',
@@ -16,4 +17,12 @@ export class ApiFactory {
       },
     });
   }
+}
+
+export function getServerLoopbackOrigin(
+  env: Record<string, string | undefined> = process.env,
+): string {
+  const parsedPort = Number(env.SERVER_PORT);
+  const port = Number.isInteger(parsedPort) && parsedPort >= 1 && parsedPort <= 65_535 ? parsedPort : 3000;
+  return `http://127.0.0.1:${port}`;
 }

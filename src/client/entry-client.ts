@@ -13,7 +13,7 @@ export default viteSSR(App, { routes }, (hookParams) => {
   // init api
   const apiRequest = ApiFactory.createInstance();
   const apiClient = ApiClientFactory.createInstance(apiRequest);
-  const api = createClientRanklandApi();
+  const api = createClientRanklandApi(apiClient);
   app.provide(API_REQUEST_TOKEN, apiRequest);
   app.provide(API_CLIENT_TOKEN, apiClient);
   app.provide(RANKLAND_API_TOKEN, api);

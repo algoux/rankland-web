@@ -1,4 +1,5 @@
-import { expect, test, type Page } from '@playwright/test';
+import type { Page } from '@playwright/test';
+import { expect, test } from './test';
 
 const MOCK_API_PORT = Number(process.env.E2E_MOCK_API_PORT || 4322);
 const MOCK_API_BASE = `http://127.0.0.1:${MOCK_API_PORT}`;
@@ -149,7 +150,7 @@ test.describe('/playground', () => {
       window.localStorage.setItem('PlaygroundWelcomeMessageRead', 'true');
       window.localStorage.setItem('StyledRanklistSettingsIntroRead', 'true');
     });
-    const src = `${MOCK_API_BASE}/file/download?id=file-localized-v2`;
+    const src = `${MOCK_API_BASE}/ranking/file?id=file-localized-v2`;
     await page.goto(`/playground?src=${encodeURIComponent(src)}&id=localized-key-v2`);
 
     await expect(page.locator('.monaco-editor').first()).toBeVisible({ timeout: 60_000 });
@@ -162,7 +163,7 @@ test.describe('/playground', () => {
       window.localStorage.setItem('PlaygroundWelcomeMessageRead', 'true');
       window.localStorage.setItem('StyledRanklistSettingsIntroRead', 'true');
     });
-    const src = `${MOCK_API_BASE}/file/download?id=missing-file`;
+    const src = `${MOCK_API_BASE}/ranking/file?id=missing-file`;
     await page.route(src, (route) => route.fulfill({
       status: 500,
       contentType: 'application/json',

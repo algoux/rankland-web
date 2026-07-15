@@ -9,8 +9,7 @@ const result = spawnSync(npmBin, ['run', 'build'], {
   stdio: 'inherit',
   env: {
     ...process.env,
-    API_BASE_CLIENT: mockApiBase,
-    CDN_API_BASE_CLIENT: mockApiBase,
+    LEGACY_API_BASE_CLIENT: mockApiBase,
     VIN_URL: `${mockApiBase}/vin.txt`,
     WS_BASE: `ws://127.0.0.1:${mockApiPort}`,
   },

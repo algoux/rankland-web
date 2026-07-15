@@ -195,13 +195,13 @@ export class CreateContestReqDTO {
   @FromBody()
   @IsString()
   @IsNotEmpty()
-  @Length(3, 32)
+  @Length(3, 64)
   public uk: string;
 
   @FromBody()
   @IsString()
   @IsNotEmpty()
-  @Length(3, 32)
+  @Length(3, 255)
   public name: string;
 
   @FromBody()
@@ -298,7 +298,7 @@ export class UpdateContestReqDTO {
   @IsOptional()
   @IsString()
   @IsNotEmpty()
-  @Length(3, 32)
+  @Length(3, 255)
   public name?: string;
 
   @FromBody()
@@ -592,6 +592,11 @@ export class AdminContestSummaryDTO extends ContestSummaryDTO {
 
 export class GetPublicContestsRespDTO {
   public contests: ContestSummaryDTO[];
+}
+
+export class GetPublicStatisticsRespDTO {
+  public totalSrkCount: number;
+  public totalViewCount: number;
 }
 
 export class GetContestsRespDTO {

@@ -28,6 +28,11 @@ interface FetchRequestAdapterOptions {
   fetchImpl?: typeof fetch;
 }
 
+interface FetchResponseLoaderOptions {
+  timeoutMs?: number;
+  fetchImpl?: typeof fetch;
+}
+
 export function createFetchRequestAdapter(options: FetchRequestAdapterOptions): RanklandRequestAdapter {
   const fetchImpl = options.fetchImpl || fetch;
   const timeoutMs = options.timeoutMs || 30_000;
@@ -62,6 +67,12 @@ export function createFetchRequestAdapter(options: FetchRequestAdapterOptions): 
       throw new HttpException(response.status, response.statusText);
     },
   };
+}
+
+export function createFetchResponseLoader(options: FetchResponseLoaderOptions = {}) {
+  const fetchImpl = options.fetchImpl || fetch;
+  const timeoutMs = options.timeoutMs || 30_000;
+  return (url: string) => fetchWithTimeout(fetchImpl, url, timeoutMs);
 }
 
 async function fetchWithTimeout(fetchImpl: typeof fetch, url: string, timeoutMs: number) {

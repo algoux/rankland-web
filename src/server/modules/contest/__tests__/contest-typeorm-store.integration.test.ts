@@ -397,6 +397,62 @@ describe.runIf(runMysqlTests)('contest TypeORM event store', () => {
     expect(await service.getContestWithUsers(managementUk, true)).toMatchObject({ viewCount: 2 });
   });
 
+  it('aggregates views only from active contests with an SRK file', async () => {
+    const staticUk = `${uk}-statistics-static`;
+    const liveOnlyUk = `${uk}-statistics-live-only`;
+    const deletedUk = `${uk}-statistics-deleted`;
+    createdUks.add(staticUk);
+    createdUks.add(liveOnlyUk);
+    createdUks.add(deletedUk);
+    const service = new ContestService(typeOrmClientFor(dataSource), testIdGenerator);
+    const before = await service.getPublicStatistics();
+    const createInput = (contestUk: string): Parameters<ContestService['createContest']>[0] => ({
+      uk: contestUk,
+      name: contestUk,
+      title: { fallback: contestUk },
+      startAt: '2026-01-01T00:00:00Z',
+      duration: [5, 'h'],
+      problems: [],
+      markers: [],
+      series: [],
+      users: [],
+    });
+
+    await service.createContest(createInput(staticUk));
+    await service.createContest(createInput(liveOnlyUk));
+    await service.createContest(createInput(deletedUk));
+    const staticContest = await service.getContest(staticUk);
+    const liveOnlyContest = await service.getContest(liveOnlyUk);
+    const deletedContest = await service.getContest(deletedUk);
+    const fileRepository = dataSource.getRepository(FileEntity);
+    const createFile = async (contestId: string, name: string) => {
+      const id = testIdGenerator.nextId();
+      return fileRepository.save(fileRepository.create({
+        id,
+        contestId,
+        category: 'RankMain',
+        name,
+        path: `${id}/${name}`,
+        size: 1,
+        hashType: 'sha256',
+        hashValue: '0'.repeat(64),
+      }));
+    };
+    const staticFile = await createFile(staticContest.id, `${staticUk}.srk.json`);
+    const deletedFile = await createFile(deletedContest.id, `${deletedUk}.srk.json`);
+    await service.updateContest({ uk: staticUk, srkFileID: staticFile.id });
+    await service.updateContest({ uk: deletedUk, srkFileID: deletedFile.id });
+    await dataSource.getRepository(ContestEntity).update({ id: staticContest.id }, { viewCount: 11 });
+    await dataSource.getRepository(ContestEntity).update({ id: liveOnlyContest.id }, { viewCount: 1_000 });
+    await dataSource.getRepository(ContestEntity).update({ id: deletedContest.id }, { viewCount: 700 });
+    await service.deleteContest(deletedUk);
+
+    await expect(service.getPublicStatistics()).resolves.toEqual({
+      totalSrkCount: before.totalSrkCount + 1,
+      totalViewCount: before.totalViewCount + 11,
+    });
+  });
+
   it('only associates active files from the same contest and rejects case-insensitive self redirects', async () => {
     const ownerUk = `${uk}-file-owner`;
     const otherUk = `${uk}-file-other`;

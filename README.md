@@ -114,10 +114,8 @@ pnpm run db:migration:generate
 RankLand 外部 API 配置：
 
 ```bash
-API_BASE_SERVER=https://rl-api.algoux.cn
-CDN_API_BASE_SERVER=https://rl-api.algoux.cn
-API_BASE_CLIENT=https://rl-api.algoux.cn
-CDN_API_BASE_CLIENT=https://rl-api.algoux.cn
+LEGACY_API_BASE_SERVER=https://rl-api.algoux.cn
+LEGACY_API_BASE_CLIENT=https://rl-api.algoux.cn
 SRK_STORAGE_BASE=https://srk-assets.algoux.cn
 VIN_URL=https://cdn.algoux.cn/rankland/vin.txt
 HOST_GLOBAL=rl.algoux.org
@@ -129,8 +127,8 @@ GTAG=
 BEIAN=
 ```
 
-`*_SERVER` 在 SSR 服务运行时读取；`*_CLIENT` 和 `VIN_URL` 会在 Vite 构建时写入浏览器包。
-如果切换 mock 或环境地址，需要重新运行 client build。
+`LEGACY_API_BASE_SERVER` 在 SSR 服务运行时读取；`LEGACY_API_BASE_CLIENT` 和 `VIN_URL` 会在 Vite 构建时写入浏览器包。
+这两个地址只用于 `/rank/search`、`/ranking/*` 等尚未迁移的旧接口；contest、collection、statistics 与文件元数据统一使用同源 `/api/v2`。如果切换 legacy mock 或环境地址，需要重新运行 client build。
 
 ## 测试
 

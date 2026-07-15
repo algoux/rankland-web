@@ -108,8 +108,8 @@ x-producer-id: <producer-id>
 
 ```ts
 {
-  uk: string;                // 唯一比赛标识，长度 3..32
-  name: string;              // 展示/管理名称，长度 3..32
+  uk: string;                // 唯一比赛标识，长度 3..64
+  name: string;              // 展示/管理名称，长度 3..255
   title: I18NStringSet;      // fallback 必须是非空字符串，其他值也必须是字符串
   startAt: string;
   duration: TimeDuration;
@@ -402,6 +402,23 @@ POST /api/v2/public/contests/:uk/views
 ```
 
 无请求体、无需鉴权。每次有效调用使用单条原子更新令 `view_count = view_count + 1`，不做 IP、会话或重复上报限制。成功 Data: `null`；比赛不存在或已删除时返回 `ContestNotFound`。任何比赛详情或列表查询都不会自动调用本接口。
+
+### 公开查询静态榜单统计
+
+```text
+GET /api/v2/public/statistics
+```
+
+仅统计未软删除且 `srkFileID != null` 的静态榜单，实时但尚未关联 SRK 文件的 contest 不计入。Data:
+
+```ts
+{
+  totalSrkCount: number;
+  totalViewCount: number;
+}
+```
+
+`totalViewCount` 是上述静态榜单 `viewCount` 的总和；空集合返回两个 `0`。
 
 ### 公开查询事件流
 

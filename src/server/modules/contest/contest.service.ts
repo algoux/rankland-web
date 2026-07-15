@@ -237,6 +237,22 @@ export default class ContestService {
     };
   }
 
+  public async getPublicStatistics(): Promise<{ totalSrkCount: number; totalViewCount: number }> {
+    const aggregate = await this.dataSource
+      .getRepository(ContestEntity)
+      .createQueryBuilder('contest')
+      .select('COUNT(*)', 'totalSrkCount')
+      .addSelect('COALESCE(SUM(`contest`.`view_count`), 0)', 'totalViewCount')
+      .where('`contest`.`deleted_at` IS NULL')
+      .andWhere('`contest`.`srk_file_id` IS NOT NULL')
+      .getRawOne<{ totalSrkCount?: string | number; totalViewCount?: string | number }>();
+
+    return {
+      totalSrkCount: parseStatisticsInteger(aggregate?.totalSrkCount ?? 0, 'totalSrkCount'),
+      totalViewCount: parseStatisticsInteger(aggregate?.totalViewCount ?? 0, 'totalViewCount'),
+    };
+  }
+
   public async reportView(uk: string): Promise<void> {
     const result = await this.dataSource
       .getRepository(ContestEntity)
@@ -499,6 +515,14 @@ function jsonTextIncludes(value: unknown, query: string): boolean {
     return false;
   }
   return JSON.stringify(value).toLowerCase().includes(query.toLowerCase());
+}
+
+function parseStatisticsInteger(value: string | number, field: string): number {
+  const parsed = Number(value);
+  if (!Number.isSafeInteger(parsed) || parsed < 0) {
+    throw new RangeError(`${field} must be a non-negative safe integer`);
+  }
+  return parsed;
 }
 
 function normalizeContestStartAt(value: string): Date {

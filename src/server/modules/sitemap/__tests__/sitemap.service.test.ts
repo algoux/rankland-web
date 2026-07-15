@@ -1,9 +1,6 @@
 import { describe, expect, it, vi } from 'vitest';
 import HttpException from '@server/exceptions/http.exception';
-import {
-  SITEMAP_PAGE_SIZE,
-  SITEMAP_SITE_ORIGIN,
-} from '../sitemap.constants';
+import { SITEMAP_PAGE_SIZE, SITEMAP_SITE_ORIGIN } from '../sitemap.constants';
 import SitemapService from '../sitemap.service';
 
 function makeRank(uniqueKey: string) {
@@ -26,26 +23,18 @@ function createRanklistService(uniqueKeys: string[]) {
 }
 
 describe('SitemapService', () => {
-  it('derives unique keys from the shared ranklist service and keeps sitemap reverse ordering', async () => {
-    const ranklistService = createRanklistService([
-      'newest-rank',
-      'middle-rank',
-      'oldest-rank',
-    ]);
+  it('derives unique keys from the shared ranklist service and reverses newest-first ordering', async () => {
+    const ranklistService = createRanklistService(['newest-rank', 'middle-rank', 'oldest-rank']);
     const service = new SitemapService(ranklistService as any);
 
-    await expect(service.getRanklistUniqueKeys()).resolves.toEqual([
-      'oldest-rank',
-      'middle-rank',
-      'newest-rank',
-    ]);
+    await expect(service.getRanklistUniqueKeys()).resolves.toEqual(['oldest-rank', 'middle-rank', 'newest-rank']);
 
     expect(ranklistService.getAllRanklists).toHaveBeenCalledTimes(1);
   });
 
   it('builds fixed-cn sitemap index and text pages with 10000 locs per file', async () => {
-    const keys = Array.from({ length: 20_001 }, (_item, index) => `rank-${index + 1}`);
-    const service = new SitemapService(createRanklistService([...keys].reverse()) as any);
+    const keys = Array.from({ length: 20_001 }, (_item, index) => `rank-${20_001 - index}`);
+    const service = new SitemapService(createRanklistService(keys) as any);
 
     const indexXml = await service.getSitemapIndexXml();
     expect(indexXml).toContain(`${SITEMAP_SITE_ORIGIN}/sitemap_ranklist_vol_1.txt`);
@@ -60,9 +49,7 @@ describe('SitemapService', () => {
     expect(firstPageLines.at(-1)).toBe(`${SITEMAP_SITE_ORIGIN}/ranklist/rank-10000`);
 
     const thirdPage = await service.getRanklistSitemapText(3);
-    expect(thirdPage.trimEnd().split('\n')).toEqual([
-      `${SITEMAP_SITE_ORIGIN}/ranklist/rank-20001`,
-    ]);
+    expect(thirdPage.trimEnd().split('\n')).toEqual([`${SITEMAP_SITE_ORIGIN}/ranklist/rank-20001`]);
   });
 
   it('URL-encodes unique keys in text sitemap locs', async () => {

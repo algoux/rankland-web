@@ -123,7 +123,7 @@
             :data="collectionPageData.ranklist.srk"
             :name="renderedRanklistId"
             :id="renderedRanklistId"
-            :meta="collectionPageData.ranklist.info"
+            :meta="renderedRanklistMeta"
             :srk-url="renderedRanklistSrkUrl"
             show-footer
             show-filter
@@ -149,7 +149,7 @@ import type { IApiCollectionItem } from '@/services/ranklist-api';
 import { Button } from '@/components/ui/button';
 import Loading from '@/components/common/Loading.vue';
 import StyledRanklist from '@/components/ranklist/StyledRanklist.vue';
-import { getFullUrl, getSrkFileDownloadUrl, ranklandRoutes } from '@/app/config';
+import { getFullUrl, ranklandRoutes } from '@/app/config';
 import { LocalStorageKey } from '@/app/local-storage-key.config';
 import ranklandLogo from '@/assets/rankland-logo.png';
 import {
@@ -166,6 +166,7 @@ import {
 import { formatTitle } from '@/app/title-format';
 import type { ThemeName } from '@/lib/theme';
 import CollectionTreeItem from './CollectionTreeItem.vue';
+import { RanklistViewReporter } from '@/domain/ranklist/view-reporter';
 
 const COLLECTION_SUBMENU_ANIMATION_MS = 220;
 
@@ -202,6 +203,8 @@ export default class Collection extends Vue {
   private syncedActiveRankId = '';
   private syncedRanklistScrollTopKey = '';
   private ranklistScrollTopFrame: number | undefined;
+  private reportedViewCountUK = '';
+  private readonly viewReporter = new RanklistViewReporter();
 
   get collectionId() {
     const id = this.$route.params.id;
@@ -221,8 +224,15 @@ export default class Collection extends Vue {
   }
 
   get renderedRanklistSrkUrl() {
-    const fileID = this.collectionPageData?.ranklist?.info.fileID;
-    return fileID ? getSrkFileDownloadUrl(fileID) : undefined;
+    return this.collectionPageData?.ranklist?.srkUrl;
+  }
+
+  get renderedRanklistMeta() {
+    const info = this.collectionPageData?.ranklist?.info;
+    if (!info || this.reportedViewCountUK !== info.uniqueKey) {
+      return info;
+    }
+    return { ...info, viewCnt: info.viewCnt + 1 };
   }
 
   get pageTitle() {
@@ -294,6 +304,7 @@ export default class Collection extends Vue {
     this.syncActiveAncestorOpenKeys();
     this.syncInvalidRankId();
     this.queueActiveMenuScroll();
+    this.reportRenderedRanklistView();
   }
 
   updated() {
@@ -301,6 +312,7 @@ export default class Collection extends Vue {
     this.syncInvalidRankId();
     this.queueActiveMenuScroll();
     this.queueRanklistScrollToTopAfterSwitch();
+    this.reportRenderedRanklistView();
   }
 
   beforeUnmount() {
@@ -556,6 +568,20 @@ export default class Collection extends Vue {
       window.cancelAnimationFrame(this.ranklistScrollTopFrame);
       this.ranklistScrollTopFrame = undefined;
     }
+  }
+
+  private reportRenderedRanklistView() {
+    void this.viewReporter.report({
+      routeUK: this.activeRankId || '',
+      loadedUK: this.collectionPageData?.ranklist?.info.uniqueKey,
+      report: (uk) => this.$api.reportPublicContestView({ uk }),
+      onSuccess: (uk) => {
+        if (this.activeRankId === uk && this.collectionPageData?.ranklist?.info.uniqueKey === uk) {
+          this.reportedViewCountUK = uk;
+        }
+      },
+      onError: (error, uk) => console.error(`[collection] failed to report view for ${uk}`, error),
+    });
   }
 }
 

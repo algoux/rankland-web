@@ -1,4 +1,4 @@
-import { expect, test } from '@playwright/test';
+import { expect, test } from './test';
 
 test.describe('/', () => {
   test('restores the original home typography and antd-like cards', async ({ page }) => {

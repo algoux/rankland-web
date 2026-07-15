@@ -1,4 +1,5 @@
-import { expect, test, type Page } from '@playwright/test';
+import type { Page } from '@playwright/test';
+import { expect, test } from './test';
 
 test.describe('route navigation progress', () => {
   test('shows the themed top bar while route chunks are loading', async ({ page }) => {
@@ -37,22 +38,22 @@ test.describe('route navigation progress', () => {
     await waitForHydration(page);
     await expect(page.locator('html')).toHaveClass(/dark/);
 
-    const listAllRequest = createManualGate();
-    await page.route('**/rank/listall', async (route) => {
-      listAllRequest.started = true;
-      listAllRequest.resolveStarted();
-      await listAllRequest.waitForRelease();
+    const contestsRequest = createManualGate();
+    await page.route(/\/api\/v2\/public\/contests(?:\?.*)?$/, async (route) => {
+      contestsRequest.started = true;
+      contestsRequest.resolveStarted();
+      await contestsRequest.waitForRelease();
       await route.continue();
     });
 
     await page.getByRole('navigation').getByRole('link', { name: '探索' }).click();
-    await listAllRequest.waitForStart();
+    await contestsRequest.waitForStart();
 
     const bar = page.locator('#nprogress .bar');
     await expect(bar).toBeVisible();
     await expect(bar).toHaveCSS('background-color', 'rgb(246, 172, 6)');
 
-    listAllRequest.release();
+    contestsRequest.release();
     await expect(page).toHaveTitle('探索 | RankLand');
     await expect(bar).toHaveCount(0);
   });

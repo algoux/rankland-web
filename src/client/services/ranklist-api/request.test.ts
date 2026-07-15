@@ -17,9 +17,9 @@ describe('createFetchRequestAdapter', () => {
       fetchImpl,
     });
 
-    await expect(adapter.get('/rank/listall')).resolves.toEqual({ ok: true });
+    await expect(adapter.get('/rank/search')).resolves.toEqual({ ok: true });
 
-    expect(fetchImpl.mock.calls[0][0]).toBe('https://rl-api.algoux.cn/base/rank/listall');
+    expect(fetchImpl.mock.calls[0][0]).toBe('https://rl-api.algoux.cn/base/rank/search');
   });
 
   it('throws ApiException for non-zero rankland API envelopes', async () => {
@@ -28,7 +28,7 @@ describe('createFetchRequestAdapter', () => {
       fetchImpl: vi.fn(async () => jsonResponse({ code: 11, message: 'missing' })),
     });
 
-    await expect(adapter.get('/rank/nope')).rejects.toBeInstanceOf(ApiException);
+    await expect(adapter.get('/ranking/nope')).rejects.toBeInstanceOf(ApiException);
   });
 
   it('returns raw responses for getResponse calls and checks HTTP status', async () => {
@@ -41,9 +41,9 @@ describe('createFetchRequestAdapter', () => {
       fetchImpl: vi.fn(async () => new Response('', { status: 404, statusText: 'Not Found' })),
     });
 
-    await expect(okAdapter.get('/file/download?id=fid', { getResponse: true })).resolves.toMatchObject({
+    await expect(okAdapter.get('/ranking/file?id=fid', { getResponse: true })).resolves.toMatchObject({
       response: expect.any(Response),
     });
-    await expect(badAdapter.get('/file/download?id=fid', { getResponse: true })).rejects.toBeInstanceOf(HttpException);
+    await expect(badAdapter.get('/ranking/file?id=fid', { getResponse: true })).rejects.toBeInstanceOf(HttpException);
   });
 });

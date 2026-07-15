@@ -216,17 +216,6 @@ function createImplicitOfficialRanklist(baseRanklist) {
   };
 }
 
-const largeRanklistInfo = {
-  id: 'rid-large',
-  uniqueKey: 'large-key',
-  name: 'Large Rank Time Fixture',
-  fileID: 'file-large',
-  viewCnt: 1,
-  content: '',
-  createdAt: '2024-04-01T10:00:00Z',
-  updatedAt: '2024-04-01T12:00:00Z',
-};
-
 const fixtures = {
   collection: readFixture('collection.json'),
   listAll: readFixture('listall.json'),
@@ -287,103 +276,12 @@ const server = http.createServer((req, res) => {
     return;
   }
 
-  if (pathname === '/statistics') {
-    sendJson(res, wrap(fixtures.statistics));
-    return;
-  }
-
-  if (pathname === '/rank/listall' || pathname === '/rank/search') {
+  if (pathname === '/rank/search') {
     sendJson(res, wrap(fixtures.listAll));
     return;
   }
 
-  if (pathname.startsWith('/rank/group/')) {
-    sendJson(res, wrap({ content: JSON.stringify(fixtures.collection) }));
-    return;
-  }
-
-  if (pathname.startsWith('/rank/')) {
-    const key = pathname.split('/').pop();
-    if (key === 'missing-key' || key === 'not-found') {
-      sendJson(res, { code: 11, message: 'ranklist not found' });
-      return;
-    }
-    if (key === 'large-key') {
-      sendJson(res, wrap(largeRanklistInfo));
-      return;
-    }
-    if (key === 'short-progress-key' || key === 'long-progress-key') {
-      sendJson(res, wrap({
-        ...fixtures.ranklistInfo,
-        id: `rid-${key}`,
-        uniqueKey: key,
-        name: key === 'short-progress-key' ? 'Progress Reset Fixture (3h)' : 'Progress Reset Fixture (5h)',
-        fileID: key === 'short-progress-key' ? 'file-progress-reset-short' : 'file-progress-reset-long',
-      }));
-      return;
-    }
-    if (key === 'no-problems-key') {
-      sendJson(res, wrap({
-        ...fixtures.ranklistInfo,
-        id: 'rid-no-problems-key',
-        uniqueKey: key,
-        name: 'No Problems Fixture',
-        fileID: 'file-no-problems',
-      }));
-      return;
-    }
-    if (key === 'implicit-official-key') {
-      sendJson(res, wrap({
-        ...fixtures.ranklistInfo,
-        id: 'rid-implicit-official-key',
-        uniqueKey: key,
-        name: 'Implicit Official Fixture',
-        fileID: 'file-implicit-official',
-      }));
-      return;
-    }
-    const ranklistInfo = {
-      ...fixtures.ranklistInfo,
-      uniqueKey: key,
-      fileID: key === 'localized-key-v2' ? 'file-localized-v2' : fixtures.ranklistInfo.fileID,
-      name: key === 'another-key'
-        ? 'Another Contest'
-        : key === 'icpc-2025-regional'
-          ? '2025 Regional'
-          : key === 'deep-key'
-            ? 'Deep Scroll Contest'
-            : key === 'localized-key-v2'
-              ? 'Localized Contest'
-              : fixtures.ranklistInfo.name,
-    };
-    if (key === 'no-view-key') {
-      delete ranklistInfo.viewCnt;
-    }
-    sendJson(res, wrap(ranklistInfo));
-    return;
-  }
-
-  if (pathname === '/file/download') {
-    if (url.searchParams.get('id') === largeRanklistInfo.fileID) {
-      sendJson(res, fixtures.largeSrk);
-      return;
-    }
-    if (url.searchParams.get('id') === 'file-progress-reset-short') {
-      sendJson(res, fixtures.progressResetShortSrk);
-      return;
-    }
-    if (url.searchParams.get('id') === 'file-progress-reset-long') {
-      sendJson(res, fixtures.progressResetLongSrk);
-      return;
-    }
-    if (url.searchParams.get('id') === 'file-no-problems') {
-      sendJson(res, fixtures.noProblemsSrk);
-      return;
-    }
-    if (url.searchParams.get('id') === 'file-implicit-official') {
-      sendJson(res, fixtures.implicitOfficialSrk);
-      return;
-    }
+  if (pathname === '/ranking/file') {
     if (url.searchParams.get('id') === 'file-localized-v2') {
       sendJson(res, fixtures.localizedSrk);
       return;
@@ -410,7 +308,11 @@ const server = http.createServer((req, res) => {
   sendJson(res, { code: 404, message: `No mock for ${pathname}` }, 404);
 });
 
-server.listen(port, () => {
-  // eslint-disable-next-line no-console
-  console.log(`[e2e-mock-rankland-api] listening on http://127.0.0.1:${port}`);
-});
+if (require.main === module) {
+  server.listen(port, () => {
+    // eslint-disable-next-line no-console
+    console.log(`[e2e-mock-rankland-api] listening on http://127.0.0.1:${port}`);
+  });
+}
+
+module.exports = { fixtures };

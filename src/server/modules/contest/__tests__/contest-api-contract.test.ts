@@ -96,6 +96,66 @@ describe('contest API contract', () => {
     }
   });
 
+  it('accepts contest UKs up to 64 characters and names up to 255 characters', async () => {
+    const base = {
+      uk: 'u'.repeat(64),
+      name: 'n'.repeat(255),
+      title: { fallback: 'Contest' },
+      startAt: '2026-01-01T00:00:00Z',
+      duration: [5, 'h'],
+      problems: null,
+      users: [],
+      markers: null,
+      series: null,
+    };
+
+    await expect(validationProperties(plainToInstance(CreateContestReqDTO, base))).resolves.toEqual([]);
+    await expect(validationProperties(plainToInstance(CreateContestReqDTO, {
+      ...base,
+      uk: 'u'.repeat(65),
+    }))).resolves.toContain('uk');
+    await expect(validationProperties(plainToInstance(CreateContestReqDTO, {
+      ...base,
+      name: 'n'.repeat(256),
+    }))).resolves.toContain('name');
+    await expect(validationProperties(plainToInstance(UpdateContestReqDTO, {
+      uk: 'contest-a',
+      name: 'n'.repeat(255),
+    }))).resolves.toEqual([]);
+    await expect(validationProperties(plainToInstance(UpdateContestReqDTO, {
+      uk: 'contest-a',
+      name: 'n'.repeat(256),
+    }))).resolves.toContain('name');
+  });
+
+  it('builds the public statistics request without changing getPublicContests', async () => {
+    const request = vi.fn(async () => ({
+      success: true,
+      code: 0,
+      data: { totalSrkCount: 12, totalViewCount: 345 },
+    }));
+    const responseParser = {
+      pat: vi.fn((_dto, resp) => resp.data),
+    };
+    const client = new ApiClient({ request }, responseParser as any);
+
+    expect(typeof client.getPublicContests).toBe('function');
+    const result = await (client as any).getPublicStatistics({});
+
+    expect(result).toEqual({ totalSrkCount: 12, totalViewCount: 345 });
+    expect(request).toHaveBeenCalledWith(
+      expect.objectContaining({
+        method: 'GET',
+        url: '/api/v2/public/statistics',
+        data: {},
+        metadata: expect.objectContaining({
+          name: 'getPublicStatistics',
+          path: '/api/v2/public/statistics',
+        }),
+      }),
+    );
+  });
+
   it('requires streamRevision on append requests', async () => {
     const missing = plainToInstance(AppendContestEventsReqDTO, {
       uk: 'contest-a',

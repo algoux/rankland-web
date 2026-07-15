@@ -1,9 +1,11 @@
-import { expect, test, type Page } from '@playwright/test';
+import type { Page } from '@playwright/test';
+import { expect, PUBLIC_CONTEST_VIEW_ROUTE, test } from './test';
 import fs from 'node:fs';
 import path from 'node:path';
 
 async function delayRankInfoRequest(page: Page, rankKey: string, delayMs: number) {
-  await page.route(`**/rank/${rankKey}`, async (route) => {
+  const escapedRankKey = rankKey.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  await page.route(new RegExp(`/api/v2/public/contests/${escapedRankKey}(?:\\?.*)?$`), async (route) => {
     const response = await route.fetch();
     await new Promise((resolve) => {
       setTimeout(resolve, delayMs);
@@ -73,6 +75,34 @@ test.describe('/collection/:id', () => {
     expect(layout).not.toBeNull();
     expect(layout!.hiddenHeaderHeight).toBe(64);
     expect(layout!.ranklistTop).toBeGreaterThanOrEqual(64);
+  });
+
+  test('reports one browser view for each completed collection selection, including A to B to A', async ({ page }) => {
+    const reportedUKs: string[] = [];
+    await page.unroute(PUBLIC_CONTEST_VIEW_ROUTE);
+    await page.route(PUBLIC_CONTEST_VIEW_ROUTE, async (route) => {
+      const match = new URL(route.request().url()).pathname.match(/\/contests\/([^/]+)\/views$/);
+      if (match) {
+        reportedUKs.push(decodeURIComponent(match[1]));
+      }
+      await route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify({ success: true, code: 0, data: null }),
+      });
+    });
+
+    await page.goto('/collection/official?rankId=test-key');
+    await expect(page.locator('[data-id="collection-ranklist-content"][data-ranklist-id="test-key"]')).toBeVisible({ timeout: 20_000 });
+    await expect.poll(() => reportedUKs).toEqual(['test-key']);
+
+    await page.locator('[data-id="collection-menu-item-another-key"]').click();
+    await expect(page.locator('[data-id="collection-ranklist-content"][data-ranklist-id="another-key"]')).toBeVisible({ timeout: 20_000 });
+    await expect.poll(() => reportedUKs).toEqual(['test-key', 'another-key']);
+
+    await page.locator('[data-id="collection-menu-item-test-key"]').click();
+    await expect(page.locator('[data-id="collection-ranklist-content"][data-ranklist-id="test-key"]')).toBeVisible({ timeout: 20_000 });
+    await expect.poll(() => reportedUKs).toEqual(['test-key', 'another-key', 'test-key']);
   });
 
   test('does not create document-level horizontal overflow from the full-bleed page shell', async ({ page }) => {
