@@ -109,7 +109,7 @@
           <a href="https://github.com/algoux" target="_blank" rel="noopener">GitHub</a>
         </p>
         <p>© 2022-present algoUX. All Rights Reserved.</p>
-        <p>榜单访问统计：至少 {{ totalViewCount }} 次</p>
+        <p>榜单访问统计：{{ totalViewCount }} 次</p>
         <p>
           其他链接：
           <a href="https://algoux.org" target="_blank" rel="noopener">首页</a>
