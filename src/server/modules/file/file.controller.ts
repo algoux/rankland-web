@@ -6,6 +6,8 @@ import {
   DeleteFileReqDTO,
   GetFileReqDTO,
   GetFileRespDTO,
+  GetPublicFileReqDTO,
+  GetPublicFileRespDTO,
   UploadFileReqDTO,
   UploadFileRespDTO,
 } from '@common/modules/file/file.dto';
@@ -30,6 +32,13 @@ export default class FileController {
   @UseGuards(AuthGuard)
   @Contract(GetFileReqDTO, GetFileRespDTO)
   public async getFile(@Data() data: GetFileReqDTO): Promise<GetFileRespDTO> {
+    return this.service.getFile(data.id);
+  }
+
+  @Api.Summary('公开查询比赛文件')
+  @Get('/public/files/:id')
+  @Contract(GetPublicFileReqDTO, GetPublicFileRespDTO)
+  public async getPublicFile(@Data() data: GetPublicFileReqDTO): Promise<GetPublicFileRespDTO> {
     return this.service.getFile(data.id);
   }
 

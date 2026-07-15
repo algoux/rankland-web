@@ -21,10 +21,14 @@ export enum ErrCode {
   ContestEventStreamRevisionMismatch = 100007,
 
   // File
-  FileNotFound = 110000,
-  FileInvalidName = 110001,
-  FileUploadTooLarge = 110002,
-  FileUploadAccessDenied = 110003,
-  FileUploadUnavailable = 110004,
-  FileUploadUnknown = 110099,
+  FileNotFound = 101000,
+  FileInvalidName = 101001,
+  FileUploadTooLarge = 101002,
+  FileUploadAccessDenied = 101003,
+  FileUploadUnavailable = 101004,
+  FileUploadUnknown = 101099,
+
+  // Collection
+  CollectionExisted = 102000,
+  CollectionNotFound = 102001,
 }

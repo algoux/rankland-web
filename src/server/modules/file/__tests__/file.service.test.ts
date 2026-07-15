@@ -130,7 +130,9 @@ describe('FileService', () => {
     const harness = createHarness({ existingFile: storedFile() });
     const service = harness.createService();
 
-    await expect(service.getFile(FILE_ID)).resolves.toMatchObject({ id: FILE_ID, name: 'demo.srk.json' });
+    const file = await service.getFile(FILE_ID);
+    expect(file).toMatchObject({ id: FILE_ID, name: 'demo.srk.json' });
+    expect(file).not.toHaveProperty('deletedAt');
     await service.deleteFile(FILE_ID);
     await expect(service.getFile(FILE_ID)).rejects.toMatchObject({ code: ErrCode.FileNotFound });
     expect(harness.fileRepository.softDelete).toHaveBeenCalledWith({ id: FILE_ID });

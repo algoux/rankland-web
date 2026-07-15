@@ -30,6 +30,13 @@ export class GetFileReqDTO {
   public id: string;
 }
 
+export class GetPublicFileReqDTO {
+  @FromParam()
+  @IsString()
+  @Matches(SNOWFLAKE_ID_PATTERN)
+  public id: string;
+}
+
 export class DeleteFileReqDTO {
   @FromParam()
   @IsString()
@@ -54,3 +61,5 @@ export class FileRespDTO {
 export class UploadFileRespDTO extends FileRespDTO {}
 
 export class GetFileRespDTO extends FileRespDTO {}
+
+export class GetPublicFileRespDTO extends FileRespDTO {}

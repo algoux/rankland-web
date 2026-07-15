@@ -7,6 +7,7 @@ import { ContestUserEntity } from '@server/entities/contest-user.entity';
 import { ContestEventStreamEntity } from '@server/entities/contest-event-stream.entity';
 import { IdWorkerRegistryEntity } from '@server/entities/id-worker-registry.entity';
 import { FileEntity } from '@server/entities/file.entity';
+import { CollectionEntity } from '@server/entities/collection.entity';
 import MysqlConfig from '@server/configs/mysql/mysql.config';
 import { mysql2UtcConnector } from './mysql2-utc-connector';
 
@@ -33,6 +34,7 @@ export function getMysqlDataSourceOptions(mysqlConfig: MysqlDataSourceConfig): D
       ContestEventStreamEntity,
       ContestEventEntity,
       FileEntity,
+      CollectionEntity,
       IdWorkerRegistryEntity,
     ],
     migrations: [path.join(__dirname, 'migrations/*{.ts,.js}')],

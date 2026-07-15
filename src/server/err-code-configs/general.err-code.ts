@@ -25,4 +25,8 @@ registerErrCodeConfigs({
   [ErrCode.FileUploadAccessDenied]: '文件上传被存储服务拒绝',
   [ErrCode.FileUploadUnavailable]: '文件存储服务暂不可用',
   [ErrCode.FileUploadUnknown]: '文件上传失败',
+
+  // Collection
+  [ErrCode.CollectionExisted]: '该合集已存在',
+  [ErrCode.CollectionNotFound]: '该合集未找到',
 });
