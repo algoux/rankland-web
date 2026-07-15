@@ -89,7 +89,7 @@ describe('exception handlers (content-negotiated)', () => {
 
     await new GlobalExceptionHandler().catch(error, ctx);
 
-    expect(ctx.status).toBe(200);
+    expect(ctx.status).toBe(413);
     expect(ctx.body).toEqual({
       success: false,
       code: ErrCode.FileUploadTooLarge,

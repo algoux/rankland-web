@@ -9,7 +9,7 @@ export default class GuardNotPassExceptionHandler implements IBwcxExceptionHandl
   public catch(e: GuardNotPassException, ctx: RequestContext) {
     ctx.error(`GuardNotPassException caught: url: ${ctx.url}, ua: ${ctx.request.headers['user-agent']}, err:`, e);
     writeErrorResponse(ctx, {
-      status: ctx.status || 200,
+      status: 401,
       code: ErrCode.Unauthorized,
       msg: errCodeConfigs[ErrCode.Unauthorized],
     });

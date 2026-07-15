@@ -3,6 +3,7 @@ import type { IBwcxExceptionHandler, RequestContext } from 'bwcx-ljsm';
 import LogicException from '@server/exceptions/logic.exception';
 import { errCodeConfigs } from '@server/err-code-configs';
 import { writeErrorResponse } from '@server/http/rl-response';
+import { ErrCode } from '@common/enums/err-code.enum';
 
 @ExceptionHandler(LogicException)
 export default class LogicExceptionHandler implements IBwcxExceptionHandler {
@@ -16,8 +17,27 @@ export default class LogicExceptionHandler implements IBwcxExceptionHandler {
       ctx.warn(`No err code config for LogicException. url: ${ctx.url}, code: ${e.code}`);
     }
     const msgText = errCodeConfigs[e.code] || '系统异常，请稍后再试';
+    let status = ctx.status !== 404 && ctx.status !== 200 ? ctx.status : undefined;
+    if (!status) {
+      switch (e.code) {
+        case ErrCode.InvalidAuthInfo:
+          status = 401;
+          break;
+        case ErrCode.ContestNotFound:
+        case ErrCode.ContestUserNotFound:
+        case ErrCode.FileNotFound:
+        case ErrCode.CollectionNotFound:
+          status = 404;
+          break;
+        case ErrCode.FileUploadTooLarge:
+          status = 413;
+          break;
+        default:
+          status = 200;
+      }
+    }
     writeErrorResponse(ctx, {
-      status: ctx.status || 200,
+      status,
       code: e.code,
       msg: msgText,
     });
