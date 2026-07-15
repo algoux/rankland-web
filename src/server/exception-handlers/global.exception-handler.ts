@@ -12,7 +12,7 @@ export default class GlobalExceptionHandler implements IBwcxExceptionHandler {
       const errCode = code === 'LIMIT_FILE_SIZE' ? ErrCode.FileUploadTooLarge : ErrCode.FileUploadUnknown;
       ctx.warn(`File upload parsing failed: ${code || e.message}`);
       writeErrorResponse(ctx, {
-        status: 200,
+        status: errCode === ErrCode.FileUploadTooLarge ? 413 : 200,
         code: errCode,
         msg: errCodeConfigs[errCode],
       });

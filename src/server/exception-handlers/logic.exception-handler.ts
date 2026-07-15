@@ -29,9 +29,6 @@ export default class LogicExceptionHandler implements IBwcxExceptionHandler {
         case ErrCode.CollectionNotFound:
           status = 404;
           break;
-        case ErrCode.FileUploadTooLarge:
-          status = 413;
-          break;
         default:
           status = 200;
       }
