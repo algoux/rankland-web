@@ -87,6 +87,9 @@ importers:
       copy-to-clipboard:
         specifier: ^3.3.3
         version: 3.3.3
+      cos-nodejs-sdk-v5:
+        specifier: ^2.15.4
+        version: 2.15.4
       file-saver:
         specifier: ^2.0.5
         version: 2.0.5
@@ -238,9 +241,6 @@ importers:
       copyfiles:
         specifier: ^2.4.1
         version: 2.4.1
-      cos-nodejs-sdk-v5:
-        specifier: ^2.15.4
-        version: 2.15.4
       cross-env:
         specifier: ^7.0.3
         version: 7.0.3

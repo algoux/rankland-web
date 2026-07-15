@@ -31,6 +31,10 @@ import {
   DeleteContestEventStreamProducerLockReqDTO,
   UpdateContestUserReqDTO,
   StreamPublicContestEventStreamNotificationsReqDTO,
+  GetPublicContestsRespDTO,
+  GetContestsRespDTO,
+  ReportPublicContestViewReqDTO,
+  DeleteContestReqDTO,
 } from '@common/modules/contest/contest.dto';
 import LogicException from '@server/exceptions/logic.exception';
 import { ErrCode } from '@common/enums/err-code.enum';
@@ -78,6 +82,36 @@ export default class ContestController {
   @Contract(UpdateContestReqDTO, null)
   public async updateContest(@Data() data: UpdateContestReqDTO) {
     await this.service.updateContest(data as any);
+  }
+
+  @Api.Summary('查询全部实时比赛')
+  @Get('/contests')
+  @UseGuards(AuthGuard)
+  @Contract(null, GetContestsRespDTO)
+  public async getContests(): Promise<GetContestsRespDTO> {
+    return this.service.listContests(true) as Promise<GetContestsRespDTO>;
+  }
+
+  @Api.Summary('公开查询全部实时比赛')
+  @Get('/public/contests')
+  @Contract(null, GetPublicContestsRespDTO)
+  public async getPublicContests(): Promise<GetPublicContestsRespDTO> {
+    return this.service.listContests(false) as Promise<GetPublicContestsRespDTO>;
+  }
+
+  @Api.Summary('上报一次实时比赛浏览')
+  @Post('/public/contests/:uk/views')
+  @Contract(ReportPublicContestViewReqDTO, null)
+  public async reportPublicContestView(@Data() data: ReportPublicContestViewReqDTO) {
+    await this.service.reportView(data.uk);
+  }
+
+  @Api.Summary('删除实时比赛')
+  @Delete('/contests/:uk')
+  @UseGuards(AuthGuard)
+  @Contract(DeleteContestReqDTO, null)
+  public async deleteContest(@Data() data: DeleteContestReqDTO) {
+    await this.service.deleteContest(data.uk);
   }
 
   @Api.Summary('重置实时比赛事件流')

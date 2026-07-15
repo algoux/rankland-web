@@ -4,6 +4,7 @@ import { getMysqlDataSourceOptions } from '@server/database/typeorm-data-source'
 import { ContestEntity } from '@server/entities/contest.entity';
 import { ContestEventStreamEntity } from '@server/entities/contest-event-stream.entity';
 import { ContestUserEntity } from '@server/entities/contest-user.entity';
+import { FileEntity } from '@server/entities/file.entity';
 import { IdWorkerRegistryEntity } from '@server/entities/id-worker-registry.entity';
 import TypeOrmClient from '@server/database/typeorm-client';
 import type IdGeneratorConfig from '@server/configs/id-generator/id-generator.config';
@@ -17,6 +18,8 @@ import {
 } from '@common/proto/rankland_live_contest';
 import { parseProducerBatchJson } from '../contest-event-codec';
 import { ContestClientEventBO } from '../contest-event-bo';
+import { contestDurationToSeconds } from '@common/modules/contest/contest-metadata';
+import { ErrCode } from '@common/enums/err-code.enum';
 
 const runMysqlTests = process.env.RUN_MYSQL_TESTS === 'true';
 const testIdGenerator = new SnowflakeIdGenerator({ workerId: 1023 });
@@ -38,12 +41,20 @@ describe.runIf(runMysqlTests)('contest TypeORM event store', () => {
         id: testIdGenerator.nextId(),
         uk,
         name: uk,
-        contest: { title: uk, startAt: '2026-01-01T00:00:00Z', duration: [5, 'h'] } as any,
+        title: { fallback: uk },
+        startAt: new Date('2026-01-01T00:00:00Z'),
+        durationS: 5 * 60 * 60,
+        frozenDurationS: null,
+        banner: null,
+        refLinks: null,
         problems: [],
         markers: [],
         series: [],
         sorter: null,
         contributors: null,
+        srkFileId: null,
+        viewCount: 0,
+        redirectUk: null,
       }),
     );
     await dataSource.getRepository(ContestEventStreamEntity).save(
@@ -60,11 +71,15 @@ describe.runIf(runMysqlTests)('contest TypeORM event store', () => {
       return;
     }
     for (const itemUk of createdUks) {
-      const contest = await dataSource.getRepository(ContestEntity).findOne({ where: { uk: itemUk } });
+      const contest = await dataSource.getRepository(ContestEntity).findOne({
+        where: { uk: itemUk },
+        withDeleted: true,
+      });
       const stream = contest
         ? await dataSource.getRepository(ContestEventStreamEntity).findOne({ where: { contestId: contest.id } })
         : null;
       if (contest) {
+        await dataSource.query('DELETE FROM file WHERE contest_id = ?', [contest.id]);
         await dataSource.query('DELETE FROM contest_event WHERE contest_id = ?', [contest.id]);
         await dataSource.query('DELETE FROM contest_user WHERE contest_id = ?', [contest.id]);
         await dataSource.query('DELETE FROM contest_event_stream WHERE contest_id = ?', [contest.id]);
@@ -116,7 +131,7 @@ describe.runIf(runMysqlTests)('contest TypeORM event store', () => {
 
   it('uses normalized table and column names while keeping uk only on contest', async () => {
     const tables = await dataSource.query(
-      "SELECT TABLE_NAME AS tableName FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME IN ('contest', 'contest_user', 'contest_event_stream', 'contest_event', 'id_worker_registry')",
+      "SELECT TABLE_NAME AS tableName FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME IN ('contest', 'contest_user', 'contest_event_stream', 'contest_event', 'file', 'id_worker_registry')",
     );
     const streamUkColumns = await dataSource.query(
       "SELECT COLUMN_NAME AS columnName FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'contest_event_stream' AND COLUMN_NAME = 'uk'",
@@ -128,7 +143,7 @@ describe.runIf(runMysqlTests)('contest TypeORM event store', () => {
       "SELECT INDEX_NAME AS indexName FROM INFORMATION_SCHEMA.STATISTICS WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'contest_event' AND INDEX_NAME = 'IDX_contest_event_revision_event'",
     );
     const columns = await dataSource.query(
-      "SELECT TABLE_NAME AS tableName, COLUMN_NAME AS columnName FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME IN ('contest', 'contest_user', 'contest_event_stream', 'contest_event', 'id_worker_registry') ORDER BY TABLE_NAME, ORDINAL_POSITION",
+      "SELECT TABLE_NAME AS tableName, COLUMN_NAME AS columnName FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME IN ('contest', 'contest_user', 'contest_event_stream', 'contest_event', 'file', 'id_worker_registry') ORDER BY TABLE_NAME, ORDINAL_POSITION",
     );
     const idColumnDefinitions = await dataSource.query(
       `SELECT TABLE_NAME AS tableName, COLUMN_NAME AS columnName, COLUMN_TYPE AS columnType,
@@ -139,6 +154,7 @@ describe.runIf(runMysqlTests)('contest TypeORM event store', () => {
            OR (TABLE_NAME = 'contest_user' AND COLUMN_NAME IN ('id', 'contest_id'))
            OR (TABLE_NAME = 'contest_event' AND COLUMN_NAME IN ('id', 'contest_id'))
            OR (TABLE_NAME = 'contest_event_stream' AND COLUMN_NAME = 'contest_id')
+           OR (TABLE_NAME = 'file' AND COLUMN_NAME IN ('id', 'contest_id'))
            OR (TABLE_NAME = 'id_worker_registry' AND COLUMN_NAME IN ('id', 'worker_id', 'reserved_until_ms')))
        ORDER BY TABLE_NAME, ORDINAL_POSITION`,
     );
@@ -148,6 +164,7 @@ describe.runIf(runMysqlTests)('contest TypeORM event store', () => {
       'contest_event',
       'contest_event_stream',
       'contest_user',
+      'file',
       'id_worker_registry',
     ]);
     expect(streamUkColumns).toEqual([]);
@@ -163,14 +180,23 @@ describe.runIf(runMysqlTests)('contest TypeORM event store', () => {
         'id',
         'uk',
         'name',
-        'contest',
+        'title',
+        'start_at',
+        'duration_s',
+        'frozen_duration_s',
+        'banner',
+        'ref_links',
         'problems',
         'markers',
         'series',
         'sorter',
         'contributors',
+        'srk_file_id',
+        'view_count',
+        'redirect_uk',
         'created_at',
         'updated_at',
+        'deleted_at',
       ],
       contest_event: [
         'id',
@@ -218,6 +244,19 @@ describe.runIf(runMysqlTests)('contest TypeORM event store', () => {
         'created_at',
         'updated_at',
       ],
+      file: [
+        'id',
+        'contest_id',
+        'category',
+        'name',
+        'path',
+        'size',
+        'hash_type',
+        'hash_value',
+        'created_at',
+        'updated_at',
+        'deleted_at',
+      ],
       id_worker_registry: ['id', 'worker_id', 'reserved_until_ms', 'host', 'pid', 'created_at', 'updated_at'],
     });
     expect(idColumnDefinitions).toEqual(
@@ -256,6 +295,13 @@ describe.runIf(runMysqlTests)('contest TypeORM event store', () => {
           columnKey: 'PRI',
         }),
         expect.objectContaining({
+          tableName: 'file',
+          columnName: 'id',
+          columnType: 'bigint unsigned',
+          columnKey: 'PRI',
+        }),
+        expect.objectContaining({ tableName: 'file', columnName: 'contest_id', columnType: 'bigint unsigned' }),
+        expect.objectContaining({
           tableName: 'id_worker_registry',
           columnName: 'id',
           columnType: 'bigint unsigned',
@@ -284,7 +330,9 @@ describe.runIf(runMysqlTests)('contest TypeORM event store', () => {
     await service.createContest({
       uk: serviceUk,
       name: serviceUk,
-      contest: { title: serviceUk, startAt: '2026-01-01T00:00:00Z', duration: [5, 'h'] } as any,
+      title: { fallback: serviceUk },
+      startAt: '2026-01-01T00:00:00Z',
+      duration: [5, 'h'],
       problems: [],
       markers: [],
       series: [],
@@ -308,6 +356,103 @@ describe.runIf(runMysqlTests)('contest TypeORM event store', () => {
     expect(users[0].organization).toBe('Org One');
     expect(storedUser.name).toBe('User One');
     expect(storedUser.organization).toBe('Org One');
+  });
+
+  it('keeps contest reads side-effect free and manages views and soft deletion explicitly', async () => {
+    const managementUk = `${uk}-management`;
+    createdUks.add(managementUk);
+    const service = new ContestService(typeOrmClientFor(dataSource), testIdGenerator);
+
+    await service.createContest({
+      uk: managementUk,
+      name: managementUk,
+      title: { fallback: managementUk },
+      startAt: '2026-01-01T00:00:00.999Z',
+      duration: [0.5, 'min'],
+      frozenDuration: null,
+      problems: null,
+      users: [],
+      markers: null,
+      series: null,
+      sorter: null,
+    });
+
+    const before = await service.getContestWithUsers(managementUk, false);
+    expect(before).toMatchObject({ viewCount: 0, duration: [30, 's'], problems: null });
+    expect(before.startAt).not.toContain('.999');
+
+    await service.reportView(managementUk);
+    await service.reportView(managementUk);
+    const after = await service.getContestWithUsers(managementUk, false);
+    expect(after.viewCount).toBe(2);
+    expect((await service.getContest(managementUk)).viewCount).toBe(2);
+
+    await service.deleteContest(managementUk.toUpperCase());
+    await expect(service.getContest(managementUk)).rejects.toThrow();
+    await expect(service.findContestUsers(managementUk)).rejects.toThrow();
+    await expect(service.reportView(managementUk)).rejects.toThrow();
+    expect((await service.listContests(false)).contests.some((item) => item.uk === managementUk)).toBe(false);
+    const adminItem = (await service.listContests(true)).contests.find((item) => item.uk === managementUk);
+    expect(adminItem?.deletedAt).toEqual(expect.any(String));
+    expect(await service.getContestWithUsers(managementUk, true)).toMatchObject({ viewCount: 2 });
+  });
+
+  it('only associates active files from the same contest and rejects case-insensitive self redirects', async () => {
+    const ownerUk = `${uk}-file-owner`;
+    const otherUk = `${uk}-file-other`;
+    createdUks.add(ownerUk);
+    createdUks.add(otherUk);
+    const service = new ContestService(typeOrmClientFor(dataSource), testIdGenerator);
+    const createInput = (contestUk: string): Parameters<ContestService['createContest']>[0] => ({
+      uk: contestUk,
+      name: contestUk,
+      title: { fallback: contestUk },
+      startAt: '2026-01-01T00:00:00Z',
+      duration: [5, 'h'],
+      problems: [],
+      markers: [],
+      series: [],
+      users: [],
+    });
+    await service.createContest(createInput(ownerUk));
+    await service.createContest(createInput(otherUk));
+    const owner = await service.getContest(ownerUk);
+    const other = await service.getContest(otherUk);
+    const fileRepository = dataSource.getRepository(FileEntity);
+    const saveFile = (contestId: string, name: string) => {
+      const id = testIdGenerator.nextId();
+      return fileRepository.save(
+        fileRepository.create({
+          id,
+          contestId,
+          category: '',
+          name,
+          path: `${id}/${name}`,
+          size: 1,
+          hashType: 'sha256',
+          hashValue: '0'.repeat(64),
+        }),
+      );
+    };
+    const ownFile = await saveFile(owner.id, 'own.srk.json');
+    const otherFile = await saveFile(other.id, 'other.srk.json');
+    const deletedFile = await saveFile(owner.id, 'deleted.srk.json');
+    await fileRepository.softDelete({ id: deletedFile.id });
+
+    await service.updateContest({ uk: ownerUk, srkFileID: ownFile.id });
+    expect((await service.getContest(ownerUk)).srkFileId).toBe(ownFile.id);
+    await expect(
+      service.updateContest({ uk: ownerUk, srkFileID: otherFile.id }),
+    ).rejects.toMatchObject({ code: ErrCode.FileNotFound });
+    await expect(
+      service.updateContest({ uk: ownerUk, srkFileID: deletedFile.id }),
+    ).rejects.toMatchObject({ code: ErrCode.FileNotFound });
+    await expect(
+      service.updateContest({ uk: ownerUk.toUpperCase(), redirectUK: ownerUk }),
+    ).rejects.toMatchObject({ code: ErrCode.IllegalParameters });
+
+    await service.updateContest({ uk: ownerUk, srkFileID: null });
+    expect((await service.getContest(ownerUk)).srkFileId).toBeNull();
   });
 
   it('denormalizes submit time and filters frozen non-new events during catch-up', async () => {
@@ -494,7 +639,9 @@ async function waitForMysqlFractionalSecond(dataSource: DataSource): Promise<voi
     if (microseconds >= 100_000 && microseconds <= 800_000) {
       return;
     }
-    await new Promise((resolve) => setTimeout(resolve, 10));
+    await new Promise((resolve) => {
+      setTimeout(resolve, 10);
+    });
   }
 }
 
@@ -506,7 +653,9 @@ async function waitForMysqlTimestampAfter(dataSource: DataSource, timestamp: str
     if (row.currentTimestamp > timestamp) {
       return;
     }
-    await new Promise((resolve) => setTimeout(resolve, 1));
+    await new Promise((resolve) => {
+      setTimeout(resolve, 1);
+    });
   }
 }
 
@@ -519,17 +668,31 @@ function groupColumnsByTable(rows: Array<{ tableName: string; columnName: string
 }
 
 async function createContestWithStream(dataSource: DataSource, uk: string, contestConfig: Record<string, unknown>) {
+  const title = contestConfig.title;
+  const duration = contestConfig.duration;
+  const frozenDuration = contestConfig.frozenDuration;
   const contest = await dataSource.getRepository(ContestEntity).save(
     dataSource.getRepository(ContestEntity).create({
       id: testIdGenerator.nextId(),
       uk,
       name: uk,
-      contest: contestConfig as any,
+      title: typeof title === 'string' ? { fallback: title } : (title as any),
+      startAt: new Date(String(contestConfig.startAt)),
+      durationS: contestDurationToSeconds(duration),
+      frozenDurationS:
+        frozenDuration === null || frozenDuration === undefined
+          ? null
+          : contestDurationToSeconds(frozenDuration),
+      banner: (contestConfig.banner as any) ?? null,
+      refLinks: (contestConfig.refLinks as any) ?? null,
       problems: [],
       markers: [],
       series: [],
       sorter: null,
       contributors: null,
+      srkFileId: null,
+      viewCount: 0,
+      redirectUk: null,
     }),
   );
   await dataSource.getRepository(ContestEventStreamEntity).save(

@@ -74,6 +74,8 @@ pnpm run dev
 
 Redis 用于开发和生产 SSR 页面结果缓存。Redis 不可用时服务会跳过缓存并继续未缓存 SSR；不会因为缓存层异常中断页面响应。
 
+文件上传默认使用 `FS` Provider，将对象写入当前工作目录的 `temp/file/`，并通过同源 `/file/` 路径下载；`FS_BASE_PATH` 和 `FILE_BASE_URL` 均可覆盖。Compose 模板为该目录配置了多实例共享的持久卷。选择 `TencentCloud` 时，下载 URL 默认使用 `https://cdn.algoux.cn/rankland/file/`，并且必须同时提供完整 COS 凭据、bucket 和 region。开发和生产共用同一个环境变量配置逻辑。
+
 运行时不会自动执行 migration。切换分支、拉取代码或新增 migration 后，请手动运行：
 
 ```bash
@@ -92,6 +94,7 @@ pnpm run db:migration:generate
 
 - [Contest 事件架构](docs/contest-event-architecture.md)
 - [Contest v2 API 文档](docs/contest-api.md)
+- [比赛文件存储与 Provider](docs/file-storage.md)
 - [生产者 / 消费者实现指导](docs/contest-producer-consumer-guide.md)
 - [Contest 事件实现进度](docs/contest-event-implementation-progress.md)
 - [MySQL DATETIME UTC 约定](docs/mysql-datetime-utc.md)
@@ -160,8 +163,15 @@ fnm exec --using v20.19.1 corepack pnpm@9.15.9 run test:e2e
 ```text
 POST /api/v2/contests                              x-token
 PATCH /api/v2/contests/:uk                         x-token
+GET  /api/v2/contests                              x-token
 GET  /api/v2/contests/:uk                          x-token
+DELETE /api/v2/contests/:uk                        x-token
+GET  /api/v2/public/contests
 GET  /api/v2/public/contests/:uk
+POST /api/v2/public/contests/:uk/views
+POST /api/v2/files                                 x-token, multipart
+GET  /api/v2/files/:id                             x-token
+DELETE /api/v2/files/:id                           x-token
 GET  /api/v2/contests/:uk/users                    x-token
 GET  /api/v2/contests/:uk/users/:userId            x-token
 PATCH /api/v2/contests/:uk/users/:userId           x-token
@@ -178,7 +188,7 @@ POST /api/v2/contests/:uk/events/reset             x-token
 
 `POST /api/v2/contests/:uk/events` 支持直接传 `BatchProducerEvent` 等价 JSON，也支持 raw protobuf bytes；protobuf content type 仅允许 `application/x-protobuf` 或 `application/protobuf`。`GET /api/v2/public/contests/:uk/events` 会按 `Accept` 返回 `GetContestEventsResponse` protobuf bytes 或等价 JSON。
 
-`contest.uk` 是唯一比赛标识。MySQL 表字段使用 snake_case；例如 `contest_event_stream` 只保存 `contest_id`、事件高水位和 producer lock，不保存冗余 `uk`。接口、DTO 和业务代码中的字段仍使用 camelCase，并由 TypeORM 映射到 snake_case 列。
+`uk` 是唯一比赛标识。MySQL 表字段使用 snake_case；例如 `contest_event_stream` 只保存 `contest_id`、事件高水位和 producer lock，不保存冗余 `uk`。接口、DTO 和业务代码中的字段仍使用 camelCase，并由 TypeORM 映射到 snake_case 列。
 
 ## 构建
 
@@ -203,10 +213,19 @@ REDIS_PORT=6379 \
 REDIS_DB=0 \
 REDIS_PASS=... \
 AUTH_TOKEN=... \
+FILE_PROVIDER=TencentCloud \
+FILE_BASE_URL=https://cdn.algoux.cn/rankland/file/ \
+FS_BASE_PATH= \
+COS_SECRET_ID=... \
+COS_SECRET_KEY=... \
+COS_DOMAIN= \
+COS_BUCKET=... \
+COS_REGION=... \
+COS_BASE_PATH=rankland/file/ \
 fnm exec --using v20.19.1 corepack pnpm@9.15.9 run start
 ```
 
-`NODE_ENV=production` 下必须提供 `MYSQL_HOST`、`MYSQL_USER`、`MYSQL_PASS` 和 `MYSQL_DB`。生产启动不会自动迁移数据库。
+`NODE_ENV=production` 下必须提供 `MYSQL_HOST`、`MYSQL_USER`、`MYSQL_PASS` 和 `MYSQL_DB`。文件 Provider 默认是 `FS`；Compose 使用 `rankland-files` 命名卷持久化并在多实例间共享文件。显式选择 `TencentCloud` 时还必须提供 COS secret、bucket 和 region，`COS_DOMAIN` 可选。生产启动不会自动迁移数据库。
 Redis 配置未提供时会使用 `127.0.0.1:6379/0`，仅影响 SSR 页面缓存。
 
 ## 开发指南

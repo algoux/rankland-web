@@ -28,6 +28,7 @@ import { BwcxClientVueClientRoutesMapId } from 'bwcx-client-vue/server';
 import { clientRoutesMap } from '@common/router/client-routes';
 import TypeOrmClient from './database/typeorm-client';
 import RedisConfig from './configs/redis/redis.config';
+import FileConfig, { DEFAULT_FS_FILE_BASE_URL, FileProviderKey } from './configs/file/file.config';
 import { RedisClientId } from './container-ids';
 import IdGeneratorService from './services/id-generator.service';
 
@@ -76,6 +77,7 @@ export default class OurApp extends App {
   };
 
   protected multerOptions: IAppConfig['multerOptions'] = {
+    preservePath: true,
     limits: {
       fileSize: 8 * 1024 * 1024,
     },
@@ -94,6 +96,7 @@ export default class OurApp extends App {
 
   protected async beforeWire() {
     const redisConfig = getDependency<RedisConfig>(RedisConfig, this.container);
+    const fileConfig = getDependency<FileConfig>(FileConfig, this.container);
     this.redisClient = new Redis({
       host: redisConfig.host,
       port: redisConfig.port,
@@ -127,6 +130,18 @@ export default class OurApp extends App {
         extensions: false,
       }),
     );
+    if (fileConfig.provider === FileProviderKey.FS) {
+      this.instance.use(
+        mount(
+          DEFAULT_FS_FILE_BASE_URL.replace(/\/+$/, ''),
+          koaStatic(fileConfig.fs.basePath, {
+            index: false,
+            maxage: 0,
+            extensions: false,
+          }),
+        ),
+      );
+    }
     // serve static files (remove it if use other way to serve static files like CDN)
     this.instance.use(
       mount(

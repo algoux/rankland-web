@@ -17,4 +17,12 @@ registerErrCodeConfigs({
   [ErrCode.ContestEventIdGap]: '事件 ID 不连续',
   [ErrCode.ContestEventIdConflict]: '事件 ID 已存在但内容不一致',
   [ErrCode.ContestEventStreamRevisionMismatch]: '事件流版本不匹配',
+
+  // File
+  [ErrCode.FileNotFound]: '该文件未找到',
+  [ErrCode.FileInvalidName]: '文件名非法',
+  [ErrCode.FileUploadTooLarge]: '上传文件过大',
+  [ErrCode.FileUploadAccessDenied]: '文件上传被存储服务拒绝',
+  [ErrCode.FileUploadUnavailable]: '文件存储服务暂不可用',
+  [ErrCode.FileUploadUnknown]: '文件上传失败',
 });

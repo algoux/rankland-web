@@ -1,6 +1,6 @@
 # Contest Event Architecture
 
-Updated: 2026-07-14
+Updated: 2026-07-15
 
 ## Goals
 
@@ -89,7 +89,7 @@ Contest event `TimeDuration` values use nanosecond semantics internally.
 
 Solution result values in events should be raw judge results whenever the upstream data source exposes them. They intentionally differ from SRK `SolutionResultLite` / `SolutionResultFull`: `FZ` maps to the SRK `?` frozen/unknown display state and is deprecated, but remains producer-supported as a fallback when the raw frozen result cannot be retrieved. `FB` is a computed ranklist property derived from AC events, so append and catch-up event payloads must not contain `FB`. If a retained legacy payload already contains deprecated `FB`, the catch-up codec normalizes it back to raw `AC` before responding.
 
-When `contest.frozenDuration` is positive, catch-up computes `frozenStartNs = duration - frozenDuration`. If a solution's `NEW_SOLUTION.time` is at or after that start, the HTTP catch-up response hides that solution's progress, result settle, and result change events. The new-solution event itself remains visible.
+When persisted `frozen_duration_s` is positive, catch-up computes the absolute freeze boundary as `start_at + duration_s - frozen_duration_s`. Because producer event times are relative to `start_at`, the comparison value is stored in the snapshot as `frozenStartNs = (duration_s - frozen_duration_s) * 1e9`. If a solution's `NEW_SOLUTION.time` is at or after that start, the HTTP catch-up response hides that solution's progress, result settle, and result change events. The new-solution event itself remains visible.
 
 ## Consumer Protocol
 

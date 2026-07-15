@@ -50,6 +50,9 @@ describe('contest entity nullable output fields', () => {
   });
 
   it('applies to optional contest fields exposed in contest responses', () => {
-    expectNullableOutputTransformer(ContestEntity, ['sorter', 'contributors']);
+    expectNullableOutputTransformer(ContestEntity, ['contributors']);
+    for (const propertyName of ['problems', 'markers', 'series', 'sorter']) {
+      expect(findColumnTransformer(ContestEntity, propertyName), `ContestEntity.${propertyName}`).toBeUndefined();
+    }
   });
 });

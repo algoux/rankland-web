@@ -8,8 +8,10 @@ import {
 } from '@common/proto/rankland_live_contest';
 import {
   AppendContestEventsReqDTO,
+  CreateContestReqDTO,
   GetPublicContestEventsReqDTO,
   MAX_APPEND_CONTEST_EVENTS_BATCH_SIZE,
+  UpdateContestReqDTO,
 } from '@common/modules/contest/contest.dto';
 
 function createProgressEvents(count: number) {
@@ -43,7 +45,9 @@ describe('contest API contract', () => {
     const result = await client.createContest({
       uk: 'contest-a',
       name: 'Contest A',
-      contest: { title: 'Contest A', startAt: '2026-01-01T00:00:00Z', duration: [5, 'h'] },
+      title: { fallback: 'Contest A' },
+      startAt: '2026-01-01T00:00:00Z',
+      duration: [5, 'h'],
       problems: [],
       users: [],
       markers: [],
@@ -52,6 +56,44 @@ describe('contest API contract', () => {
 
     expect(result._id).toBe('70346717215600640');
     expect(typeof result._id).toBe('string');
+  });
+
+  it('requires an i18n title and second-precision contest durations', async () => {
+    const base = {
+      uk: 'contest-a',
+      name: 'Contest A',
+      title: { fallback: 'Contest A', 'zh-CN': '比赛 A' },
+      startAt: '2026-01-01T00:00:00Z',
+      duration: [0.5, 'min'],
+      frozenDuration: [1, 'h'],
+      problems: null,
+      users: [],
+      markers: null,
+      series: null,
+      sorter: null,
+    };
+    const valid = plainToInstance(CreateContestReqDTO, base);
+    const stringTitle = plainToInstance(CreateContestReqDTO, { ...base, title: 'Contest A' });
+    const millisecondDuration = plainToInstance(CreateContestReqDTO, { ...base, duration: [1000, 'ms'] });
+    const fractionalSecond = plainToInstance(CreateContestReqDTO, { ...base, duration: [0.5, 's'] });
+    const nullableUpdate = plainToInstance(UpdateContestReqDTO, {
+      uk: 'contest-a',
+      problems: null,
+      markers: null,
+      series: null,
+      sorter: null,
+    });
+
+    await expect(validationProperties(valid)).resolves.toEqual([]);
+    await expect(validationProperties(stringTitle)).resolves.toContain('title');
+    await expect(validationProperties(millisecondDuration)).resolves.toContain('duration');
+    await expect(validationProperties(fractionalSecond)).resolves.toContain('duration');
+    await expect(validationProperties(nullableUpdate)).resolves.toEqual([]);
+
+    for (const duration of [[1, 's'], [1, 'min'], [1, 'h'], [1, 'd']] as const) {
+      const withSupportedUnit = plainToInstance(CreateContestReqDTO, { ...base, duration });
+      await expect(validationProperties(withSupportedUnit)).resolves.not.toContain('duration');
+    }
   });
 
   it('requires streamRevision on append requests', async () => {

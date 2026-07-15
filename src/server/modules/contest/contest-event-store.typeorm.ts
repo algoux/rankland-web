@@ -5,7 +5,7 @@ import { ContestEntity } from '@server/entities/contest.entity';
 import { ContestEventEntity } from '@server/entities/contest-event.entity';
 import { ContestEventStreamEntity } from '@server/entities/contest-event-stream.entity';
 import { rankland_live_contest_common } from '@common/proto/rankland_live_contest';
-import { getFrozenStartNs } from './contest-time';
+import { getFrozenStartNsFromSeconds } from './contest-time';
 import {
   ContestEventInsertInput,
   ContestEventStore,
@@ -88,7 +88,7 @@ export default class TypeOrmContestEventStore implements ContestEventStore {
         settledEventIdsBySolutionId: new Map(
           settledRows.map((row) => [Number(row.solutionId), Number(row.eventId)] as [number, number]),
         ),
-        frozenStartNs: getFrozenStartNs(contest.contest),
+        frozenStartNs: getFrozenStartNsFromSeconds(contest.durationS, contest.frozenDurationS),
       };
     });
   }

@@ -6,6 +6,7 @@ import { ContestEventEntity } from '@server/entities/contest-event.entity';
 import { ContestUserEntity } from '@server/entities/contest-user.entity';
 import { ContestEventStreamEntity } from '@server/entities/contest-event-stream.entity';
 import { IdWorkerRegistryEntity } from '@server/entities/id-worker-registry.entity';
+import { FileEntity } from '@server/entities/file.entity';
 import MysqlConfig from '@server/configs/mysql/mysql.config';
 import { mysql2UtcConnector } from './mysql2-utc-connector';
 
@@ -26,7 +27,14 @@ export function getMysqlDataSourceOptions(mysqlConfig: MysqlDataSourceConfig): D
     bigNumberStrings: true,
     synchronize: false,
     migrationsRun: false,
-    entities: [ContestEntity, ContestUserEntity, ContestEventStreamEntity, ContestEventEntity, IdWorkerRegistryEntity],
+    entities: [
+      ContestEntity,
+      ContestUserEntity,
+      ContestEventStreamEntity,
+      ContestEventEntity,
+      FileEntity,
+      IdWorkerRegistryEntity,
+    ],
     migrations: [path.join(__dirname, 'migrations/*{.ts,.js}')],
     migrationsTableName: 'typeorm_migrations',
   };

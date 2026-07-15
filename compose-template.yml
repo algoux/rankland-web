@@ -28,6 +28,17 @@ x-app-service: &app-service
     REDIS_DB: ${REDIS_DB:-0}
     REDIS_PASS: ${REDIS_PASS:-}
     AUTH_TOKEN: ${AUTH_TOKEN:?AUTH_TOKEN is required}
+    FILE_PROVIDER: ${FILE_PROVIDER:-FS}
+    FILE_BASE_URL: ${FILE_BASE_URL:-}
+    FS_BASE_PATH: ${FS_BASE_PATH:-/app/temp/file/}
+    COS_SECRET_ID: ${COS_SECRET_ID:-}
+    COS_SECRET_KEY: ${COS_SECRET_KEY:-}
+    COS_DOMAIN: ${COS_DOMAIN:-}
+    COS_BUCKET: ${COS_BUCKET:-}
+    COS_REGION: ${COS_REGION:-}
+    COS_BASE_PATH: ${COS_BASE_PATH:-rankland/file/}
+  volumes:
+    - rankland-files:${FS_BASE_PATH:-/app/temp/file/}
   healthcheck:
     test: ['CMD', 'curl', '-f', 'http://localhost:3000/api/checkHealth']
     interval: 3s
@@ -49,3 +60,6 @@ services:
     container_name: rankland-web
     ports:
       - 3000:3000
+
+volumes:
+  rankland-files:

@@ -11,13 +11,11 @@ const TimeUnit = rankland_live_contest_common.TimeUnit;
 export const contestFixture = {
   uk: CONTEST_UK,
   name: 'Temporary Live Contest',
-  contest: {
-    title: 'Temporary Live Contest',
-    startAt: '2026-06-06T18:00:00+08:00',
-    duration: [5, 'h'],
-    frozenDuration: [1, 'h'],
-    refLinks: [{ title: 'local public page', link: `/api/v2/public/contests/${CONTEST_UK}` }],
-  },
+  title: { fallback: 'Temporary Live Contest' },
+  startAt: '2026-06-06T18:00:00+08:00',
+  duration: [5, 'h'],
+  frozenDuration: [1, 'h'],
+  refLinks: [{ title: 'local public page', link: `/api/v2/public/contests/${CONTEST_UK}` }],
   problems: [
     {
       alias: 'A',

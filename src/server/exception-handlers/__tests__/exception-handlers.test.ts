@@ -3,6 +3,7 @@ import '@server/err-code-configs/general.err-code';
 import LogicExceptionHandler from '../logic.exception-handler';
 import HttpExceptionHandler from '../http.exception-handler';
 import ValidationExceptionHandler from '../validation.exception-handler';
+import GlobalExceptionHandler from '../global.exception-handler';
 import LogicException from '@server/exceptions/logic.exception';
 import HttpException from '@server/exceptions/http.exception';
 import { ValidationException } from 'bwcx-ljsm';
@@ -77,5 +78,22 @@ describe('exception handlers (content-negotiated)', () => {
     new ValidationExceptionHandler().catch(new ValidationException('req', []), ctx);
     expect(ctx.status).toBe(422);
     expect(ctx.body).toMatchObject({ success: false, code: ErrCode.IllegalParameters });
+  });
+
+  it('GlobalExceptionHandler maps the multipart file-size limit to a file business error', async () => {
+    const ctx = createCtx({ url: '/api/v2/files' });
+    const error = Object.assign(new Error('File too large'), {
+      name: 'MulterError',
+      code: 'LIMIT_FILE_SIZE',
+    });
+
+    await new GlobalExceptionHandler().catch(error, ctx);
+
+    expect(ctx.status).toBe(200);
+    expect(ctx.body).toEqual({
+      success: false,
+      code: ErrCode.FileUploadTooLarge,
+      msg: '上传文件过大',
+    });
   });
 });

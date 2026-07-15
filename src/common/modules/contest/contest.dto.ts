@@ -12,13 +12,47 @@ import {
   IsOptional,
   IsString,
   Length,
+  Matches,
   Max,
   Min,
+  Validate,
+  ValidateIf,
   ValidateNested,
+  ValidationArguments,
+  ValidatorConstraint,
+  ValidatorConstraintInterface,
 } from 'class-validator';
 import type * as srk from '@algoux/standard-ranklist';
+import { contestDurationToSeconds, isI18NStringSet } from './contest-metadata';
 
 export const MAX_APPEND_CONTEST_EVENTS_BATCH_SIZE = 1000;
+
+@ValidatorConstraint({ name: 'isI18NStringSet', async: false })
+class IsI18NStringSetConstraint implements ValidatorConstraintInterface {
+  public validate(value: unknown): boolean {
+    return isI18NStringSet(value);
+  }
+
+  public defaultMessage(args: ValidationArguments): string {
+    return `${args.property} must be an i18n object with a non-empty fallback and string values`;
+  }
+}
+
+@ValidatorConstraint({ name: 'isSecondPrecisionDuration', async: false })
+class IsSecondPrecisionDurationConstraint implements ValidatorConstraintInterface {
+  public validate(value: unknown): boolean {
+    try {
+      contestDurationToSeconds(value);
+      return true;
+    } catch {
+      return false;
+    }
+  }
+
+  public defaultMessage(args: ValidationArguments): string {
+    return `${args.property} must use s, min, h, or d and resolve to whole seconds`;
+  }
+}
 
 // #region Nested DTOs
 
@@ -50,36 +84,6 @@ export class StyleDTO {
   @IsOptional()
   @IsString()
   public backgroundColor?: string | { light: string; dark: string };
-}
-
-export class ContestDTO {
-  @IsNotEmpty()
-  public title: string | srk.I18NStringSet;
-
-  @IsString()
-  @IsNotEmpty()
-  public startAt: string;
-
-  @IsArray()
-  @IsNotEmpty()
-  @ArrayMinSize(2)
-  @ArrayMaxSize(2)
-  public duration: srk.TimeDuration;
-
-  @IsOptional()
-  @IsArray()
-  @ArrayMinSize(2)
-  @ArrayMaxSize(2)
-  public frozenDuration?: srk.TimeDuration;
-
-  @IsOptional()
-  public banner?: srk.Image | srk.ImageWithLink;
-
-  @IsOptional()
-  @IsArray()
-  @ValidateNested({ each: true })
-  @Type(() => LinkWithTitleDTO)
-  public refLinks?: LinkWithTitleDTO[];
 }
 
 export class ProblemStatisticsDTO {
@@ -201,15 +205,47 @@ export class CreateContestReqDTO {
   public name: string;
 
   @FromBody()
-  @ValidateNested()
-  @Type(() => ContestDTO)
-  public contest: ContestDTO;
+  @IsObject()
+  @Validate(IsI18NStringSetConstraint)
+  public title: srk.I18NStringSet;
+
+  @FromBody()
+  @IsString()
+  @IsNotEmpty()
+  public startAt: string;
 
   @FromBody()
   @IsArray()
+  @ArrayMinSize(2)
+  @ArrayMaxSize(2)
+  @Validate(IsSecondPrecisionDurationConstraint)
+  public duration: srk.TimeDuration;
+
+  @FromBody()
+  @IsOptional()
+  @IsArray()
+  @ArrayMinSize(2)
+  @ArrayMaxSize(2)
+  @Validate(IsSecondPrecisionDurationConstraint)
+  public frozenDuration?: srk.TimeDuration | null;
+
+  @FromBody()
+  @IsOptional()
+  public banner?: srk.Image | srk.ImageWithLink | null;
+
+  @FromBody()
+  @IsOptional()
+  @IsArray()
+  @ValidateNested({ each: true })
+  @Type(() => LinkWithTitleDTO)
+  public refLinks?: LinkWithTitleDTO[] | null;
+
+  @FromBody()
+  @ValidateIf((_object, value) => value !== null)
+  @IsArray()
   @ValidateNested({ each: true })
   @Type(() => ProblemDTO)
-  public problems: ProblemDTO[];
+  public problems: ProblemDTO[] | null;
 
   @FromBody()
   @IsArray()
@@ -218,26 +254,34 @@ export class CreateContestReqDTO {
   public users: UserDTO[];
 
   @FromBody()
+  @ValidateIf((_object, value) => value !== null)
   @IsArray()
   @ValidateNested({ each: true })
   @Type(() => MarkerDTO)
-  public markers: MarkerDTO[];
+  public markers: MarkerDTO[] | null;
 
   @FromBody()
+  @ValidateIf((_object, value) => value !== null)
   @IsArray()
   @Type(() => Object)
-  public series: srk.RankSeries[];
+  public series: srk.RankSeries[] | null;
 
   @FromBody()
   @IsOptional()
   @IsObject()
-  public sorter?: srk.Sorter;
+  public sorter?: srk.Sorter | null;
 
   @FromBody()
   @IsOptional()
   @IsArray()
   @IsString({ each: true })
   public contributors?: srk.Contributor[];
+
+  @FromBody()
+  @IsOptional()
+  @IsString()
+  @Length(3, 64)
+  public redirectUK?: string | null;
 }
 
 export class CreateContestRespDTO {
@@ -258,17 +302,50 @@ export class UpdateContestReqDTO {
   public name?: string;
 
   @FromBody()
+  @ValidateIf((_object, value) => value !== undefined)
+  @IsObject()
+  @Validate(IsI18NStringSetConstraint)
+  public title?: srk.I18NStringSet;
+
+  @FromBody()
+  @ValidateIf((_object, value) => value !== undefined)
+  @IsString()
+  @IsNotEmpty()
+  public startAt?: string;
+
+  @FromBody()
+  @ValidateIf((_object, value) => value !== undefined)
+  @IsArray()
+  @ArrayMinSize(2)
+  @ArrayMaxSize(2)
+  @Validate(IsSecondPrecisionDurationConstraint)
+  public duration?: srk.TimeDuration;
+
+  @FromBody()
   @IsOptional()
-  @ValidateNested()
-  @Type(() => ContestDTO)
-  public contest?: ContestDTO;
+  @IsArray()
+  @ArrayMinSize(2)
+  @ArrayMaxSize(2)
+  @Validate(IsSecondPrecisionDurationConstraint)
+  public frozenDuration?: srk.TimeDuration | null;
+
+  @FromBody()
+  @IsOptional()
+  public banner?: srk.Image | srk.ImageWithLink | null;
+
+  @FromBody()
+  @IsOptional()
+  @IsArray()
+  @ValidateNested({ each: true })
+  @Type(() => LinkWithTitleDTO)
+  public refLinks?: LinkWithTitleDTO[] | null;
 
   @FromBody()
   @IsOptional()
   @IsArray()
   @ValidateNested({ each: true })
   @Type(() => ProblemDTO)
-  public problems?: ProblemDTO[];
+  public problems?: ProblemDTO[] | null;
 
   @FromBody()
   @IsOptional()
@@ -282,24 +359,36 @@ export class UpdateContestReqDTO {
   @IsArray()
   @ValidateNested({ each: true })
   @Type(() => MarkerDTO)
-  public markers?: MarkerDTO[];
+  public markers?: MarkerDTO[] | null;
 
   @FromBody()
   @IsOptional()
   @IsArray()
   @Type(() => Object)
-  public series?: srk.RankSeries[];
+  public series?: srk.RankSeries[] | null;
 
   @FromBody()
   @IsOptional()
   @IsObject()
-  public sorter?: srk.Sorter;
+  public sorter?: srk.Sorter | null;
 
   @FromBody()
   @IsOptional()
   @IsArray()
   @IsString({ each: true })
   public contributors?: srk.Contributor[];
+
+  @FromBody()
+  @IsOptional()
+  @IsString()
+  @Matches(/^\d+$/)
+  public srkFileID?: string | null;
+
+  @FromBody()
+  @IsOptional()
+  @IsString()
+  @Length(3, 64)
+  public redirectUK?: string | null;
 }
 
 export class ResetContestEventsReqDTO {
@@ -436,13 +525,22 @@ export class GetContestRespDTO {
   public _id: string;
   public uk: string;
   public name: string;
-  public contest: ContestDTO;
-  public problems: ProblemDTO[];
+  public title: srk.I18NStringSet;
+  public startAt: string;
+  public duration: srk.TimeDuration;
+  public frozenDuration: srk.TimeDuration | null;
+  public banner: srk.Image | srk.ImageWithLink | null;
+  public refLinks: LinkWithTitleDTO[] | null;
+  public problems: ProblemDTO[] | null;
   public users: AdminUserDTO[];
-  public markers: srk.Marker[];
-  public series: srk.RankSeries[];
-  public sorter?: srk.Sorter;
+  public markers: srk.Marker[] | null;
+  public series: srk.RankSeries[] | null;
+  public sorter: srk.Sorter | null;
   public contributors?: string[];
+  public srkFileID: string | null;
+  public viewCount: number;
+  public redirectUK: string | null;
+  public deletedAt: string | null;
 }
 
 export class GetPublicContestReqDTO {
@@ -456,13 +554,62 @@ export class GetPublicContestRespDTO {
   public _id: string;
   public uk: string;
   public name: string;
-  public contest: ContestDTO;
-  public problems: ProblemDTO[];
+  public title: srk.I18NStringSet;
+  public startAt: string;
+  public duration: srk.TimeDuration;
+  public frozenDuration: srk.TimeDuration | null;
+  public banner: srk.Image | srk.ImageWithLink | null;
+  public refLinks: LinkWithTitleDTO[] | null;
+  public problems: ProblemDTO[] | null;
   public users: UserDTO[];
-  public markers: srk.Marker[];
-  public series: srk.RankSeries[];
-  public sorter?: srk.Sorter;
+  public markers: srk.Marker[] | null;
+  public series: srk.RankSeries[] | null;
+  public sorter: srk.Sorter | null;
   public contributors?: string[];
+  public srkFileID: string | null;
+  public viewCount: number;
+  public redirectUK: string | null;
+}
+
+export class ContestSummaryDTO {
+  public _id: string;
+  public uk: string;
+  public name: string;
+  public title: srk.I18NStringSet;
+  public startAt: string;
+  public duration: srk.TimeDuration;
+  public frozenDuration: srk.TimeDuration | null;
+  public srkFileID: string | null;
+  public viewCount: number;
+  public redirectUK: string | null;
+  public createdAt: string;
+  public updatedAt: string;
+}
+
+export class AdminContestSummaryDTO extends ContestSummaryDTO {
+  public deletedAt: string | null;
+}
+
+export class GetPublicContestsRespDTO {
+  public contests: ContestSummaryDTO[];
+}
+
+export class GetContestsRespDTO {
+  public contests: AdminContestSummaryDTO[];
+}
+
+export class ReportPublicContestViewReqDTO {
+  @FromParam()
+  @IsString()
+  @IsNotEmpty()
+  public uk: string;
+}
+
+export class DeleteContestReqDTO {
+  @FromParam()
+  @IsString()
+  @IsNotEmpty()
+  public uk: string;
 }
 
 export class GetPublicContestUsersReqDTO {

@@ -1,6 +1,6 @@
 # Contest v2 API
 
-Updated: 2026-05-29
+Updated: 2026-07-15
 
 本文档描述 contest 相关 HTTP/SSE API。接口、DTO、JSON 字段使用 camelCase；MySQL 表和列使用 snake_case，并由 TypeORM entity 显式映射。
 
@@ -110,22 +110,60 @@ x-producer-id: <producer-id>
 {
   uk: string;                // 唯一比赛标识，长度 3..32
   name: string;              // 展示/管理名称，长度 3..32
-  contest: {
-    title: string | I18NStringSet;
-    startAt: string;
-    duration: TimeDuration;
-    frozenDuration?: TimeDuration;
-    banner?: Image | ImageWithLink;
-    refLinks?: Array<{ link: string; title: string }>;
-  };
-  problems: ProblemDTO[];
+  title: I18NStringSet;      // fallback 必须是非空字符串，其他值也必须是字符串
+  startAt: string;
+  duration: TimeDuration;
+  frozenDuration?: TimeDuration | null;
+  banner?: Image | ImageWithLink | null;
+  refLinks?: Array<{ link: string; title: string }> | null;
+  problems: ProblemDTO[] | null;
   users: UserDTO[];
-  markers: MarkerDTO[];
-  series: RankSeries[];
-  sorter?: Sorter;
+  markers: MarkerDTO[] | null;
+  series: RankSeries[] | null;
+  sorter?: Sorter | null;
   contributors?: string[];
+  redirectUK?: string | null;
 }
 ```
+
+HTTP 层继续使用 SRK `TimeDuration` 二元组。只接受 `s`、`min`、`h`、`d`，且必须能精确换算为非负整数秒；`ms` 和非整数秒结果会被拒绝。数据库保存 `duration_s` / `frozen_duration_s`，响应统一规范化为 `[seconds, "s"]`。`startAt` 写库前截断到整秒。
+
+比赛元数据已全部位于顶层，不再接受或返回 `contest` 包装字段。`problems`、`markers`、`series`、`sorter` 可以显式传入和返回 `null`。
+
+### 数据库存储
+
+`contest` 表最终列顺序和主要类型如下：
+
+```text
+id BIGINT UNSIGNED
+uk VARCHAR(64)
+name VARCHAR(255)
+title JSON NOT NULL
+start_at DATETIME(0) NOT NULL
+duration_s INT UNSIGNED NOT NULL
+frozen_duration_s INT UNSIGNED NULL
+banner JSON NULL
+ref_links JSON NULL
+problems JSON NULL
+markers JSON NULL
+series JSON NULL
+sorter JSON NULL
+contributors JSON NULL
+srk_file_id BIGINT UNSIGNED NULL
+view_count INT UNSIGNED NOT NULL DEFAULT 0
+redirect_uk VARCHAR(64) NULL
+created_at DATETIME(6)
+updated_at DATETIME(6)
+deleted_at DATETIME(6) NULL
+```
+
+旧 `contest` JSON 列已移除。`srk_file_id` 和 `redirect_uk` 不设置数据库外键，由业务层校验。HTTP 的 `startAt` 仍是字符串，写入 `DATETIME(0)` 前规范化到整秒；`createdAt`、`updatedAt`、`deletedAt` 继续按项目的 MySQL UTC 与 API 日期约定处理。
+
+### 关联项目兼容边界
+
+- `srk-live-crawler-oj3` 的 SRK/RLEF 文件内部继续使用嵌套 `contest`；只在调用本 API 前展开六个字段，并把字符串标题转为 `{ fallback: title }`。RLEF 远端比较也使用顶层字段。
+- `Kessoku-the-Overlay` 在 API 适配层把六个顶层字段重建为内部既有的 `contest` 对象，将 nullable 集合规范化为其现有默认值。只有实际展示比赛的 Arena 成功加载后才 best-effort 调用独立 view 上报接口。
+- 事件 protobuf 的毫秒/纳秒时间表达未改变；本次秒级限制只作用于 Contest HTTP DTO。
 
 公开用户响应会过滤 `banned`、`broadcasterToken` 等管理字段；管理用户响应会包含这些字段。
 
@@ -168,11 +206,10 @@ Body:
 {
   "uk": "contest-a",
   "name": "Contest A",
-  "contest": {
-    "title": "Contest A",
-    "startAt": "2026-01-01T00:00:00Z",
-    "duration": [5, "h"]
-  },
+  "title": { "fallback": "Contest A" },
+  "startAt": "2026-01-01T00:00:00Z",
+  "duration": [5, "h"],
+  "frozenDuration": null,
   "problems": [],
   "users": [],
   "markers": [],
@@ -200,11 +237,13 @@ PATCH /api/v2/contests/:uk
 Auth: x-token
 ```
 
-Body 中字段均为可选：`name`、`contest`、`problems`、`users`、`markers`、`series`、`sorter`、`contributors`。
+Body 中字段均为可选：`name`、`title`、`startAt`、`duration`、`frozenDuration`、`banner`、`refLinks`、`problems`、`users`、`markers`、`series`、`sorter`、`contributors`、`srkFileID`、`redirectUK`。
 
 接口语义固定为部分更新：未传字段不更新；传入字段只按外层字段整体替换，不支持 `a.b.c` 形式的深层字段局部更新。
 
 如果传入 `users` 数组，会替换当前 contest 的用户集合；未出现在新数组中的用户会被删除。传 `users: []` 表示清空用户集合。
+
+`srkFileID` 只允许在更新接口设置；非空值必须指向当前比赛名下的未删除文件，传 `null` 表示清除。`redirectUK` 的非空值必须指向另一个未删除比赛，传 `null` 表示清除。本轮只保存重定向元数据，不执行 HTTP 302 或透明代理。
 
 Data: `null`
 
@@ -222,15 +261,64 @@ Data:
   _id: string;
   uk: string;
   name: string;
-  contest: ContestDTO;
-  problems: ProblemDTO[];
+  title: I18NStringSet;
+  startAt: string;
+  duration: TimeDuration;             // 响应为 [seconds, "s"]
+  frozenDuration: TimeDuration | null;
+  banner: Image | ImageWithLink | null;
+  refLinks: Array<{ link: string; title: string }> | null;
+  problems: ProblemDTO[] | null;
   users: AdminUserDTO[];
-  markers: MarkerDTO[];
-  series: RankSeries[];
-  sorter?: Sorter;
+  markers: MarkerDTO[] | null;
+  series: RankSeries[] | null;
+  sorter: Sorter | null;
   contributors?: string[];
+  srkFileID: string | null;
+  viewCount: number;
+  redirectUK: string | null;
+  deletedAt: string | null;
 }
 ```
+
+鉴权详情允许查看已软删除比赛。公开详情及用户、事件接口均隐藏已删除比赛。读取详情不会修改 `viewCount`。
+
+### 查询全部比赛
+
+```text
+GET /api/v2/contests
+Auth: x-token
+```
+
+按主键倒序返回全部比赛，包括软删除记录：
+
+```ts
+{
+  contests: Array<{
+    _id: string;
+    uk: string;
+    name: string;
+    title: I18NStringSet;
+    startAt: string;
+    duration: TimeDuration;
+    frozenDuration: TimeDuration | null;
+    srkFileID: string | null;
+    viewCount: number;
+    redirectUK: string | null;
+    createdAt: string;
+    updatedAt: string;
+    deletedAt: string | null;
+  }>;
+}
+```
+
+### 删除比赛
+
+```text
+DELETE /api/v2/contests/:uk
+Auth: x-token
+```
+
+软删除比赛并清理比赛 ID 缓存，不级联删除用户、事件或文件。`uk` 仍然保留，之后创建同名比赛仍返回 `ContestExisted`。Data: `null`。
 
 ### 查询比赛用户
 
@@ -296,6 +384,24 @@ GET /api/v2/public/contests/:uk
 ```
 
 Data 与管理查询比赛类似，但 `users` 中不包含 `banned`、`broadcasterToken`。
+
+已删除比赛返回 `ContestNotFound`。公开详情只读取 `viewCount`，不会隐式计数。
+
+### 公开查询全部比赛
+
+```text
+GET /api/v2/public/contests
+```
+
+按主键倒序返回未删除比赛。响应为 `{ contests: [...] }`，每项严格包含 `_id`、`uk`、`name`、`title`、`startAt`、`duration`、`frozenDuration`、`srkFileID`、`viewCount`、`redirectUK`、`createdAt`、`updatedAt`。
+
+### 上报一次比赛浏览
+
+```text
+POST /api/v2/public/contests/:uk/views
+```
+
+无请求体、无需鉴权。每次有效调用使用单条原子更新令 `view_count = view_count + 1`，不做 IP、会话或重复上报限制。成功 Data: `null`；比赛不存在或已删除时返回 `ContestNotFound`。任何比赛详情或列表查询都不会自动调用本接口。
 
 ### 公开查询事件流
 

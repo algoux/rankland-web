@@ -33,3 +33,11 @@ export function getFrozenStartNs(contest: Contest | null | undefined): string | 
   const frozenStartNs = durationNs.sub(frozenDurationNs);
   return (frozenStartNs.lt(Long.ZERO) ? Long.ZERO : frozenStartNs).toString();
 }
+
+export function getFrozenStartNsFromSeconds(durationS: number, frozenDurationS: number | null): string | null {
+  if (frozenDurationS === null || frozenDurationS <= 0) {
+    return null;
+  }
+  const frozenStartS = Math.max(0, durationS - frozenDurationS);
+  return Long.fromNumber(frozenStartS).multiply(1_000_000_000).toString();
+}

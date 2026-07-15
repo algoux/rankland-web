@@ -21,7 +21,9 @@ describe('contest Snowflake ID assignment', () => {
     const result = await service.createContest({
       uk: 'contest-a',
       name: 'Contest A',
-      contest: { title: 'Contest A', startAt: '2026-01-01T00:00:00Z', duration: [5, 'h'] } as any,
+      title: { fallback: 'Contest A' },
+      startAt: '2026-01-01T00:00:00Z',
+      duration: [5, 'h'],
       problems: [],
       markers: [],
       series: [],
