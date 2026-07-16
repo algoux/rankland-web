@@ -27,6 +27,10 @@ x-app-service: &app-service
     REDIS_PORT: ${REDIS_PORT:-6379}
     REDIS_DB: ${REDIS_DB:-0}
     REDIS_PASS: ${REDIS_PASS:-}
+    # All app replicas in one deployment must share this value. Use a
+    # different namespace for every independent environment/deployment;
+    # Redis Pub/Sub is not isolated by REDIS_DB.
+    REDIS_NAMESPACE: ${REDIS_NAMESPACE:?REDIS_NAMESPACE is required}
     AUTH_TOKEN: ${AUTH_TOKEN:?AUTH_TOKEN is required}
     FILE_PROVIDER: ${FILE_PROVIDER:-FS}
     FILE_BASE_URL: ${FILE_BASE_URL:-}

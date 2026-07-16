@@ -2,6 +2,7 @@
 .idea
 node_modules/
 .agents/
+.planning/
 skills-lock.json
 dist/
 /app/

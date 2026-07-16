@@ -16,9 +16,9 @@ export class InMemoryContestEventStore implements ContestEventStore {
   private readonly events = new Map<string, ContestStoredEvent[]>();
   private readonly contestConfigs = new Map<string, any>();
 
-  public addContest(uk: string, options: { contest?: any } = {}) {
+  public addContest(uk: string, options: { contest?: any; contestId?: string } = {}) {
     this.streams.set(uk, {
-      contestId: uk,
+      contestId: options.contestId ?? uk,
       uk,
       lastEventId: 0,
       streamRevision: 1,
@@ -34,11 +34,12 @@ export class InMemoryContestEventStore implements ContestEventStore {
     uk: string,
     runner: (transaction: ContestEventTransaction) => Promise<T>,
   ): Promise<T> {
-    const stream = this.getExistingStream(uk);
-    const transaction = new InMemoryContestEventTransaction(stream, this.events.get(uk));
+    const canonicalUk = this.resolveUk(uk);
+    const stream = this.getExistingStream(canonicalUk);
+    const transaction = new InMemoryContestEventTransaction({ ...stream }, this.events.get(canonicalUk));
     const result = await runner(transaction);
-    this.streams.set(uk, { ...transaction.stream });
-    this.events.set(uk, transaction.events);
+    this.streams.set(canonicalUk, { ...transaction.stream });
+    this.events.set(canonicalUk, transaction.events);
     return result;
   }
 
@@ -52,9 +53,20 @@ export class InMemoryContestEventStore implements ContestEventStore {
     return { ...this.getExistingStream(uk) };
   }
 
+  public async getStreamStates(contestIds: readonly string[]): Promise<ContestStreamState[]> {
+    if (contestIds.length === 0) {
+      return [];
+    }
+    const contestIdSet = new Set(contestIds);
+    return [...this.streams.values()]
+      .filter((stream) => contestIdSet.has(stream.contestId))
+      .map((stream) => ({ ...stream }));
+  }
+
   public async readEventsSnapshot(uk: string, afterEventId: number, limit: number): Promise<ContestEventsSnapshot> {
-    const stream = this.getExistingStream(uk);
-    const currentRevisionEvents = (this.events.get(uk) || [])
+    const canonicalUk = this.resolveUk(uk);
+    const stream = this.getExistingStream(canonicalUk);
+    const currentRevisionEvents = (this.events.get(canonicalUk) || [])
       .filter((event) => event.streamRevision === stream.streamRevision)
       .sort((a, b) => a.eventId - b.eventId);
     const page = currentRevisionEvents
@@ -65,23 +77,29 @@ export class InMemoryContestEventStore implements ContestEventStore {
       stream: { ...stream },
       events: page,
       settledEventIdsBySolutionId: collectSettledEventIdsBySolutionId(currentRevisionEvents, afterEventId),
-      frozenStartNs: getFrozenStartNs(this.contestConfigs.get(uk)),
+      frozenStartNs: getFrozenStartNs(this.contestConfigs.get(canonicalUk)),
     };
   }
 
   private getExistingStream(uk: string): ContestStreamState {
-    const stream = this.streams.get(uk);
+    const stream = this.streams.get(this.resolveUk(uk));
     if (!stream) {
       throw new LogicException(ErrCode.ContestNotFound, `contest ${uk} not found`);
     }
     return stream;
   }
+
+  private resolveUk(uk: string): string {
+    if (this.streams.has(uk)) {
+      return uk;
+    }
+    const normalizedUk = uk.toLowerCase();
+    const canonicalUk = [...this.streams.keys()].find((candidate) => candidate.toLowerCase() === normalizedUk);
+    return canonicalUk ?? uk;
+  }
 }
 
-function collectSettledEventIdsBySolutionId(
-  events: ContestStoredEvent[],
-  afterEventId: number,
-): Map<number, number> {
+function collectSettledEventIdsBySolutionId(events: ContestStoredEvent[], afterEventId: number): Map<number, number> {
   const result = new Map<number, number>();
   for (const event of events) {
     if (event.eventId <= afterEventId || event.solutionId === undefined || event.solutionId === null) {
@@ -101,10 +119,7 @@ function collectSettledEventIdsBySolutionId(
 class InMemoryContestEventTransaction implements ContestEventTransaction {
   public readonly events: ContestStoredEvent[];
 
-  public constructor(
-    public readonly stream: ContestStreamState,
-    events: ContestStoredEvent[] = [],
-  ) {
+  public constructor(public readonly stream: ContestStreamState, events: ContestStoredEvent[] = []) {
     this.events = events.map((event) => ({ ...event, payloadBytes: Buffer.from(event.payloadBytes) }));
   }
 

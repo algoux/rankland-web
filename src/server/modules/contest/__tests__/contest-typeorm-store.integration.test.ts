@@ -13,9 +13,7 @@ import IdGeneratorService from '@server/services/id-generator.service';
 import ContestService from '../contest.service';
 import TypeOrmContestEventStore from '../contest-event-store.typeorm';
 import ContestEventStreamService from '../contest-event-stream.service';
-import {
-  rankland_live_contest_common,
-} from '@common/proto/rankland_live_contest';
+import { rankland_live_contest_common } from '@common/proto/rankland_live_contest';
 import { parseProducerBatchJson } from '../contest-event-codec';
 import { ContestClientEventBO } from '../contest-event-bo';
 import { contestDurationToSeconds } from '@common/modules/contest/contest-metadata';
@@ -127,6 +125,48 @@ describe.runIf(runMysqlTests)('contest TypeORM event store', () => {
     expect(storedIds.map((row) => String(row.id))).toHaveLength(2);
     expect(storedIds.every((row) => /^\d+$/.test(String(row.id)))).toBe(true);
     expect(BigInt(storedIds[1].id)).toBeGreaterThan(BigInt(storedIds[0].id));
+  });
+
+  it('batch-reads canonical stream identity and filters soft-deleted contests', async () => {
+    const canonicalUk = `${uk}-CaseVariant`;
+    const deletedUk = `${uk}-deleted`;
+    createdUks.add(canonicalUk);
+    createdUks.add(deletedUk);
+    const contestConfig = {
+      title: canonicalUk,
+      startAt: '2026-01-01T00:00:00Z',
+      duration: [5, 'h'],
+    };
+    await createContestWithStream(dataSource, canonicalUk, contestConfig);
+    await createContestWithStream(dataSource, deletedUk, { ...contestConfig, title: deletedUk });
+    const canonicalContest = await dataSource.getRepository(ContestEntity).findOneByOrFail({ uk: canonicalUk });
+    const deletedContest = await dataSource.getRepository(ContestEntity).findOneByOrFail({ uk: deletedUk });
+    await dataSource
+      .getRepository(ContestEventStreamEntity)
+      .update({ contestId: canonicalContest.id }, { lastEventId: 12, streamRevision: 3 });
+    await dataSource.getRepository(ContestEntity).softDelete({ id: deletedContest.id });
+
+    const service = new ContestEventStreamService(
+      new TypeOrmContestEventStore(typeOrmClientFor(dataSource), testIdGenerator),
+    );
+    const resolved = await service.getAuthoritativeStreamState(canonicalUk.toUpperCase());
+    const states = await service.getAuthoritativeStreamStates([canonicalContest.id, deletedContest.id]);
+
+    expect(resolved).toMatchObject({
+      contestId: canonicalContest.id,
+      uk: canonicalUk,
+      lastEventId: 12,
+      streamRevision: 3,
+    });
+    expect(states).toEqual([
+      expect.objectContaining({
+        contestId: canonicalContest.id,
+        uk: canonicalUk,
+        lastEventId: 12,
+        streamRevision: 3,
+      }),
+    ]);
+    await expect(service.getAuthoritativeStreamStates([])).resolves.toEqual([]);
   });
 
   it('uses normalized table and column names while keeping uk only on contest', async () => {
@@ -427,16 +467,18 @@ describe.runIf(runMysqlTests)('contest TypeORM event store', () => {
     const fileRepository = dataSource.getRepository(FileEntity);
     const createFile = async (contestId: string, name: string) => {
       const id = testIdGenerator.nextId();
-      return fileRepository.save(fileRepository.create({
-        id,
-        contestId,
-        category: 'RankMain',
-        name,
-        path: `${id}/${name}`,
-        size: 1,
-        hashType: 'sha256',
-        hashValue: '0'.repeat(64),
-      }));
+      return fileRepository.save(
+        fileRepository.create({
+          id,
+          contestId,
+          category: 'RankMain',
+          name,
+          path: `${id}/${name}`,
+          size: 1,
+          hashType: 'sha256',
+          hashValue: '0'.repeat(64),
+        }),
+      );
     };
     const staticFile = await createFile(staticContest.id, `${staticUk}.srk.json`);
     const deletedFile = await createFile(deletedContest.id, `${deletedUk}.srk.json`);
@@ -497,15 +539,15 @@ describe.runIf(runMysqlTests)('contest TypeORM event store', () => {
 
     await service.updateContest({ uk: ownerUk, srkFileID: ownFile.id });
     expect((await service.getContest(ownerUk)).srkFileId).toBe(ownFile.id);
-    await expect(
-      service.updateContest({ uk: ownerUk, srkFileID: otherFile.id }),
-    ).rejects.toMatchObject({ code: ErrCode.FileNotFound });
-    await expect(
-      service.updateContest({ uk: ownerUk, srkFileID: deletedFile.id }),
-    ).rejects.toMatchObject({ code: ErrCode.FileNotFound });
-    await expect(
-      service.updateContest({ uk: ownerUk.toUpperCase(), redirectUK: ownerUk }),
-    ).rejects.toMatchObject({ code: ErrCode.IllegalParameters });
+    await expect(service.updateContest({ uk: ownerUk, srkFileID: otherFile.id })).rejects.toMatchObject({
+      code: ErrCode.FileNotFound,
+    });
+    await expect(service.updateContest({ uk: ownerUk, srkFileID: deletedFile.id })).rejects.toMatchObject({
+      code: ErrCode.FileNotFound,
+    });
+    await expect(service.updateContest({ uk: ownerUk.toUpperCase(), redirectUK: ownerUk })).rejects.toMatchObject({
+      code: ErrCode.IllegalParameters,
+    });
 
     await service.updateContest({ uk: ownerUk, srkFileID: null });
     expect((await service.getContest(ownerUk)).srkFileId).toBeNull();
@@ -668,9 +710,7 @@ describe.runIf(runMysqlTests)('contest TypeORM event store', () => {
         'SELECT CAST(updated_at AS CHAR(26)) AS updatedAt FROM contest_user WHERE id = ?',
         [user.id],
       );
-      const secondPrecisionTables = rows
-        .filter((row) => Number(row.microseconds) === 0)
-        .map((row) => row.tableName);
+      const secondPrecisionTables = rows.filter((row) => Number(row.microseconds) === 0).map((row) => row.tableName);
 
       expect(secondPrecisionTables).toEqual([]);
       expect(secondUserUpdate.updatedAt > firstUserUpdate.updatedAt).toBe(true);
@@ -703,9 +743,7 @@ async function waitForMysqlFractionalSecond(dataSource: DataSource): Promise<voi
 
 async function waitForMysqlTimestampAfter(dataSource: DataSource, timestamp: string): Promise<void> {
   for (;;) {
-    const [row] = await dataSource.query(
-      'SELECT CAST(CURRENT_TIMESTAMP(6) AS CHAR(26)) AS currentTimestamp',
-    );
+    const [row] = await dataSource.query('SELECT CAST(CURRENT_TIMESTAMP(6) AS CHAR(26)) AS currentTimestamp');
     if (row.currentTimestamp > timestamp) {
       return;
     }
@@ -736,9 +774,7 @@ async function createContestWithStream(dataSource: DataSource, uk: string, conte
       startAt: new Date(String(contestConfig.startAt)),
       durationS: contestDurationToSeconds(duration),
       frozenDurationS:
-        frozenDuration === null || frozenDuration === undefined
-          ? null
-          : contestDurationToSeconds(frozenDuration),
+        frozenDuration === null || frozenDuration === undefined ? null : contestDurationToSeconds(frozenDuration),
       banner: (contestConfig.banner as any) ?? null,
       refLinks: (contestConfig.refLinks as any) ?? null,
       problems: [],

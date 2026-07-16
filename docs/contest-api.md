@@ -1,6 +1,6 @@
 # Contest v2 API
 
-Updated: 2026-07-15
+Updated: 2026-07-16
 
 本文档描述 contest 相关 HTTP/SSE API。接口、DTO、JSON 字段使用 camelCase；MySQL 表和列使用 snake_case，并由 TypeORM entity 显式映射。
 
@@ -542,7 +542,9 @@ append 请求的 `streamRevision` 必须等于服务端当前 `contest_event_str
 
 append 请求中的 solution result / previousResult 优先使用原始评测结果。服务端不会拒绝 `FZ`，仅当数据源无法获取封榜期间的原始结果时才建议用它作为兜底。但当前服务端会拒绝包含 `FB` 的 event batch；first blood 应由消费者或榜单计算层根据原始 AC 事件推导。
 
-事件追加成功提交事务后，服务端才会发送 SSE 通知。
+事件追加成功提交事务后，服务端才会宣布新的事件高水位：先即时通知写入实例的本机 SSE
+连接，再 best-effort 发布 Redis Pub/Sub 供其他实例扇出。Hub、序列化、日志或 Redis
+通知失败都不会把已经提交的追加响应改成失败。
 
 ## 事件消费 API
 
@@ -557,7 +559,7 @@ Query:
 ```ts
 {
   afterEventId?: number;       // 默认 0
-  limit?: number;              // 默认 1000，服务端限制 1..5000
+  limit?: number;              // 默认 1000，服务端限制 1..1000
   streamRevision: number;      // 必填，客户端本地事件流版本
   compactProgress?: boolean;   // URL 中传 compactProgress=false 才会关闭；默认 true
 }
@@ -627,6 +629,14 @@ GET /api/v2/public/contests/:uk/event-stream/notifications
 Content-Type: text/event-stream; charset=utf-8
 ```
 
+响应同时保持以下 SSE headers：
+
+```text
+Cache-Control: no-cache, no-transform
+Connection: keep-alive
+X-Accel-Buffering: no
+```
+
 连接建立后，服务端会先写：
 
 ```text
@@ -646,6 +656,34 @@ data: {"uk":"contest-a","latestEventId":123,"streamRevision":1}
 ```
 
 SSE 只表示“有新高水位”，不携带事件 payload。消费者必须通过 HTTP catch-up 读取事件数据。
+
+公开 named-event contract 保持不变：route 仍为上述地址，事件名仍为 `events-available`，
+payload 仍然只包含 `{uk, latestEventId, streamRevision}`，并继续发送 `retry: 1000`。服务端
+不发送 SSE `id:`，消费者也不应依赖 `Last-Event-ID`。内部使用的数据库 `contestId`、canonical
+`uk`、Redis schema version、namespace 或实例身份都不会进入公开 payload。即使 MySQL 的大小写
+不敏感 collation 把不同写法解析为同一比赛，每个连接收到的 payload `uk` 仍保持该连接请求中
+使用的原始值。
+
+服务端约每 15 秒写入一次：
+
+```text
+: heartbeat
+
+```
+
+这是 SSE comment，只用于维持传输链路；浏览器 `EventSource` 会忽略它，不会触发
+`events-available` listener，也不承担状态校准。慢客户端进入 backpressure 后会跳过 heartbeat；
+约 10 秒仍未恢复时服务端结束连接，由 `EventSource` 按既有 retry hint 重连并重新获取 initial
+高水位。
+
+同一 SSE 连接上的 `(streamRevision, latestEventId)` 只会单调前进：revision 优先比较，同 revision
+才比较 event id，因此 `(2, 0)` 会覆盖 `(1, 123)`，旧 revision 通知会被丢弃。通知允许丢失、
+重复和乱序；HTTP catch-up 始终是事件 payload 的事实源。
+
+Redis 正常且目标实例已经确认 `SUBSCRIBE` ACK 时，跨实例通知目标为 MySQL commit 后 1 秒内到达。
+Redis 断线、Pub/Sub 丢消息或写实例在 commit 后、publish 前退出时，各实例每 5 秒批量校准本机
+活跃比赛；只有在 MySQL 健康且该权威查询在 1 秒内完成的前提下，故障路径才以 6 秒为验收上限。
+Redis 故障不改变 `/api/checkHealth`，也不改变已提交 append/reset 的成功响应。
 
 ### 查询事件流
 
@@ -694,7 +732,7 @@ Data: `null`
 - `contest_event_stream.last_event_id` 重置为 `0`。
 - `contest_event_stream.stream_revision` 加 1。
 - 清空 producer lock。
-- 发送 SSE `events-available` 通知。
+- 提交后宣布新的 `streamRevision`/`latestEventId=0` 高水位；通知平面失败不改变 reset 的成功响应。
 
 ## 事件错误码
 

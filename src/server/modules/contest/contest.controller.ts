@@ -41,17 +41,11 @@ import LogicException from '@server/exceptions/logic.exception';
 import { ErrCode } from '@common/enums/err-code.enum';
 import ContestService from './contest.service';
 import ContestEventStreamService from './contest-event-stream.service';
-import ContestSseHub from './contest-sse-hub';
-import {
-  getContestEventsResponseToJson,
-  parseProducerBatchJson,
-} from './contest-event-codec';
+import ContestEventNotificationCoordinator from './contest-event-notification';
+import { getContestEventsResponseToJson, parseProducerBatchJson } from './contest-event-codec';
 import { ProtobufContract } from '@server/decorators/protobuf-contract.decorator';
 import { Sse } from '@server/decorators/sse.decorator';
-import {
-  rankland_live_contest_client,
-  rankland_live_contest_producer,
-} from '@common/proto/rankland_live_contest';
+import { rankland_live_contest_client, rankland_live_contest_producer } from '@common/proto/rankland_live_contest';
 
 @ApiController('/v2')
 export default class ContestController {
@@ -66,7 +60,7 @@ export default class ContestController {
     private readonly eventStreamService: ContestEventStreamService,
 
     @Inject()
-    private readonly sseHub: ContestSseHub,
+    private readonly notificationCoordinator: ContestEventNotificationCoordinator,
   ) {}
 
   @Api.Summary('创建实时比赛')
@@ -127,12 +121,8 @@ export default class ContestController {
   @UseGuards(AuthGuard)
   @Contract(ResetContestEventsReqDTO, null)
   public async resetContestEvents(@Data() data: ResetContestEventsReqDTO) {
-    const stream = await this.service.dropEvents(data.uk);
-    this.sseHub.notify({
-      uk: data.uk,
-      latestEventId: stream.lastEventId,
-      streamRevision: stream.streamRevision,
-    });
+    const watermark = await this.service.dropEvents(data.uk);
+    await this.notificationCoordinator.announceCommitted(watermark);
   }
 
   @Api.Summary('追加实时比赛事件')
@@ -140,9 +130,7 @@ export default class ContestController {
   @UseGuards(AuthGuard)
   @Contract(AppendContestEventsReqDTO, AppendContestEventsRespDTO)
   @ProtobufContract(rankland_live_contest_producer.BatchProducerEvent, null)
-  public async appendContestEvents(
-    @Data() data: AppendContestEventsReqDTO,
-  ): Promise<AppendContestEventsRespDTO> {
+  public async appendContestEvents(@Data() data: AppendContestEventsReqDTO): Promise<AppendContestEventsRespDTO> {
     const producerId = this.ctx.headers['x-producer-id'] as string;
     const batch = parseProducerBatchJson({ streamRevision: data.streamRevision, events: data.events });
     const result = await this.eventStreamService.appendProducerEvents({
@@ -150,12 +138,19 @@ export default class ContestController {
       producerId,
       batch,
     });
-    this.sseHub.notify({
-      uk: data.uk,
+    await this.notificationCoordinator.announceCommitted({
+      contestId: result.contestId,
+      canonicalUk: result.canonicalUk,
       latestEventId: result.lastEventId,
       streamRevision: result.streamRevision,
     });
-    return result;
+    return {
+      acceptedEventIds: result.acceptedEventIds,
+      duplicateEventIds: result.duplicateEventIds,
+      lastEventId: result.lastEventId,
+      expectedNextEventId: result.expectedNextEventId,
+      streamRevision: result.streamRevision,
+    };
   }
 
   @Api.Summary('公开查询实时比赛事件')
@@ -184,21 +179,14 @@ export default class ContestController {
   ) {
     // ContentNegotiation + SSE middleware have already opened the event stream
     // (headers, ctx.respond = false). Here we only do the business hookup.
-    const stream = await this.eventStreamService.getStreamState(data.uk);
-    this.sseHub.addClient(data.uk, this.ctx.res, {
-      uk: data.uk,
-      latestEventId: stream.lastEventId,
-      streamRevision: stream.streamRevision,
-    });
+    await this.notificationCoordinator.attachClient(data.uk, this.ctx.res);
   }
 
   @Api.Summary('查询实时比赛事件流')
   @Get('/contests/:uk/event-stream')
   @UseGuards(AuthGuard)
   @Contract(GetContestEventStreamReqDTO, GetContestEventStreamRespDTO)
-  public async getContestEventStream(
-    @Data() data: GetContestEventStreamReqDTO,
-  ): Promise<GetContestEventStreamRespDTO> {
+  public async getContestEventStream(@Data() data: GetContestEventStreamReqDTO): Promise<GetContestEventStreamRespDTO> {
     return this.eventStreamService.getStreamState(data.uk);
   }
 
@@ -272,9 +260,7 @@ export default class ContestController {
   @Get('/contests/:uk/users')
   @UseGuards(AuthGuard)
   @Contract(GetContestUsersReqDTO, GetContestUsersRespDTO)
-  public async getContestUsers(
-    @Data() data: GetContestUsersReqDTO,
-  ): Promise<GetContestUsersRespDTO> {
+  public async getContestUsers(@Data() data: GetContestUsersReqDTO): Promise<GetContestUsersRespDTO> {
     const users = await this.service.findContestUsers(data.uk);
     const filteredUsers = users.map((user) => this.service.filterUserForAdmin(user));
     return { users: filteredUsers as any };
@@ -284,9 +270,7 @@ export default class ContestController {
   @Get('/contests/:uk/users/:userId')
   @UseGuards(AuthGuard)
   @Contract(GetContestUserReqDTO, GetContestUserRespDTO)
-  public async getContestUser(
-    @Data() data: GetContestUserReqDTO,
-  ): Promise<GetContestUserRespDTO> {
+  public async getContestUser(@Data() data: GetContestUserReqDTO): Promise<GetContestUserRespDTO> {
     const user = await this.service.findContestUserById(data.uk, data.userId);
     if (!user) {
       throw new LogicException(ErrCode.ContestUserNotFound);

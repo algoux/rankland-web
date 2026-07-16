@@ -12,12 +12,7 @@ export default defineConfig({
   workers: 1,
   forbidOnly: Boolean(process.env.CI),
   retries: process.env.CI ? 1 : 0,
-  reporter: process.env.CI
-    ? [
-        ['list'],
-        ['html', { open: 'never', outputFolder: 'playwright-report' }],
-      ]
-    : 'list',
+  reporter: process.env.CI ? [['list'], ['html', { open: 'never', outputFolder: 'playwright-report' }]] : 'list',
   timeout: 60_000,
   expect: {
     timeout: 10_000,
@@ -58,6 +53,7 @@ export default defineConfig({
         MYSQL_USER: process.env.MYSQL_USER || 'blue',
         MYSQL_PASS: process.env.MYSQL_PASS || 'test',
         MYSQL_DB: 'rankland_e2e',
+        REDIS_NAMESPACE: `rankland-e2e-${PORT}`,
         LEGACY_API_BASE_SERVER: MOCK_API_BASE,
         LEGACY_API_BASE_CLIENT: MOCK_API_BASE,
         WS_BASE: `ws://127.0.0.1:${MOCK_API_PORT}`,

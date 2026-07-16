@@ -12,6 +12,7 @@ import { ErrCode } from '@common/enums/err-code.enum';
 import IdGeneratorService, { IdGenerator } from '@server/services/id-generator.service';
 import { contestDurationToSeconds, contestSecondsToDuration } from '@common/modules/contest/contest-metadata';
 import { formatDatabaseDateTimeForApi, normalizeDateTimeInput } from '@server/utils/datetime.util';
+import { ContestCommittedWatermark } from './contest-event-watermark';
 
 export type ContestUserInput = srk.User & {
   banned?: boolean;
@@ -61,12 +62,12 @@ export default class ContestService {
     return contest.id;
   }
 
-  private async findContestIdByUkWithManager(manager: EntityManager, uk: string): Promise<string> {
+  private async findContestByUkWithManager(manager: EntityManager, uk: string): Promise<ContestEntity> {
     const contest = await manager.getRepository(ContestEntity).findOne({ where: { uk } });
     if (!contest) {
       throw new LogicException(ErrCode.ContestNotFound);
     }
-    return contest.id;
+    return contest;
   }
 
   public async createContest(data: ContestCreateInput): Promise<{ _id: string }> {
@@ -148,7 +149,8 @@ export default class ContestService {
         updateData.durationS = contestDurationToSeconds(data.duration);
       }
       if (data.frozenDuration !== undefined) {
-        updateData.frozenDurationS = data.frozenDuration === null ? null : contestDurationToSeconds(data.frozenDuration);
+        updateData.frozenDurationS =
+          data.frozenDuration === null ? null : contestDurationToSeconds(data.frozenDuration);
       }
       if (data.banner !== undefined) {
         updateData.banner = data.banner;
@@ -177,11 +179,11 @@ export default class ContestService {
     });
   }
 
-  public async dropEvents(uk: string): Promise<ContestEventStreamEntity> {
+  public async dropEvents(uk: string): Promise<ContestCommittedWatermark> {
     return this.dataSource.transaction(async (manager) => {
-      const contestId = await this.findContestIdByUkWithManager(manager, uk);
+      const contest = await this.findContestByUkWithManager(manager, uk);
       const stream = await manager.getRepository(ContestEventStreamEntity).findOne({
-        where: { contestId },
+        where: { contestId: contest.id },
         lock: { mode: 'pessimistic_write' },
       });
       if (!stream) {
@@ -191,7 +193,13 @@ export default class ContestService {
       stream.streamRevision += 1;
       stream.producerId = null;
       stream.producerLockedAt = null;
-      return manager.getRepository(ContestEventStreamEntity).save(stream);
+      const saved = await manager.getRepository(ContestEventStreamEntity).save(stream);
+      return {
+        contestId: contest.id,
+        canonicalUk: contest.uk,
+        latestEventId: saved.lastEventId,
+        streamRevision: saved.streamRevision,
+      };
     });
   }
 
@@ -539,8 +547,7 @@ function contestEntityToCoreFields(contest: ContestEntity) {
     title: contest.title,
     startAt: formatDatabaseDateTimeForApi(contest.startAt)!,
     duration: contestSecondsToDuration(contest.durationS),
-    frozenDuration:
-      contest.frozenDurationS === null ? null : contestSecondsToDuration(contest.frozenDurationS),
+    frozenDuration: contest.frozenDurationS === null ? null : contestSecondsToDuration(contest.frozenDurationS),
   };
 }
 

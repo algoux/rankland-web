@@ -30,25 +30,54 @@ export default class TypeOrmContestEventStore implements ContestEventStore {
     runner: (transaction: ContestEventTransaction) => Promise<T>,
   ): Promise<T> {
     return this.typeOrmClient.getDataSource().transaction(async (manager) => {
-      const stream = await this.findLockedStream(manager, uk);
-      const transaction = new TypeOrmContestEventTransaction(manager, stream, uk, this.idGenerator);
+      const { contest, stream } = await this.findLockedStream(manager, uk);
+      const transaction = new TypeOrmContestEventTransaction(manager, stream, contest.uk, this.idGenerator);
       return runner(transaction);
     });
   }
 
   public async releaseProducerLock(uk: string): Promise<ContestStreamState> {
     return this.typeOrmClient.getDataSource().transaction(async (manager) => {
-      const stream = await this.findLockedStream(manager, uk);
+      const { contest, stream } = await this.findLockedStream(manager, uk);
       stream.producerId = null;
       stream.producerLockedAt = null;
       await manager.getRepository(ContestEventStreamEntity).save(stream);
-      return streamEntityToState(stream, uk);
+      return streamEntityToState(stream, contest.uk);
     });
   }
 
   public async getStreamState(uk: string): Promise<ContestStreamState> {
-    const { stream } = await this.findStreamByUk(this.typeOrmClient.getDataSource().manager, uk);
-    return streamEntityToState(stream, uk);
+    const { contest, stream } = await this.findStreamByUk(this.typeOrmClient.getDataSource().manager, uk);
+    return streamEntityToState(stream, contest.uk);
+  }
+
+  public async getStreamStates(contestIds: readonly string[]): Promise<ContestStreamState[]> {
+    if (contestIds.length === 0) {
+      return [];
+    }
+    const rows = await this.typeOrmClient
+      .getDataSource()
+      .getRepository(ContestEventStreamEntity)
+      .createQueryBuilder('stream')
+      .innerJoin(ContestEntity, 'contest', 'contest.id = stream.contestId')
+      .select('stream.contestId', 'contestId')
+      .addSelect('contest.uk', 'uk')
+      .addSelect('stream.lastEventId', 'lastEventId')
+      .addSelect('stream.streamRevision', 'streamRevision')
+      .where('stream.contestId IN (:...contestIds)', { contestIds: [...contestIds] })
+      .andWhere('contest.deletedAt IS NULL')
+      .getRawMany<{
+        contestId: string | number;
+        uk: string;
+        lastEventId: string | number;
+        streamRevision: string | number;
+      }>();
+    return rows.map((row) => ({
+      contestId: String(row.contestId),
+      uk: row.uk,
+      lastEventId: Number(row.lastEventId),
+      streamRevision: Number(row.streamRevision),
+    }));
   }
 
   public async readEventsSnapshot(uk: string, afterEventId: number, limit: number): Promise<ContestEventsSnapshot> {
@@ -83,7 +112,7 @@ export default class TypeOrmContestEventStore implements ContestEventStore {
         .groupBy('event.solutionId')
         .getRawMany<{ solutionId: string | number; eventId: string | number }>();
       return {
-        stream: streamEntityToState(stream, uk),
+        stream: streamEntityToState(stream, contest.uk),
         events: events.map(eventEntityToStoredEvent),
         settledEventIdsBySolutionId: new Map(
           settledRows.map((row) => [Number(row.solutionId), Number(row.eventId)] as [number, number]),
@@ -93,7 +122,10 @@ export default class TypeOrmContestEventStore implements ContestEventStore {
     });
   }
 
-  private async findLockedStream(manager: EntityManager, uk: string): Promise<ContestEventStreamEntity> {
+  private async findLockedStream(
+    manager: EntityManager,
+    uk: string,
+  ): Promise<{ contest: ContestEntity; stream: ContestEventStreamEntity }> {
     const { contest } = await this.findContestByUk(manager, uk);
     const stream = await manager.getRepository(ContestEventStreamEntity).findOne({
       where: { contestId: contest.id },
@@ -102,10 +134,13 @@ export default class TypeOrmContestEventStore implements ContestEventStore {
     if (!stream) {
       throw new LogicException(ErrCode.ContestNotFound, `contest ${uk} not found`);
     }
-    return stream;
+    return { contest, stream };
   }
 
-  private async findStreamByUk(manager: EntityManager, uk: string): Promise<{ contest: ContestEntity; stream: ContestEventStreamEntity }> {
+  private async findStreamByUk(
+    manager: EntityManager,
+    uk: string,
+  ): Promise<{ contest: ContestEntity; stream: ContestEventStreamEntity }> {
     const { contest } = await this.findContestByUk(manager, uk);
     const stream = await manager.getRepository(ContestEventStreamEntity).findOne({ where: { contestId: contest.id } });
     if (!stream) {

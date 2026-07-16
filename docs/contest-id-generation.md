@@ -85,12 +85,20 @@ renewal updating zero rows intentionally makes that process fail closed.
 
 1. Initialize the TypeORM data source.
 2. Initialize `IdGeneratorService` and claim/fence a worker.
-3. Allow bwcx to start the HTTP listener.
+3. Start `ContestEventNotificationCoordinator`, including its Redis subscriber lifecycle, SSE heartbeat, and MySQL
+   reconciliation schedule. An unavailable Redis endpoint enters a degraded state without blocking startup; a missing
+   production `REDIS_NAMESPACE` remains a configuration error.
+4. Allow bwcx to start the HTTP listener.
 
 The server therefore never accepts writes with an uninitialized generator. During shutdown, the app disposes the
-generator first (release named lock and dedicated connection), then destroys the main TypeORM data source.
+notification coordinator first: it enters draining, stops timers/listeners, closes all SSE responses, and disconnects
+the dedicated subscriber without waiting for network I/O. The HTTP server can then close without being held open by
+long-lived SSE connections. Finally the app disposes the generator (releasing its named lock and dedicated connection)
+before destroying the main TypeORM data source and closing the ordinary Redis command client.
+
 If bootstrap or startup rejects, the entry point performs the same idempotent cleanup and exits with status 1; a
-failed worker claim or missing migration cannot leave a process alive without an HTTP listener.
+failed worker claim, missing migration, or notification configuration error cannot leave a process alive without an
+HTTP listener.
 
 `SNOWFLAKE_WORKER_ID=0..1023` bypasses MySQL worker assignment only for isolated tests or tooling.
 `NODE_ENV=production` rejects this override at startup; production deployments must always use the registry,

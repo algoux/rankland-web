@@ -1,6 +1,6 @@
 # Contest Event Refactor Implementation Progress
 
-Updated: 2026-07-14
+Updated: 2026-07-16
 
 ## Decisions
 
@@ -12,6 +12,7 @@ Updated: 2026-07-14
 - Startup migration: disabled. Schema changes are applied only by explicitly running `pnpm run db:migration:run`.
 - Migration generation: `db:migration:generate` compares entities with the configured database and writes a new migration file.
 - Realtime channel: SSE notifications plus HTTP catch-up. SSE sends only `latestEventId` and `streamRevision`.
+- Notification rollout: the multi-instance event-availability implementation is complete: local Hub first, Redis Pub/Sub acceleration, unconditional MySQL reconciliation, and unchanged public SSE payload. Real two-machine and browser auto-reconnect checks remain release-environment gates.
 - Producer identity: every append request must include `x-token` and `x-producer-id`. The first producer claims the stream lock. Administrators release the lock through HTTP API.
 - Event time: stored and emitted as nanoseconds using int64-compatible values.
 - Database wall-clock time: every `DATETIME(6)` column stores a UTC wall-clock value. mysql2 encodes/decodes JavaScript `Date` values as UTC and every acquired MySQL session is initialized to `+00:00`; see [MySQL DATETIME UTC](mysql-datetime-utc.md).
@@ -85,6 +86,16 @@ Updated: 2026-07-14
 - Reset the local `rankland` database and reran the rewritten initial migration.
 - Smoke-tested v2 create/read/users/stream/append/catch-up/SSE paths locally.
 - Smoke-tested Snowflake-backed create/read/admin stream/append/catch-up paths with IDs above `Number.MAX_SAFE_INTEGER`.
+- Added a revision-first event high-water model and rebuilt the local SSE Hub around database `contestId` identity with per-client monotonic gates.
+- SSE event frames are now written atomically, slow clients retain at most one latest pending high-water mark, and connections that remain blocked for 10 seconds are closed for recovery by reconnect.
+- Added 15-second SSE comment heartbeats, active-contest tracking, terminal registration handles, and idempotent contest/all-client drain operations.
+- Added canonical contest identity reads plus one-query active-contest stream-state loading, including soft-delete filtering and empty-input short-circuiting.
+- Added the local notification coordinator with two-read SSE attachment, per-instance fixed-rate/single-flight MySQL reconciliation, missing-contest closure, and synchronous draining of pending and registered clients.
+- Added the strict namespaced Redis v1 notification adapter with a dedicated subscriber connection, explicit subscribe-ACK generations, fail-open 500 ms publishing, terminal shutdown, and rate-limited recovery logging.
+- Routed append/reset and public SSE attachment through the coordinator while explicitly preserving the existing append response DTO and client-request `uk` payload semantics.
+- Added idempotent application disposal that drains notifications before HTTP, uses no network wait for the Redis subscriber, bounds later resource cleanup, and cleans bootstrap resources after startup failure.
+- Added real Redis/MySQL gated integration tests plus a production multi-process smoke for local/remote fan-out, commit-to-publish process death, namespace partition, Redis blackhole, heartbeat, self-echo deduplication, soft deletion, and graceful shutdown.
+- Added production namespace configuration, Compose/CI wiring, an optional real-nginx smoke, and the deployment/blue-green/rollback runbook.
 
 ## Commands
 
@@ -93,7 +104,9 @@ pnpm run db:migration:generate
 pnpm run db:migration:run
 pnpm run test
 RUN_MYSQL_TESTS=true pnpm run test
+RUN_REDIS_TESTS=true pnpm run test
 pnpm run build
+RUN_NOTIFICATION_SMOKE=true REDIS_NAMESPACE=rankland-smoke AUTH_TOKEN=rankland-smoke pnpm run test:notification-smoke
 ```
 
 ## Migration Mechanics
@@ -112,7 +125,7 @@ pnpm run build
 - Old Mongo event logs are not migrated.
 - Runtime no longer connects to MongoDB for contest data.
 - `resetContestEvents` now resets the stream: retains old event rows, increments `streamRevision`, clears `lastEventId`, and releases the producer lock.
-- `resetContestEvents` also sends an SSE notification with the new `streamRevision`.
+- `resetContestEvents` announces the committed `streamRevision`/`latestEventId=0` watermark through the same local/Redis/reconcile notification path.
 - Consumers should persist both `checkpointEventId` and `streamRevision`. `checkpointEventId` may be sparse when compaction removes stale progress events.
 - Catch-up compaction filters stale progress events only in HTTP recovery responses. Live realtime notifications are never compacted because they do not carry event payloads.
 
@@ -122,4 +135,5 @@ pnpm run build
 - Load-test large contests for catch-up settled-event aggregation and public user text filters; optimize indexes or push filtering into SQL only if measurements justify it.
 - Tighten public user DTO/query types so they do not advertise admin-only fields.
 - Decide one `uk -> contestId` lookup strategy and either bound/invalidate `contestIdCacheMap` or remove it.
-- Add an SSE heartbeat/keep-alive frame if deployment intermediaries are observed dropping idle streams.
+- Run the A4 check on two real green machines and verify browser `EventSource` reconnection through the target nginx before production cutover.
+- Measure the authoritative batch query at the deployment's expected maximum active-contest count and keep p99 below 1 second before asserting the 6-second SLO at that capacity.

@@ -1,7 +1,4 @@
-import {
-  rankland_live_contest_common,
-  rankland_live_contest_producer,
-} from '@common/proto/rankland_live_contest';
+import { rankland_live_contest_common, rankland_live_contest_producer } from '@common/proto/rankland_live_contest';
 import { ErrCode } from '@common/enums/err-code.enum';
 import { InMemoryContestEventStore } from '../contest-event-store.memory';
 import ContestEventStreamService from '../contest-event-stream.service';
@@ -85,14 +82,43 @@ describe('contest event stream service', () => {
     ).rejects.toThrow(/expected event id 2/);
   });
 
+  it('rolls back memory stream mutations when a transaction fails', async () => {
+    const store = new InMemoryContestEventStore();
+    store.addContest('contest-a');
+    const service = new ContestEventStreamService(store);
+
+    await expect(
+      service.appendProducerEvents({ uk: 'contest-a', producerId: 'producer-a', batch: batch([newSolution(2)]) }),
+    ).rejects.toThrow(/expected event id 1/);
+
+    const result = await service.appendProducerEvents({
+      uk: 'contest-a',
+      producerId: 'producer-b',
+      batch: batch([newSolution(1)]),
+    });
+    expect(result.acceptedEventIds).toEqual([1]);
+    await expect(service.getStreamState('contest-a')).resolves.toMatchObject({
+      lastEventId: 1,
+      producerId: 'producer-b',
+    });
+  });
+
   it('accepts duplicate retries with the same payload without advancing twice', async () => {
     const store = new InMemoryContestEventStore();
     store.addContest('contest-a');
     const service = new ContestEventStreamService(store);
     const producerBatch = batch([newSolution(1), progress(2)]);
 
-    const first = await service.appendProducerEvents({ uk: 'contest-a', producerId: 'producer-a', batch: producerBatch });
-    const retry = await service.appendProducerEvents({ uk: 'contest-a', producerId: 'producer-a', batch: producerBatch });
+    const first = await service.appendProducerEvents({
+      uk: 'contest-a',
+      producerId: 'producer-a',
+      batch: producerBatch,
+    });
+    const retry = await service.appendProducerEvents({
+      uk: 'contest-a',
+      producerId: 'producer-a',
+      batch: producerBatch,
+    });
 
     expect(first.acceptedEventIds).toEqual([1, 2]);
     expect(retry.acceptedEventIds).toEqual([]);
@@ -124,7 +150,11 @@ describe('contest event stream service', () => {
     store.addContest('contest-a');
     const service = new ContestEventStreamService(store);
 
-    await service.appendProducerEvents({ uk: 'contest-a', producerId: 'producer-a', batch: batch([newSolution(1), progress(2, 1, 40)]) });
+    await service.appendProducerEvents({
+      uk: 'contest-a',
+      producerId: 'producer-a',
+      batch: batch([newSolution(1), progress(2, 1, 40)]),
+    });
 
     await expect(
       service.appendProducerEvents({ uk: 'contest-a', producerId: 'producer-a', batch: batch([progress(2, 1, 80)]) }),
@@ -138,7 +168,11 @@ describe('contest event stream service', () => {
 
     await service.appendProducerEvents({ uk: 'contest-a', producerId: 'producer-a', batch: batch([newSolution(1)]) });
     await service.releaseProducerLock('contest-a');
-    const result = await service.appendProducerEvents({ uk: 'contest-a', producerId: 'producer-b', batch: batch([progress(2)]) });
+    const result = await service.appendProducerEvents({
+      uk: 'contest-a',
+      producerId: 'producer-b',
+      batch: batch([progress(2)]),
+    });
 
     expect(result.lastEventId).toBe(2);
   });
@@ -306,9 +340,9 @@ describe('contest event stream service', () => {
     store.addContest('contest-a');
     const service = new ContestEventStreamService(store);
 
-    await expect(
-      service.getClientEvents({ uk: 'contest-a', afterEventId: 0, limit: 10 } as any),
-    ).rejects.toThrow(/streamRevision is required/);
+    await expect(service.getClientEvents({ uk: 'contest-a', afterEventId: 0, limit: 10 } as any)).rejects.toThrow(
+      /streamRevision is required/,
+    );
   });
 
   it('retains old revision events while allowing a reset stream to reuse event ids', async () => {
@@ -339,8 +373,7 @@ describe('contest event stream service', () => {
     expect(clientEventIds(page.events)).toEqual([1]);
     expect(page.streamRevision).toBe(2);
     expect((store as any).events.get('contest-a').map((event: ContestStoredEvent) => event.streamRevision)).toEqual([
-      1,
-      2,
+      1, 2,
     ]);
   });
 
@@ -352,6 +385,30 @@ describe('contest event stream service', () => {
     await expect(
       service.appendProducerEvents({ uk: 'contest-a', producerId: '   ', batch: batch([progress(1)]) }),
     ).rejects.toThrow(/x-producer-id is required/);
+  });
+
+  it('keeps public request UKs while exposing canonical identity for notification reads', async () => {
+    const store = new InMemoryContestEventStore();
+    store.addContest('Contest-A', { contestId: '70346717215600640' });
+    const service = new ContestEventStreamService(store);
+
+    await expect(service.getStreamState('contest-a')).resolves.toMatchObject({
+      contestId: '70346717215600640',
+      uk: 'contest-a',
+    });
+    await expect(service.getAuthoritativeStreamState('contest-a')).resolves.toMatchObject({
+      contestId: '70346717215600640',
+      uk: 'Contest-A',
+    });
+    await expect(service.getAuthoritativeStreamStates(['70346717215600640'])).resolves.toEqual([
+      expect.objectContaining({
+        contestId: '70346717215600640',
+        uk: 'Contest-A',
+        lastEventId: 0,
+        streamRevision: 1,
+      }),
+    ]);
+    await expect(service.getAuthoritativeStreamStates([])).resolves.toEqual([]);
   });
 });
 
@@ -383,6 +440,10 @@ class InstrumentedContestEventStore implements ContestEventStore {
 
   public async getStreamState(): Promise<ContestStreamState> {
     return { ...this.transaction.stream };
+  }
+
+  public async getStreamStates(contestIds: readonly string[]): Promise<ContestStreamState[]> {
+    return contestIds.includes(this.transaction.stream.contestId) ? [{ ...this.transaction.stream }] : [];
   }
 
   public async readEventsSnapshot(): Promise<never> {

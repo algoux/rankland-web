@@ -37,19 +37,17 @@ export interface ContestEventsSnapshot {
 
 export interface ContestEventTransaction {
   stream: ContestStreamState;
-  findEvents(eventIds: number[]): Promise<ContestStoredEvent[]>;
-  findNewSolutionSubmitTimes(solutionIds: number[]): Promise<Map<number, string>>;
-  insertEvents(inputs: ContestEventInsertInput[]): Promise<void>;
-  setProducerLock(producerId: string): Promise<void>;
-  advanceLastEventId(lastEventId: number): Promise<void>;
+  findEvents: (eventIds: number[]) => Promise<ContestStoredEvent[]>;
+  findNewSolutionSubmitTimes: (solutionIds: number[]) => Promise<Map<number, string>>;
+  insertEvents: (inputs: ContestEventInsertInput[]) => Promise<void>;
+  setProducerLock: (producerId: string) => Promise<void>;
+  advanceLastEventId: (lastEventId: number) => Promise<void>;
 }
 
 export interface ContestEventStore {
-  runInStreamTransaction<T>(
-    uk: string,
-    runner: (transaction: ContestEventTransaction) => Promise<T>,
-  ): Promise<T>;
-  releaseProducerLock(uk: string): Promise<ContestStreamState>;
-  getStreamState(uk: string): Promise<ContestStreamState>;
-  readEventsSnapshot(uk: string, afterEventId: number, limit: number): Promise<ContestEventsSnapshot>;
+  runInStreamTransaction: <T>(uk: string, runner: (transaction: ContestEventTransaction) => Promise<T>) => Promise<T>;
+  releaseProducerLock: (uk: string) => Promise<ContestStreamState>;
+  getStreamState: (uk: string) => Promise<ContestStreamState>;
+  getStreamStates: (contestIds: readonly string[]) => Promise<ContestStreamState[]>;
+  readEventsSnapshot: (uk: string, afterEventId: number, limit: number) => Promise<ContestEventsSnapshot>;
 }

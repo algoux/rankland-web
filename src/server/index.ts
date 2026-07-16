@@ -29,8 +29,11 @@ import { clientRoutesMap } from '@common/router/client-routes';
 import TypeOrmClient from './database/typeorm-client';
 import RedisConfig from './configs/redis/redis.config';
 import FileConfig, { DEFAULT_FS_FILE_BASE_URL, FileProviderKey } from './configs/file/file.config';
-import { RedisClientId } from './container-ids';
+import { RedisClientId, RedisSubscriberClientId } from './container-ids';
 import IdGeneratorService from './services/id-generator.service';
+import ContestEventNotificationCoordinator from './modules/contest/contest-event-notification';
+import { disposeApplicationResources } from './application-resource-disposal';
+import { listenHttpServer } from './application-http-listener';
 
 export default class OurApp extends App {
   protected baseDir = path.join(__dirname, '..');
@@ -85,8 +88,10 @@ export default class OurApp extends App {
 
   private pageRenderer: IPageRenderer;
   private redisClient: Redis;
+  private redisSubscriberClient: Redis;
   private typeOrmClient: TypeOrmClient;
   private idGeneratorService: IdGeneratorService;
+  private notificationCoordinator: ContestEventNotificationCoordinator;
   private disposePromise?: Promise<void>;
 
   public constructor() {
@@ -108,6 +113,19 @@ export default class OurApp extends App {
       enableOfflineQueue: false,
       maxRetriesPerRequest: 1,
     });
+    this.redisSubscriberClient = new Redis({
+      host: redisConfig.host,
+      port: redisConfig.port,
+      db: redisConfig.db,
+      password: redisConfig.password || undefined,
+      lazyConnect: true,
+      connectTimeout: 500,
+      enableOfflineQueue: false,
+      maxRetriesPerRequest: 1,
+      autoResubscribe: false,
+      autoResendUnfulfilledCommands: false,
+      connectionName: `${redisConfig.namespace}:contest-event-notification:${process.pid}`,
+    });
     this.redisClient.on('error', (error) => {
       console.warn('[Redis] client error:', error);
     });
@@ -116,6 +134,9 @@ export default class OurApp extends App {
     });
     if (!this.container.isBound(RedisClientId)) {
       this.container.bind(RedisClientId).toConstantValue(this.redisClient);
+    }
+    if (!this.container.isBound(RedisSubscriberClientId)) {
+      this.container.bind(RedisSubscriberClientId).toConstantValue(this.redisSubscriberClient);
     }
 
     // cors
@@ -178,6 +199,11 @@ export default class OurApp extends App {
     await this.typeOrmClient.init();
     this.idGeneratorService = getDependency<IdGeneratorService>(IdGeneratorService, this.container);
     await this.idGeneratorService.init();
+    this.notificationCoordinator = getDependency<ContestEventNotificationCoordinator>(
+      ContestEventNotificationCoordinator,
+      this.container,
+    );
+    await this.notificationCoordinator.start();
   }
 
   protected async afterStart() {
@@ -206,22 +232,17 @@ export default class OurApp extends App {
   }
 
   private async disposeResources(): Promise<void> {
-    if (this.server) {
-      await this.stop().catch((error: unknown) => {
-        console.warn('[Shutdown] HTTP server close failed:', error);
-      });
-    }
-    await this.pageRenderer?.destory?.().catch((error: unknown) => {
-      console.warn('[Shutdown] page renderer close failed:', error);
-    });
-    await this.idGeneratorService?.dispose().catch((error: unknown) => {
-      console.warn('[Shutdown] ID generator close failed:', error);
-    });
-    await this.typeOrmClient?.destroy().catch((error: unknown) => {
-      console.warn('[Shutdown] TypeORM close failed:', error);
-    });
-    await this.redisClient?.quit().catch((error: unknown) => {
-      console.warn('[Shutdown] Redis close failed:', error);
+    await disposeApplicationResources({
+      stopNotifications: this.notificationCoordinator ? () => this.notificationCoordinator.stop() : undefined,
+      disconnectSubscriber: this.redisSubscriberClient ? () => this.redisSubscriberClient.disconnect(false) : undefined,
+      stopHttp: this.server ? () => this.stop() : undefined,
+      closePageRenderer: this.pageRenderer?.destory ? () => this.pageRenderer.destory() : undefined,
+      closeIdGenerator: this.idGeneratorService ? () => this.idGeneratorService.dispose() : undefined,
+      closeTypeOrm: this.typeOrmClient ? () => this.typeOrmClient.destroy() : undefined,
+      closeRedisCommand: this.redisClient ? () => this.redisClient.disconnect(false) : undefined,
+      onError: (resource, error) => {
+        console.warn(`[Shutdown] ${resource} close failed:`, error);
+      },
     });
   }
 }
@@ -234,12 +255,7 @@ app
     await app.startManually(async () => {
       const httpServer = http.createServer(app.instance.callback());
       app.server = httpServer;
-      const listenPromise = new Promise((resolve, _reject) => {
-        httpServer.listen(app.port, app.hostname, () => {
-          resolve(true);
-        });
-      });
-      await listenPromise;
+      await listenHttpServer(httpServer, app.port, app.hostname);
     });
   })
   .catch(async (error: unknown) => {

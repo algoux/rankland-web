@@ -7,4 +7,13 @@ export default class RedisProdConfig extends RedisConfig {
   public readonly port: number = Number(process.env.REDIS_PORT) || 6379;
   public readonly db: number = Number(process.env.REDIS_DB) || 0;
   public readonly password: string = process.env.REDIS_PASS || '';
+  public readonly namespace: string = readProductionNamespace();
+}
+
+function readProductionNamespace(): string {
+  const namespace = process.env.REDIS_NAMESPACE?.trim();
+  if (!namespace) {
+    throw new Error('REDIS_NAMESPACE is required for production Redis configuration');
+  }
+  return namespace;
 }

@@ -210,6 +210,7 @@ REDIS_HOST=... \
 REDIS_PORT=6379 \
 REDIS_DB=0 \
 REDIS_PASS=... \
+REDIS_NAMESPACE=rankland-prod \
 AUTH_TOKEN=... \
 FILE_PROVIDER=TencentCloud \
 FILE_BASE_URL=https://cdn.algoux.cn/rankland/file/ \
@@ -223,8 +224,15 @@ COS_BASE_PATH=rankland/file/ \
 fnm exec --using v20.19.1 corepack pnpm@9.15.9 run start
 ```
 
-`NODE_ENV=production` 下必须提供 `MYSQL_HOST`、`MYSQL_USER`、`MYSQL_PASS` 和 `MYSQL_DB`。文件 Provider 默认是 `FS`；Compose 使用 `rankland-files` 命名卷持久化并在多实例间共享文件。显式选择 `TencentCloud` 时还必须提供 COS secret、bucket 和 region，`COS_DOMAIN` 可选。生产启动不会自动迁移数据库。
-Redis 配置未提供时会使用 `127.0.0.1:6379/0`，仅影响 SSR 页面缓存。
+`NODE_ENV=production` 下必须提供 `MYSQL_HOST`、`MYSQL_USER`、`MYSQL_PASS`、`MYSQL_DB` 和非空
+`REDIS_NAMESPACE`。同一部署的所有应用实例必须连接同一个 MySQL write primary、同一个 standalone
+Redis endpoint，并使用完全相同的 namespace；不同环境和独立部署必须使用不同 namespace。
+Redis Pub/Sub 不按 logical database 隔离，因此不能用 `REDIS_DB` 代替 namespace。非生产环境未配置
+namespace 时默认使用 `rankland:local`。
+
+文件 Provider 默认是 `FS`；Compose 使用 `rankland-files` 命名卷持久化并在多实例间共享文件。
+显式选择 `TencentCloud` 时还必须提供 COS secret、bucket 和 region，`COS_DOMAIN` 可选。生产启动
+不会自动迁移数据库。
 
 ## 开发指南
 

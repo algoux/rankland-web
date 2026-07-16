@@ -20,6 +20,8 @@ export interface AppendProducerEventsInput {
 }
 
 export interface AppendProducerEventsResult {
+  contestId: string;
+  canonicalUk: string;
   acceptedEventIds: number[];
   duplicateEventIds: number[];
   lastEventId: number;
@@ -122,6 +124,8 @@ export default class ContestEventStreamService {
       }
 
       return {
+        contestId: stream.contestId,
+        canonicalUk: stream.uk,
         acceptedEventIds,
         duplicateEventIds,
         lastEventId: cursor,
@@ -169,11 +173,21 @@ export default class ContestEventStreamService {
   }
 
   public async releaseProducerLock(uk: string) {
-    return this.store.releaseProducerLock(uk);
+    const state = await this.store.releaseProducerLock(uk);
+    return { ...state, uk };
   }
 
   public async getStreamState(uk: string) {
+    const state = await this.getAuthoritativeStreamState(uk);
+    return { ...state, uk };
+  }
+
+  public async getAuthoritativeStreamState(uk: string) {
     return this.store.getStreamState(uk);
+  }
+
+  public async getAuthoritativeStreamStates(contestIds: readonly string[]) {
+    return this.store.getStreamStates(contestIds);
   }
 }
 
@@ -206,7 +220,8 @@ function fillSolutionSubmitTime(
   if (!needsSolutionSubmitTime(event)) {
     return;
   }
-  const submitTimeNs = batchSubmitTimesByEventId.get(event.eventId) || persistedSubmitTimesBySolutionId.get(event.solutionId);
+  const submitTimeNs =
+    batchSubmitTimesByEventId.get(event.eventId) || persistedSubmitTimesBySolutionId.get(event.solutionId);
   if (!submitTimeNs) {
     throw new LogicException(
       ErrCode.ContestEventInvalidBatch,
@@ -257,10 +272,7 @@ function normalizeProducerId(value: unknown): string {
     throw new LogicException(ErrCode.ContestEventInvalidBatch, 'x-producer-id is required');
   }
   if (producerId.length > 128) {
-    throw new LogicException(
-      ErrCode.ContestEventInvalidBatch,
-      'x-producer-id must not exceed 128 characters',
-    );
+    throw new LogicException(ErrCode.ContestEventInvalidBatch, 'x-producer-id must not exceed 128 characters');
   }
   return producerId;
 }
