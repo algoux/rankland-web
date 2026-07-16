@@ -184,6 +184,7 @@ const COLLECTION_SUBMENU_ANIMATION_MS = 220;
 export default class Collection extends Vue {
   @Prop() collectionPageData?: CollectionPageData;
   @Prop() errorKind?: RanklistPageErrorKind;
+  @Prop() reportViewOnClient?: boolean;
 
   PageErrorKind = RanklistPageErrorKind;
   fallbackTitle = formatTitle();
@@ -386,6 +387,7 @@ export default class Collection extends Vue {
       return {
         collectionPageData,
         errorKind: undefined,
+        reportViewOnClient: isClient,
       };
     } catch (error) {
       if (shouldLogRanklistPageError(error)) {
@@ -394,6 +396,7 @@ export default class Collection extends Vue {
       return {
         collectionPageData: undefined,
         errorKind: writeRanklistPageErrorResponse(error, { isClient, writeResponse }),
+        reportViewOnClient: isClient,
       };
     }
   }
@@ -571,6 +574,9 @@ export default class Collection extends Vue {
   }
 
   private reportRenderedRanklistView() {
+    if (!this.reportViewOnClient) {
+      return;
+    }
     void this.viewReporter.report({
       routeUK: this.activeRankId || '',
       loadedUK: this.collectionPageData?.ranklist?.info.uniqueKey,

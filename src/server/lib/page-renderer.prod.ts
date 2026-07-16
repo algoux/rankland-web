@@ -4,7 +4,11 @@ import { Inject, Provide } from 'bwcx-core';
 import type { RequestContext } from 'bwcx-ljsm';
 import type { Renderer, Rendered } from 'vite-ssr/utils/types';
 import { createSsrRequestLanguageInitialState } from '@common/request-language';
-import { IPageRenderer, type PageRenderOptions } from './page-renderer.interface';
+import {
+  IPageRenderer,
+  triggerSuccessfulSsrRender,
+  type PageRenderOptions,
+} from './page-renderer.interface';
 import {
   RedisSsrPageCache,
   getSsrPageCacheKey,
@@ -26,6 +30,7 @@ interface RenderProdSsrPageOptions {
   cache?: Pick<RedisSsrPageCache, 'get' | 'set'>;
   defaultStatus?: number;
   requestLanguages?: readonly string[];
+  onSuccessfulSsrRender?: () => void;
   onSsrError?: (error: unknown) => void;
 }
 
@@ -64,6 +69,7 @@ export default class PageRendererProd implements IPageRenderer {
       cache: this.cache,
       defaultStatus: options.defaultStatus,
       requestLanguages: options.requestLanguages,
+      onSuccessfulSsrRender: options.onSuccessfulSsrRender,
       onSsrError: (error) => {
         ctx.error?.(`Render ${ctx.url} failed, retry with csr mode. Error:`, error);
       },
@@ -85,15 +91,17 @@ export async function renderProdSsrPage(options: RenderProdSsrPageOptions): Prom
   const cached = cacheKey ? await options.cache?.get(cacheKey) : undefined;
   if (cached) {
     logSsrPageCacheHit(options.url);
+    triggerSuccessfulSsrRender(
+      cached,
+      options.mode === 'ssr' ? options.onSuccessfulSsrRender : undefined,
+      (error) => console.error('[SSR] successful-render callback failed:', error),
+    );
     return cached;
   }
 
+  let rendered: SsrPageRenderResult;
   try {
-    const rendered = await renderWithMode(options, options.mode);
-    if (cacheKey && shouldWriteSsrPageCache(rendered)) {
-      await options.cache?.set(cacheKey, toSsrPageCachePayload(rendered));
-    }
-    return toSsrPageCachePayload(rendered);
+    rendered = await renderWithMode(options, options.mode);
   } catch (error) {
     if (options.mode !== 'ssr') {
       throw error;
@@ -101,6 +109,16 @@ export async function renderProdSsrPage(options: RenderProdSsrPageOptions): Prom
     options.onSsrError?.(error);
     return toSsrPageCachePayload(await renderWithMode(options, 'csr'));
   }
+
+  if (cacheKey && shouldWriteSsrPageCache(rendered)) {
+    await options.cache?.set(cacheKey, toSsrPageCachePayload(rendered));
+  }
+  triggerSuccessfulSsrRender(
+    rendered,
+    options.mode === 'ssr' ? options.onSuccessfulSsrRender : undefined,
+    (error) => console.error('[SSR] successful-render callback failed:', error),
+  );
+  return toSsrPageCachePayload(rendered);
 }
 
 async function renderWithMode(options: RenderProdSsrPageOptions, mode: 'ssr' | 'csr'): Promise<SsrPageRenderResult> {

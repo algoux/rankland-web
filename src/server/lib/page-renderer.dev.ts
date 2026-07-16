@@ -15,7 +15,11 @@ import path from 'path';
 import { promises as fs } from 'fs';
 import chalk from 'chalk';
 import { createSsrRequestLanguageInitialState } from '@common/request-language';
-import { IPageRenderer, type PageRenderOptions } from './page-renderer.interface';
+import {
+  IPageRenderer,
+  triggerSuccessfulSsrRender,
+  type PageRenderOptions,
+} from './page-renderer.interface';
 import {
   RedisSsrPageCache,
   getSsrPageCacheKey,
@@ -197,6 +201,11 @@ export default class PageRendererDev implements IPageRenderer {
     if (cached) {
       logSsrPageCacheHit(url);
       this.writeCachedPayload(ctx, cached);
+      triggerSuccessfulSsrRender(
+        cached,
+        options.onSuccessfulSsrRender,
+        (error) => ctx.error?.('[SSR] successful-render callback failed:', error),
+      );
       return cached.html;
     }
 
@@ -273,6 +282,11 @@ export default class PageRendererDev implements IPageRenderer {
         await this.cache?.set(cacheKey, toSsrPageCachePayload(rendered));
       }
 
+      triggerSuccessfulSsrRender(
+        rendered,
+        options.onSuccessfulSsrRender,
+        (error) => ctx.error?.('[SSR] successful-render callback failed:', error),
+      );
       return rendered.html;
     } catch (e) {
       ctx.error?.(`Render ${ctx.url} failed, retry with csr mode. Error:`, e);

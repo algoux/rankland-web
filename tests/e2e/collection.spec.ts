@@ -94,15 +94,16 @@ test.describe('/collection/:id', () => {
 
     await page.goto('/collection/official?rankId=test-key');
     await expect(page.locator('[data-id="collection-ranklist-content"][data-ranklist-id="test-key"]')).toBeVisible({ timeout: 20_000 });
-    await expect.poll(() => reportedUKs).toEqual(['test-key']);
+    await page.waitForTimeout(300);
+    expect(reportedUKs).toEqual([]);
 
     await page.locator('[data-id="collection-menu-item-another-key"]').click();
     await expect(page.locator('[data-id="collection-ranklist-content"][data-ranklist-id="another-key"]')).toBeVisible({ timeout: 20_000 });
-    await expect.poll(() => reportedUKs).toEqual(['test-key', 'another-key']);
+    await expect.poll(() => reportedUKs).toEqual(['another-key']);
 
     await page.locator('[data-id="collection-menu-item-test-key"]').click();
     await expect(page.locator('[data-id="collection-ranklist-content"][data-ranklist-id="test-key"]')).toBeVisible({ timeout: 20_000 });
-    await expect.poll(() => reportedUKs).toEqual(['test-key', 'another-key', 'test-key']);
+    await expect.poll(() => reportedUKs).toEqual(['another-key', 'test-key']);
   });
 
   test('does not create document-level horizontal overflow from the full-bleed page shell', async ({ page }) => {

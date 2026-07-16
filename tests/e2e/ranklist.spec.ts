@@ -46,7 +46,7 @@ test.describe('/ranklist/:id', () => {
     await expect(page.locator('.srk-ranklist-client-render-region')).toHaveCount(0);
   });
 
-  test('reports exactly one browser view after hydration and never reports during SSR', async ({ page, request }) => {
+  test('reports exactly one server view after SSR and does not report again during hydration', async ({ page, request }) => {
     let reportCount = 0;
     const serverViewCountBefore = await getPublicContestViewCount(request, 'test-key');
     await page.unroute(PUBLIC_CONTEST_VIEW_ROUTE);
@@ -60,6 +60,28 @@ test.describe('/ranklist/:id', () => {
     });
 
     await page.goto('/ranklist/test-key');
+    await expect(page.locator('[data-id="ranklist-content"][data-ranklist-id="test-key"]')).toBeVisible({
+      timeout: 20_000,
+    });
+    await page.waitForTimeout(300);
+    expect(reportCount).toBe(0);
+    await expect.poll(() => getPublicContestViewCount(request, 'test-key')).toBe(serverViewCountBefore + 1);
+  });
+
+  test('reports exactly one browser view for a forced CSR entry without a server report', async ({ page, request }) => {
+    let reportCount = 0;
+    const serverViewCountBefore = await getPublicContestViewCount(request, 'test-key');
+    await page.unroute(PUBLIC_CONTEST_VIEW_ROUTE);
+    await page.route(PUBLIC_CONTEST_VIEW_ROUTE, async (route) => {
+      reportCount += 1;
+      await route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify({ success: true, code: 0, data: null }),
+      });
+    });
+
+    await page.goto('/ranklist/test-key?ssr=0');
     await expect(page.locator('[data-id="ranklist-content"][data-ranklist-id="test-key"]')).toBeVisible({
       timeout: 20_000,
     });

@@ -82,6 +82,7 @@ import { RanklistViewReporter } from '@/domain/ranklist/view-reporter';
 export default class Ranklist extends Vue {
   @Prop() ranklistData?: IApiRanklist;
   @Prop() errorKind?: RanklistPageErrorKind;
+  @Prop() reportViewOnClient?: boolean;
 
   RanklistPageErrorKind = RanklistPageErrorKind;
   fallbackTitle = formatTitle();
@@ -135,6 +136,7 @@ export default class Ranklist extends Vue {
       return {
         ranklistData,
         errorKind: undefined,
+        reportViewOnClient: isClient,
       };
     } catch (error) {
       if (shouldLogRanklistPageError(error)) {
@@ -143,11 +145,15 @@ export default class Ranklist extends Vue {
       return {
         ranklistData: undefined,
         errorKind: writeRanklistPageErrorResponse(error, { isClient, writeResponse }),
+        reportViewOnClient: isClient,
       };
     }
   }
 
   private reportRenderedRanklistView() {
+    if (!this.reportViewOnClient) {
+      return;
+    }
     void this.viewReporter.report({
       routeUK: this.ranklistId,
       loadedUK: this.ranklistData?.info.uniqueKey,

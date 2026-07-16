@@ -62,6 +62,53 @@ describe('rankland migrated pages', () => {
     });
   });
 
+  it('enables browser view reporting for CSR data loads but not SSR hydration state', async () => {
+    const ranklistData = {
+      info: { uniqueKey: 'regional-2026' },
+      srk: { rows: [] },
+      srkUrl: '/file/regional-2026.json',
+    };
+    const ranklistAsyncData = getComponentAsyncData(Ranklist);
+    const ranklistOptions = {
+      api: { getRanklist: vi.fn(async () => ranklistData) },
+      to: { params: { id: 'regional-2026' }, query: {} },
+      writeResponse: vi.fn(),
+    };
+
+    await expect(ranklistAsyncData({ ...ranklistOptions, isClient: false })).resolves.toMatchObject({
+      reportViewOnClient: false,
+    });
+    await expect(ranklistAsyncData({ ...ranklistOptions, isClient: true })).resolves.toMatchObject({
+      reportViewOnClient: true,
+    });
+
+    const collectionAsyncData = getComponentAsyncData(Collection);
+    const collectionOptions = {
+      api: {
+        getCollection: vi.fn(async () => ({
+          root: {
+            children: [
+              { type: CollectionItemType.File, uniqueKey: 'regional-2026', name: 'Regional 2026' },
+            ],
+          },
+        })),
+        getRanklist: vi.fn(async () => ranklistData),
+      },
+      to: {
+        params: { id: 'official' },
+        query: { rankId: 'regional-2026' },
+      },
+      writeResponse: vi.fn(),
+    };
+
+    await expect(collectionAsyncData({ ...collectionOptions, isClient: false })).resolves.toMatchObject({
+      reportViewOnClient: false,
+    });
+    await expect(collectionAsyncData({ ...collectionOptions, isClient: true })).resolves.toMatchObject({
+      reportViewOnClient: true,
+    });
+  });
+
   it('SSR-renders the RSS feed link in the home footer other links', async () => {
     const app = createSSRApp(Home, {
       statistics: {

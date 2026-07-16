@@ -13,6 +13,7 @@ describe('PageRendererProd', () => {
 
   it('returns cached SSR HTML without invoking vite-ssr', async () => {
     const renderPage = vi.fn();
+    const onSuccessfulSsrRender = vi.fn();
     const info = vi.spyOn(console, 'info').mockImplementation(() => undefined);
     const cache = {
       get: vi.fn(async () => ({ html: '<main>cached</main>', status: 200, headers: { 'x-head': 'cached' } })),
@@ -28,6 +29,7 @@ describe('PageRendererProd', () => {
         request: {} as any,
         response: {} as any,
         cache,
+        onSuccessfulSsrRender,
       })).resolves.toEqual({
         html: '<main>cached</main>',
         status: 200,
@@ -36,6 +38,7 @@ describe('PageRendererProd', () => {
       expect(info).toHaveBeenCalledWith('[SSR cache] hit: https://rl.algoux.org/ranklist/icpc');
       expect(renderPage).not.toHaveBeenCalled();
       expect(cache.set).not.toHaveBeenCalled();
+      expect(onSuccessfulSsrRender).toHaveBeenCalledTimes(1);
     } finally {
       info.mockRestore();
     }
@@ -43,6 +46,7 @@ describe('PageRendererProd', () => {
 
   it('writes successful SSR output to cache after rendering', async () => {
     const renderPage = vi.fn(async () => ({ html: '<main>fresh</main>', headers: { 'x-head': 'fresh' } }));
+    const onSuccessfulSsrRender = vi.fn();
     const cache = {
       get: vi.fn(async () => undefined),
       set: vi.fn(),
@@ -56,6 +60,7 @@ describe('PageRendererProd', () => {
       request: {} as any,
       response: {} as any,
       cache,
+      onSuccessfulSsrRender,
     })).resolves.toMatchObject({
       html: '<main>fresh</main>',
       status: 200,
@@ -66,6 +71,7 @@ describe('PageRendererProd', () => {
       status: 200,
       headers: { 'x-head': 'fresh' },
     });
+    expect(onSuccessfulSsrRender).toHaveBeenCalledTimes(1);
   });
 
   it('uses request languages for SSR cache scope and vite-ssr initial state', async () => {
@@ -107,6 +113,7 @@ describe('PageRendererProd', () => {
 
   it('does not read or write the SSR page cache in CSR mode', async () => {
     const renderPage = vi.fn(async () => ({ html: '<main>csr</main>' }));
+    const onSuccessfulSsrRender = vi.fn();
     const cache = {
       get: vi.fn(async () => ({ html: '<main>cached</main>', status: 200, headers: {} })),
       set: vi.fn(),
@@ -120,6 +127,7 @@ describe('PageRendererProd', () => {
       request: {} as any,
       response: {} as any,
       cache,
+      onSuccessfulSsrRender,
     })).resolves.toMatchObject({
       html: '<main>csr</main>',
       status: 200,
@@ -128,6 +136,7 @@ describe('PageRendererProd', () => {
     expect(cache.get).not.toHaveBeenCalled();
     expect(cache.set).not.toHaveBeenCalled();
     expect(renderPage).toHaveBeenCalledWith(expect.any(String), expect.objectContaining({ skip: true }));
+    expect(onSuccessfulSsrRender).not.toHaveBeenCalled();
   });
 
   it('falls back to CSR and avoids cache writes when SSR render throws', async () => {
@@ -141,6 +150,7 @@ describe('PageRendererProd', () => {
       get: vi.fn(async () => undefined),
       set: vi.fn(),
     };
+    const onSuccessfulSsrRender = vi.fn();
 
     await expect(renderProdSsrPage({
       mode: 'ssr',
@@ -150,11 +160,13 @@ describe('PageRendererProd', () => {
       request: {} as any,
       response: {} as any,
       cache,
+      onSuccessfulSsrRender,
     })).resolves.toMatchObject({
       html: '<main>csr</main>',
       status: 200,
     });
     expect(cache.set).not.toHaveBeenCalled();
+    expect(onSuccessfulSsrRender).not.toHaveBeenCalled();
   });
 
   it('does not cache transient load-failed SSR output and strips the internal header', async () => {
@@ -169,6 +181,7 @@ describe('PageRendererProd', () => {
       get: vi.fn(async () => undefined),
       set: vi.fn(),
     };
+    const onSuccessfulSsrRender = vi.fn();
 
     await expect(renderProdSsrPage({
       mode: 'ssr',
@@ -178,12 +191,14 @@ describe('PageRendererProd', () => {
       request: {} as any,
       response: {} as any,
       cache,
+      onSuccessfulSsrRender,
     })).resolves.toEqual({
       html: '<main>load failed</main>',
       status: 200,
       headers: { 'x-head': 'fresh' },
     });
     expect(cache.set).not.toHaveBeenCalled();
+    expect(onSuccessfulSsrRender).not.toHaveBeenCalled();
   });
 
   it('does not write non-cacheable SSR statuses', async () => {
@@ -196,6 +211,7 @@ describe('PageRendererProd', () => {
       get: vi.fn(async () => undefined),
       set: vi.fn(),
     };
+    const onSuccessfulSsrRender = vi.fn();
 
     await expect(renderProdSsrPage({
       mode: 'ssr',
@@ -205,11 +221,13 @@ describe('PageRendererProd', () => {
       request: {} as any,
       response: {} as any,
       cache,
+      onSuccessfulSsrRender,
     })).resolves.toEqual({
       html: '<main>server error</main>',
       status: 500,
       headers: { 'x-head': 'fresh' },
     });
     expect(cache.set).not.toHaveBeenCalled();
+    expect(onSuccessfulSsrRender).not.toHaveBeenCalled();
   });
 });
