@@ -1,4 +1,5 @@
 import { Config } from 'bwcx-ljsm';
+import { DEFAULT_MYSQL_CONNECTION_LIMIT } from './mysql.connection-limit';
 
 @Config()
 export default class MysqlConfig {
@@ -7,4 +8,5 @@ export default class MysqlConfig {
   public readonly username: string = 'blue';
   public readonly password: string = 'test';
   public readonly database: string = 'rankland';
+  public readonly connectionLimit: number = DEFAULT_MYSQL_CONNECTION_LIMIT;
 }

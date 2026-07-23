@@ -33,7 +33,7 @@ import { RedisClientId, RedisSubscriberClientId } from './container-ids';
 import IdGeneratorService from './services/id-generator.service';
 import ContestEventNotificationCoordinator from './modules/contest/contest-event-notification';
 import { disposeApplicationResources } from './application-resource-disposal';
-import { listenHttpServer } from './application-http-listener';
+import { listenHttpServer, parseServerListenBacklog } from './application-http-listener';
 
 export default class OurApp extends App {
   protected baseDir = path.join(__dirname, '..');
@@ -255,7 +255,12 @@ app
     await app.startManually(async () => {
       const httpServer = http.createServer(app.instance.callback());
       app.server = httpServer;
-      await listenHttpServer(httpServer, app.port, app.hostname);
+      await listenHttpServer(
+        httpServer,
+        app.port,
+        app.hostname,
+        parseServerListenBacklog(process.env.SERVER_LISTEN_BACKLOG),
+      );
     });
   })
   .catch(async (error: unknown) => {

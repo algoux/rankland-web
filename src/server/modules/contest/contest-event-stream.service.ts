@@ -5,13 +5,26 @@ import {
   StoredEventInput,
   storedEventToClientEvent,
 } from './contest-event-codec';
-import { ContestEventStore, ContestStoredEvent } from './contest-event-store';
+import { ContestEventStore, ContestReadableEvent } from './contest-event-store';
 import TypeOrmContestEventStore from './contest-event-store.typeorm';
-import { rankland_live_contest_common } from '@common/proto/rankland_live_contest';
+import { rankland_live_contest_client, rankland_live_contest_common } from '@common/proto/rankland_live_contest';
 import Long from 'long';
 import { ContestClientEventBO, ContestEventsResponseBO, ContestProducerBatchBO } from './contest-event-bo';
 import LogicException from '@server/exceptions/logic.exception';
 import { ErrCode } from '@common/enums/err-code.enum';
+import ContestEventReadCache, {
+  ContestEventReadCacheUnavailableError,
+  ContestEventReadFormat,
+} from './contest-event-read-cache';
+import ContestEventReadCacheConfig from '@server/configs/contest-event-read-cache/contest-event-read-cache.config';
+import { trustedPreEncodedProtobuf, trustedPreNormalizedJson, TrustedResponse } from '@server/http/trusted-response';
+import HttpException from '@server/exceptions/http.exception';
+import { getContestEventsResponseToJson } from './contest-event-codec';
+import ContestEventReadBulkhead, { ContestEventReadBulkheadError } from './contest-event-read-bulkhead';
+import { isDeepStrictEqual } from 'util';
+import type { ContestEventReadCacheResult } from './contest-event-read-cache';
+import { contestEventReadMetrics } from './contest-event-read-metrics';
+import { ContestEventReadDatabaseUnavailableError } from './contest-event-read-db-deadline';
 
 export interface AppendProducerEventsInput {
   uk: string;
@@ -27,6 +40,8 @@ export interface AppendProducerEventsResult {
   lastEventId: number;
   expectedNextEventId: number;
   streamRevision: number;
+  /** Internal post-commit delta; controllers must not expose it on the wire. */
+  committedEvents: ContestReadableEvent[];
 }
 
 export interface GetClientEventsInput {
@@ -41,7 +56,35 @@ export interface GetClientEventsResult extends ContestEventsResponseBO {}
 
 @Provide()
 export default class ContestEventStreamService {
-  public constructor(@Inject(TypeOrmContestEventStore) private readonly store: ContestEventStore) {}
+  private readonly fallbackBulkhead: ContestEventReadBulkhead;
+  private readonly authoritativeStateFlights = new Map<
+    string,
+    Promise<Awaited<ReturnType<ContestEventStore['getStreamState']>>>
+  >();
+
+  public constructor(
+    @Inject(TypeOrmContestEventStore) private readonly store: ContestEventStore,
+    @Inject(ContestEventReadCache) private readonly readCache?: ContestEventReadCache,
+    @Inject(ContestEventReadCacheConfig)
+    private readonly readCacheConfig?: Partial<
+      Pick<
+        ContestEventReadCacheConfig,
+        | 'mode'
+        | 'fallbackConcurrency'
+        | 'fallbackQueueSize'
+        | 'fallbackQueueTimeoutMs'
+        | 'retryAfterSeconds'
+        | 'onCompareSampleRate'
+        | 'bootstrapAuthorityCoalescingEnabled'
+      >
+    >,
+  ) {
+    this.fallbackBulkhead = new ContestEventReadBulkhead(
+      readCacheConfig?.fallbackConcurrency ?? 4,
+      readCacheConfig?.fallbackQueueSize ?? 32,
+      readCacheConfig?.fallbackQueueTimeoutMs ?? 1_000,
+    );
+  }
 
   public async appendProducerEvents(input: AppendProducerEventsInput): Promise<AppendProducerEventsResult> {
     const producerId = normalizeProducerId(input.producerId);
@@ -131,17 +174,40 @@ export default class ContestEventStreamService {
         lastEventId: cursor,
         expectedNextEventId: cursor + 1,
         streamRevision: stream.streamRevision,
+        committedEvents: newEvents.map((event) => ({
+          contestId: stream.contestId,
+          streamRevision: stream.streamRevision,
+          eventId: event.eventId,
+          type: event.type,
+          solutionId: event.solutionId,
+          solutionSubmitTimeNs: event.solutionSubmitTimeNs,
+          payloadBytes: event.payloadBytes,
+        })),
       };
     });
   }
 
   public async getClientEvents(input: GetClientEventsInput): Promise<GetClientEventsResult> {
+    return this.getClientEventsAtFence(input);
+  }
+
+  private async getClientEventsAtFence(
+    input: GetClientEventsInput,
+    throughEventId?: number,
+  ): Promise<GetClientEventsResult> {
     if (!Number.isInteger(input.streamRevision) || input.streamRevision < 1) {
       throw new LogicException(ErrCode.ContestEventInvalidBatch, 'streamRevision is required');
     }
     const afterEventId = Math.max(0, input.afterEventId ?? 0);
     const limit = Math.max(1, Math.min(input.limit ?? 1000, 1000));
-    const snapshot = await this.store.readEventsSnapshot(input.uk, afterEventId, limit + 1);
+    const snapshot = await this.store.readEventsSnapshot({
+      uk: input.uk,
+      afterEventId,
+      limit: limit + 1,
+      requestStreamRevision: input.streamRevision,
+      compactProgress: input.compactProgress !== false,
+      throughEventId,
+    });
     const { stream } = snapshot;
     if (input.streamRevision !== stream.streamRevision) {
       return emptyResetResponse(input.uk, stream, 'stream revision changed');
@@ -172,23 +238,196 @@ export default class ContestEventStreamService {
     };
   }
 
+  public async getClientEventsForTransport(
+    input: GetClientEventsInput,
+    format: ContestEventReadFormat,
+  ): Promise<Record<string, any> | TrustedResponse> {
+    const mode = this.readCacheConfig?.mode ?? 'off';
+    if (mode === 'off' || !this.readCache) {
+      return this.runLegacyRead(input);
+    }
+    if (mode === 'shadow') {
+      const legacy = await this.runLegacyRead(input);
+      this.runShadowRead(input, format, legacy).catch(() => undefined);
+      return legacy;
+    }
+
+    try {
+      const result = await this.readCache.getEvents(input, format);
+      if (Math.random() < (this.readCacheConfig?.onCompareSampleRate ?? 0)) {
+        this.runOnComparison(input, result).catch(() => undefined);
+      }
+      return result.format === 'protobuf'
+        ? trustedPreEncodedProtobuf(result.body, result.release)
+        : trustedPreNormalizedJson(result.data, result.release);
+    } catch (error) {
+      if (error instanceof ContestEventReadCacheUnavailableError) {
+        if (error.reason === 'contest is oversize') {
+          return this.runLegacyRead(input);
+        }
+        throw this.temporaryUnavailable();
+      }
+      throw error;
+    }
+  }
+
   public async releaseProducerLock(uk: string) {
     const state = await this.store.releaseProducerLock(uk);
     return { ...state, uk };
   }
 
   public async getStreamState(uk: string) {
-    const state = await this.getAuthoritativeStreamState(uk);
-    return { ...state, uk };
+    try {
+      const state = await this.getAuthoritativeStreamState(uk);
+      return { ...state, uk };
+    } catch (error) {
+      this.rethrowStreamAvailability(error);
+    }
+  }
+
+  public async getCanonicalStreamState(uk: string) {
+    try {
+      return await this.getAuthoritativeStreamState(uk);
+    } catch (error) {
+      this.rethrowStreamAvailability(error);
+    }
   }
 
   public async getAuthoritativeStreamState(uk: string) {
-    return this.store.getStreamState(uk);
+    if (this.readCacheConfig?.bootstrapAuthorityCoalescingEnabled === false) {
+      return this.store.getStreamState(uk);
+    }
+    const key = normalizeAuthorityUk(uk);
+    const existing = this.authoritativeStateFlights.get(key);
+    if (existing) {
+      contestEventReadMetrics.add('streamAuthoritySingleflightJoins');
+      return existing;
+    }
+    const flight = this.store.getStreamState(uk);
+    this.authoritativeStateFlights.set(key, flight);
+    try {
+      return await flight;
+    } finally {
+      if (this.authoritativeStateFlights.get(key) === flight) {
+        this.authoritativeStateFlights.delete(key);
+      }
+    }
+  }
+
+  public async getFreshAuthoritativeStreamState(uk: string) {
+    try {
+      return await this.store.getStreamState(uk);
+    } catch (error) {
+      this.rethrowStreamAvailability(error);
+    }
   }
 
   public async getAuthoritativeStreamStates(contestIds: readonly string[]) {
-    return this.store.getStreamStates(contestIds);
+    try {
+      return await this.store.getStreamStates(contestIds);
+    } catch (error) {
+      this.rethrowStreamAvailability(error);
+    }
   }
+
+  public async getAuthoritativeCacheStates(contestIds: readonly string[]) {
+    return this.store.readAuthorityByContestIds(contestIds);
+  }
+
+  private async runShadowRead(
+    input: GetClientEventsInput,
+    format: ContestEventReadFormat,
+    legacy: Record<string, any>,
+  ): Promise<void> {
+    if (!this.readCache) {
+      return;
+    }
+    const result = await this.readCache.getEvents(input, format);
+    try {
+      this.readCache.recordComparison(
+        input.uk,
+        compareReadResponses(cacheResultToJson(result), legacy, 'inconclusive'),
+      );
+    } finally {
+      result.release();
+    }
+  }
+
+  private async runOnComparison(input: GetClientEventsInput, result: ContestEventReadCacheResult): Promise<void> {
+    if (!this.readCache) {
+      return;
+    }
+    const cached = result.format === 'json' ? structuredClone(result.data) : cacheResultToJson(result);
+    const legacy = await this.runLegacyRead(input, Number(cached.latestEventId));
+    this.readCache.recordComparison(input.uk, compareReadResponses(cached, legacy, 'authority-changed'));
+  }
+
+  private async runLegacyRead(input: GetClientEventsInput, throughEventId?: number): Promise<Record<string, any>> {
+    try {
+      contestEventReadMetrics.add('fallbackReads');
+      return await this.fallbackBulkhead.run(async () =>
+        getContestEventsResponseToJson(await this.getClientEventsAtFence(input, throughEventId)),
+      );
+    } catch (error) {
+      if (error instanceof ContestEventReadBulkheadError) {
+        contestEventReadMetrics.add('fallbackRejects');
+        throw this.temporaryUnavailable();
+      }
+      if (error instanceof ContestEventReadDatabaseUnavailableError) {
+        contestEventReadMetrics.add('fallbackRejects');
+        throw this.temporaryUnavailable();
+      }
+      throw error;
+    }
+  }
+
+  private temporaryUnavailable(): HttpException {
+    return new HttpException(503, {
+      'Retry-After': String(this.readCacheConfig?.retryAfterSeconds ?? 1),
+    });
+  }
+
+  private rethrowStreamAvailability(error: unknown): never {
+    if (error instanceof ContestEventReadDatabaseUnavailableError) {
+      throw this.temporaryUnavailable();
+    }
+    throw error;
+  }
+}
+
+function normalizeAuthorityUk(uk: string): string {
+  return uk.normalize('NFC').toLocaleLowerCase('en-US');
+}
+
+function cacheResultToJson(result: ContestEventReadCacheResult): Record<string, any> {
+  if (result.format === 'json') {
+    return result.data as Record<string, any>;
+  }
+  const message = rankland_live_contest_client.GetContestEventsResponse.decode(result.body);
+  const json = rankland_live_contest_client.GetContestEventsResponse.toObject(message, {
+    longs: String,
+    enums: String,
+    arrays: true,
+  }) as Record<string, any>;
+  json.fromEventId = message._fromEventId ? message.fromEventId : null;
+  json.toEventId = message._toEventId ? message.toEventId : null;
+  delete json._fromEventId;
+  delete json._toEventId;
+  return json;
+}
+
+function compareReadResponses(
+  cached: Record<string, any>,
+  legacy: Record<string, any>,
+  authorityDifference: 'inconclusive' | 'authority-changed',
+): 'match' | 'mismatch' | 'inconclusive' | 'authority-changed' {
+  if (
+    cached.streamRevision !== legacy.streamRevision ||
+    String(cached.latestEventId) !== String(legacy.latestEventId)
+  ) {
+    return authorityDifference;
+  }
+  return isDeepStrictEqual(cached, legacy) ? 'match' : 'mismatch';
 }
 
 function getBatchSubmitTimesByEventId(events: StoredEventInput[]): Map<number, string> {
@@ -231,7 +470,10 @@ function fillSolutionSubmitTime(
   event.solutionSubmitTimeNs = submitTimeNs;
 }
 
-function filterFrozenNonNewEvents(events: ContestStoredEvent[], frozenStartNs?: string | null): ContestStoredEvent[] {
+function filterFrozenNonNewEvents(
+  events: ContestReadableEvent[],
+  frozenStartNs?: string | null,
+): ContestReadableEvent[] {
   if (!frozenStartNs) {
     return events;
   }
@@ -244,13 +486,13 @@ function filterFrozenNonNewEvents(events: ContestStoredEvent[], frozenStartNs?: 
   });
 }
 
-function isNewSolutionEvent(event: StoredEventInput | ContestStoredEvent): boolean {
+function isNewSolutionEvent(event: StoredEventInput | ContestReadableEvent): boolean {
   return event.type === rankland_live_contest_common.EventType.NEW_SOLUTION;
 }
 
 function needsSolutionSubmitTime(
-  event: StoredEventInput | ContestStoredEvent,
-): event is (StoredEventInput | ContestStoredEvent) & { solutionId: number } {
+  event: StoredEventInput | ContestReadableEvent,
+): event is (StoredEventInput | ContestReadableEvent) & { solutionId: number } {
   return (
     event.solutionId !== undefined &&
     event.solutionId !== null &&

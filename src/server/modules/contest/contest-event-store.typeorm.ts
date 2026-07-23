@@ -1,5 +1,5 @@
 import { Inject, Provide } from 'bwcx-core';
-import { EntityManager, In, MoreThan } from 'typeorm';
+import { EntityManager, In, QueryRunner } from 'typeorm';
 import TypeOrmClient from '@server/database/typeorm-client';
 import { ContestEntity } from '@server/entities/contest.entity';
 import { ContestEventEntity } from '@server/entities/contest-event.entity';
@@ -8,21 +8,49 @@ import { rankland_live_contest_common } from '@common/proto/rankland_live_contes
 import { getFrozenStartNsFromSeconds } from './contest-time';
 import {
   ContestEventInsertInput,
+  ContestEventAuthorityState,
+  ContestEventRangeMemoryEstimate,
+  ContestEventRangeRead,
+  ContestEventsSnapshotReadRequest,
   ContestEventStore,
   ContestEventsSnapshot,
   ContestEventTransaction,
+  ContestReadableEvent,
   ContestStoredEvent,
   ContestStreamState,
 } from './contest-event-store';
 import LogicException from '@server/exceptions/logic.exception';
 import { ErrCode } from '@common/enums/err-code.enum';
 import IdGeneratorService, { IdGenerator } from '@server/services/id-generator.service';
+import { contestEventReadMetrics } from './contest-event-read-metrics';
+import ContestEventReadCacheConfig from '@server/configs/contest-event-read-cache/contest-event-read-cache.config';
+import {
+  ContestEventReadDatabaseDeadlineError,
+  ContestEventReadDatabaseUnavailableError,
+  runTypeOrmReadWithAcquisitionRetry,
+} from './contest-event-read-db-deadline';
 
 @Provide()
 export default class TypeOrmContestEventStore implements ContestEventStore {
   public constructor(
     @Inject(TypeOrmClient) private readonly typeOrmClient: TypeOrmClient,
     @Inject(IdGeneratorService) private readonly idGenerator: IdGenerator,
+    @Inject(ContestEventReadCacheConfig)
+    private readonly readCacheConfig: Pick<ContestEventReadCacheConfig, 'queryTimeoutMs'> &
+      Partial<
+        Pick<
+          ContestEventReadCacheConfig,
+          | 'poolAcquireRetryAttempts'
+          | 'poolAcquireRetryMinDelayMs'
+          | 'poolAcquireRetryMaxDelayMs'
+          | 'bootstrapAuthorityCoalescingEnabled'
+        >
+      > = {
+      queryTimeoutMs: 1_000,
+      poolAcquireRetryAttempts: 16,
+      poolAcquireRetryMinDelayMs: 5,
+      poolAcquireRetryMaxDelayMs: 50,
+    },
   ) {}
 
   public async runInStreamTransaction<T>(
@@ -47,86 +75,313 @@ export default class TypeOrmContestEventStore implements ContestEventStore {
   }
 
   public async getStreamState(uk: string): Promise<ContestStreamState> {
-    const { contest, stream } = await this.findStreamByUk(this.typeOrmClient.getDataSource().manager, uk);
-    return streamEntityToState(stream, contest.uk);
+    if (this.readCacheConfig.bootstrapAuthorityCoalescingEnabled === false) {
+      try {
+        const { contest, stream } = await this.findStreamByUk(this.typeOrmClient.getDataSource().manager, uk);
+        return streamEntityToState(stream, contest.uk);
+      } catch (error) {
+        this.rethrowReadFailure(error);
+      }
+    }
+    const { stream } = await this.runBoundedRead((manager) => this.findSnapshotStateByUk(manager, uk));
+    return stream;
   }
 
   public async getStreamStates(contestIds: readonly string[]): Promise<ContestStreamState[]> {
-    if (contestIds.length === 0) {
-      return [];
-    }
-    const rows = await this.typeOrmClient
-      .getDataSource()
-      .getRepository(ContestEventStreamEntity)
-      .createQueryBuilder('stream')
-      .innerJoin(ContestEntity, 'contest', 'contest.id = stream.contestId')
-      .select('stream.contestId', 'contestId')
-      .addSelect('contest.uk', 'uk')
-      .addSelect('stream.lastEventId', 'lastEventId')
-      .addSelect('stream.streamRevision', 'streamRevision')
-      .where('stream.contestId IN (:...contestIds)', { contestIds: [...contestIds] })
-      .andWhere('contest.deletedAt IS NULL')
-      .getRawMany<{
-        contestId: string | number;
-        uk: string;
-        lastEventId: string | number;
-        streamRevision: string | number;
-      }>();
-    return rows.map((row) => ({
-      contestId: String(row.contestId),
-      uk: row.uk,
-      lastEventId: Number(row.lastEventId),
-      streamRevision: Number(row.streamRevision),
+    const states = await this.readAuthorityByContestIds(contestIds);
+    return states.map((state) => ({
+      contestId: state.contestId,
+      uk: state.canonicalUk,
+      lastEventId: state.lastEventId,
+      streamRevision: state.streamRevision,
     }));
   }
 
-  public async readEventsSnapshot(uk: string, afterEventId: number, limit: number): Promise<ContestEventsSnapshot> {
-    return this.typeOrmClient.getDataSource().transaction('REPEATABLE READ', async (manager) => {
-      const { contest, stream } = await this.findStreamByUk(manager, uk);
-      const events = await manager.getRepository(ContestEventEntity).find({
-        where: {
-          contestId: stream.contestId,
-          streamRevision: stream.streamRevision,
-          eventId: MoreThan(afterEventId),
+  public async readAuthorityByUk(uk: string): Promise<ContestEventAuthorityState> {
+    contestEventReadMetrics.add('authorityByUkCalls');
+    const { stream, durationS, frozenDurationS } = await this.runBoundedRead((manager) =>
+      this.findSnapshotStateByUk(manager, uk),
+    );
+    contestEventReadMetrics.add('authorityByUkRows');
+    return authorityState(stream, durationS, frozenDurationS);
+  }
+
+  public async readAuthorityByContestIds(contestIds: readonly string[]): Promise<ContestEventAuthorityState[]> {
+    if (contestIds.length === 0) {
+      return [];
+    }
+    contestEventReadMetrics.add('authorityBatchCalls');
+    const rows = await this.runBoundedRead((manager) =>
+      manager
+        .getRepository(ContestEventStreamEntity)
+        .createQueryBuilder('stream')
+        .innerJoin(ContestEntity, 'contest', 'contest.id = stream.contestId')
+        .select('stream.contestId', 'contestId')
+        .addSelect('contest.uk', 'canonicalUk')
+        .addSelect('contest.durationS', 'durationS')
+        .addSelect('contest.frozenDurationS', 'frozenDurationS')
+        .addSelect('stream.lastEventId', 'lastEventId')
+        .addSelect('stream.streamRevision', 'streamRevision')
+        .where('stream.contestId IN (:...contestIds)', { contestIds: [...contestIds] })
+        .andWhere('contest.deletedAt IS NULL')
+        .maxExecutionTime(this.readCacheConfig.queryTimeoutMs)
+        .getRawMany<{
+          contestId: string | number;
+          canonicalUk: string;
+          durationS: string | number;
+          frozenDurationS?: string | number | null;
+          lastEventId: string | number;
+          streamRevision: string | number;
+        }>(),
+    );
+    contestEventReadMetrics.add('authorityBatchRows', rows.length);
+    return rows.map((row) =>
+      authorityState(
+        {
+          contestId: String(row.contestId),
+          uk: row.canonicalUk,
+          lastEventId: Number(row.lastEventId),
+          streamRevision: Number(row.streamRevision),
         },
-        order: {
-          eventId: 'ASC',
-        },
-        take: limit,
-      });
-      const settledRows = await manager
+        Number(row.durationS),
+        row.frozenDurationS === undefined || row.frozenDurationS === null ? null : Number(row.frozenDurationS),
+      ),
+    );
+  }
+
+  public async readEventRange(request: ContestEventRangeRead): Promise<ContestReadableEvent[]> {
+    if (request.afterEventId >= request.throughEventId || request.limit < 1) {
+      return [];
+    }
+    contestEventReadMetrics.add('eventRangeCalls');
+    const events = await this.runBoundedRead((manager) =>
+      manager
         .getRepository(ContestEventEntity)
         .createQueryBuilder('event')
-        .select('event.solutionId', 'solutionId')
-        .addSelect('MAX(event.eventId)', 'eventId')
-        .where('event.contestId = :contestId', { contestId: stream.contestId })
-        .andWhere('event.streamRevision = :streamRevision', { streamRevision: stream.streamRevision })
-        .andWhere('event.eventId > :afterEventId', { afterEventId })
-        .andWhere('event.solutionId IS NOT NULL')
-        .andWhere('event.type IN (:...types)', {
-          types: [
-            rankland_live_contest_common.EventType.SOLUTION_ON_RESULT_SETTLE,
-            rankland_live_contest_common.EventType.SOLUTION_ON_RESULT_CHANGE,
-          ],
-        })
-        .groupBy('event.solutionId')
-        .getRawMany<{ solutionId: string | number; eventId: string | number }>();
+        .select([
+          'event.contestId',
+          'event.eventId',
+          'event.streamRevision',
+          'event.type',
+          'event.solutionId',
+          'event.solutionSubmitTimeNs',
+          'event.payloadBytes',
+        ])
+        .where('event.contestId = :contestId', { contestId: request.contestId })
+        .andWhere('event.streamRevision = :streamRevision', { streamRevision: request.streamRevision })
+        .andWhere('event.eventId > :afterEventId', { afterEventId: request.afterEventId })
+        .andWhere('event.eventId <= :throughEventId', { throughEventId: request.throughEventId })
+        .orderBy('event.eventId', 'ASC')
+        .limit(Math.max(1, Math.trunc(request.limit)))
+        .maxExecutionTime(this.readCacheConfig.queryTimeoutMs)
+        .getMany(),
+    );
+    contestEventReadMetrics.add('eventRangeRows', events.length);
+    return events.map(eventEntityToReadableEvent);
+  }
+
+  public async estimateEventRangeMemory(request: ContestEventRangeRead): Promise<ContestEventRangeMemoryEstimate> {
+    if (request.afterEventId >= request.throughEventId || request.limit < 1) {
+      return { rowCount: 0, payloadBytes: 0, solutionSubmitTimeBytes: 0 };
+    }
+    return this.runBoundedRead(async (manager) => {
+      const page = manager
+        .getRepository(ContestEventEntity)
+        .createQueryBuilder('event')
+        .select('event.payloadBytes', 'payloadBytes')
+        .addSelect('event.solutionSubmitTimeNs', 'solutionSubmitTimeNs')
+        .where('event.contestId = :contestId', { contestId: request.contestId })
+        .andWhere('event.streamRevision = :streamRevision', { streamRevision: request.streamRevision })
+        .andWhere('event.eventId > :afterEventId', { afterEventId: request.afterEventId })
+        .andWhere('event.eventId <= :throughEventId', { throughEventId: request.throughEventId })
+        .orderBy('event.eventId', 'ASC')
+        .limit(Math.max(1, Math.trunc(request.limit)));
+      const row = await manager
+        .createQueryBuilder()
+        .select('COUNT(*)', 'rowCount')
+        .addSelect('COALESCE(SUM(OCTET_LENGTH(event_page.payloadBytes)), 0)', 'payloadBytes')
+        .addSelect('COALESCE(SUM(OCTET_LENGTH(event_page.solutionSubmitTimeNs)), 0)', 'solutionSubmitTimeBytes')
+        .from(`(${page.getQuery()})`, 'event_page')
+        .setParameters(page.getParameters())
+        .maxExecutionTime(this.readCacheConfig.queryTimeoutMs)
+        .getRawOne<{
+          rowCount: string | number;
+          payloadBytes: string | number;
+          solutionSubmitTimeBytes: string | number;
+        }>();
       return {
-        stream: streamEntityToState(stream, contest.uk),
-        events: events.map(eventEntityToStoredEvent),
-        settledEventIdsBySolutionId: new Map(
-          settledRows.map((row) => [Number(row.solutionId), Number(row.eventId)] as [number, number]),
+        rowCount: parseNonNegativeSafeInteger(row?.rowCount, 'event range row count'),
+        payloadBytes: parseNonNegativeSafeInteger(row?.payloadBytes, 'event range payload bytes'),
+        solutionSubmitTimeBytes: parseNonNegativeSafeInteger(
+          row?.solutionSubmitTimeBytes,
+          'event range submit-time bytes',
         ),
-        frozenStartNs: getFrozenStartNsFromSeconds(contest.durationS, contest.frozenDurationS),
       };
     });
+  }
+
+  public async readEventsSnapshot(request: ContestEventsSnapshotReadRequest): Promise<ContestEventsSnapshot> {
+    contestEventReadMetrics.add('eventsReadTransactionStarted');
+    contestEventReadMetrics.add('legacySnapshotCalls');
+    try {
+      const snapshot = await this.runBoundedRead(async (manager) => {
+        const { stream, durationS, frozenDurationS } = await this.findSnapshotStateByUk(manager, request.uk);
+        const snapshotLastEventId =
+          request.throughEventId === undefined
+            ? stream.lastEventId
+            : Math.min(stream.lastEventId, Math.max(0, Math.trunc(request.throughEventId)));
+        const shouldReadEvents =
+          request.requestStreamRevision === stream.streamRevision && request.afterEventId <= snapshotLastEventId;
+        const events = shouldReadEvents
+          ? await manager
+              .getRepository(ContestEventEntity)
+              .createQueryBuilder('event')
+              .select([
+                'event.contestId',
+                'event.eventId',
+                'event.streamRevision',
+                'event.type',
+                'event.solutionId',
+                'event.solutionSubmitTimeNs',
+                'event.payloadBytes',
+              ])
+              .where('event.contestId = :contestId', { contestId: stream.contestId })
+              .andWhere('event.streamRevision = :streamRevision', { streamRevision: stream.streamRevision })
+              .andWhere('event.eventId > :afterEventId', { afterEventId: request.afterEventId })
+              .andWhere('event.eventId <= :snapshotLastEventId', { snapshotLastEventId })
+              .orderBy('event.eventId', 'ASC')
+              .limit(request.limit)
+              .maxExecutionTime(this.readCacheConfig.queryTimeoutMs)
+              .getMany()
+          : [];
+        const settledRows =
+          shouldReadEvents && request.compactProgress
+            ? await manager
+                .getRepository(ContestEventEntity)
+                .createQueryBuilder('event')
+                .select('event.solutionId', 'solutionId')
+                .addSelect('MAX(event.eventId)', 'eventId')
+                .where('event.contestId = :contestId', { contestId: stream.contestId })
+                .andWhere('event.streamRevision = :streamRevision', { streamRevision: stream.streamRevision })
+                .andWhere('event.eventId > :afterEventId', { afterEventId: request.afterEventId })
+                .andWhere('event.eventId <= :snapshotLastEventId', { snapshotLastEventId })
+                .andWhere('event.solutionId IS NOT NULL')
+                .andWhere('event.type IN (:...types)', {
+                  types: [
+                    rankland_live_contest_common.EventType.SOLUTION_ON_RESULT_SETTLE,
+                    rankland_live_contest_common.EventType.SOLUTION_ON_RESULT_CHANGE,
+                  ],
+                })
+                .groupBy('event.solutionId')
+                .maxExecutionTime(this.readCacheConfig.queryTimeoutMs)
+                .getRawMany<{ solutionId: string | number; eventId: string | number }>()
+            : [];
+        return {
+          stream: { ...stream, lastEventId: snapshotLastEventId },
+          events: events.map(eventEntityToReadableEvent),
+          settledEventIdsBySolutionId: new Map(
+            settledRows.map((row) => [Number(row.solutionId), Number(row.eventId)] as [number, number]),
+          ),
+          frozenStartNs: getFrozenStartNsFromSeconds(durationS, frozenDurationS),
+        };
+      }, 'REPEATABLE READ');
+      contestEventReadMetrics.add('eventsReadTransactionCommitted');
+      contestEventReadMetrics.add('legacySnapshotRows', snapshot.events.length);
+      return snapshot;
+    } catch (error) {
+      contestEventReadMetrics.add('eventsReadTransactionRolledBack');
+      throw error;
+    }
+  }
+
+  private async findSnapshotStateByUk(
+    manager: EntityManager,
+    uk: string,
+  ): Promise<{
+    stream: ContestStreamState;
+    durationS: number;
+    frozenDurationS?: number | null;
+  }> {
+    const row = await manager
+      .getRepository(ContestEntity)
+      .createQueryBuilder('contest')
+      .innerJoin(ContestEventStreamEntity, 'stream', 'stream.contestId = contest.id')
+      .select('contest.id', 'contestId')
+      .addSelect('contest.uk', 'uk')
+      .addSelect('contest.durationS', 'durationS')
+      .addSelect('contest.frozenDurationS', 'frozenDurationS')
+      .addSelect('stream.lastEventId', 'lastEventId')
+      .addSelect('stream.streamRevision', 'streamRevision')
+      .addSelect('stream.producerId', 'producerId')
+      .where('contest.uk = :uk', { uk })
+      .maxExecutionTime(this.readCacheConfig.queryTimeoutMs)
+      .getRawOne<{
+        contestId: string | number;
+        uk: string;
+        durationS: string | number;
+        frozenDurationS?: string | number | null;
+        lastEventId: string | number;
+        streamRevision: string | number;
+        producerId?: string | null;
+      }>();
+    if (!row) {
+      throw new LogicException(ErrCode.ContestNotFound, `contest ${uk} not found`);
+    }
+    return {
+      stream: {
+        contestId: String(row.contestId),
+        uk: row.uk,
+        lastEventId: Number(row.lastEventId),
+        streamRevision: Number(row.streamRevision),
+        producerId: row.producerId,
+      },
+      durationS: Number(row.durationS),
+      frozenDurationS:
+        row.frozenDurationS === undefined || row.frozenDurationS === null ? null : Number(row.frozenDurationS),
+    };
+  }
+
+  private async runBoundedRead<T>(
+    read: (manager: EntityManager) => Promise<T>,
+    isolationLevel?: NonNullable<Parameters<QueryRunner['startTransaction']>[0]>,
+  ): Promise<T> {
+    try {
+      return await runTypeOrmReadWithAcquisitionRetry(
+        () => this.typeOrmClient.getDataSource().createQueryRunner(),
+        this.readCacheConfig.queryTimeoutMs,
+        read,
+        isolationLevel,
+        {
+          maximumAttempts: this.readCacheConfig.poolAcquireRetryAttempts ?? 16,
+          minimumDelayMs: this.readCacheConfig.poolAcquireRetryMinDelayMs ?? 5,
+          maximumDelayMs: this.readCacheConfig.poolAcquireRetryMaxDelayMs ?? 50,
+        },
+      );
+    } catch (error) {
+      this.rethrowReadFailure(error);
+    }
+  }
+
+  private rethrowReadFailure(error: unknown): never {
+    if (error instanceof ContestEventReadDatabaseDeadlineError) {
+      contestEventReadMetrics.add('databaseReadDeadlines');
+      contestEventReadMetrics.add(deadlinePhaseCounter(error.phase));
+    }
+    if (error instanceof LogicException) {
+      throw error;
+    }
+    contestEventReadMetrics.add('databaseReadUnavailable');
+    if (error instanceof ContestEventReadDatabaseUnavailableError) {
+      throw error;
+    }
+    throw new ContestEventReadDatabaseUnavailableError('contest event database read failed', error);
   }
 
   private async findLockedStream(
     manager: EntityManager,
     uk: string,
   ): Promise<{ contest: ContestEntity; stream: ContestEventStreamEntity }> {
-    const { contest } = await this.findContestByUk(manager, uk);
+    const { contest } = await this.findContestByUk(manager, uk, true);
     const stream = await manager.getRepository(ContestEventStreamEntity).findOne({
       where: { contestId: contest.id },
       lock: { mode: 'pessimistic_write' },
@@ -149,13 +404,29 @@ export default class TypeOrmContestEventStore implements ContestEventStore {
     return { contest, stream };
   }
 
-  private async findContestByUk(manager: EntityManager, uk: string): Promise<{ contest: ContestEntity }> {
-    const contest = await manager.getRepository(ContestEntity).findOne({ where: { uk } });
+  private async findContestByUk(manager: EntityManager, uk: string, lock = false): Promise<{ contest: ContestEntity }> {
+    const contest = await manager.getRepository(ContestEntity).findOne({
+      where: { uk },
+      ...(lock ? { lock: { mode: 'pessimistic_write' as const } } : {}),
+    });
     if (!contest) {
       throw new LogicException(ErrCode.ContestNotFound, `contest ${uk} not found`);
     }
     return { contest };
   }
+}
+
+function deadlinePhaseCounter(
+  phase: ContestEventReadDatabaseDeadlineError['phase'],
+):
+  | 'databaseReadDeadlineAcquire'
+  | 'databaseReadDeadlineTransaction'
+  | 'databaseReadDeadlineQuery'
+  | 'databaseReadDeadlineRelease' {
+  if (phase === 'acquire') return 'databaseReadDeadlineAcquire';
+  if (phase === 'query') return 'databaseReadDeadlineQuery';
+  if (phase === 'release') return 'databaseReadDeadlineRelease';
+  return 'databaseReadDeadlineTransaction';
 }
 
 class TypeOrmContestEventTransaction implements ContestEventTransaction {
@@ -266,5 +537,40 @@ function eventEntityToStoredEvent(entity: ContestEventEntity): ContestStoredEven
     solutionSubmitTimeNs: entity.solutionSubmitTimeNs,
     payloadHash: entity.payloadHash,
     payloadBytes: Buffer.from(entity.payloadBytes),
+  };
+}
+
+function eventEntityToReadableEvent(entity: ContestEventEntity): ContestReadableEvent {
+  return {
+    contestId: entity.contestId,
+    eventId: entity.eventId,
+    streamRevision: entity.streamRevision,
+    type: entity.type,
+    solutionId: entity.solutionId,
+    solutionSubmitTimeNs: entity.solutionSubmitTimeNs,
+    payloadBytes: Buffer.from(entity.payloadBytes),
+  };
+}
+
+function parseNonNegativeSafeInteger(value: unknown, name: string): number {
+  const parsed = typeof value === 'number' ? value : Number(value);
+  if (!Number.isSafeInteger(parsed) || parsed < 0) {
+    throw new Error(`${name} is invalid`);
+  }
+  return parsed;
+}
+
+function authorityState(
+  stream: ContestStreamState,
+  durationS: number,
+  frozenDurationS?: number | null,
+): ContestEventAuthorityState {
+  return {
+    contestId: stream.contestId,
+    canonicalUk: stream.uk,
+    streamRevision: stream.streamRevision,
+    lastEventId: stream.lastEventId,
+    frozenStartNs: getFrozenStartNsFromSeconds(durationS, frozenDurationS),
+    visibilityFingerprint: `duration=${durationS};frozen=${frozenDurationS ?? 'null'}`,
   };
 }

@@ -26,13 +26,52 @@ export interface ContestStoredEvent {
   payloadBytes: Buffer;
 }
 
+export type ContestReadableEvent = Pick<
+  ContestStoredEvent,
+  'contestId' | 'eventId' | 'streamRevision' | 'type' | 'solutionId' | 'solutionSubmitTimeNs' | 'payloadBytes'
+>;
+
 export interface ContestEventInsertInput extends Omit<ContestStoredEvent, 'contestId' | 'streamRevision'> {}
 
 export interface ContestEventsSnapshot {
   stream: ContestStreamState;
-  events: ContestStoredEvent[];
+  events: ContestReadableEvent[];
   settledEventIdsBySolutionId: Map<number, number>;
   frozenStartNs?: string | null;
+}
+
+export interface ContestEventsSnapshotReadRequest {
+  uk: string;
+  afterEventId: number;
+  limit: number;
+  requestStreamRevision: number;
+  compactProgress: boolean;
+  /** Internal comparison fence used to reconstruct an append-only stream prefix. */
+  throughEventId?: number;
+}
+
+export interface ContestEventAuthorityState {
+  contestId: string;
+  canonicalUk: string;
+  streamRevision: number;
+  lastEventId: number;
+  frozenStartNs?: string | null;
+  visibilityFingerprint: string;
+}
+
+export interface ContestEventRangeRead {
+  contestId: string;
+  streamRevision: number;
+  afterEventId: number;
+  throughEventId: number;
+  limit: number;
+}
+
+/** Exact lightweight metadata for the rows selected by one range page. */
+export interface ContestEventRangeMemoryEstimate {
+  rowCount: number;
+  payloadBytes: number;
+  solutionSubmitTimeBytes: number;
 }
 
 export interface ContestEventTransaction {
@@ -49,5 +88,9 @@ export interface ContestEventStore {
   releaseProducerLock: (uk: string) => Promise<ContestStreamState>;
   getStreamState: (uk: string) => Promise<ContestStreamState>;
   getStreamStates: (contestIds: readonly string[]) => Promise<ContestStreamState[]>;
-  readEventsSnapshot: (uk: string, afterEventId: number, limit: number) => Promise<ContestEventsSnapshot>;
+  readEventsSnapshot: (request: ContestEventsSnapshotReadRequest) => Promise<ContestEventsSnapshot>;
+  readAuthorityByUk: (uk: string) => Promise<ContestEventAuthorityState>;
+  readAuthorityByContestIds: (contestIds: readonly string[]) => Promise<ContestEventAuthorityState[]>;
+  estimateEventRangeMemory: (request: ContestEventRangeRead) => Promise<ContestEventRangeMemoryEstimate>;
+  readEventRange: (request: ContestEventRangeRead) => Promise<ContestReadableEvent[]>;
 }

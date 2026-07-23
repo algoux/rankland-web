@@ -5,12 +5,14 @@ import ContestEventStreamService from '../contest-event-stream.service';
 import {
   ContestEventInsertInput,
   ContestEventStore,
+  ContestEventsSnapshotReadRequest,
   ContestEventTransaction,
   ContestStoredEvent,
   ContestStreamState,
 } from '../contest-event-store';
 import { parseProducerBatchJson } from '../contest-event-codec';
 import { ContestClientEventBO } from '../contest-event-bo';
+import { ContestEventReadPoolAcquisitionUnavailableError } from '../contest-event-read-db-deadline';
 
 function progress(eventId: number, solutionId = 1, percentageProgress = 50) {
   return {
@@ -54,6 +56,19 @@ function clientEventIds(events: ContestClientEventBO[]): number[] {
 }
 
 describe('contest event stream service', () => {
+  it('maps stream-state pool exhaustion to a retryable HTTP 503', async () => {
+    const store = new InMemoryContestEventStore();
+    vi.spyOn(store, 'getStreamState').mockRejectedValue(
+      new ContestEventReadPoolAcquisitionUnavailableError(new Error('No connections available.')),
+    );
+    const service = new ContestEventStreamService(store, undefined, { retryAfterSeconds: 2 });
+
+    await expect(service.getStreamState('contest-a')).rejects.toMatchObject({
+      code: 503,
+      headers: { 'Retry-After': '2' },
+    });
+  });
+
   it('lets the first producer claim the stream lock and rejects another producer', async () => {
     const store = new InMemoryContestEventStore();
     store.addContest('contest-a');
@@ -194,6 +209,28 @@ describe('contest event stream service', () => {
     expect(clientEventIds(page.events)).toEqual([4]);
     expect(page.checkpointEventId).toBe(4);
     expect(page.hasMore).toBe(true);
+  });
+
+  it('passes revision and compact intent into the single snapshot read', async () => {
+    const store = new SnapshotRequestRecordingStore();
+    store.addContest('contest-a');
+    const service = new ContestEventStreamService(store);
+
+    await service.getClientEvents({
+      uk: 'contest-a',
+      afterEventId: 7,
+      limit: 25,
+      streamRevision: 3,
+      compactProgress: false,
+    });
+
+    expect(store.lastSnapshotRequest).toEqual({
+      uk: 'contest-a',
+      afterEventId: 7,
+      limit: 26,
+      requestStreamRevision: 3,
+      compactProgress: false,
+    });
   });
 
   it('filters non-new events for frozen submissions even when compaction is disabled', async () => {
@@ -412,6 +449,15 @@ describe('contest event stream service', () => {
   });
 });
 
+class SnapshotRequestRecordingStore extends InMemoryContestEventStore {
+  public lastSnapshotRequest?: Record<string, unknown>;
+
+  public async readEventsSnapshot(request: ContestEventsSnapshotReadRequest) {
+    this.lastSnapshotRequest = request;
+    return super.readEventsSnapshot(request);
+  }
+}
+
 class InstrumentedContestEventStore implements ContestEventStore {
   public readonly transaction: InstrumentedContestEventTransaction;
 
@@ -446,7 +492,7 @@ class InstrumentedContestEventStore implements ContestEventStore {
     return contestIds.includes(this.transaction.stream.contestId) ? [{ ...this.transaction.stream }] : [];
   }
 
-  public async readEventsSnapshot(): Promise<never> {
+  public async readEventsSnapshot(_request: ContestEventsSnapshotReadRequest): Promise<never> {
     throw new Error('not implemented');
   }
 }

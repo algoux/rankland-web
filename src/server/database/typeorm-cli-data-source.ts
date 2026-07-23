@@ -1,5 +1,6 @@
 import type { MysqlDataSourceConfig } from './typeorm-data-source';
 import { createMysqlDataSource } from './typeorm-data-source';
+import { parseMysqlConnectionLimit } from '@server/configs/mysql/mysql.connection-limit';
 
 type MysqlEnvName = 'MYSQL_HOST' | 'MYSQL_USER' | 'MYSQL_PASS' | 'MYSQL_DB';
 
@@ -10,6 +11,7 @@ function getMysqlDataSourceConfigFromEnv(): MysqlDataSourceConfig {
     username: readMysqlEnv('MYSQL_USER', 'blue'),
     password: readMysqlEnv('MYSQL_PASS', 'test'),
     database: readMysqlEnv('MYSQL_DB', 'rankland'),
+    connectionLimit: parseMysqlConnectionLimit(process.env.MYSQL_CONNECTION_LIMIT),
   };
 }
 

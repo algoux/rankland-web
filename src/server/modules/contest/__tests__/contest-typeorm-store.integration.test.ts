@@ -18,6 +18,10 @@ import { parseProducerBatchJson } from '../contest-event-codec';
 import { ContestClientEventBO } from '../contest-event-bo';
 import { contestDurationToSeconds } from '@common/modules/contest/contest-metadata';
 import { ErrCode } from '@common/enums/err-code.enum';
+import {
+  ContestEventReadDatabaseDeadlineError,
+  runTypeOrmReadWithDeadline,
+} from '../contest-event-read-db-deadline';
 
 const runMysqlTests = process.env.RUN_MYSQL_TESTS === 'true';
 const testIdGenerator = new SnowflakeIdGenerator({ workerId: 1023 });
@@ -605,6 +609,152 @@ describe.runIf(runMysqlTests)('contest TypeORM event store', () => {
     expect(page.checkpointEventId).toBe(5);
   });
 
+  it('skips settle aggregation for compact=false and skips all event reads for reset/ahead requests', async () => {
+    const sqlUk = `${uk}-sql-fast-path`;
+    createdUks.add(sqlUk);
+    await createContestWithStream(dataSource, sqlUk, {
+      title: sqlUk,
+      startAt: '2026-01-01T00:00:00Z',
+      duration: [5, 'h'],
+    });
+    const service = new ContestEventStreamService(
+      new TypeOrmContestEventStore(typeOrmClientFor(dataSource), testIdGenerator, { queryTimeoutMs: 1_234 }),
+    );
+    await service.appendProducerEvents({
+      uk: sqlUk,
+      producerId: 'producer-a',
+      batch: parseProducerBatchJson({
+        streamRevision: 1,
+        events: [newSolution(1, 301), progress(2, 301), settle(3, 301)],
+      }),
+    });
+    const queries: string[] = [];
+    const originalLogQuery = dataSource.logger.logQuery.bind(dataSource.logger);
+    const querySpy = vi.spyOn(dataSource.logger, 'logQuery').mockImplementation((query, parameters, runner) => {
+      queries.push(query);
+      originalLogQuery(query, parameters, runner);
+    });
+
+    await service.getClientEvents({
+      uk: sqlUk,
+      afterEventId: 0,
+      limit: 10,
+      streamRevision: 1,
+      compactProgress: false,
+    });
+    expect(queries.some(isContestEventPageQuery)).toBe(true);
+    expect(queries.some((query) => /\bMAX\s*\(|\bGROUP\s+BY\b/i.test(query))).toBe(false);
+    const boundedSelects = queries.filter((query) => /\bSELECT\b/i.test(query));
+    expect(boundedSelects.length).toBeGreaterThanOrEqual(2);
+    expect(boundedSelects.every((query) => /MAX_EXECUTION_TIME\(1234\)/i.test(query))).toBe(true);
+
+    queries.length = 0;
+    await service.getClientEvents({
+      uk: sqlUk,
+      afterEventId: 0,
+      limit: 10,
+      streamRevision: 2,
+      compactProgress: true,
+    });
+    expect(queries.some(isContestEventPageQuery)).toBe(false);
+
+    queries.length = 0;
+    await service.getClientEvents({
+      uk: sqlUk,
+      afterEventId: 999,
+      limit: 10,
+      streamRevision: 1,
+      compactProgress: true,
+    });
+    expect(queries.some(isContestEventPageQuery)).toBe(false);
+    querySpy.mockRestore();
+  });
+
+  it('cancels a hung MySQL read at the end-to-end deadline and leaves the pool usable', async () => {
+    const startedAt = Date.now();
+
+    await expect(
+      runTypeOrmReadWithDeadline(dataSource.createQueryRunner(), 100, (manager) => manager.query('SELECT SLEEP(2)')),
+    ).rejects.toBeInstanceOf(ContestEventReadDatabaseDeadlineError);
+
+    expect(Date.now() - startedAt).toBeLessThan(1_000);
+    await expect(dataSource.query('SELECT 1 AS ok')).resolves.toMatchObject([{ ok: '1' }]);
+  });
+
+  it('serializes append behind contest deletion so no event can commit after delete', async () => {
+    const deleteRaceUk = `${uk}-append-delete-race`;
+    createdUks.add(deleteRaceUk);
+    await createContestWithStream(dataSource, deleteRaceUk, {
+      title: deleteRaceUk,
+      startAt: '2026-01-01T00:00:00Z',
+      duration: [5, 'h'],
+    });
+    const contest = await dataSource.getRepository(ContestEntity).findOneByOrFail({ uk: deleteRaceUk });
+    const service = new ContestEventStreamService(
+      new TypeOrmContestEventStore(typeOrmClientFor(dataSource), testIdGenerator),
+    );
+    const lockRunner = dataSource.createQueryRunner();
+    await lockRunner.connect();
+    await lockRunner.startTransaction();
+
+    try {
+      await lockRunner.manager.getRepository(ContestEntity).findOneOrFail({
+        where: { id: contest.id },
+        lock: { mode: 'pessimistic_write' },
+      });
+      await lockRunner.manager.getRepository(ContestEventStreamEntity).findOneOrFail({
+        where: { contestId: contest.id },
+        lock: { mode: 'pessimistic_write' },
+      });
+
+      let appendSettled = false;
+      const appendOutcome = service
+        .appendProducerEvents({
+          uk: deleteRaceUk,
+          producerId: 'producer-delete-race',
+          batch: parseProducerBatchJson({
+            streamRevision: 1,
+            events: [newSolution(1, 401)],
+          }),
+        })
+        .then(
+          (value) => {
+            appendSettled = true;
+            return { status: 'fulfilled' as const, value };
+          },
+          (error: unknown) => {
+            appendSettled = true;
+            return { status: 'rejected' as const, error };
+          },
+        );
+
+      await new Promise((resolve) => setTimeout(resolve, 25));
+      expect(appendSettled).toBe(false);
+      await lockRunner.manager.getRepository(ContestEntity).softDelete({ id: contest.id });
+      await lockRunner.commitTransaction();
+
+      const outcome = await appendOutcome;
+      expect(outcome).toMatchObject({
+        status: 'rejected',
+        error: { code: ErrCode.ContestNotFound },
+      });
+      await expect(
+        dataSource.getRepository(ContestEventStreamEntity).findOneByOrFail({ contestId: contest.id }),
+      ).resolves.toMatchObject({ lastEventId: 0, streamRevision: 1 });
+      await expect(
+        dataSource.getRepository(ContestEventStreamEntity).count({ where: { contestId: contest.id } }),
+      ).resolves.toBe(1);
+      await expect(
+        dataSource.query('SELECT event_id FROM contest_event WHERE contest_id = ?', [contest.id]),
+      ).resolves.toEqual([]);
+    } finally {
+      if (lockRunner.isTransactionActive) {
+        await lockRunner.rollbackTransaction();
+      }
+      await lockRunner.release();
+    }
+  });
+
   it('assigns disjoint worker slots to concurrently initialized generators', async () => {
     const typeOrmClient = typeOrmClientFor(dataSource);
     const generatorConfig: IdGeneratorConfig = { workerIdOverride: undefined };
@@ -831,6 +981,10 @@ function settle(eventId: number, solutionId: number, timeValue = 0) {
 
 function clientEventIds(events: ContestClientEventBO[]): number[] {
   return events.map((event) => event.eventId);
+}
+
+function isContestEventPageQuery(query: string): boolean {
+  return /\bFROM\s+[`"]?contest_event[`"]?\s+[`"]?event[`"]?/i.test(query);
 }
 
 function typeOrmClientFor(dataSource: DataSource): TypeOrmClient {

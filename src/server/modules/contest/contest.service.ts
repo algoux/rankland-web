@@ -13,6 +13,7 @@ import IdGeneratorService, { IdGenerator } from '@server/services/id-generator.s
 import { contestDurationToSeconds, contestSecondsToDuration } from '@common/modules/contest/contest-metadata';
 import { formatDatabaseDateTimeForApi, normalizeDateTimeInput } from '@server/utils/datetime.util';
 import { ContestCommittedWatermark } from './contest-event-watermark';
+import type { ContestEventCacheControl } from './contest-event-cache-control';
 
 export type ContestUserInput = srk.User & {
   banned?: boolean;
@@ -62,8 +63,11 @@ export default class ContestService {
     return contest.id;
   }
 
-  private async findContestByUkWithManager(manager: EntityManager, uk: string): Promise<ContestEntity> {
-    const contest = await manager.getRepository(ContestEntity).findOne({ where: { uk } });
+  private async findContestByUkWithManager(manager: EntityManager, uk: string, lock = false): Promise<ContestEntity> {
+    const contest = await manager.getRepository(ContestEntity).findOne({
+      where: { uk },
+      ...(lock ? { lock: { mode: 'pessimistic_write' as const } } : {}),
+    });
     if (!contest) {
       throw new LogicException(ErrCode.ContestNotFound);
     }
@@ -120,12 +124,9 @@ export default class ContestService {
     });
   }
 
-  public async updateContest(data: ContestUpdateInput): Promise<void> {
-    await this.dataSource.transaction(async (manager) => {
-      const contest = await manager.getRepository(ContestEntity).findOne({ where: { uk: data.uk } });
-      if (!contest) {
-        throw new LogicException(ErrCode.ContestNotFound);
-      }
+  public async updateContest(data: ContestUpdateInput): Promise<ContestEventCacheControl | undefined> {
+    return this.dataSource.transaction(async (manager) => {
+      const { contest } = await this.findLockedContestAndStream(manager, data.uk);
       if (data.redirectUK !== undefined) {
         await this.validateRedirectUk(manager, data.uk, data.redirectUK, contest.id);
       }
@@ -176,19 +177,24 @@ export default class ContestService {
           await manager.getRepository(ContestUserEntity).delete({ contestId: contest.id });
         }
       }
+      if (data.duration !== undefined || data.frozenDuration !== undefined) {
+        const committedDurationS = updateData.durationS ?? contest.durationS;
+        const committedFrozenDurationS =
+          data.frozenDuration !== undefined ? updateData.frozenDurationS ?? null : contest.frozenDurationS;
+        return {
+          type: 'metadata',
+          contestId: contest.id,
+          canonicalUk: contest.uk,
+          visibilityFingerprint: `duration=${committedDurationS};frozen=${committedFrozenDurationS ?? 'null'}`,
+        };
+      }
+      return undefined;
     });
   }
 
   public async dropEvents(uk: string): Promise<ContestCommittedWatermark> {
     return this.dataSource.transaction(async (manager) => {
-      const contest = await this.findContestByUkWithManager(manager, uk);
-      const stream = await manager.getRepository(ContestEventStreamEntity).findOne({
-        where: { contestId: contest.id },
-        lock: { mode: 'pessimistic_write' },
-      });
-      if (!stream) {
-        throw new LogicException(ErrCode.ContestNotFound);
-      }
+      const { contest, stream } = await this.findLockedContestAndStream(manager, uk);
       stream.lastEventId = 0;
       stream.streamRevision += 1;
       stream.producerId = null;
@@ -275,12 +281,30 @@ export default class ContestService {
     }
   }
 
-  public async deleteContest(uk: string): Promise<void> {
-    const contest = await this.getContest(uk);
-    const result = await this.dataSource.getRepository(ContestEntity).softDelete({ id: contest.id });
-    if (!result.affected) {
+  public async deleteContest(uk: string): Promise<ContestEventCacheControl> {
+    return this.dataSource.transaction(async (manager) => {
+      const { contest } = await this.findLockedContestAndStream(manager, uk);
+      const result = await manager.getRepository(ContestEntity).softDelete({ id: contest.id });
+      if (!result.affected) {
+        throw new LogicException(ErrCode.ContestNotFound);
+      }
+      return { type: 'delete', contestId: contest.id, canonicalUk: contest.uk };
+    });
+  }
+
+  private async findLockedContestAndStream(
+    manager: EntityManager,
+    uk: string,
+  ): Promise<{ contest: ContestEntity; stream: ContestEventStreamEntity }> {
+    const contest = await this.findContestByUkWithManager(manager, uk, true);
+    const stream = await manager.getRepository(ContestEventStreamEntity).findOne({
+      where: { contestId: contest.id },
+      lock: { mode: 'pessimistic_write' },
+    });
+    if (!stream) {
       throw new LogicException(ErrCode.ContestNotFound);
     }
+    return { contest, stream };
   }
 
   public filterUserForPublic(user: ContestUserEntity | any): User {

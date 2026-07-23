@@ -96,7 +96,7 @@ import { formatTitle } from '@/app/title-format';
 import { parseRealtimeSolutionBuffer } from '@/utils/realtime-solutions.util';
 
 @View('/live/:id')
-@RenderMethod(RenderMethodKind.SSR)
+@RenderMethod(RenderMethodKind.CSR)
 @Options({
   components: {
     Button,

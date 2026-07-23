@@ -5,6 +5,7 @@ RankLand 的 bwcx + Vue 3 SSR 前端/后端一体项目。当前前端已从
 渲染层，并使用 shadcn-vue radix track + Tailwind v3 替代原 Umi/React/antd 页面。
 
 包含技术栈：
+
 - Vue 3 (Class Component First)
 - TypeScript
 - Vite 4 + vite-ssr
@@ -224,6 +225,10 @@ COS_BASE_PATH=rankland/file/ \
 fnm exec --using v20.19.1 corepack pnpm@9.15.9 run start
 ```
 
+`compose-template.yml` 只列出启动所需的拓扑、凭据与存储配置。业务服务已经内置经过本机 loadtest
+选择的性能默认值，常规部署无需复制这些环境变量；全部可覆盖项、约束、压测依据和回滚值集中记录在
+[服务端性能配置](docs/server-performance-configuration.md)。
+
 `NODE_ENV=production` 下必须提供 `MYSQL_HOST`、`MYSQL_USER`、`MYSQL_PASS`、`MYSQL_DB` 和非空
 `REDIS_NAMESPACE`。同一部署的所有应用实例必须连接同一个 MySQL write primary、同一个 standalone
 Redis endpoint，并使用完全相同的 namespace；不同环境和独立部署必须使用不同 namespace。
@@ -232,7 +237,7 @@ namespace 时默认使用 `rankland:local`。
 
 文件 Provider 默认是 `FS`；Compose 使用 `rankland-files` 命名卷持久化并在多实例间共享文件。
 显式选择 `TencentCloud` 时还必须提供 COS secret、bucket 和 region，`COS_DOMAIN` 可选。生产启动
-不会自动迁移数据库。
+不会自动迁移数据库。覆盖性能项需要整批重启实例，并按性能配置文档记录调优证据与回滚值。
 
 ## 开发指南
 
@@ -314,7 +319,6 @@ const apiClient = useApiClient();
 const res = await apiClient.someApi({ ... });
 ```
 
-
 #### 前端路由和导航
 
 使用 `@View` 和 `@RenderMethod` 为页面视图组件声明路由，这样可以无需定义前端路由配置并自动在后端装配该路由。
@@ -322,6 +326,7 @@ const res = await apiClient.someApi({ ... });
 要导航到其他页面，请通过组件实例上的 `$$router` 进行导航。本项目约定页面路由组件以 `.view.vue` 结尾，以和其他组件进行区分。
 
 示例：
+
 ```typescript
 @View('/ranklist/:id')
 @RenderMethod(RenderMethodKind.SSR)

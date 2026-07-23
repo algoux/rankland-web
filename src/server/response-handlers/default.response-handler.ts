@@ -4,6 +4,7 @@ import { ResponseContentType, contentTypeHeaderValue } from '@server/http/conten
 import { writeRlSuccessHeaders } from '@server/http/rl-response';
 import { getProtobufContract } from '@server/decorators/protobuf-contract.decorator';
 import { normalizeJsonDatesForApi } from '@server/utils/datetime.util';
+import { isTrustedResponse, TrustedPreNormalizedJsonResponse } from '@server/http/trusted-response';
 
 /**
  * Generic, business-agnostic success response handler. It wraps the route
@@ -24,6 +25,33 @@ export default class DefaultResponseHandler implements IBwcxResponseHandler {
       return undefined;
     }
 
+    if (isTrustedResponse(response)) {
+      if (response.kind === 'pre-encoded-protobuf') {
+        if (ctx.state?.respContentType !== ResponseContentType.Protobuf) {
+          response.release();
+          throw new Error('trusted pre-encoded protobuf response used for a non-protobuf request');
+        }
+        const respMessage = getProtobufContract(ctx.__bwcx__?.controller, ctx.__bwcx__?.route)?.resp;
+        if (!respMessage) {
+          response.release();
+          throw new Error('trusted pre-encoded protobuf response requires a protobuf response contract');
+        }
+        writeRlSuccessHeaders(ctx, { contentType: contentTypeHeaderValue(ResponseContentType.Protobuf) });
+        response.release();
+        return response.body;
+      }
+      if (ctx.state?.respContentType === ResponseContentType.Protobuf) {
+        response.release();
+        throw new Error('trusted pre-normalized JSON response used for a protobuf request');
+      }
+      releaseJsonAtResponseTerminal(response, ctx);
+      return {
+        success: true,
+        code: 0,
+        data: response.data,
+      };
+    }
+
     if (ctx.state?.respContentType === ResponseContentType.Protobuf) {
       const respMessage = getProtobufContract(ctx.__bwcx__?.controller, ctx.__bwcx__?.route)?.resp;
       if (respMessage) {
@@ -41,4 +69,26 @@ export default class DefaultResponseHandler implements IBwcxResponseHandler {
       data: normalizeJsonDatesForApi(response),
     };
   }
+}
+
+function releaseJsonAtResponseTerminal(response: TrustedPreNormalizedJsonResponse, ctx: RequestContext): void {
+  const rawResponse = ctx.res as
+    | {
+        once?: (event: string, listener: () => void) => void;
+        removeListener?: (event: string, listener: () => void) => void;
+      }
+    | undefined;
+  if (!rawResponse?.once) {
+    response.release();
+    return;
+  }
+  const release = () => {
+    rawResponse.removeListener?.('finish', release);
+    rawResponse.removeListener?.('close', release);
+    rawResponse.removeListener?.('error', release);
+    response.release();
+  };
+  rawResponse.once('finish', release);
+  rawResponse.once('close', release);
+  rawResponse.once('error', release);
 }

@@ -11,7 +11,10 @@ import { CollectionEntity } from '@server/entities/collection.entity';
 import MysqlConfig from '@server/configs/mysql/mysql.config';
 import { mysql2UtcConnector } from './mysql2-utc-connector';
 
-export type MysqlDataSourceConfig = Pick<MysqlConfig, 'host' | 'port' | 'username' | 'password' | 'database'>;
+export type MysqlDataSourceConfig = Pick<
+  MysqlConfig,
+  'host' | 'port' | 'username' | 'password' | 'database' | 'connectionLimit'
+>;
 
 export function getMysqlDataSourceOptions(mysqlConfig: MysqlDataSourceConfig): DataSourceOptions {
   return {
@@ -26,6 +29,9 @@ export function getMysqlDataSourceOptions(mysqlConfig: MysqlDataSourceConfig): D
     timezone: 'Z',
     supportBigNumbers: true,
     bigNumberStrings: true,
+    extra: {
+      connectionLimit: mysqlConfig.connectionLimit,
+    },
     synchronize: false,
     migrationsRun: false,
     entities: [

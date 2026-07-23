@@ -1,6 +1,6 @@
 # Contest v2 API
 
-Updated: 2026-07-16
+Updated: 2026-07-18
 
 本文档描述 contest 相关 HTTP/SSE API。接口、DTO、JSON 字段使用 camelCase；MySQL 表和列使用 snake_case，并由 TypeORM entity 显式映射。
 
@@ -542,9 +542,9 @@ append 请求的 `streamRevision` 必须等于服务端当前 `contest_event_str
 
 append 请求中的 solution result / previousResult 优先使用原始评测结果。服务端不会拒绝 `FZ`，仅当数据源无法获取封榜期间的原始结果时才建议用它作为兜底。但当前服务端会拒绝包含 `FB` 的 event batch；first blood 应由消费者或榜单计算层根据原始 AC 事件推导。
 
-事件追加成功提交事务后，服务端才会宣布新的事件高水位：先即时通知写入实例的本机 SSE
-连接，再 best-effort 发布 Redis Pub/Sub 供其他实例扇出。Hub、序列化、日志或 Redis
-通知失败都不会把已经提交的追加响应改成失败。
+事件追加成功提交事务后，服务端才会宣布新的事件高水位：先对本机读缓存 write-through 或
+fail-close，再即时通知本机 SSE 连接，最后 best-effort 发布 Redis Pub/Sub 供其他实例扇出。
+缓存、Hub、序列化、日志或 Redis 通知失败都不会把已经提交的追加响应改成失败。
 
 ## 事件消费 API
 
@@ -616,6 +616,23 @@ X-RL-Resp-Code: 0
   "resetReason": "stream revision changed"
 }
 ```
+
+服务端可能在 startup `mode=on` 下从进程内缓存提供相同契约；这不改变 route、query、JSON/protobuf
+字段或 cursor 规则。缓存只在最近一次完整 MySQL 权威查询的 6 秒租约内服务。no-progress tip、客户端
+携带更高 revision/cursor、租约过期或本机收到更高 SSE/Redis 目标时，服务端会先加入一次有界的
+MySQL 权威刷新；未经 MySQL 确认的较高 request 值不会写入共享 target，也不会构造 revision 回退。
+
+若 MySQL 权威读取失败/超时、hydration/fallback 队列过载、事件范围出现 gap/损坏，服务端快速返回：
+
+```text
+HTTP/1.1 503 Service Unavailable
+Retry-After: 1
+```
+
+JSON 继续使用通用错误 wrapper；protobuf 继续使用空 body 与 `X-RL-Resp-Success/Code/Msg` 错误头，
+并同样包含 `Retry-After: 1`。消费者应按 `Retry-After` 延迟后重试，并继续保留原
+`checkpointEventId + streamRevision`；不要把 503 当成空 page、reset 或已追平。oversize 比赛会进入
+有界 legacy fallback，只有 fallback 同样过载时才返回 503。
 
 ### SSE 更新通知
 
@@ -747,7 +764,7 @@ Data: `null`
 | `ContestEventStreamRevisionMismatch` | 100007 | append 请求指定的事件流版本与服务端当前版本不一致 |
 | `ContestNotFound` | 100001 | `uk` 对应 contest 不存在 |
 
-传输层失败由通用中间件以标准 HTTP 状态返回：`406` 无法协商响应类型；`415` 请求体类型不支持；`413` 请求体超过 5 MiB；`400` protobuf 请求字节无法解码。
+传输层失败由通用中间件以标准 HTTP 状态返回：`406` 无法协商响应类型；`415` 请求体类型不支持；`413` 请求体超过 5 MiB；`400` protobuf 请求字节无法解码；`503` 表示当前无法在权威租约/有界读取资源内完成 catch-up，并携带 `Retry-After: 1`。
 
 参数校验失败通常为 HTTP 422、数字错误码 `-3`。普通 contest 管理 API 的业务错误通常不额外显式设置 HTTP status，而是通过响应体中的数字错误码表达。
 

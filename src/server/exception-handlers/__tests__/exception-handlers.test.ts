@@ -66,6 +66,22 @@ describe('exception handlers (content-negotiated)', () => {
     expect(ctx.body).toMatchObject({ success: false, code: 406 });
   });
 
+  it('preserves bounded retry headers on temporary-unavailable JSON and protobuf errors', () => {
+    for (const respContentType of [ResponseContentType.Json, ResponseContentType.Protobuf]) {
+      const ctx = createCtx({ respContentType });
+      new HttpExceptionHandler().catch(new HttpException(503, { 'Retry-After': '1' }), ctx);
+
+      expect(ctx.status).toBe(503);
+      expect(ctx.headers['Retry-After']).toBe('1');
+      if (respContentType === ResponseContentType.Protobuf) {
+        expect(Buffer.isBuffer(ctx.body)).toBe(true);
+        expect(ctx.headers['X-RL-Resp-Code']).toBe('503');
+      } else {
+        expect(ctx.body).toMatchObject({ success: false, code: 503 });
+      }
+    }
+  });
+
   it('HttpExceptionHandler only sets status for non-api routes', () => {
     const ctx = createCtx({ url: '/some/page' });
     new HttpExceptionHandler().catch(new HttpException(404), ctx);

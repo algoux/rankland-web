@@ -1,8 +1,13 @@
 import {
   ContestEventInsertInput,
+  ContestEventAuthorityState,
+  ContestEventRangeMemoryEstimate,
+  ContestEventRangeRead,
   ContestEventStore,
   ContestEventsSnapshot,
+  ContestEventsSnapshotReadRequest,
   ContestEventTransaction,
+  ContestReadableEvent,
   ContestStoredEvent,
   ContestStreamState,
 } from './contest-event-store';
@@ -63,20 +68,88 @@ export class InMemoryContestEventStore implements ContestEventStore {
       .map((stream) => ({ ...stream }));
   }
 
-  public async readEventsSnapshot(uk: string, afterEventId: number, limit: number): Promise<ContestEventsSnapshot> {
+  public async readAuthorityByUk(uk: string): Promise<ContestEventAuthorityState> {
     const canonicalUk = this.resolveUk(uk);
+    return this.toAuthorityState(canonicalUk, this.getExistingStream(canonicalUk));
+  }
+
+  public async readAuthorityByContestIds(contestIds: readonly string[]): Promise<ContestEventAuthorityState[]> {
+    if (contestIds.length === 0) {
+      return [];
+    }
+    const contestIdSet = new Set(contestIds);
+    return [...this.streams.entries()]
+      .filter(([, stream]) => contestIdSet.has(stream.contestId))
+      .map(([uk, stream]) => this.toAuthorityState(uk, stream));
+  }
+
+  public async readEventRange(request: ContestEventRangeRead): Promise<ContestReadableEvent[]> {
+    return this.selectEventRange(request).map((event) => ({
+      contestId: event.contestId,
+      eventId: event.eventId,
+      streamRevision: event.streamRevision,
+      type: event.type,
+      solutionId: event.solutionId,
+      solutionSubmitTimeNs: event.solutionSubmitTimeNs,
+      payloadBytes: Buffer.from(event.payloadBytes),
+    }));
+  }
+
+  public async estimateEventRangeMemory(request: ContestEventRangeRead): Promise<ContestEventRangeMemoryEstimate> {
+    const rows = this.selectEventRange(request);
+    return {
+      rowCount: rows.length,
+      payloadBytes: rows.reduce((total, event) => total + event.payloadBytes.byteLength, 0),
+      solutionSubmitTimeBytes: rows.reduce(
+        (total, event) => total + Buffer.byteLength(event.solutionSubmitTimeNs ?? '', 'utf8'),
+        0,
+      ),
+    };
+  }
+
+  private selectEventRange(request: ContestEventRangeRead): ContestStoredEvent[] {
+    const streamEntry = [...this.streams.entries()].find(([, stream]) => stream.contestId === request.contestId);
+    if (!streamEntry || request.afterEventId >= request.throughEventId || request.limit < 1) {
+      return [];
+    }
+    const [uk] = streamEntry;
+    return (this.events.get(uk) || [])
+      .filter(
+        (event) =>
+          event.streamRevision === request.streamRevision &&
+          event.eventId > request.afterEventId &&
+          event.eventId <= request.throughEventId,
+      )
+      .sort((a, b) => a.eventId - b.eventId)
+      .slice(0, request.limit);
+  }
+
+  public async readEventsSnapshot(request: ContestEventsSnapshotReadRequest): Promise<ContestEventsSnapshot> {
+    const canonicalUk = this.resolveUk(request.uk);
     const stream = this.getExistingStream(canonicalUk);
+    const snapshotLastEventId =
+      request.throughEventId === undefined
+        ? stream.lastEventId
+        : Math.min(stream.lastEventId, Math.max(0, Math.trunc(request.throughEventId)));
     const currentRevisionEvents = (this.events.get(canonicalUk) || [])
       .filter((event) => event.streamRevision === stream.streamRevision)
       .sort((a, b) => a.eventId - b.eventId);
-    const page = currentRevisionEvents
-      .filter((event) => event.eventId > afterEventId)
-      .slice(0, limit)
+    const shouldReadEvents =
+      request.requestStreamRevision === stream.streamRevision && request.afterEventId <= snapshotLastEventId;
+    const page = (shouldReadEvents ? currentRevisionEvents : [])
+      .filter((event) => event.eventId > request.afterEventId && event.eventId <= snapshotLastEventId)
+      .slice(0, request.limit)
       .map((event) => ({ ...event, payloadBytes: Buffer.from(event.payloadBytes) }));
     return {
-      stream: { ...stream },
+      stream: { ...stream, lastEventId: snapshotLastEventId },
       events: page,
-      settledEventIdsBySolutionId: collectSettledEventIdsBySolutionId(currentRevisionEvents, afterEventId),
+      settledEventIdsBySolutionId:
+        shouldReadEvents && request.compactProgress
+          ? collectSettledEventIdsBySolutionId(
+              currentRevisionEvents.filter((event) => event.eventId <= snapshotLastEventId),
+              request.afterEventId,
+            )
+          : new Map(),
       frozenStartNs: getFrozenStartNs(this.contestConfigs.get(canonicalUk)),
     };
   }
@@ -96,6 +169,18 @@ export class InMemoryContestEventStore implements ContestEventStore {
     const normalizedUk = uk.toLowerCase();
     const canonicalUk = [...this.streams.keys()].find((candidate) => candidate.toLowerCase() === normalizedUk);
     return canonicalUk ?? uk;
+  }
+
+  private toAuthorityState(uk: string, stream: ContestStreamState): ContestEventAuthorityState {
+    const frozenStartNs = getFrozenStartNs(this.contestConfigs.get(uk));
+    return {
+      contestId: stream.contestId,
+      canonicalUk: stream.uk,
+      streamRevision: stream.streamRevision,
+      lastEventId: stream.lastEventId,
+      frozenStartNs,
+      visibilityFingerprint: `frozenStartNs=${frozenStartNs ?? 'null'}`,
+    };
   }
 }
 

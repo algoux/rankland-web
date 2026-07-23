@@ -4,6 +4,8 @@ import { ResponseContentType } from '@server/http/content-type';
 import { ProtobufContract } from '@server/decorators/protobuf-contract.decorator';
 import { rankland_live_contest_client } from '@common/proto/rankland_live_contest';
 import { formatDateTimeForApi } from '@server/utils/datetime.util';
+import { EventEmitter } from 'events';
+import { trustedPreEncodedProtobuf, trustedPreNormalizedJson } from '@server/http/trusted-response';
 
 function decorate(decorator: MethodDecorator, target: any, key: string) {
   decorator(target.prototype, key, Object.getOwnPropertyDescriptor(target.prototype, key)!);
@@ -25,8 +27,10 @@ function createCtx(options: {
   respond?: boolean;
 }) {
   const headers: Record<string, string> = {};
+  const res = new EventEmitter();
   return {
     headers,
+    res,
     state: { respContentType: options.respContentType },
     respond: options.respond,
     __bwcx__: { controller: options.controller ?? JsonController, route: options.route ?? 'get' },
@@ -123,6 +127,38 @@ describe('DefaultResponseHandler', () => {
     expect(ctx.headers['X-RL-Resp-Success']).toBe('true');
     expect(ctx.headers['X-RL-Resp-Code']).toBe('0');
     expect(ctx.headers['X-RL-Resp-Msg']).toBeUndefined();
+  });
+
+  it('keeps a trusted normalized JSON graph by reference until the response terminates', () => {
+    const ctx = createCtx({ respContentType: ResponseContentType.Json });
+    const release = vi.fn();
+    const data = Object.freeze({ value: 'already-normalized', nested: Object.freeze([1, 2]) });
+
+    const result = handler.handle(trustedPreNormalizedJson(data, release), ctx) as any;
+
+    expect(result).toEqual({ success: true, code: 0, data });
+    expect(result.data).toBe(data);
+    expect(release).not.toHaveBeenCalled();
+    ctx.res.emit('finish');
+    ctx.res.emit('close');
+    expect(release).toHaveBeenCalledTimes(1);
+  });
+
+  it('returns trusted pre-encoded protobuf bytes without another event encode', () => {
+    const ctx = createCtx({
+      respContentType: ResponseContentType.Protobuf,
+      controller: EventsController,
+      route: 'get',
+    });
+    const release = vi.fn();
+    const body = Buffer.from([0x0a, 0x01, 0x78]);
+
+    const result = handler.handle(trustedPreEncodedProtobuf(body, release), ctx);
+
+    expect(result).toBe(body);
+    expect(release).toHaveBeenCalledTimes(1);
+    expect(ctx.headers['Content-Type']).toBe('application/protobuf');
+    expect(ctx.headers['X-RL-Resp-Success']).toBe('true');
   });
 
   it('returns an empty protobuf body for void responses', () => {

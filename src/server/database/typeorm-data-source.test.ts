@@ -11,9 +11,19 @@ describe('MySQL DataSource UTC configuration', () => {
     expect(options).toMatchObject({
       type: 'mysql',
       connectorPackage: 'mysql2',
-      driver: mysql2UtcConnector,
       timezone: 'Z',
+      extra: { connectionLimit: 20 },
     });
+    expect(options.driver).toBe(mysql2UtcConnector);
     expect(options).not.toHaveProperty('dateStrings', true);
+  });
+
+  it('passes an explicit pool connection limit to mysql2', () => {
+    const options = getMysqlDataSourceOptions({
+      ...new MysqlConfig(),
+      connectionLimit: 24,
+    });
+
+    expect(options).toMatchObject({ extra: { connectionLimit: 24 } });
   });
 });

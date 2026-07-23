@@ -123,12 +123,12 @@ interface ContestEventNotificationCoordinator {
 
 `ContestEventNotificationCoordinator` 的 implementation 内部包含：
 
-| 内部模块 | 责任 | 不暴露给控制器的细节 |
-| --- | --- | --- |
-| `ContestSseHub` | 按 `contestId` 管理本机连接、单调门控、整帧写入、backpressure、heartbeat、active contest | client state、pending slot、drain/timeout listener |
-| Redis bus adapter | envelope 编解码、publish、专用 subscriber、重订阅 generation | ioredis 事件、频道、连接状态和限频日志 |
-| `ContestEventStreamService` / store | canonical identity、单条 initial state 与 active contest 批量权威状态 | TypeORM JOIN、实体映射 |
-| Reconciler | 5 秒 fixed-rate、single-flight、恢复后立即校准 | 调度、跳过重叠、空 active 集合短路 |
+| 内部模块                            | 责任                                                                                     | 不暴露给控制器的细节                               |
+| ----------------------------------- | ---------------------------------------------------------------------------------------- | -------------------------------------------------- |
+| `ContestSseHub`                     | 按 `contestId` 管理本机连接、单调门控、整帧写入、backpressure、heartbeat、active contest | client state、pending slot、drain/timeout listener |
+| Redis bus adapter                   | envelope 编解码、publish、专用 subscriber、重订阅 generation                             | ioredis 事件、频道、连接状态和限频日志             |
+| `ContestEventStreamService` / store | canonical identity、单条 initial state 与 active contest 批量权威状态                    | TypeORM JOIN、实体映射                             |
+| Reconciler                          | 5 秒 fixed-rate、single-flight、恢复后立即校准                                           | 调度、跳过重叠、空 active 集合短路                 |
 
 Redis 是 true external dependency，生产 adapter 使用 ioredis，测试 adapter 可模拟 publish 失败、重连和乱序。该 seam 保持在 coordinator 内部，不扩散到 controller。
 
@@ -330,20 +330,20 @@ Redis 故障不改变 readiness。生产告警应基于 Redis state/publish fail
 
 ## 13. 故障矩阵
 
-| 场景 | 即时路径 | 恢复路径 | 对业务写响应的影响 |
-| --- | --- | --- | --- |
-| 单进程、Redis 正常 | 本机 Hub | MySQL 校准 | 无 |
-| 单进程、Redis 故障 | 本机 Hub | MySQL 校准 | 无 |
-| 多实例、Redis 正常 | 本机 Hub + Pub/Sub | MySQL 校准 | 无 |
-| subscriber 断线/丢消息 | 本机实例仍可工作 | 5 秒校准；订阅 ACK 后立即校准 | 无 |
-| commit 后、publish 前进程退出 | 写实例可能随即消失 | 其他实例 5 秒校准；客户端重连 initial state | 已提交写仍成功 |
-| 重复/乱序/旧 revision | per-client gate 丢弃 | 不需要 | 无 |
-| 慢 SSE client | 单槽合并 | 10 秒后断开重连 | 无 |
-| 请求 `uk` 大小写与存储值不同 | 内部按 `contestId` 路由，公开帧保留 client 请求 `uk` | 二次读取 + 校准 | 无 |
-| active 比赛被软删除 | 无新即时通知 | 下一次校准关闭该比赛连接 | 无 |
-| Redis namespace 配错 | Pub/Sub 被分区 | MySQL 校准仍可在 6 秒内收敛 | 无；部署验收必须发现 |
-| MySQL 不健康 | Redis 可能继续发已有提示 | 无法保证权威校准 | 新写本身失败；6 秒 SLO 暂停 |
-| 新旧版本混部 | 旧实例不 publish/校准 | 不能给旧实例连接提供完整保证 | 不支持该发布形态 |
+| 场景                          | 即时路径                                             | 恢复路径                                    | 对业务写响应的影响          |
+| ----------------------------- | ---------------------------------------------------- | ------------------------------------------- | --------------------------- |
+| 单进程、Redis 正常            | 本机 Hub                                             | MySQL 校准                                  | 无                          |
+| 单进程、Redis 故障            | 本机 Hub                                             | MySQL 校准                                  | 无                          |
+| 多实例、Redis 正常            | 本机 Hub + Pub/Sub                                   | MySQL 校准                                  | 无                          |
+| subscriber 断线/丢消息        | 本机实例仍可工作                                     | 5 秒校准；订阅 ACK 后立即校准               | 无                          |
+| commit 后、publish 前进程退出 | 写实例可能随即消失                                   | 其他实例 5 秒校准；客户端重连 initial state | 已提交写仍成功              |
+| 重复/乱序/旧 revision         | per-client gate 丢弃                                 | 不需要                                      | 无                          |
+| 慢 SSE client                 | 单槽合并                                             | 10 秒后断开重连                             | 无                          |
+| 请求 `uk` 大小写与存储值不同  | 内部按 `contestId` 路由，公开帧保留 client 请求 `uk` | 二次读取 + 校准                             | 无                          |
+| active 比赛被软删除           | 无新即时通知                                         | 下一次校准关闭该比赛连接                    | 无                          |
+| Redis namespace 配错          | Pub/Sub 被分区                                       | MySQL 校准仍可在 6 秒内收敛                 | 无；部署验收必须发现        |
+| MySQL 不健康                  | Redis 可能继续发已有提示                             | 无法保证权威校准                            | 新写本身失败；6 秒 SLO 暂停 |
+| 新旧版本混部                  | 旧实例不 publish/校准                                | 不能给旧实例连接提供完整保证                | 不支持该发布形态            |
 
 ## 14. 发布与回滚边界
 
@@ -370,7 +370,56 @@ Redis 故障不改变 readiness。生产告警应基于 Redis state/publish fail
 - 业务不再接受一个校准周期的故障延迟；
 - MySQL 校准在真实 active contest 规模下无法满足成本或 6 秒窗口，且 Redis 快照也不足以解决。
 
-## 16. 一手资料
+## 16. 通知波平滑 follow-up（2026-07-20）
+
+四实例本机容量表征证明，原同步 Hub fanout 会让同一实例约 1,100 ～ 1,250 个 SSE client
+几乎同时发起 catch-up。5 个实例只改变每实例 client 数就把 4,400 viewer 的 events p99 从
+2,133 ms 降至 1,339 ms；Nginx sampled timing 又把慢段定位为 upstream connect/admission，
+而不是 downstream body、MySQL pool 或长 event-loop pause。因此在 Hub 内增加可选、per-contest
+调度层，不改变 coordinator 的外部 seam。
+
+调度状态由 `latestAccepted`、单槽 `queuedFanout`、至多一个 `activeCycle`、至多一个 timer 和
+轮换的 `nextStartShard` 组成。client 在注册时 round-robin 绑定 shard；cycle 启动时冻结 client
+列表和旋转顺序。所有 deadline、duration 与 timer lag 使用单调 `performance.now()`，墙钟仅用于
+日志 epoch 区间，系统时钟回拨不能延长 fanout。
+
+不变量如下：
+
+1. `latestAccepted` 只按 `(revision,eventId)` 单调前进，旧/重复提示不启动 timer；
+2. 合并窗口只保留最新 watermark；active cycle 的未发送 shard 可直接提升到 queued 新值；
+3. queued 新值保留到 follow-up，per-client suppression 使 follow-up 只实际写此前收到旧值的 client；
+4. blocked client 仍只有一个 latest-wins pending slot，drain 后按原逻辑写最新值；
+5. 每次 cycle 轮换 first shard；持续通知不能永久饿死固定 shard；
+6. client set 归零、closeContest、beginDraining 与 closeAll 都取消 timer、queued 和 active state；
+7. 默认使用经本机 loadtest 选择的 `25ms / 32 shards / 200ms`；显式 `0ms / 1 shard / 0ms`
+   完整保留旧同步行为并作为无状态回滚。
+
+```mermaid
+stateDiagram-v2
+  [*] --> Idle
+  Idle --> Coalescing: newer watermark
+  Coalescing --> Active: coalesce timer
+  Active --> Active: newer watermark advances unflushed shards
+  Active --> Coalescing: queued newer watermark after cycle
+  Active --> Idle: cycle complete and queue empty
+  Coalescing --> Idle: close/delete/drain
+  Active --> Idle: close/delete/drain
+```
+
+runtime marker 按实例输出 config、gauges、counter delta 和 interval maxima。压测从 worker steady HDR
+派生严格 `> threshold` 请求数，并只在所有 worker 共同完整的 steady 秒计算 slow-active；通知
+evidence 还必须覆盖所有预期 app label、唯一 config、连续 interval coverage，并要求每个实例都
+独立产生 interval-scoped notify-to-last maximum，不能由另一实例的全局 maximum 掩盖缺测。
+这使调度优化的安全性、尾部收益和额外交付延迟由同一 classifier 强制，而不是依赖离线手算。
+
+冻结候选 `25ms / 16 shards / 200ms` 在 4 workers、5,000 viewers、10 分钟 steady 的三组固定
+seed 上全部通过。相对 `25/8/100` 的同三 seed，events p99 从 1,774–2,049 ms 降至
+691–1,174 ms，slow-active 从 17.9%–20.3% 降至 0.27%–3.14%；最差 notify-to-last 为
+612 ms。三轮均为全生命周期 503=0、5,000/5,000 final cursor、viewer correctness=0、cleanup
+verified。该结果确立当前本机 JSON profile 的“至少 5,000”容量，不外推为未测试的最大容量，
+也不替代目标环境、PB-only、10,000 伸展和 soak 门禁。
+
+## 17. 一手资料
 
 - [Redis Pub/Sub delivery semantics](https://redis.io/docs/latest/develop/pubsub/)
 - [Redis Streams](https://redis.io/docs/latest/develop/data-types/streams/)

@@ -3,11 +3,15 @@ import RedisConfig from '@server/configs/redis/redis.config';
 import { RedisClientId, RedisSubscriberClientId } from '@server/container-ids';
 import ContestEventNotificationRedisAdapter, {
   CONTEST_EVENT_NOTIFICATION_PUBLISH_TIMEOUT_MS,
+  buildContestEventCacheControlChannel,
   buildContestEventNotificationChannel,
+  parseContestEventCacheControlEnvelope,
   parseContestEventNotificationEnvelope,
+  serializeContestEventCacheControlEnvelope,
   serializeContestEventNotificationEnvelope,
 } from '../contest-event-notification.redis';
 import type {
+  ContestEventCacheControl,
   ContestEventNotificationRedisCallbacks,
   RedisPublisherPort,
   RedisSubscriberPort,
@@ -19,6 +23,19 @@ const watermark: ContestCommittedWatermark = {
   canonicalUk: 'contest-a',
   latestEventId: 123,
   streamRevision: 2,
+};
+
+const deleteControl: ContestEventCacheControl = {
+  type: 'delete',
+  contestId: '70346717215600640',
+  canonicalUk: 'contest-a',
+};
+
+const metadataControl: ContestEventCacheControl = {
+  type: 'metadata',
+  contestId: '70346717215600640',
+  canonicalUk: 'contest-a',
+  visibilityFingerprint: 'duration=18000;frozen=120',
 };
 
 describe('contest event notification Redis protocol', () => {
@@ -126,6 +143,75 @@ describe('contest event notification Redis protocol', () => {
   });
 });
 
+describe('contest event read-cache control Redis protocol', () => {
+  it('builds an independent versioned channel from the same deployment namespace', () => {
+    expect(buildContestEventCacheControlChannel('rankland:staging')).toBe(
+      'rankland:staging:contest-event-read-cache-control:v1',
+    );
+    expect(buildContestEventCacheControlChannel('rankland:staging')).not.toBe(
+      buildContestEventNotificationChannel('rankland:staging'),
+    );
+    expect(() => buildContestEventCacheControlChannel('   ')).toThrow(/namespace/i);
+  });
+
+  it('round-trips strict delete and metadata invalidation envelopes without event content', () => {
+    const deleteRaw = serializeContestEventCacheControlEnvelope(deleteControl);
+    const metadataRaw = serializeContestEventCacheControlEnvelope(metadataControl);
+
+    expect(deleteRaw).toBe('{"schemaVersion":1,"type":"delete","contestId":"70346717215600640","uk":"contest-a"}');
+    expect(metadataRaw).toBe(
+      '{"schemaVersion":1,"type":"metadata","contestId":"70346717215600640","uk":"contest-a","visibilityFingerprint":"duration=18000;frozen=120"}',
+    );
+    expect(parseContestEventCacheControlEnvelope(deleteRaw)).toEqual({ ok: true, control: deleteControl });
+    expect(parseContestEventCacheControlEnvelope(metadataRaw)).toEqual({ ok: true, control: metadataControl });
+    expect(deleteRaw).not.toContain('eventId');
+    expect(metadataRaw).not.toContain('events');
+  });
+
+  it.each([
+    ['invalid JSON', '{'],
+    ['array', '[]'],
+    ['unknown schema', JSON.stringify({ ...deleteWireEnvelope(), schemaVersion: 2 })],
+    ['extra field', JSON.stringify({ ...deleteWireEnvelope(), extra: true })],
+    ['unknown type', JSON.stringify({ ...deleteWireEnvelope(), type: 'reset' })],
+    ['delete fingerprint', JSON.stringify({ ...deleteWireEnvelope(), visibilityFingerprint: 'frozen=null' })],
+    ['metadata missing fingerprint', JSON.stringify({ ...deleteWireEnvelope(), type: 'metadata' })],
+    [
+      'metadata blank fingerprint',
+      JSON.stringify({ ...deleteWireEnvelope(), type: 'metadata', visibilityFingerprint: '   ' }),
+    ],
+    ['missing canonical UK', JSON.stringify({ schemaVersion: 1, type: 'delete', contestId: deleteControl.contestId })],
+    ['event content', JSON.stringify({ ...deleteWireEnvelope(), events: [] })],
+  ])('rejects %s', (_name, raw) => {
+    expect(parseContestEventCacheControlEnvelope(raw)).toEqual({
+      ok: false,
+      reason: raw === '{' ? 'invalid-json' : 'invalid-envelope',
+    });
+  });
+
+  it('applies the 4 KiB byte limit and rejects invalid values before serialization', () => {
+    const oversized = JSON.stringify({
+      ...deleteWireEnvelope(),
+      type: 'metadata',
+      visibilityFingerprint: '界'.repeat(1_400),
+    });
+
+    expect(parseContestEventCacheControlEnvelope(oversized)).toEqual({ ok: false, reason: 'too-large' });
+    expect(() =>
+      serializeContestEventCacheControlEnvelope({ ...deleteControl, contestId: '18446744073709551616' }),
+    ).toThrow(/contestId/);
+    expect(() =>
+      serializeContestEventCacheControlEnvelope({ ...metadataControl, visibilityFingerprint: '   ' }),
+    ).toThrow(/visibilityFingerprint/);
+    expect(() =>
+      serializeContestEventCacheControlEnvelope({
+        ...metadataControl,
+        visibilityFingerprint: '界'.repeat(1_400),
+      }),
+    ).toThrow(/4096 bytes/);
+  });
+});
+
 describe('ContestEventNotificationRedisAdapter publisher', () => {
   beforeEach(() => {
     vi.spyOn(console, 'warn').mockImplementation(() => undefined);
@@ -157,6 +243,42 @@ describe('ContestEventNotificationRedisAdapter publisher', () => {
         message: serializeContestEventNotificationEnvelope(watermark),
       },
     ]);
+  });
+
+  it('publishes cache invalidation on the independent control channel', async () => {
+    const publisher = new FakePublisher();
+    publisher.status = 'ready';
+    publisher.publishResult = Promise.resolve(2);
+    const adapter = createAdapter(publisher);
+
+    await expect(adapter.publishControl(metadataControl)).resolves.toEqual({
+      status: 'published',
+      receiverCount: 2,
+    });
+    expect(publisher.published).toEqual([
+      {
+        channel: 'rankland:test:contest-event-read-cache-control:v1',
+        message: serializeContestEventCacheControlEnvelope(metadataControl),
+      },
+    ]);
+  });
+
+  it('keeps committed writes fail-open when cache-control publishing or serialization fails', async () => {
+    const publisher = new FakePublisher();
+    publisher.status = 'ready';
+    publisher.publishResult = Promise.reject(new TypeError('Redis write failed'));
+    const adapter = createAdapter(publisher);
+
+    await expect(adapter.publishControl(deleteControl)).resolves.toEqual({
+      status: 'failed',
+      reason: 'error',
+      errorClass: 'TypeError',
+    });
+    await expect(adapter.publishControl({ ...metadataControl, visibilityFingerprint: '   ' })).resolves.toEqual({
+      status: 'failed',
+      reason: 'error',
+      errorClass: 'RangeError',
+    });
   });
 
   it('skips publishing while the command client is not ready', async () => {
@@ -231,17 +353,26 @@ describe('ContestEventNotificationRedisAdapter subscriber', () => {
     subscriber.status = 'ready';
     subscriber.emit('ready');
     expect(adapter.getState()).toBe('subscribing');
-    expect(subscriber.subscribedChannels).toEqual(['rankland:test:contest-event-availability:v1']);
+    expect(subscriber.subscribedChannels).toEqual([
+      'rankland:test:contest-event-availability:v1',
+      'rankland:test:contest-event-read-cache-control:v1',
+    ]);
 
     subscriber.emit(
       'message',
       'rankland:test:contest-event-availability:v1',
       serializeContestEventNotificationEnvelope(watermark),
     );
+    subscriber.emit(
+      'message',
+      'rankland:test:contest-event-read-cache-control:v1',
+      serializeContestEventCacheControlEnvelope(deleteControl),
+    );
     expect(callbacks.onWatermark).not.toHaveBeenCalled();
+    expect(callbacks.onControl).not.toHaveBeenCalled();
     expect(callbacks.onSubscribed).not.toHaveBeenCalled();
 
-    subscribeAck.resolve(1);
+    subscribeAck.resolve(2);
     await flushPromises();
     expect(adapter.getState()).toBe('subscribed');
     expect(callbacks.onSubscribed).toHaveBeenCalledTimes(1);
@@ -251,8 +382,14 @@ describe('ContestEventNotificationRedisAdapter subscriber', () => {
       'rankland:test:contest-event-availability:v1',
       serializeContestEventNotificationEnvelope(watermark),
     );
+    subscriber.emit(
+      'message',
+      'rankland:test:contest-event-read-cache-control:v1',
+      serializeContestEventCacheControlEnvelope(deleteControl),
+    );
     await flushPromises();
     expect(callbacks.onWatermark).toHaveBeenCalledWith(watermark);
+    expect(callbacks.onControl).toHaveBeenCalledWith(deleteControl);
   });
 
   it('ignores stale generation ACK and close callbacks', async () => {
@@ -275,12 +412,12 @@ describe('ContestEventNotificationRedisAdapter subscriber', () => {
 
     subscriber.status = 'ready';
     subscriber.emit('ready');
-    firstAck.resolve(1);
+    firstAck.resolve(2);
     await flushPromises();
     expect(adapter.getState()).toBe('subscribing');
     expect(callbacks.onSubscribed).not.toHaveBeenCalled();
 
-    secondAck.resolve(1);
+    secondAck.resolve(2);
     await flushPromises();
     expect(adapter.getState()).toBe('subscribed');
     expect(callbacks.onSubscribed).toHaveBeenCalledTimes(1);
@@ -292,12 +429,40 @@ describe('ContestEventNotificationRedisAdapter subscriber', () => {
     expect(adapter.getState()).toBe('subscribed');
   });
 
+  it('does not advertise readiness when Redis only acknowledges one of the two channels', async () => {
+    const subscriber = new FakeSubscriber();
+    subscriber.subscribeFactories.push(() => Promise.resolve(1));
+    const adapter = createAdapter(new FakePublisher(), subscriber);
+    const callbacks = createCallbacks();
+
+    await adapter.start(callbacks);
+    subscriber.status = 'ready';
+    subscriber.emit('ready');
+    await flushPromises();
+
+    expect(adapter.getState()).toBe('degraded');
+    expect(callbacks.onSubscribed).not.toHaveBeenCalled();
+    subscriber.emit(
+      'message',
+      'rankland:test:contest-event-availability:v1',
+      serializeContestEventNotificationEnvelope(watermark),
+    );
+    subscriber.emit(
+      'message',
+      'rankland:test:contest-event-read-cache-control:v1',
+      serializeContestEventCacheControlEnvelope(deleteControl),
+    );
+    await flushPromises();
+    expect(callbacks.onWatermark).not.toHaveBeenCalled();
+    expect(callbacks.onControl).not.toHaveBeenCalled();
+  });
+
   it('recovers from initial connect and subscribe failures on a later ready epoch', async () => {
     const subscriber = new FakeSubscriber();
     subscriber.connectFactory = () => Promise.reject(new Error('initial Redis unavailable'));
     subscriber.subscribeFactories.push(
       () => Promise.reject(new Error('subscribe failed')),
-      () => Promise.resolve(1),
+      () => Promise.resolve(2),
     );
     const adapter = createAdapter(new FakePublisher(), subscriber);
     const callbacks = createCallbacks();
@@ -329,9 +494,20 @@ describe('ContestEventNotificationRedisAdapter subscriber', () => {
 
     subscriber.emit('message', 'another:channel', serializeContestEventNotificationEnvelope(watermark));
     subscriber.emit('message', 'rankland:test:contest-event-availability:v1', '{');
+    subscriber.emit(
+      'message',
+      'rankland:test:contest-event-availability:v1',
+      serializeContestEventCacheControlEnvelope(deleteControl),
+    );
+    subscriber.emit(
+      'message',
+      'rankland:test:contest-event-read-cache-control:v1',
+      serializeContestEventNotificationEnvelope(watermark),
+    );
     await flushPromises();
 
     expect(callbacks.onWatermark).not.toHaveBeenCalled();
+    expect(callbacks.onControl).not.toHaveBeenCalled();
     expect(adapter.getState()).toBe('subscribed');
   });
 
@@ -358,9 +534,15 @@ describe('ContestEventNotificationRedisAdapter subscriber', () => {
       'rankland:test:contest-event-availability:v1',
       serializeContestEventNotificationEnvelope(watermark),
     );
+    subscriber.emit(
+      'message',
+      'rankland:test:contest-event-read-cache-control:v1',
+      serializeContestEventCacheControlEnvelope(deleteControl),
+    );
     await flushPromises();
     expect(callbacks.onSubscribed).not.toHaveBeenCalled();
     expect(callbacks.onWatermark).not.toHaveBeenCalled();
+    expect(callbacks.onControl).not.toHaveBeenCalled();
     await adapter.start(callbacks);
     expect(subscriber.connectCalls).toBe(1);
   });
@@ -469,6 +651,33 @@ describe('ContestEventNotificationRedisAdapter logging', () => {
     });
     expect(JSON.stringify(invalidMessages)).not.toContain(secretPayload);
   });
+
+  it('separately rate-limits invalid control messages without logging their payload', async () => {
+    vi.useFakeTimers();
+    const warn = vi.spyOn(console, 'warn').mockImplementation(() => undefined);
+    vi.spyOn(console, 'info').mockImplementation(() => undefined);
+    const subscriber = new FakeSubscriber();
+    const adapter = createAdapter(new FakePublisher(), subscriber);
+    await adapter.start(createCallbacks());
+    subscriber.status = 'ready';
+    subscriber.emit('ready');
+    await flushPromises();
+
+    const secretPayload = '{not-json-control-secret}';
+    subscriber.emit('message', 'rankland:test:contest-event-read-cache-control:v1', secretPayload);
+    subscriber.emit('message', 'rankland:test:contest-event-read-cache-control:v1', secretPayload);
+
+    const invalidMessages = warn.mock.calls.filter(
+      ([event]) => event === 'contest_event_cache_control.invalid_message',
+    );
+    expect(invalidMessages).toHaveLength(1);
+    expect(invalidMessages[0][1]).toMatchObject({
+      channel: 'rankland:test:contest-event-read-cache-control:v1',
+      reason: 'invalid-json',
+      suppressedCount: 0,
+    });
+    expect(JSON.stringify(invalidMessages)).not.toContain(secretPayload);
+  });
 });
 
 function wireEnvelope() {
@@ -478,6 +687,15 @@ function wireEnvelope() {
     uk: watermark.canonicalUk,
     latestEventId: watermark.latestEventId,
     streamRevision: watermark.streamRevision,
+  };
+}
+
+function deleteWireEnvelope() {
+  return {
+    schemaVersion: 1,
+    type: 'delete',
+    contestId: deleteControl.contestId,
+    uk: deleteControl.canonicalUk,
   };
 }
 
@@ -505,9 +723,9 @@ class FakeSubscriber extends EventEmitter implements RedisSubscriberPort {
     return this.connectFactory();
   }
 
-  public subscribe(channel: string): Promise<number> {
-    this.subscribedChannels.push(channel);
-    return this.subscribeFactories.shift()?.() || Promise.resolve(1);
+  public subscribe(...channels: string[]): Promise<number> {
+    this.subscribedChannels.push(...channels);
+    return this.subscribeFactories.shift()?.() || Promise.resolve(channels.length);
   }
 
   public disconnect(reconnect: boolean): void {
@@ -528,10 +746,12 @@ function createAdapter(publisher = new FakePublisher(), subscriber = new FakeSub
 
 function createCallbacks(): ContestEventNotificationRedisCallbacks & {
   onWatermark: ReturnType<typeof vi.fn>;
+  onControl: ReturnType<typeof vi.fn>;
   onSubscribed: ReturnType<typeof vi.fn>;
 } {
   return {
     onWatermark: vi.fn(),
+    onControl: vi.fn(),
     onSubscribed: vi.fn(),
   };
 }

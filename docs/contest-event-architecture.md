@@ -1,6 +1,6 @@
 # Contest Event Architecture
 
-Updated: 2026-07-16
+Updated: 2026-07-18
 
 ## Goals
 
@@ -23,10 +23,13 @@ cross-instance notification accelerator.
 - `mysql2` is used only as TypeORM's MySQL driver dependency.
 - HTTP is the canonical producer append and consumer catch-up protocol.
 - SSE only sends availability notifications: `uk`, `latestEventId`, and `streamRevision`.
-- The writing instance notifies its local SSE hub immediately after commit, then publishes the same high-water mark
-  through Redis Pub/Sub for other instances.
-- Every instance reconciles the authoritative MySQL high-water marks for its locally active contests every 5 seconds.
-  This closes Pub/Sub disconnects, message loss, and the commit-to-publish process-exit window.
+- A cache-aware build can serve catch-up through a bounded process-local read cache. The startup mode defaults to
+  `off`; MySQL remains the only authority in every mode, and Redis never stores event bodies.
+- After commit, the writing instance first publishes or fail-closes its local cache generation, then notifies the
+  local SSE Hub, then best-effort publishes the high-water/control hint through Redis Pub/Sub.
+- Every instance reconciles authoritative MySQL state for the union of locally active SSE contests and resident
+  cache contests. The default hot interval is 3 seconds and the safety maximum is 5 seconds. This closes Pub/Sub
+  disconnects, message loss, control loss, and the commit-to-publish process-exit window.
 - Redis remains fail-open: an unavailable notification accelerator does not change application readiness or a
   successfully committed append/reset response.
 - Socket.IO is not started by the server process.
@@ -72,7 +75,8 @@ Append rules:
 2. Require `streamRevision` and a non-empty batch.
 3. Require event ids to be strictly increasing inside the batch.
 4. Resolve `uk -> contestId`.
-5. Lock the `contest_event_stream` row in a transaction.
+5. Lock the active `contest` row, then lock its `contest_event_stream` row in the same transaction. Reset, delete,
+   and visibility-changing contest updates use the same order.
 6. Reject the append if batch `streamRevision` differs from the locked stream row.
 7. The first producer claims the stream lock.
 8. Later appends must use the same `x-producer-id` until an admin releases the lock.
@@ -81,9 +85,9 @@ Append rules:
 11. Conflicting duplicate payloads and gaps abort the transaction.
 12. For non-new solution events, resolve the solution submit time from an earlier `NEW_SOLUTION` in the same batch or one batch lookup of existing new-solution rows in the current revision.
 13. `lastEventId` is updated only after the event rows are inserted.
-14. Event-availability notifications are announced only after transaction commit. The local hub is notified first;
-    Redis publication is best-effort and notification-plane failures cannot turn a committed append into an HTTP
-    failure.
+14. Event-availability notifications are announced only after transaction commit. Local cache write-through or
+    fail-close runs first, the local Hub runs second, and Redis publication runs last. Cache/Hub/Redis failures are
+    isolated and cannot turn a committed append into an HTTP failure.
 
 This one-request/one-ack flow is the correctness boundary. Producers should not send the next batch until the previous append response succeeds.
 
@@ -130,6 +134,46 @@ Catch-up compaction is enabled by default. If a recovery range contains later se
 
 Live realtime delivery does not carry event payloads and is never compacted.
 
+### Process-local read cache
+
+`CONTEST_EVENT_READ_CACHE_MODE` is read only at startup:
+
+- `off` uses the optimized, bounded legacy MySQL snapshot reader and constructs no cache entries;
+- `shadow` still returns the legacy result, builds the cache in the background, and compares complete response
+  semantics without logging payloads;
+- `on` serves materialized JSON or protobuf views and uses a small asynchronous legacy comparison sample.
+
+Each ready entry is keyed by database `contestId` and current `streamRevision`. It owns immutable raw-id chunks,
+precomputed full/compact projections, protobuf event fragments, and pre-normalized JSON event views. A ready GET
+does not rescan all settle/change candidates and does not re-encode each protobuf event. JSON responses pin their
+snapshot until response `finish`/`close`/`error`; protobuf responses release immediately after body construction.
+
+A cache generation is serviceable only while its raw prefix is continuous, its visibility fingerprint matches,
+its materialized event id covers the observed target, and its last full MySQL authority query started no more than
+6 seconds ago. Redis watermarks/control messages can raise a target or invalidate a generation but never renew this
+lease. An expired lease, a no-progress tip, or request evidence ahead of local authority joins a per-contest MySQL
+singleflight. If authority cannot be established, the route returns `503 Service Unavailable` with
+`Retry-After: 1`; it does not serve an unbounded stale tip.
+
+Hydration and tail fill use minimal event-range columns, per-generation tokens, a global bulkhead, incremental
+builder reservations, a 256 MiB process budget, a 128 MiB contest budget, 15-minute idle TTL, and byte-weighted
+LRU. Delete produces a terminal in-process tombstone; reset, metadata change, same-revision authority regression,
+gap, corruption, or late-token mismatch fail closed. Oversize contests are marked and use only the bounded legacy
+fallback rather than repeatedly hydrating.
+
+The 128 MiB contest budget includes the current resident snapshot, in-flight builders, and response-pinned retired
+generations together. Cache/fallback reads have a 1-second end-to-end deadline covering pool acquisition,
+transaction setup, queries, and commit; SELECTs also carry a MySQL execution hint. Expiry immediately releases the
+application bulkhead slot, destroys an acquired socket, and fences any connection or result that arrives late. A
+read acquisition also fails fast when the main pool is full rather than entering mysql2's internal wait queue. The
+pre-TypeORM UTC session query uses the same hard bound, and an unproven rollback destroys rather than reuses the
+connection.
+Authority/range/decode/validation failure puts the failed generation into a short retry cooldown. Control and
+shutdown replace lifecycle tokens, reject queued hydration, and discard every late identity/state/range result. A
+delete tombstone returns the normal contest-not-found domain error. If a post-commit cache update cannot be
+invalidated, a contest deny-set (or, if necessary, the process-wide kill switch) prevents that process from serving
+potentially stale cache state.
+
 ## Transport: content negotiation, protobuf & SSE
 
 Request parsing and response wrapping are handled by generic, business-agnostic infrastructure; controllers
@@ -145,8 +189,12 @@ only declare capabilities through decorators and return plain objects.
   - `SseMiddleware` opens the event-stream response (headers, `ctx.respond = false`, `retry:`), then hands off.
 - `DefaultResponseHandler` wraps the success path by content type: JSON → `{ success, code, data }`; protobuf →
   encode the route return with the declared response message + `X-RL-Resp-Success/Code` headers.
+- The event cache may return a trusted pre-normalized JSON view or trusted pre-encoded protobuf body. The generic
+  handler verifies that it matches negotiated content type, preserves the same wrapper/headers, and owns terminal
+  release of the JSON snapshot pin.
 - Exception handlers wrap the failure path by content type: JSON → `{ success, code, msg, ... }`; protobuf →
-  empty body + `X-RL-Resp-Success/Code/Msg` (and optional `X-RL-Resp-Meta`) headers.
+  empty body + `X-RL-Resp-Success/Code/Msg` (and optional `X-RL-Resp-Meta`) headers. Temporary cache/fallback
+  overload is HTTP 503 in either format and includes `Retry-After: 1`.
 
 This keeps `application/protobuf` ⇄ JSON interchange a transport concern; the same controller serves both.
 
@@ -229,6 +277,12 @@ not isolate Pub/Sub channels.
 Production requires a non-empty `REDIS_NAMESPACE`. A missing namespace is a startup configuration error, while a
 runtime Redis outage is fail-open and does not change `/api/checkHealth`. Nginx must disable buffering and caching for
 the actual location that matches the SSE route.
+
+Read cache rollout and rollback are startup-only. First deploy the cache-aware build everywhere in `off` so every
+writer publishes the strict `<REDIS_NAMESPACE>:contest-event-read-cache-control:v1` delete/metadata channel. Only
+the same cache-aware build may then be introduced as `shadow` or `on`; a pre-cache binary must not coexist with
+`on`. Default `off` remains mandatory
+until the external B0/B1/C, three-seed 5,000-viewer, soak, blue-green, and rollback evidence is archived.
 
 Before rollout, run:
 

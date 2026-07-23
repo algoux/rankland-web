@@ -4,6 +4,8 @@ import ContestSseHub from '../contest-sse-hub';
 class FakeResponse extends EventEmitter {
   public readonly writes: string[] = [];
   public readonly writeResults: boolean[] = [];
+  public writeError?: Error;
+  public writeHook?: () => void;
   public endCalls = 0;
   public destroyCalls = 0;
   public destroyed = false;
@@ -11,6 +13,8 @@ class FakeResponse extends EventEmitter {
   public writableFinished = false;
 
   public write(chunk: string): boolean {
+    if (this.writeError) throw this.writeError;
+    this.writeHook?.();
     this.writes.push(chunk);
     return this.writeResults.shift() ?? true;
   }
@@ -39,8 +43,28 @@ function eventFrame(uk: string, latestEventId: number, streamRevision = 1) {
   return `event: events-available\ndata: ${JSON.stringify({ uk, latestEventId, streamRevision })}\n\n`;
 }
 
+const synchronousNotificationEnvironment = {
+  CONTEST_EVENT_NOTIFICATION_COALESCE_WINDOW_MS: '0',
+  CONTEST_EVENT_NOTIFICATION_FANOUT_SHARDS: '1',
+  CONTEST_EVENT_NOTIFICATION_FANOUT_WINDOW_MS: '0',
+} as const;
+type SynchronousNotificationEnvironmentKey = keyof typeof synchronousNotificationEnvironment;
+
 describe('ContestSseHub', () => {
+  let originalNotificationEnvironment: Record<SynchronousNotificationEnvironmentKey, string | undefined>;
+
+  beforeEach(() => {
+    originalNotificationEnvironment = Object.fromEntries(
+      Object.keys(synchronousNotificationEnvironment).map((key) => [key, process.env[key]]),
+    ) as Record<SynchronousNotificationEnvironmentKey, string | undefined>;
+    Object.assign(process.env, synchronousNotificationEnvironment);
+  });
+
   afterEach(() => {
+    for (const [key, value] of Object.entries(originalNotificationEnvironment)) {
+      if (value === undefined) delete process.env[key];
+      else process.env[key] = value;
+    }
     vi.useRealTimers();
   });
 
@@ -58,6 +82,45 @@ describe('ContestSseHub', () => {
     expect(second.writes).toEqual([eventFrame('Contest-A', 7, 2)]);
   });
 
+  it('buffers live watermarks for a prepared client until activation', () => {
+    const hub = new ContestSseHub();
+    const response = new FakeResponse();
+    const prepared = hub.prepareClient('70346717215600640', 'Contest-A', response);
+
+    hub.notify(watermark(8));
+    hub.notify(watermark(10));
+    expect(response.writes).toEqual([]);
+
+    prepared.activate(watermark(7));
+    expect(response.writes).toEqual([eventFrame('Contest-A', 10)]);
+  });
+
+  it('aborts a prepared client without committing or ending its HTTP response', () => {
+    const hub = new ContestSseHub();
+    const response = new FakeResponse();
+    const prepared = hub.prepareClient('70346717215600640', 'Contest-A', response);
+
+    prepared.abort();
+
+    expect(response.writes).toEqual([]);
+    expect(response.endCalls).toBe(0);
+    expect(hub.getActiveContestIds()).toEqual([]);
+  });
+
+  it('aborts unactivated clients without committing a 200 when the hub drains', () => {
+    const hub = new ContestSseHub();
+    const response = new FakeResponse();
+    const prepared = hub.prepareClient('70346717215600640', 'Contest-A', response);
+
+    hub.beginDraining();
+    hub.closeAll();
+
+    expect(prepared.closed).toBe(true);
+    expect(response.writes).toEqual([]);
+    expect(response.endCalls).toBe(0);
+    expect(hub.getActiveContestIds()).toEqual([]);
+  });
+
   it('only advances each client watermark in revision-first order', () => {
     const hub = new ContestSseHub();
     const response = new FakeResponse();
@@ -69,6 +132,205 @@ describe('ContestSseHub', () => {
     hub.notify(watermark(999, 1));
 
     expect(response.writes).toEqual([eventFrame('Contest-A', 100, 1), eventFrame('Contest-A', 0, 2)]);
+  });
+
+  it('coalesces to the latest watermark and fans out in deterministic shards', () => {
+    vi.useFakeTimers();
+    const hub = new ContestSseHub({
+      coalesceWindowMs: 25,
+      fanoutShards: 2,
+      fanoutWindowMs: 100,
+      summaryIntervalMs: 60_000,
+    });
+    const responses = Array.from({ length: 4 }, () => new FakeResponse());
+    for (const response of responses) hub.addClient('70346717215600640', 'contest-a', response);
+
+    hub.notify(watermark(8));
+    hub.notify(watermark(10));
+    expect(responses.map((response) => response.writes.length)).toEqual([0, 0, 0, 0]);
+
+    vi.advanceTimersByTime(25);
+    expect(responses.map((response) => response.writes)).toEqual([
+      [eventFrame('contest-a', 10)],
+      [],
+      [eventFrame('contest-a', 10)],
+      [],
+    ]);
+    vi.advanceTimersByTime(99);
+    expect(responses.map((response) => response.writes.length)).toEqual([1, 0, 1, 0]);
+    vi.advanceTimersByTime(1);
+    expect(responses.map((response) => response.writes)).toEqual(
+      Array.from({ length: 4 }, () => [eventFrame('contest-a', 10)]),
+    );
+  });
+
+  it('sends initial authority immediately but never below an already queued live watermark', () => {
+    vi.useFakeTimers();
+    const hub = new ContestSseHub({
+      coalesceWindowMs: 25,
+      fanoutShards: 2,
+      fanoutWindowMs: 100,
+      summaryIntervalMs: 60_000,
+    });
+    const response = new FakeResponse();
+    const registration = hub.addClient('70346717215600640', 'contest-a', response);
+
+    hub.notify(watermark(10));
+    registration.notifyInitial(watermark(8));
+
+    expect(response.writes).toEqual([eventFrame('contest-a', 10)]);
+    vi.advanceTimersByTime(125);
+    expect(response.writes).toEqual([eventFrame('contest-a', 10)]);
+  });
+
+  it('advances unflushed shards immediately and follows up only clients that received the older watermark', () => {
+    vi.useFakeTimers();
+    const hub = new ContestSseHub({
+      coalesceWindowMs: 25,
+      fanoutShards: 2,
+      fanoutWindowMs: 100,
+      summaryIntervalMs: 60_000,
+    });
+    const responses = Array.from({ length: 4 }, () => new FakeResponse());
+    for (const response of responses) hub.addClient('70346717215600640', 'contest-a', response);
+
+    hub.notify(watermark(8));
+    vi.advanceTimersByTime(25);
+    hub.notify(watermark(10));
+    vi.advanceTimersByTime(100);
+    expect(responses.map((response) => response.writes)).toEqual([
+      [eventFrame('contest-a', 8)],
+      [eventFrame('contest-a', 10)],
+      [eventFrame('contest-a', 8)],
+      [eventFrame('contest-a', 10)],
+    ]);
+
+    vi.advanceTimersByTime(25);
+    vi.advanceTimersByTime(100);
+    expect(responses.every((response) => response.writes.at(-1) === eventFrame('contest-a', 10))).toBe(true);
+    expect(responses.map((response) => response.writes.length)).toEqual([2, 1, 2, 1]);
+  });
+
+  it('keeps shard scheduling monotonic when the wall clock jumps during delivery', () => {
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date('2026-07-20T00:00:00.000Z'));
+    const hub = new ContestSseHub({
+      coalesceWindowMs: 25,
+      fanoutShards: 2,
+      fanoutWindowMs: 100,
+      summaryIntervalMs: 60_000,
+    });
+    const first = new FakeResponse();
+    const second = new FakeResponse();
+    first.writeHook = () => vi.setSystemTime(new Date('2026-07-19T00:00:00.000Z'));
+    hub.addClient('70346717215600640', 'contest-a', first);
+    hub.addClient('70346717215600640', 'contest-a', second);
+
+    hub.notify(watermark(10));
+    vi.advanceTimersByTime(25);
+    expect(first.writes).toEqual([eventFrame('contest-a', 10)]);
+    vi.advanceTimersByTime(100);
+    expect(second.writes).toEqual([eventFrame('contest-a', 10)]);
+  });
+
+  it('rotates the first shard and ignores a duplicate after the previous cycle completes', () => {
+    vi.useFakeTimers();
+    const hub = new ContestSseHub({
+      coalesceWindowMs: 25,
+      fanoutShards: 2,
+      fanoutWindowMs: 100,
+      summaryIntervalMs: 60_000,
+    });
+    const responses = Array.from({ length: 4 }, () => new FakeResponse());
+    for (const response of responses) hub.addClient('70346717215600640', 'contest-a', response);
+
+    hub.notify(watermark(10));
+    vi.advanceTimersByTime(125);
+    hub.notify(watermark(10));
+    expect(vi.getTimerCount()).toBe(0);
+
+    hub.notify(watermark(11));
+    vi.advanceTimersByTime(25);
+    expect(responses.map((response) => response.writes.length)).toEqual([1, 2, 1, 2]);
+    vi.advanceTimersByTime(100);
+    expect(responses.every((response) => response.writes.length === 2)).toBe(true);
+  });
+
+  it('emits interval-scoped notification maxima and resets them after each summary', () => {
+    vi.useFakeTimers();
+    const info = vi.spyOn(console, 'info').mockImplementation(() => undefined);
+    const hub = new ContestSseHub({
+      coalesceWindowMs: 25,
+      fanoutShards: 2,
+      fanoutWindowMs: 100,
+      summaryIntervalMs: 1_000,
+    });
+    hub.start();
+    hub.addClient('70346717215600640', 'contest-a', new FakeResponse());
+    hub.addClient('70346717215600640', 'contest-a', new FakeResponse());
+
+    hub.notify(watermark(10));
+    vi.advanceTimersByTime(1_000);
+    vi.advanceTimersByTime(1_000);
+
+    const summaries = info.mock.calls
+      .filter(([event]) => event === 'contest_event_notification_runtime.summary')
+      .map(([, payload]) => JSON.parse(String(payload)));
+    expect(summaries[0]).toMatchObject({
+      maximaScope: 'interval',
+      maxima: {
+        'fanout.notifyToLastShardMsMax': expect.any(Number),
+      },
+    });
+    expect(summaries[1]).toMatchObject({ maximaScope: 'interval', maxima: {} });
+
+    hub.beginDraining();
+    hub.closeAll();
+    info.mockRestore();
+  });
+
+  it('continues later shards when one client write throws', () => {
+    vi.useFakeTimers();
+    const hub = new ContestSseHub({
+      coalesceWindowMs: 25,
+      fanoutShards: 2,
+      fanoutWindowMs: 100,
+      summaryIntervalMs: 60_000,
+    });
+    const broken = new FakeResponse();
+    broken.writeError = new Error('socket failed');
+    const healthy = new FakeResponse();
+    hub.addClient('70346717215600640', 'contest-a', broken);
+    hub.addClient('70346717215600640', 'contest-a', healthy);
+
+    hub.notify(watermark(10));
+    vi.advanceTimersByTime(125);
+
+    expect(broken.destroyCalls).toBe(1);
+    expect(healthy.writes).toEqual([eventFrame('contest-a', 10)]);
+  });
+
+  it('cancels queued fanout when a contest closes or the Hub begins draining', () => {
+    vi.useFakeTimers();
+    const hub = new ContestSseHub({
+      coalesceWindowMs: 25,
+      fanoutShards: 2,
+      fanoutWindowMs: 100,
+      summaryIntervalMs: 60_000,
+    });
+    const first = new FakeResponse();
+    hub.addClient('70346717215600640', 'contest-a', first);
+    hub.notify(watermark(8));
+    hub.closeContest('70346717215600640');
+    vi.runAllTimers();
+    expect(first.writes).toEqual([]);
+
+    const second = new FakeResponse();
+    hub.addClient('2', 'contest-b', second);
+    hub.notify({ contestId: '2', canonicalUk: 'contest-b', latestEventId: 9, streamRevision: 1 });
+    hub.beginDraining();
+    vi.runAllTimers();
+    expect(second.writes).toEqual([]);
   });
 
   it('keeps one latest pending watermark while a client is blocked', () => {
@@ -144,9 +406,12 @@ describe('ContestSseHub', () => {
     hub.addClient('1', 'contest-a', first);
     hub.addClient('2', 'contest-b', second);
 
+    expect(hub.hasActiveClients('1')).toBe(true);
+    expect(hub.hasActiveClients('missing')).toBe(false);
     expect(hub.getActiveContestIds()).toEqual(['1', '2']);
     hub.closeContest('1');
     expect(first.endCalls).toBe(1);
+    expect(hub.hasActiveClients('1')).toBe(false);
     expect(hub.getActiveContestIds()).toEqual(['2']);
 
     hub.closeAll();

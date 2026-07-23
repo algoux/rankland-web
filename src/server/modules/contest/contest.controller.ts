@@ -42,10 +42,12 @@ import { ErrCode } from '@common/enums/err-code.enum';
 import ContestService from './contest.service';
 import ContestEventStreamService from './contest-event-stream.service';
 import ContestEventNotificationCoordinator from './contest-event-notification';
-import { getContestEventsResponseToJson, parseProducerBatchJson } from './contest-event-codec';
+import { parseProducerBatchJson } from './contest-event-codec';
 import { ProtobufContract } from '@server/decorators/protobuf-contract.decorator';
 import { Sse } from '@server/decorators/sse.decorator';
 import { rankland_live_contest_client, rankland_live_contest_producer } from '@common/proto/rankland_live_contest';
+import { ResponseContentType } from '@server/http/content-type';
+import { openSseResponse } from '@server/middlewares/sse.middleware';
 
 @ApiController('/v2')
 export default class ContestController {
@@ -76,7 +78,10 @@ export default class ContestController {
   @UseGuards(AuthGuard)
   @Contract(UpdateContestReqDTO, null)
   public async updateContest(@Data() data: UpdateContestReqDTO) {
-    await this.service.updateContest(data as any);
+    const control = await this.service.updateContest(data as any);
+    if (control) {
+      await this.notificationCoordinator.announceControl(control);
+    }
   }
 
   @Api.Summary('查询全部实时比赛')
@@ -113,7 +118,8 @@ export default class ContestController {
   @UseGuards(AuthGuard)
   @Contract(DeleteContestReqDTO, null)
   public async deleteContest(@Data() data: DeleteContestReqDTO) {
-    await this.service.deleteContest(data.uk);
+    const control = await this.service.deleteContest(data.uk);
+    await this.notificationCoordinator.announceControl(control);
   }
 
   @Api.Summary('重置实时比赛事件流')
@@ -138,12 +144,15 @@ export default class ContestController {
       producerId,
       batch,
     });
-    await this.notificationCoordinator.announceCommitted({
-      contestId: result.contestId,
-      canonicalUk: result.canonicalUk,
-      latestEventId: result.lastEventId,
-      streamRevision: result.streamRevision,
-    });
+    await this.notificationCoordinator.announceCommitted(
+      {
+        contestId: result.contestId,
+        canonicalUk: result.canonicalUk,
+        latestEventId: result.lastEventId,
+        streamRevision: result.streamRevision,
+      },
+      result.committedEvents,
+    );
     return {
       acceptedEventIds: result.acceptedEventIds,
       duplicateEventIds: result.duplicateEventIds,
@@ -158,16 +167,16 @@ export default class ContestController {
   @Contract(GetPublicContestEventsReqDTO, GetPublicContestEventsRespDTO)
   @ProtobufContract(null, rankland_live_contest_client.GetContestEventsResponse)
   public async getPublicContestEvents(@Data() data: GetPublicContestEventsReqDTO): Promise<any> {
-    const result = await this.eventStreamService.getClientEvents({
-      uk: data.uk,
-      afterEventId: data.afterEventId ?? 0,
-      limit: data.limit ?? 1000,
-      streamRevision: data.streamRevision,
-      compactProgress: data.compactProgress,
-    });
-    // Return a single serialization-ready object. The default response handler
-    // wraps it as JSON or encodes it to protobuf based on the negotiated type.
-    return getContestEventsResponseToJson(result);
+    return this.eventStreamService.getClientEventsForTransport(
+      {
+        uk: data.uk,
+        afterEventId: data.afterEventId ?? 0,
+        limit: data.limit ?? 1000,
+        streamRevision: data.streamRevision,
+        compactProgress: data.compactProgress,
+      },
+      this.ctx.state?.respContentType === ResponseContentType.Protobuf ? 'protobuf' : 'json',
+    );
   }
 
   @Api.Summary('公开实时比赛事件流通知')
@@ -177,9 +186,18 @@ export default class ContestController {
   public async streamPublicContestEventStreamNotifications(
     @Data() data: StreamPublicContestEventStreamNotificationsReqDTO,
   ) {
-    // ContentNegotiation + SSE middleware have already opened the event stream
-    // (headers, ctx.respond = false). Here we only do the business hookup.
-    await this.notificationCoordinator.attachClient(data.uk, this.ctx.res);
+    const prepared = await this.notificationCoordinator.prepareClient(data.uk, this.ctx.res);
+    if (prepared.closed) {
+      prepared.abort();
+      return;
+    }
+    try {
+      openSseResponse(this.ctx);
+      prepared.activate();
+    } catch (error) {
+      prepared.abort();
+      throw error;
+    }
   }
 
   @Api.Summary('查询实时比赛事件流')

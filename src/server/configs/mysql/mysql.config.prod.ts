@@ -1,5 +1,6 @@
 import { Config } from 'bwcx-ljsm';
 import MysqlConfig from './mysql.config';
+import { parseMysqlConnectionLimit } from './mysql.connection-limit';
 
 @Config(MysqlConfig, { when: 'production', override: true })
 export default class MysqlProdConfig extends MysqlConfig {
@@ -8,4 +9,5 @@ export default class MysqlProdConfig extends MysqlConfig {
   public readonly username: string = process.env.MYSQL_USER || 'blue';
   public readonly password: string = process.env.MYSQL_PASS || 'test';
   public readonly database: string = process.env.MYSQL_DB || 'rankland';
+  public readonly connectionLimit: number = parseMysqlConnectionLimit(process.env.MYSQL_CONNECTION_LIMIT);
 }

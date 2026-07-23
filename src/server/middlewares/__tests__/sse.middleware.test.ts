@@ -1,5 +1,5 @@
 import 'reflect-metadata';
-import SseMiddleware from '../sse.middleware';
+import SseMiddleware, { openSseResponse } from '../sse.middleware';
 import { Sse } from '@server/decorators/sse.decorator';
 
 function decorate(decorator: MethodDecorator, target: any, key: string) {
@@ -48,12 +48,19 @@ function createCtx() {
 describe('SseMiddleware', () => {
   const mw = new SseMiddleware();
 
-  it('sets up the event-stream response and hands off to the controller', async () => {
+  it('defers committing the event-stream response until the controller explicitly opens it', async () => {
     const ctx = createCtx();
     let called = false;
     await mw.use(ctx, async () => {
       called = true;
     });
+
+    expect(called).toBe(true);
+    expect(ctx.respond).toBeUndefined();
+    expect(ctx.res.headStatus).toBeUndefined();
+    expect(ctx.writes).toHaveLength(0);
+
+    openSseResponse(ctx);
     expect(ctx.headers['Content-Type']).toBe('text/event-stream; charset=utf-8');
     expect(ctx.headers['Cache-Control']).toBe('no-cache, no-transform');
     expect(ctx.headers['Connection']).toBe('keep-alive');
@@ -61,16 +68,18 @@ describe('SseMiddleware', () => {
     expect(ctx.respond).toBe(false);
     expect(ctx.res.headStatus).toBe(200);
     expect(ctx.writes).toContain('retry: 2000\n\n');
-    expect(called).toBe(true);
   });
 
-  it('opens the stream before the controller runs', async () => {
+  it('keeps the HTTP response uncommitted when controller bootstrap fails', async () => {
     const ctx = createCtx();
-    let respondAtHandoff: boolean | undefined;
-    await mw.use(ctx, async () => {
-      respondAtHandoff = ctx.respond;
-    });
-    expect(respondAtHandoff).toBe(false);
+    await expect(
+      mw.use(ctx, async () => {
+        throw new Error('bootstrap unavailable');
+      }),
+    ).rejects.toThrow('bootstrap unavailable');
+    expect(ctx.respond).toBeUndefined();
+    expect(ctx.res.headStatus).toBeUndefined();
+    expect(ctx.writes).toHaveLength(0);
   });
 
   it('skips routes that are not SSE endpoints', async () => {

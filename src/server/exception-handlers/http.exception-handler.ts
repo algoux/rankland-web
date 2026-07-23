@@ -12,6 +12,9 @@ export default class HttpExceptionHandler implements IBwcxExceptionHandler {
           err: ${e.message}`);
 
     const msg = e.code === 404 ? '请求地址不存在' : statuses[e.code] || 'Unknown Error';
+    if (Object.keys(e.headers).length > 0) {
+      ctx.set(e.headers);
+    }
     if (ctx.url.indexOf('/api/') !== -1) {
       writeErrorResponse(ctx, {
         status: e.code,
