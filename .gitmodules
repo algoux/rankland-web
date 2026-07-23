@@ -1,3 +1,6 @@
 [submodule "src/common/shared"]
 	path = src/common/shared
 	url = git@github.com:algoux/rankland-shared.git
+[submodule "loadtest"]
+	path = loadtest
+	url = git@github.com:algoux/rankland-web-loadtest.git
