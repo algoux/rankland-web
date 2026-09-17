@@ -31,6 +31,7 @@ export function getMysqlDataSourceOptions(mysqlConfig: MysqlDataSourceConfig): D
     bigNumberStrings: true,
     extra: {
       connectionLimit: mysqlConfig.connectionLimit,
+      jsonStrings: true,
     },
     synchronize: false,
     migrationsRun: false,
