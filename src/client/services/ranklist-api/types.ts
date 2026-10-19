@@ -1,5 +1,4 @@
 import type * as srk from '@algoux/standard-ranklist';
-import type Long from 'long';
 
 export interface CacheManager {
   get(key: string): Promise<string | undefined>;
@@ -51,29 +50,4 @@ export interface IApiCollection {
 export interface IApiStatistics {
   totalSrkCount: number;
   totalViewCount: number;
-}
-
-export interface IApiLiveRanklistInfo {
-  id: string;
-  uniqueKey: string;
-  title: srk.Contest['title'];
-  startAt: srk.Contest['title'];
-  duration: srk.Contest['duration'];
-  frozenDuration: srk.Contest['frozenDuration'];
-  unfrozenAt: srk.DatetimeISOString;
-  problems: srk.Problem[];
-  members: srk.User[];
-  markers: srk.Marker[];
-  series: srk.RankSeries[];
-  sorter: srk.SorterICPC;
-  contributors: srk.Contributor[];
-  type: srk.Type;
-}
-
-export interface IApiLiveScrollSolution {
-  id: Long;
-  problemAlias: string;
-  userId: string;
-  result: 'AC' | 'FB' | 'RJ' | '?';
-  solved: number;
 }

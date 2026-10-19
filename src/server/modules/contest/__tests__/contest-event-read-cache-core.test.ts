@@ -601,6 +601,7 @@ describe('contest event read cache snapshot', () => {
         }),
       ]),
       { maxBytes: 1024 * 1024, maxEntryBytes: 1024 * 1024 },
+      { diagnosticsEnabled: true },
     );
     const warm = await cache.getEvents({ uk: 'Contest-A', afterEventId: 0, limit: 10, streamRevision: 1 }, 'json');
     warm.release();
@@ -644,6 +645,24 @@ describe('contest event read cache snapshot', () => {
       largeObjectSpaceUsedBytes: expect.any(Number),
     });
     cache.dispose();
+    info.mockRestore();
+  });
+
+  it('does not emit routine runtime cache summaries by default', () => {
+    const info = vi.spyOn(console, 'info').mockImplementation(() => undefined);
+    const cache = new ContestEventReadCache(new ScriptedLoader([]), {
+      maxBytes: 1024 * 1024,
+      maxEntryBytes: 1024 * 1024,
+    });
+
+    cache.start();
+    cache.dispose();
+
+    expect(
+      info.mock.calls.filter(
+        ([event]) => event === 'contest_event_read_cache.summary' || event === 'contest_event_read_runtime.summary',
+      ),
+    ).toEqual([]);
     info.mockRestore();
   });
 

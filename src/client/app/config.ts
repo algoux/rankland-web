@@ -13,8 +13,6 @@ export interface RanklandRuntimeConfig {
   hostCN: string;
   siteAlias: string;
   beian: string;
-  livePollingInterval: number;
-  wsBase: string;
   gtag: string;
   buildCommit: string;
 }
@@ -63,8 +61,6 @@ export function getRanklandRuntimeConfig(env: Record<string, string | undefined>
     hostCN: env.HOST_CN || 'rl.algoux.cn',
     siteAlias: env.SITE_ALIAS || 'global',
     beian: env.BEIAN || '',
-    livePollingInterval: Number(env.LIVE_POLLING_INTERVAL || 10_000),
-    wsBase: env.WS_BASE || '',
     gtag: env.GTAG || '',
     buildCommit: env.BUILD_COMMIT || '',
   };

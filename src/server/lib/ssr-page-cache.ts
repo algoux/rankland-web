@@ -176,7 +176,7 @@ function resolveRouteQueryAllowlist(pathname: string) {
     return ['rankId'];
   }
   if (/^\/live\/[^/]+$/.test(pathname)) {
-    return ['scrollSolution', 'token'];
+    return ['scrollSolution'];
   }
   return undefined;
 }

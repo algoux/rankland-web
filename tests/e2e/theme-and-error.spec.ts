@@ -131,7 +131,7 @@ test.describe('cross-cutting RankLand behavior', () => {
       title: 'Playground | RankLand',
     });
 
-    await page.goto('/live/mock-live');
+    await page.goto('/live/live-test-key');
     await expect(page).toHaveTitle('Live: Test Contest 2024 | RankLand');
     expect(await readSeo()).toMatchObject({
       ogTitle: 'Live: Test Contest 2024 | RankLand',

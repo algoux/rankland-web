@@ -20,7 +20,7 @@ describe('SSR page cache keys', () => {
   it('keeps route-specific query params isolated', () => {
     expect(normalizeSsrPageCacheUrl('/search?kw=icpc&rankId=ignored')).toBe('/search?kw=icpc');
     expect(normalizeSsrPageCacheUrl('/live/live-1?token=secret&scrollSolution=1&kw=ignored')).toBe(
-      '/live/live-1?scrollSolution=1&token=secret',
+      '/live/live-1?scrollSolution=1',
     );
     expect(getSsrPageCacheKey('/live/live-1?token=secret')).not.toContain('secret');
   });

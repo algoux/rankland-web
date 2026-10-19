@@ -224,7 +224,6 @@ function createImplicitOfficialRanklist(baseRanklist) {
 const fixtures = {
   collection: readFixture('collection.json'),
   listAll: readFixture('listall.json'),
-  liveInfo: readFixture('live-info.json'),
   localizedSrk: createLocalizedRanklist(),
   largeSrk: createLargeRanklist(),
   ranklistInfo: readFixture('ranklist-info.json'),
@@ -301,37 +300,6 @@ const server = http.createServer((req, res) => {
       return;
     }
     sendJson(res, fixtures.srk);
-    return;
-  }
-
-  if (pathname.startsWith('/ranking/config/')) {
-    const key = pathname.split('/').pop();
-    if (key === 'ccpc26-live-test' || key === 'ccpc26-live-ordinary-test') {
-      sendJson(res, wrap({
-        id: key,
-        uniqueKey: key,
-        ...fixtures.ccpc26Srk.contest,
-      }));
-      return;
-    }
-    if (key === 'missing-key' || key === 'not-found') {
-      sendJson(res, { code: 11, message: 'live ranklist not found' });
-      return;
-    }
-    sendJson(res, wrap(fixtures.liveInfo));
-    return;
-  }
-
-  if (pathname.startsWith('/ranking/')) {
-    if (pathname === '/ranking/ccpc26-live-test') {
-      sendJson(res, wrap(fixtures.ccpc26LiveSrk));
-      return;
-    }
-    if (pathname === '/ranking/ccpc26-live-ordinary-test') {
-      sendJson(res, wrap({ ...fixtures.ccpc26LiveSrk, sorter: { algorithm: 'ICPC', config: {} } }));
-      return;
-    }
-    sendJson(res, wrap(fixtures.srk));
     return;
   }
 

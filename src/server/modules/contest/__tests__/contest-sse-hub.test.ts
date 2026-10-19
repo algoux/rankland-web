@@ -270,12 +270,15 @@ describe('ContestSseHub', () => {
   it('emits interval-scoped notification maxima and resets them after each summary', () => {
     useFakeMonotonicTimers();
     const info = vi.spyOn(console, 'info').mockImplementation(() => undefined);
-    const hub = new ContestSseHub({
-      coalesceWindowMs: 25,
-      fanoutShards: 2,
-      fanoutWindowMs: 100,
-      summaryIntervalMs: 1_000,
-    });
+    const hub = new ContestSseHub(
+      {
+        coalesceWindowMs: 25,
+        fanoutShards: 2,
+        fanoutWindowMs: 100,
+        summaryIntervalMs: 1_000,
+      },
+      { diagnosticsEnabled: true },
+    );
     hub.start();
     hub.addClient('70346717215600640', 'contest-a', new FakeResponse());
     hub.addClient('70346717215600640', 'contest-a', new FakeResponse());
@@ -297,6 +300,25 @@ describe('ContestSseHub', () => {
 
     hub.beginDraining();
     hub.closeAll();
+    info.mockRestore();
+  });
+
+  it('does not emit routine notification summaries by default', () => {
+    vi.useFakeTimers();
+    const info = vi.spyOn(console, 'info').mockImplementation(() => undefined);
+    const hub = new ContestSseHub({
+      coalesceWindowMs: 25,
+      fanoutShards: 2,
+      fanoutWindowMs: 100,
+      summaryIntervalMs: 1_000,
+    });
+
+    hub.start();
+    vi.advanceTimersByTime(2_000);
+    hub.beginDraining();
+    hub.closeAll();
+
+    expect(info.mock.calls.filter(([event]) => event === 'contest_event_notification_runtime.summary')).toEqual([]);
     info.mockRestore();
   });
 

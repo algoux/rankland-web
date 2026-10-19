@@ -1,24 +1,33 @@
-import type { Ranklist } from '@algoux/standard-ranklist';
-import type { ApiService, IApiLiveRanklistInfo } from '@/services/ranklist-api';
+import type { ApiService } from '@/services/ranklist-api';
+import type {
+  LiveContestConfig,
+  LiveContestTransport,
+} from '@/services/ranklist-api/live-contest-types';
 
 export interface LivePageData {
-  liveInfo: IApiLiveRanklistInfo;
-  ranklist: Ranklist;
+  requestedUk: string;
+  config: LiveContestConfig;
 }
 
 export async function loadLivePageData({
   api,
   id,
-  token,
 }: {
   api: ApiService;
   id: string;
-  token?: string;
 }): Promise<LivePageData> {
-  const liveInfo = await api.getLiveRanklistInfo({ uniqueKey: id });
-  const ranklist = await api.getLiveRanklist({ id: liveInfo.id, token });
+  const transport = createLiveContestTransport(api);
   return {
-    liveInfo,
-    ranklist,
+    requestedUk: id,
+    config: await transport.getContest(id),
   };
+}
+
+export function createLiveContestTransport(api: ApiService): LiveContestTransport {
+  return api.createLiveContestTransport(async (bytes) => {
+    const { decodeLiveContestEventPage } = await import(
+      '@/services/ranklist-api/live-contest-protobuf'
+    );
+    return decodeLiveContestEventPage(bytes);
+  });
 }

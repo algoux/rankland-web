@@ -1,5 +1,8 @@
 import { describe, expect, it, vi } from 'vitest';
+import { ApiRequestException } from '@/api';
 import { LogicException, LogicExceptionKind } from '@/services/ranklist-api';
+import { ErrCode } from '@common/enums/err-code.enum';
+import { LiveContestTransportError } from '@/services/ranklist-api/live-contest-transport';
 import { SSR_SKIP_CACHE_HEADER } from '@common/ssr-cache';
 import {
   RanklistPageErrorKind,
@@ -16,6 +19,20 @@ describe('ranklist page error normalization', () => {
 
   it('recognizes not-found errors after SSR serialization strips the prototype', () => {
     expect(toRanklistPageErrorKind({ kind: LogicExceptionKind.NotFound })).toBe(RanklistPageErrorKind.NotFound);
+  });
+
+  it('recognizes API v2 contest-not-found errors and HTTP 404 responses', () => {
+    expect(toRanklistPageErrorKind(
+      new ApiRequestException(ErrCode.ContestNotFound, 'contest not found'),
+    )).toBe(RanklistPageErrorKind.NotFound);
+    expect(toRanklistPageErrorKind({ status: 404 })).toBe(RanklistPageErrorKind.NotFound);
+    expect(toRanklistPageErrorKind({ response: { status: 404 } })).toBe(RanklistPageErrorKind.NotFound);
+    expect(toRanklistPageErrorKind(
+      new LiveContestTransportError('missing', { status: 404 }),
+    )).toBe(RanklistPageErrorKind.NotFound);
+    expect(toRanklistPageErrorKind(
+      new LiveContestTransportError('invalid', { status: 422 }),
+    )).toBe(RanklistPageErrorKind.LoadFailed);
   });
 
   it('falls back to a generic load error for unknown failures', () => {

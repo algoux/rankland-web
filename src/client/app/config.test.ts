@@ -20,7 +20,8 @@ describe('rankland runtime config', () => {
     expect(config).not.toHaveProperty('cdnApiBaseServer');
     expect(config.hostGlobal).toBe('rl.algoux.org');
     expect(config.hostCN).toBe('rl.algoux.cn');
-    expect(config.livePollingInterval).toBe(10_000);
+    expect(config).not.toHaveProperty('livePollingInterval');
+    expect(config).not.toHaveProperty('wsBase');
     expect(config.vinUrl).toBe('https://cdn.algoux.cn/rankland/vin.txt');
   });
 

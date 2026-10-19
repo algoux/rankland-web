@@ -5,23 +5,21 @@ import { inject } from 'vue';
 import { ApiClient } from '@common/api/api-client';
 import { ResponseParser } from '@common/api/response-parser';
 
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface IRequestExtraOpts {
-  /** 自定义请求选项 */
+  signal?: AbortSignal;
 }
 
 export class ApiClientFactory {
   public static createInstance(requestAdaptor: AxiosInstance) {
     const request = (opts: IBwcxApiRequestAdaptorArgs<IRequestExtraOpts>) => {
-      // 通过 extraOpts 获取调用时传入的自定义请求选项
-      // 通过 metadata 获取此 API 的元数据
-      // const { extraOpts = {}, metadata } = opts;
+      const { extraOpts = {} } = opts;
       const config: Omit<typeof opts, 'metadata' | 'extraOpts'> = { ...opts };
       // @ts-ignore
       delete config.metadata;
       // @ts-ignore
       delete config.extraOpts;
       config.url = config.url.replace(/^\/api/, '');
+      config.signal = extraOpts.signal;
       return requestAdaptor
         .request(config)
         .then((response) => response.data)

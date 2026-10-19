@@ -75,6 +75,9 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
+      - name: Check protobuf generated files
+        run: pnpm run check:proto
+
       - name: Run database migrations
         run: pnpm run db:migration:run
 

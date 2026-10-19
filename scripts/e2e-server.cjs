@@ -6,6 +6,10 @@ const os = require('os');
 const path = require('path');
 const mysql = require('mysql2/promise');
 const { fixtures } = require('./e2e-mock-rankland-api.cjs');
+const {
+  rankland_live_contest_client: liveClientProto,
+  rankland_live_contest_common: liveCommonProto,
+} = require('../src/common/proto/rankland_live_contest.js');
 
 const E2E_DATABASE = 'rankland_e2e';
 const database = process.env.MYSQL_DB;
@@ -212,6 +216,9 @@ async function seedFixtures() {
       );
     }
 
+    await seedLiveContest(connection);
+    await seedCcpc26LiveContests(connection);
+
     await connection.execute('INSERT INTO collection (id, uk, content) VALUES (?, ?, ?)', [
       '3001',
       'official',
@@ -220,6 +227,291 @@ async function seedFixtures() {
   } finally {
     await connection.end();
   }
+}
+
+async function seedLiveContest(connection) {
+  await seedEventContest(connection, {
+    contestId: '9003',
+    contestUserIdBase: 9100,
+    contestEventIdBase: 9200,
+    uk: 'live-test-key',
+    name: 'Test Contest 2024',
+    ranklist: fixtures.srk,
+    users: fixtures.srk.rows.slice(0, 2).map((row) => row.user),
+    events: createLiveTestEvents(),
+  });
+}
+
+async function seedCcpc26LiveContests(connection) {
+  await seedEventContest(connection, {
+    contestId: '9004',
+    contestUserIdBase: 9300,
+    contestEventIdBase: 9400,
+    uk: 'ccpc26-live-test',
+    name: 'CCPC26 Test Contest',
+    ranklist: fixtures.ccpc26Srk,
+    users: fixtures.ccpc26Srk.rows.map((row) => row.user),
+    events: createCcpc26InitialEvents(),
+  });
+  await seedEventContest(connection, {
+    contestId: '9005',
+    contestUserIdBase: 9500,
+    contestEventIdBase: 9600,
+    uk: 'ccpc26-live-ordinary-test',
+    name: 'CCPC26 Ordinary ICPC Fixture',
+    ranklist: fixtures.ccpc26OrdinarySrk,
+    users: fixtures.ccpc26OrdinarySrk.rows.map((row) => row.user),
+    events: createCcpc26InitialEvents(),
+  });
+}
+
+async function seedEventContest(connection, options) {
+  const {
+    contestId,
+    contestUserIdBase,
+    contestEventIdBase,
+    uk,
+    name,
+    ranklist,
+    users,
+    events,
+  } = options;
+  const contestTitle = typeof ranklist.contest.title === 'string'
+    ? { fallback: ranklist.contest.title }
+    : ranklist.contest.title;
+  await connection.execute(
+    `INSERT INTO contest (
+      id, uk, name, title, start_at, duration_s, frozen_duration_s, banner, ref_links,
+      problems, markers, series, sorter, contributors, srk_file_id, view_count, redirect_uk,
+      created_at, updated_at, deleted_at
+    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+    [
+      contestId,
+      uk,
+      name,
+      JSON.stringify(contestTitle),
+      toMysqlDateTime(ranklist.contest.startAt),
+      timeDurationToSeconds(ranklist.contest.duration),
+      ranklist.contest.frozenDuration
+        ? timeDurationToSeconds(ranklist.contest.frozenDuration)
+        : null,
+      null,
+      JSON.stringify(ranklist.contest.refLinks ?? []),
+      JSON.stringify(ranklist.problems ?? []),
+      JSON.stringify(ranklist.markers ?? []),
+      JSON.stringify(ranklist.series ?? []),
+      JSON.stringify(ranklist.sorter ?? null),
+      JSON.stringify(ranklist.contributors ?? []),
+      null,
+      0,
+      null,
+      '2024-04-01 00:00:00.000000',
+      '2024-04-01 00:00:00.000000',
+      null,
+    ],
+  );
+
+  for (const [index, user] of users.entries()) {
+    await connection.execute(
+      `INSERT INTO contest_user (
+        id, contest_id, user_id, name, avatar, photo, organization, location,
+        team_members, markers, official, banned, broadcaster_token, sort_index
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      [
+        String(contestUserIdBase + index),
+        contestId,
+        user.id,
+        serializeTextColumn(user.name),
+        user.avatar ? serializeTextColumn(user.avatar) : null,
+        user.photo ? serializeTextColumn(user.photo) : null,
+        user.organization ? serializeTextColumn(user.organization) : null,
+        user.location ?? null,
+        user.teamMembers ? JSON.stringify(user.teamMembers) : null,
+        user.markers || user.marker
+          ? JSON.stringify(user.markers || [user.marker])
+          : null,
+        user.official === false ? 0 : 1,
+        0,
+        null,
+        index,
+      ],
+    );
+  }
+
+  await connection.execute(
+    `INSERT INTO contest_event_stream (
+      contest_id, last_event_id, stream_revision, producer_id, producer_locked_at
+    ) VALUES (?, ?, ?, ?, ?)`,
+    [contestId, events.length, 1, null, null],
+  );
+  for (const event of events) {
+    const payloadBytes = encodeLiveClientEvent(event);
+    await connection.execute(
+      `INSERT INTO contest_event (
+        id, contest_id, event_id, stream_revision, type, producer_id,
+        solution_id, user_id, problem_alias, percentage_progress,
+        previous_result, result, time_ns, solution_submit_time_ns,
+        payload_hash, payload_bytes
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      [
+        String(contestEventIdBase + event.eventId),
+        contestId,
+        event.eventId,
+        1,
+        event.type,
+        'e2e-seed',
+        event.solutionId ?? null,
+        event.userId ?? null,
+        event.problemAlias ?? null,
+        event.percentageProgress ?? null,
+        event.previousResult ?? null,
+        event.result ?? null,
+        event.timeNs ?? null,
+        event.solutionSubmitTimeNs ?? null,
+        createHash('sha256').update(payloadBytes).digest('hex'),
+        payloadBytes,
+      ],
+    );
+  }
+}
+
+function createLiveTestEvents() {
+  return [
+    {
+      eventId: 1,
+      type: liveCommonProto.EventType.NEW_SOLUTION,
+      newSolutionData: {
+        solutionId: 101,
+        userId: 'team-alpha',
+        problemAlias: 'A',
+        time: { value: '600', unit: liveCommonProto.TimeUnit.S },
+      },
+      solutionId: 101,
+      userId: 'team-alpha',
+      problemAlias: 'A',
+      timeNs: '600000000000',
+      solutionSubmitTimeNs: '600000000000',
+    },
+    {
+      eventId: 2,
+      type: liveCommonProto.EventType.SOLUTION_ON_RESULT_SETTLE,
+      solutionOnResultSettleData: {
+        solutionId: 101,
+        result: liveCommonProto.Result.AC,
+        time: { value: '601', unit: liveCommonProto.TimeUnit.S },
+      },
+      solutionId: 101,
+      result: liveCommonProto.Result.AC,
+      timeNs: '601000000000',
+    },
+    {
+      eventId: 3,
+      type: liveCommonProto.EventType.NEW_SOLUTION,
+      newSolutionData: {
+        solutionId: 102,
+        userId: 'team-beta',
+        problemAlias: 'A',
+        time: { value: '1200', unit: liveCommonProto.TimeUnit.S },
+      },
+      solutionId: 102,
+      userId: 'team-beta',
+      problemAlias: 'A',
+      timeNs: '1200000000000',
+      solutionSubmitTimeNs: '1200000000000',
+    },
+    {
+      eventId: 4,
+      type: liveCommonProto.EventType.SOLUTION_ON_RESULT_SETTLE,
+      solutionOnResultSettleData: {
+        solutionId: 102,
+        result: liveCommonProto.Result.WA,
+        time: { value: '1201', unit: liveCommonProto.TimeUnit.S },
+      },
+      solutionId: 102,
+      result: liveCommonProto.Result.WA,
+      timeNs: '1201000000000',
+    },
+  ];
+}
+
+function createCcpc26InitialEvents() {
+  const solutions = [
+    { solutionId: 201, userId: 'ccpc26-alpha', problemAlias: 'B', submittedAtSeconds: 60 },
+    { solutionId: 202, userId: 'ccpc26-alpha', problemAlias: 'A', submittedAtSeconds: 120 },
+    { solutionId: 203, userId: 'ccpc26-beta', problemAlias: 'A', submittedAtSeconds: 180 },
+  ];
+  return solutions.flatMap((solution, index) => {
+    const newEventId = index * 2 + 1;
+    const settleEventId = newEventId + 1;
+    const submittedAtNs = `${solution.submittedAtSeconds}000000000`;
+    const settledAtSeconds = solution.submittedAtSeconds + 1;
+    return [
+      {
+        eventId: newEventId,
+        type: liveCommonProto.EventType.NEW_SOLUTION,
+        newSolutionData: {
+          solutionId: solution.solutionId,
+          userId: solution.userId,
+          problemAlias: solution.problemAlias,
+          time: { value: String(solution.submittedAtSeconds), unit: liveCommonProto.TimeUnit.S },
+        },
+        solutionId: solution.solutionId,
+        userId: solution.userId,
+        problemAlias: solution.problemAlias,
+        timeNs: submittedAtNs,
+        solutionSubmitTimeNs: submittedAtNs,
+      },
+      {
+        eventId: settleEventId,
+        type: liveCommonProto.EventType.SOLUTION_ON_RESULT_SETTLE,
+        solutionOnResultSettleData: {
+          solutionId: solution.solutionId,
+          result: liveCommonProto.Result.AC,
+          time: { value: String(settledAtSeconds), unit: liveCommonProto.TimeUnit.S },
+        },
+        solutionId: solution.solutionId,
+        result: liveCommonProto.Result.AC,
+        timeNs: `${settledAtSeconds}000000000`,
+      },
+    ];
+  });
+}
+
+function timeDurationToSeconds([value, unit]) {
+  const multipliers = {
+    ns: 1 / 1_000_000_000,
+    us: 1 / 1_000_000,
+    ms: 1 / 1_000,
+    s: 1,
+    min: 60,
+    h: 3600,
+    d: 86_400,
+  };
+  const multiplier = multipliers[unit];
+  if (multiplier === undefined) {
+    throw new Error(`Unsupported E2E contest duration unit: ${unit}`);
+  }
+  const seconds = value * multiplier;
+  if (!Number.isSafeInteger(seconds) || seconds < 0) {
+    throw new Error(`E2E contest duration must resolve to non-negative whole seconds: ${value} ${unit}`);
+  }
+  return seconds;
+}
+
+function encodeLiveClientEvent(event) {
+  const message = liveClientProto.ClientEvent.fromObject({
+    eventId: event.eventId,
+    type: event.type,
+    newSolutionData: event.newSolutionData,
+    solutionOnProgressData: event.solutionOnProgressData,
+    solutionOnResultSettleData: event.solutionOnResultSettleData,
+    solutionOnResultChangeData: event.solutionOnResultChangeData,
+  });
+  return Buffer.from(liveClientProto.ClientEvent.encode(message).finish());
+}
+
+function serializeTextColumn(value) {
+  return typeof value === 'string' ? value : JSON.stringify(value);
 }
 
 function buildContestSeeds() {

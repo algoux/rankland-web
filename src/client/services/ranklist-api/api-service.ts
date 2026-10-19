@@ -5,10 +5,15 @@ import { ErrCode } from '@common/enums/err-code.enum';
 import { ApiRequestException, type ApiClientType } from '@client/api';
 import { ApiException, HttpException } from './request';
 import { LogicException, LogicExceptionKind } from './logic-exception';
+import {
+  HttpLiveContestTransport,
+  type HttpLiveContestTransportOptions,
+  type LiveContestHttpClient,
+} from './live-contest-transport';
+import type { LiveContestTransport } from './live-contest-types';
 import type {
   CacheManager,
   IApiCollection,
-  IApiLiveRanklistInfo,
   IApiRanklist,
   IApiRanklistInfo,
   IApiStatistics,
@@ -22,8 +27,14 @@ interface ApiServiceOptions {
   legacyApi: RanklandRequestAdapter;
   apiClient: Pick<
     ApiClientType,
-    'getPublicContest' | 'getPublicFile' | 'getPublicContests' | 'getPublicCollection' | 'getPublicStatistics'
+    | 'getPublicContest'
+    | 'getPublicContestEventStream'
+    | 'getPublicFile'
+    | 'getPublicContests'
+    | 'getPublicCollection'
+    | 'getPublicStatistics'
   >;
+  eventRequest?: LiveContestHttpClient;
   fetchFile?: (url: string) => Promise<Response>;
   resolveFileUrl?: (url: string) => string;
   cacheManager?: CacheManager;
@@ -32,6 +43,7 @@ interface ApiServiceOptions {
 export class ApiService {
   private readonly legacyApi: RanklandRequestAdapter;
   private readonly apiClient: ApiServiceOptions['apiClient'];
+  private readonly eventRequest?: LiveContestHttpClient;
   private readonly fetchFile: (url: string) => Promise<Response>;
   private readonly resolveFileUrl: (url: string) => string;
   private readonly cacheManager?: CacheManager;
@@ -39,9 +51,26 @@ export class ApiService {
   public constructor(options: ApiServiceOptions) {
     this.legacyApi = options.legacyApi;
     this.apiClient = options.apiClient;
+    this.eventRequest = options.eventRequest;
     this.fetchFile = options.fetchFile ?? fetch;
     this.resolveFileUrl = options.resolveFileUrl ?? ((url) => url);
     this.cacheManager = options.cacheManager;
+  }
+
+  public createLiveContestTransport(
+    decodeEventPage: HttpLiveContestTransportOptions['decodeEventPage'],
+  ): LiveContestTransport {
+    return new HttpLiveContestTransport({
+      apiClient: this.apiClient,
+      request: (config) => {
+        if (!this.eventRequest) {
+          return Promise.reject(new Error('Live contest event transport is unavailable'));
+        }
+        return this.eventRequest.request(config);
+      },
+      decodeEventPage,
+      eventSourceFactory: (url) => new EventSource(url),
+    });
   }
 
   public async getRanklistInfo(opts: { uniqueKey: string }): Promise<IApiRanklistInfo> {
@@ -141,31 +170,6 @@ export class ApiService {
     return this.apiClient.getPublicStatistics() as Promise<IApiStatistics>;
   }
 
-  public getLiveRanklistInfo(opts: { uniqueKey: string }): Promise<IApiLiveRanklistInfo> {
-    return this.legacyApi
-      .get<IApiLiveRanklistInfo>(
-        urlcat('/ranking/config/:uniqueKey', { uniqueKey: opts.uniqueKey, _t: Date.now() }),
-      )
-      .catch((e) => {
-        if (isApiNotFoundError(e)) {
-          throw new LogicException(LogicExceptionKind.NotFound);
-        }
-        throw e;
-      });
-  }
-
-  public getLiveRanklist(opts: { id: string; token?: string }): Promise<srk.Ranklist> {
-    return this.legacyApi
-      .get<srk.Ranklist>(
-        urlcat('/ranking/:id', { id: opts.id, token: opts.token || undefined, _t: Date.now() }),
-      )
-      .catch((e) => {
-        if (isApiNotFoundError(e)) {
-          throw new LogicException(LogicExceptionKind.NotFound);
-        }
-        throw e;
-      });
-  }
 }
 
 function isApiNotFoundError(error: unknown) {

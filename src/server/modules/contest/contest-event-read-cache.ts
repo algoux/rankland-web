@@ -1,6 +1,7 @@
 import { rankland_live_contest_client } from '@common/proto/rankland_live_contest';
 import { Inject, Provide } from 'bwcx-core';
 import ContestEventReadCacheConfig from '@server/configs/contest-event-read-cache/contest-event-read-cache.config';
+import ContestEventRuntimeConfig from '@server/configs/contest-event-runtime/contest-event-runtime.config';
 import {
   ContestEventCacheBuildError,
   ContestEventCacheSnapshot,
@@ -206,6 +207,7 @@ export default class ContestEventReadCache {
   private started = false;
   private targetVersionSequence = 0;
   private summaryTimer?: NodeJS.Timeout;
+  private readonly runtimeDiagnosticsEnabled: boolean;
   private counters: ContestEventReadCacheCounters = emptyCounters();
   private lastSummaryCounters: ContestEventReadCacheCounters = emptyCounters();
   private lastStoreCounters: ContestEventReadStoreCounters = contestEventReadMetrics.snapshot();
@@ -218,6 +220,8 @@ export default class ContestEventReadCache {
     private readonly loader: ContestEventReadCacheLoader,
     @Inject(ContestEventReadCacheConfig)
     options: ContestEventReadCacheOptions = {},
+    @Inject(ContestEventRuntimeConfig)
+    runtimeConfig: Pick<ContestEventRuntimeConfig, 'diagnosticsEnabled'> = new ContestEventRuntimeConfig(),
   ) {
     this.options = {
       maxBytes: positiveInteger(options.maxBytes, DEFAULTS.maxBytes, 'maxBytes'),
@@ -243,6 +247,7 @@ export default class ContestEventReadCache {
       throw new RangeError('maxEntryBytes must not exceed maxBytes');
     }
     this.now = options.now ?? monotonicNow;
+    this.runtimeDiagnosticsEnabled = runtimeConfig.diagnosticsEnabled;
     this.hydrationBulkhead = new ContestEventReadBulkhead(this.options.hydrationConcurrency, 32, 1_000);
   }
 
@@ -650,6 +655,9 @@ export default class ContestEventReadCache {
       return;
     }
     this.started = true;
+    if (!this.runtimeDiagnosticsEnabled) {
+      return;
+    }
     this.lastSummaryCounters = this.snapshotCounters();
     this.lastStoreCounters = contestEventReadMetrics.snapshot();
     this.lastMysqlPoolMetrics = mysqlPoolMetrics.snapshot();
@@ -707,8 +715,10 @@ export default class ContestEventReadCache {
       this.summaryTimer = undefined;
     }
     if (this.started) {
-      this.logSummary(true);
-      this.eventLoopDelay.disable();
+      if (this.runtimeDiagnosticsEnabled) {
+        this.logSummary(true);
+        this.eventLoopDelay.disable();
+      }
       this.started = false;
     }
     for (const entry of this.entriesByContestId.values()) {
@@ -726,6 +736,9 @@ export default class ContestEventReadCache {
   }
 
   private logSummary(final: boolean): void {
+    if (!this.runtimeDiagnosticsEnabled) {
+      return;
+    }
     const current = this.snapshotCounters();
     const store = contestEventReadMetrics.snapshot();
     const pool = mysqlPoolMetrics.snapshot();
