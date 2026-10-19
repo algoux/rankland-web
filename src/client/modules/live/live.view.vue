@@ -234,7 +234,7 @@ export default class LiveRanklist extends Vue {
     }
     this.fetchRanklistSnapshot();
     this.pollTimer = window.setInterval(
-      this.fetchRanklistSnapshot,
+      () => this.fetchRanklistSnapshot(),
       getRanklandRuntimeConfig().livePollingInterval,
     );
   }
@@ -246,7 +246,7 @@ export default class LiveRanklist extends Vue {
     }
   }
 
-  private fetchRanklistSnapshot = async () => {
+  private async fetchRanklistSnapshot() {
     if (!this.liveId) {
       return;
     }
@@ -258,7 +258,7 @@ export default class LiveRanklist extends Vue {
     } catch (error) {
       console.error(error);
     }
-  };
+  }
 
   private syncWebsocket() {
     this.closeWebsocket();

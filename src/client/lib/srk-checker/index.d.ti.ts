@@ -6,7 +6,7 @@ import * as t from "ts-interface-checker";
 
 export const Type = t.lit('general');
 
-export const Version = t.lit('0.3.12');
+export const Version = t.lit('0.3.14');
 
 export const DatetimeISOString = t.name("string");
 
@@ -65,6 +65,7 @@ export const GroupableUserFields = t.union(t.lit('id'), t.lit('name'), t.lit('or
 
 export const ExternalUser = t.iface([], {
   "name": "Text",
+  "role": t.opt("string"),
   "avatar": t.opt("Image"),
   "link": t.opt("string"),
 });
@@ -97,7 +98,7 @@ export const Problem = t.iface([], {
 
 export const SolutionResultLite = t.union(t.lit('FB'), t.lit('AC'), t.lit('RJ'), t.lit('?'), "null");
 
-export const SolutionResultFull = t.union("SolutionResultLite", t.lit('WA'), t.lit('PE'), t.lit('TLE'), t.lit('MLE'), t.lit('OLE'), t.lit('RTE'), t.lit('NOUT'), t.lit('CE'), t.lit('UKE'));
+export const SolutionResultFull = t.union("SolutionResultLite", t.lit('WA'), t.lit('PE'), t.lit('TLE'), t.lit('MLE'), t.lit('OLE'), t.lit('IDLE'), t.lit('RTE'), t.lit('NOUT'), t.lit('CE'), t.lit('UKE'));
 
 export const SolutionResultCustom = t.name("string");
 
@@ -200,6 +201,21 @@ export const Marker = t.iface([], {
 export const SorterBase = t.iface([], {
 });
 
+export const SorterICPCExtendedAlgorithmCCPC26 = t.iface([], {
+  "algorithm": t.lit('CCPC26'),
+  "config": t.iface([], {
+    "problemRevealAcceptedThreshold": t.iface([], {
+      "count": t.opt("number"),
+      "ratio": t.opt("number"),
+      "rounding": t.opt(t.union(t.lit('floor'), t.lit('ceil'), t.lit('round'))),
+      "denominator": t.opt(t.union(t.lit('all'), t.lit('submitted'), t.lit('scored'))),
+      "includeOfficialOnly": t.opt("boolean"),
+    }),
+  }),
+});
+
+export const SorterICPCExtendedAlgorithm = t.name("SorterICPCExtendedAlgorithmCCPC26");
+
 export const SorterICPC = t.iface(["SorterBase"], {
   "algorithm": t.lit('ICPC'),
   "config": t.iface([], {
@@ -209,6 +225,7 @@ export const SorterICPC = t.iface(["SorterBase"], {
     "timeRounding": t.opt(t.union(t.lit('floor'), t.lit('ceil'), t.lit('round'))),
     "rankingTimePrecision": t.opt("TimeUnit"),
     "rankingTimeRounding": t.opt(t.union(t.lit('floor'), t.lit('ceil'), t.lit('round'))),
+    "extendedAlgorithms": t.opt(t.array("SorterICPCExtendedAlgorithm")),
   }),
 });
 
@@ -278,6 +295,8 @@ const exportedTypeSuite: t.ITypeSuite = {
   MarkerStylePreset,
   Marker,
   SorterBase,
+  SorterICPCExtendedAlgorithmCCPC26,
+  SorterICPCExtendedAlgorithm,
   SorterICPC,
   SorterScore,
   Sorter,

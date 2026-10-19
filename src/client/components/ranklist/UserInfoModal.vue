@@ -20,6 +20,7 @@ const props = defineProps<{
   filterMarker?: string;
   languages?: readonly string[];
   rankTimeData: RankTimeData;
+  showRankCurve?: boolean;
 }>();
 
 const theme = inject(THEME_TOKEN, undefined);
@@ -106,7 +107,7 @@ function resolveDisplayText(text: Parameters<typeof resolveText>[0]) {
       />
       <p v-if="slogan" class="slogan mt-4 mb-2">{{ slogan }}</p>
     </div>
-    <div v-if="user.official && rankTimeData.initialized" class="mt-4">
+    <div v-if="showRankCurve !== false && user.official && rankTimeData.initialized" class="mt-4">
       <RankCurve
         :key="rankTimeData.key"
         :unit="rankTimeData.unit"

@@ -242,6 +242,8 @@ function buildContestSeeds() {
   add('no-problems-key', 'No Problems Fixture');
   add('implicit-official-key', 'Implicit Official Fixture');
   add('no-view-key', 'Test Contest 2024');
+  add('ccpc26-key', 'CCPC26 Test Contest');
+  add('ccpc26-ordinary-key', 'CCPC26 Ordinary ICPC Fixture');
 
   return Array.from(entries.values());
 }
@@ -269,6 +271,10 @@ function ranklistFor(uk) {
       return fixtures.noProblemsSrk;
     case 'implicit-official-key':
       return fixtures.implicitOfficialSrk;
+    case 'ccpc26-key':
+      return fixtures.ccpc26Srk;
+    case 'ccpc26-ordinary-key':
+      return fixtures.ccpc26OrdinarySrk;
     default:
       return fixtures.srk;
   }

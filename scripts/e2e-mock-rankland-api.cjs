@@ -2,6 +2,11 @@
 const fs = require('fs');
 const http = require('http');
 const path = require('path');
+const {
+  filterSolutionsUntil,
+  getSortedCalculatedRawSolutions,
+  regenerateRanklistBySolutions,
+} = require('@algoux/standard-ranklist-utils');
 
 const fixturesDir = path.join(__dirname, '..', 'tests', 'fixtures');
 const port = Number(process.env.PORT || 4322);
@@ -224,6 +229,7 @@ const fixtures = {
   largeSrk: createLargeRanklist(),
   ranklistInfo: readFixture('ranklist-info.json'),
   srk: readFixture('ranklist.srk.json'),
+  ccpc26Srk: readFixture('ccpc26.srk.json'),
   statistics: readFixture('statistics.json'),
 };
 
@@ -231,6 +237,14 @@ fixtures.progressResetShortSrk = createProgressResetRanklist(fixtures.srk, 3);
 fixtures.progressResetLongSrk = createProgressResetRanklist(fixtures.srk, 5);
 fixtures.noProblemsSrk = createNoProblemsRanklist(fixtures.srk);
 fixtures.implicitOfficialSrk = createImplicitOfficialRanklist(fixtures.srk);
+fixtures.ccpc26OrdinarySrk = {
+  ...fixtures.ccpc26Srk,
+  sorter: { algorithm: 'ICPC', config: {} },
+};
+fixtures.ccpc26LiveSrk = regenerateRanklistBySolutions(
+  fixtures.ccpc26Srk,
+  filterSolutionsUntil(getSortedCalculatedRawSolutions(fixtures.ccpc26Srk.rows), [4, 'min']),
+);
 fixtures.collection.root.children[0].children[0].children.push(
   {
     type: 1,
@@ -292,6 +306,14 @@ const server = http.createServer((req, res) => {
 
   if (pathname.startsWith('/ranking/config/')) {
     const key = pathname.split('/').pop();
+    if (key === 'ccpc26-live-test' || key === 'ccpc26-live-ordinary-test') {
+      sendJson(res, wrap({
+        id: key,
+        uniqueKey: key,
+        ...fixtures.ccpc26Srk.contest,
+      }));
+      return;
+    }
     if (key === 'missing-key' || key === 'not-found') {
       sendJson(res, { code: 11, message: 'live ranklist not found' });
       return;
@@ -301,6 +323,14 @@ const server = http.createServer((req, res) => {
   }
 
   if (pathname.startsWith('/ranking/')) {
+    if (pathname === '/ranking/ccpc26-live-test') {
+      sendJson(res, wrap(fixtures.ccpc26LiveSrk));
+      return;
+    }
+    if (pathname === '/ranking/ccpc26-live-ordinary-test') {
+      sendJson(res, wrap({ ...fixtures.ccpc26LiveSrk, sorter: { algorithm: 'ICPC', config: {} } }));
+      return;
+    }
     sendJson(res, wrap(fixtures.srk));
     return;
   }

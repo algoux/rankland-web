@@ -8,7 +8,7 @@ import { RenderMethodKind } from 'bwcx-client-vue/enums';
 export const clientRoutesMap = new Map<string, { path: string; routeProps: Newable | undefined; renderMethod: RenderMethodKind | undefined }>([
   ['Collection', { path: '/collection/:id', routeProps: undefined, renderMethod: RenderMethodKind.SSR }],
   ['Home', { path: '/', routeProps: undefined, renderMethod: RenderMethodKind.SSR }],
-  ['LiveRanklist', { path: '/live/:id', routeProps: undefined, renderMethod: RenderMethodKind.SSR }],
+  ['LiveRanklist', { path: '/live/:id', routeProps: undefined, renderMethod: RenderMethodKind.CSR }],
   ['Playground', { path: '/playground', routeProps: undefined, renderMethod: RenderMethodKind.CSR }],
   ['Ranklist', { path: '/ranklist/:id', routeProps: undefined, renderMethod: RenderMethodKind.SSR }],
   ['Search', { path: '/search', routeProps: undefined, renderMethod: RenderMethodKind.SSR }],

@@ -116,7 +116,7 @@ const userMap = computed(() => {
 });
 
 // All submissions for this problem in reverse-chronological order (newest first).
-// `props.solutions` is the parent's cached full-contest list that updates as the ranklist changes.
+// `props.solutions` is the parent's current contest slice, including the selected replay cutoff.
 const problemSolutions = computed(() =>
   props.solutions.filter((tetrad) => tetrad[1] === props.problemIndex).reverse(),
 );

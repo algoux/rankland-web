@@ -33,6 +33,7 @@ import {
   calculateProblemStatistics,
   convertToStaticRanklist,
   filterSolutionsUntil,
+  getCCPC26ProblemLayout,
   getSortedCalculatedRawSolutions,
   numberToAlphabet,
   regenerateRanklistBySolutions,
@@ -104,6 +105,8 @@ import type {
 } from './styled-ranklist-settings';
 import type { StyledRanklistRendererProps } from './styled-ranklist-types';
 import { isOfficialParticipant } from './styled-ranklist-filter';
+import { useCCPC26Mode } from '@/composables/use-ccpc26-mode';
+import { isCCPC26Ranklist } from '@/utils/ccpc26.util';
 import SearchableMultiSelect from './SearchableMultiSelect.vue';
 import SettingInfoTip from './SettingInfoTip.vue';
 import RanklistQualityAction from './RanklistQualityAction.vue';
@@ -128,6 +131,7 @@ const filter = reactive<{ organizations: string[]; officialOnly: boolean; marker
   marker: '',
 });
 const timeTravelTime = ref<number | null>(null);
+const clientClockReady = ref(false);
 const rankTimeDataInitialized = ref(false);
 const rankTimeDataSet = ref<RankTimeDataSet>(createEmptyRankTimeDataSet());
 const rankTimeData = ref<RankTimeData>(createEmptyRankTimeData());
@@ -176,6 +180,8 @@ const storedRanklistSettings = ref<unknown>(readLocalStorageJson(LocalStorageKey
 const settingsIntroRead = ref<string | undefined>(readLocalStorageString(LocalStorageKey.StyledRanklistSettingsIntroRead));
 const memorizedData = shallowRef<srk.Ranklist>(toRanklistPayloadWithoutVolatileFields(toRaw(props.data)));
 const rankTimeDataVersion = ref(0);
+const enableCCPC26 = useCCPC26Mode(() => memorizedData.value, () => props.isLive, () => timeTravelTime.value);
+const requiresClientClockForRanklist = computed(() => props.isLive && isCCPC26Ranklist(memorizedData.value));
 
 const ranklistSettings = computed(() => normalizeStyledRanklistSettings(storedRanklistSettings.value));
 const isScoreSorterRanklist = computed(() => memorizedData.value.sorter?.algorithm === 'score');
@@ -193,6 +199,7 @@ const emptyStatusPlaceholder = computed(() =>
   getEmptyStatusPlaceholder(renderedRanklistSettings.value.emptyStatusPlaceholder),
 );
 const textLanguages = computed(() => props.languages || injectedRequestLanguages);
+const rendererLanguages = computed(() => textLanguages.value ? [...textLanguages.value] : undefined);
 const themeName = computed(() => (themeService?.state.theme || EnumTheme.light) as EnumTheme);
 const ranklistRenderContainerClassName = computed(() => props.tableClass || '');
 const ranklistRenderContainerStyle = computed(() => ({
@@ -245,14 +252,23 @@ watch(
 );
 
 const solutions = computed(() => getSortedCalculatedRawSolutions(memorizedData.value.rows));
+const currentSolutions = computed(() => timeTravelTime.value === null
+  ? solutions.value
+  : filterSolutionsUntil(solutions.value, [timeTravelTime.value, 'ms']));
 const genData = computed(() => {
   if (timeTravelTime.value === null) {
     return memorizedData.value;
   }
-  const filteredSolutions = filterSolutionsUntil(solutions.value, [timeTravelTime.value, 'ms']);
-  return regenerateRanklistBySolutions(props.data, filteredSolutions);
+  return regenerateRanklistBySolutions(memorizedData.value, currentSolutions.value);
 });
 const staticData = computed(() => convertToStaticRanklist(genData.value) as StaticRanklist);
+// Reveal decisions always use the complete slice, before display-only row filtering.
+const ccpc26ProblemLayout = computed(() => enableCCPC26.value
+  ? getCCPC26ProblemLayout(staticData.value as srk.Ranklist)
+  : undefined);
+const problemVisibilityKey = computed(() => ccpc26ProblemLayout.value
+  ? `ccpc26:${ccpc26ProblemLayout.value.revealedProblemIndexes.join(',')}`
+  : 'normal');
 const organizations = computed(() =>
   Array.from(
     new Set(staticData.value.rows.map((row) => resolveDisplayText(row.user?.organization)).filter(Boolean)),
@@ -369,8 +385,10 @@ const activeUserRowIndex = computed(() =>
 const activeUserRow = computed(() =>
   activeUserRowIndex.value >= 0 ? usingData.value.rows[activeUserRowIndex.value] : activeUserPayload.value?.row,
 );
+const activeProblemRevealed = computed(() => isProblemRevealed(activeProblemPayload.value?.problemIndex));
+const activeSolutionProblemRevealed = computed(() => isProblemRevealed(activeSolutionPayload.value?.problemIndex));
 const activeProblemModalTitle = computed(() => {
-  if (!activeProblemPayload.value) {
+  if (!activeProblemPayload.value || !activeProblemRevealed.value) {
     return undefined;
   }
   const { problem, problemIndex } = activeProblemPayload.value;
@@ -390,6 +408,8 @@ onErrorCaptured((error) => {
 });
 
 onMounted(() => {
+  // Live time comes from the browser; keep its initial markup independent of the SSR clock.
+  clientClockReady.value = true;
   syncClientWidth();
   window.addEventListener('resize', syncClientWidth);
   void finishInitialRanklistHydrationRender();
@@ -401,6 +421,7 @@ onMounted(() => {
 });
 
 onBeforeUnmount(() => {
+  rankTimeCalculationRequest += 1;
   if (typeof window !== 'undefined') {
     window.removeEventListener('resize', syncClientWidth);
     (Object.keys(actionMenuCloseTimers) as RanklistActionMenu[]).forEach(cancelActionMenuClose);
@@ -425,6 +446,26 @@ watch(staticData, () => {
   recalcRankTimeDataForCurrentUser();
 });
 
+watch(ccpc26ProblemLayout, () => {
+  if (!activeProblemRevealed.value) {
+    problemModalOpen.value = false;
+    activeProblemPayload.value = null;
+  }
+}, { flush: 'sync' });
+
+watch(enableCCPC26, (enabled) => {
+  if (enabled) {
+    rankTimeCalculationRequest += 1;
+    resetRankTimeWorker();
+    rankTimeDataSet.value = createEmptyRankTimeDataSet();
+    rankTimeData.value = createEmptyRankTimeData();
+    rankTimeDataInitialized.value = false;
+    return;
+  }
+  recalcRankTimeDataForCurrentUser();
+  scheduleRankCurveRendererPreload();
+});
+
 watch(
   () => filter.marker,
   () => {
@@ -443,8 +484,11 @@ function recalcRankTimeDataForCurrentUser() {
 function scheduleRankTimeDataForCurrentUser(userId: string) {
   const request = (rankTimeCalculationRequest += 1);
   rankTimeData.value = createEmptyRankTimeData();
+  if (enableCCPC26.value) {
+    return;
+  }
   scheduleRankTimeCalculation(() => {
-    if (request !== rankTimeCalculationRequest || currentShownUserId.value !== userId) {
+    if (enableCCPC26.value || request !== rankTimeCalculationRequest || currentShownUserId.value !== userId) {
       return;
     }
     calcUserRankTimeData(userId, request);
@@ -452,9 +496,12 @@ function scheduleRankTimeDataForCurrentUser(userId: string) {
 }
 
 function scheduleRankTimeDataPreparation() {
+  if (enableCCPC26.value) {
+    return;
+  }
   const request = rankTimeCalculationRequest;
   scheduleRankTimeCalculation(() => {
-    if (request !== rankTimeCalculationRequest || currentShownUserId.value) {
+    if (enableCCPC26.value || request !== rankTimeCalculationRequest || currentShownUserId.value) {
       return;
     }
     void prepareRankTimeDataInWorker();
@@ -513,6 +560,9 @@ function updateRanklistSetting<K extends keyof StyledRanklistSettings>(key: K, v
 }
 
 function handleTimeTravel(time: number | null) {
+  activeSolutionPayload.value = null;
+  problemModalOpen.value = false;
+  activeProblemPayload.value = null;
   timeTravelTime.value = time;
 }
 
@@ -780,7 +830,7 @@ function makeRankTimeWorkerDataPayload() {
 }
 
 async function prepareRankTimeDataInWorker() {
-  if (!canUseRankTimeWorker()) {
+  if (enableCCPC26.value || !canUseRankTimeWorker()) {
     return false;
   }
 
@@ -820,11 +870,14 @@ async function prepareRankTimeDataInWorker() {
 }
 
 function scheduleRankCurveRendererPreload() {
-  if (typeof window === 'undefined') {
+  if (enableCCPC26.value || typeof window === 'undefined') {
     return;
   }
 
   const run = () => {
+    if (enableCCPC26.value) {
+      return;
+    }
     void preloadRankCurveRenderer().catch((error) => {
       console.warn('[RankCurve] renderer preload failed:', error);
     });
@@ -857,12 +910,19 @@ async function waitForPreparedRankTimeWorkerCache(cacheKey: string) {
   }
 }
 
-async function selectRankTimeDataInWorker(userId: string) {
+function isCurrentRankTimeRequest(userId: string, request: number) {
+  return !enableCCPC26.value && request === rankTimeCalculationRequest && currentShownUserId.value === userId;
+}
+
+async function selectRankTimeDataInWorker(userId: string, request: number) {
   if (!canUseRankTimeWorker()) {
     throw new Error('Rank time worker is unavailable');
   }
   const cacheKey = getRankTimeWorkerCacheKey();
   const hasPreparedCache = await waitForPreparedRankTimeWorkerCache(cacheKey);
+  if (!isCurrentRankTimeRequest(userId, request) || cacheKey !== getRankTimeWorkerCacheKey()) {
+    return null;
+  }
   const response = await postRankTimeWorkerRequest({
     kind: 'select',
     cacheKey,
@@ -897,24 +957,33 @@ function selectRankTimeDataSync(userId: string) {
   });
 }
 
-async function selectRankTimeData(userId: string) {
+async function selectRankTimeData(userId: string, request: number) {
+  if (!isCurrentRankTimeRequest(userId, request)) {
+    return null;
+  }
   if (canUseRankTimeWorker()) {
     try {
-      return await selectRankTimeDataInWorker(userId);
+      return await selectRankTimeDataInWorker(userId, request);
     } catch (error) {
-      if (isRankTimeWorkerResetError(error)) {
+      if (!isCurrentRankTimeRequest(userId, request) || isRankTimeWorkerResetError(error)) {
         return null;
       }
       console.warn('[RankTimeData] worker selection failed, falling back to main thread:', error);
     }
   }
+  if (!isCurrentRankTimeRequest(userId, request)) {
+    return null;
+  }
   return selectRankTimeDataSync(userId);
 }
 
 async function calcUserRankTimeData(userId: string, request: number) {
+  if (enableCCPC26.value) {
+    return;
+  }
   rankTimeData.value = createEmptyRankTimeData();
-  const selectedRankTimeData = await selectRankTimeData(userId);
-  if (request !== rankTimeCalculationRequest || currentShownUserId.value !== userId) {
+  const selectedRankTimeData = await selectRankTimeData(userId, request);
+  if (!isCurrentRankTimeRequest(userId, request)) {
     return;
   }
   if (!selectedRankTimeData) {
@@ -946,11 +1015,19 @@ function handleSolutionClick(payload: SolutionClickPayload) {
 }
 
 function handleProblemClick(payload: ProblemClickPayload) {
+  if (!isProblemRevealed(payload.problemIndex)) {
+    return;
+  }
   activeProblemPayload.value = payload;
   problemModalOpen.value = true;
   userModalOpen.value = false;
   activeSolutionPayload.value = null;
   currentShownUserId.value = '';
+}
+
+function isProblemRevealed(problemIndex: number | undefined) {
+  return problemIndex === undefined || !ccpc26ProblemLayout.value ||
+    ccpc26ProblemLayout.value.revealedProblemIndexes.includes(problemIndex);
 }
 
 function handleSettingsIntroModalClose() {
@@ -1186,6 +1263,7 @@ function resolveDisplayText(text: Parameters<typeof resolveText>[0]) {
     </p>
     <div class="mx-4" data-id="ranklist-progress">
       <ProgressBar
+        v-if="!isLive || clientClockReady"
         :key="progressBarRenderKey"
         :data="memorizedData"
         enable-time-travel
@@ -1432,8 +1510,11 @@ function resolveDisplayText(text: Parameters<typeof resolveText>[0]) {
       </div>
       <div class="srk-ranklist-table-scroll">
         <Ranklist
+          v-if="!requiresClientClockForRanklist || clientClockReady"
           :key="ranklistClientRenderReady ? 'client-ranklist' : 'ssr-ranklist'"
           :data="usingData"
+          :enable-c-c-p-c26="enableCCPC26"
+          :ccpc26-problem-layout="ccpc26ProblemLayout"
           :theme="themeName"
           :status-cell-preset="renderedRanklistSettings.statusCellPreset"
           :status-color-as-text="renderedRanklistSettings.statusColorAsText"
@@ -1447,7 +1528,7 @@ function resolveDisplayText(text: Parameters<typeof resolveText>[0]) {
           :split-organization="renderedRanklistSettings.splitOrganization"
           :user-avatar-placement="renderedRanklistSettings.userAvatarPlacement"
           :format-srk-asset-url="formatRendererAssetUrl"
-          :languages="textLanguages"
+          :languages="rendererLanguages"
           @user-click="handleUserClick"
           @solution-click="handleSolutionClick"
           @problem-click="handleProblemClick"
@@ -1470,11 +1551,14 @@ function resolveDisplayText(text: Parameters<typeof resolveText>[0]) {
           :assets-scope="id || ''"
           :filter-marker="filter.marker"
           :rank-time-data="rankTimeData"
+          :show-rank-curve="!enableCCPC26"
           :languages="textLanguages"
         />
       </Modal>
       <Modal
-        :open="problemModalOpen && !!activeProblemPayload"
+        v-if="activeProblemRevealed"
+        :key="`problem:${problemVisibilityKey}`"
+        :open="problemModalOpen && !!activeProblemPayload && activeProblemRevealed"
         :title="activeProblemModalTitle"
         :width="clientWidth >= 700 ? 680 : clientWidth - 20"
         root-class-name="srk-general-modal-root"
@@ -1482,21 +1566,23 @@ function resolveDisplayText(text: Parameters<typeof resolveText>[0]) {
         @update:open="problemModalOpen = $event"
       >
         <ProblemInfoModal
-          v-if="activeProblemPayload"
+          v-if="activeProblemPayload && activeProblemRevealed"
           :problem="activeProblemPayload.problem"
           :problem-index="activeProblemPayload.problemIndex"
           :ranklist="staticData as any"
-          :solutions="solutions"
+          :solutions="currentSolutions"
           :languages="textLanguages"
         />
       </Modal>
       <DefaultSolutionModal
+        :key="`solutions:${problemVisibilityKey}`"
         :open="!!activeSolutionPayload"
         :user="activeSolutionPayload?.user"
         :problem="activeSolutionPayload?.problem"
         :problem-index="activeSolutionPayload?.problemIndex ?? 0"
+        :problem-revealed="activeSolutionProblemRevealed"
         :solutions="activeSolutionPayload?.solutions || []"
-        :languages="textLanguages"
+        :languages="rendererLanguages"
         @close="activeSolutionPayload = null"
         @update:open="!$event && (activeSolutionPayload = null)"
       />

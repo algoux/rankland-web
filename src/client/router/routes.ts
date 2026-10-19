@@ -33,7 +33,7 @@ const clientRoutes = parseRoutes([
     component: () => import(/* webpackChunkName: "LiveRanklist" */ '../modules/live/live.view.vue'),
     routeProps: undefined,
     priority: undefined,
-    renderMethod: RenderMethodKind.SSR,
+    renderMethod: RenderMethodKind.CSR,
     otherOptions: undefined,
   },
   {
