@@ -158,10 +158,11 @@ const rankTimeWorkerRequests = new Map<
     reject: (error: Error) => void;
   }
 >();
-const shouldRemountRanklistAfterHydration = shouldDeferInitialHydrationRender();
-const ranklistClientRenderReady = ref(!shouldRemountRanklistAfterHydration);
+// Hydrate the SSR defaults first, then patch saved preferences on the same Ranklist instance.
+const shouldDeferRanklistPreferences = shouldDeferInitialHydrationRender();
+const ranklistClientRenderReady = ref(!shouldDeferRanklistPreferences);
 let resolveInitialRanklistRender: (() => void) | null = null;
-if (shouldRemountRanklistAfterHydration) {
+if (shouldDeferRanklistPreferences) {
   registerInitialHydrationTask(new Promise<void>((resolve) => {
     resolveInitialRanklistRender = resolve;
   }));
@@ -539,7 +540,7 @@ function syncClientWidth() {
 }
 
 async function finishInitialRanklistHydrationRender() {
-  if (!shouldRemountRanklistAfterHydration) {
+  if (!shouldDeferRanklistPreferences) {
     return;
   }
   try {
@@ -1511,7 +1512,6 @@ function resolveDisplayText(text: Parameters<typeof resolveText>[0]) {
       <div class="srk-ranklist-table-scroll">
         <Ranklist
           v-if="!requiresClientClockForRanklist || clientClockReady"
-          :key="ranklistClientRenderReady ? 'client-ranklist' : 'ssr-ranklist'"
           :data="usingData"
           :enable-c-c-p-c26="enableCCPC26"
           :ccpc26-problem-layout="ccpc26ProblemLayout"

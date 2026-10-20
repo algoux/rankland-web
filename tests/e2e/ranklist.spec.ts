@@ -142,7 +142,7 @@ test.describe('/ranklist/:id', () => {
     expect(hydrationMessages).toEqual([]);
   });
 
-  test('reveals the page after the initial ranklist preference remount', async ({ page }) => {
+  test('patches saved ranklist preferences before reveal without replacing the SSR table', async ({ page }) => {
     const hydrationMessages: string[] = [];
     page.on('console', (message) => {
       const text = message.text();
@@ -150,6 +150,8 @@ test.describe('/ranklist/:id', () => {
         hydrationMessages.push(text);
       }
     });
+    page.on('pageerror', (error) => hydrationMessages.push(error.message));
+    await page.emulateMedia({ colorScheme: 'dark' });
     await page.addInitScript(() => {
       window.localStorage.setItem('StyledRanklistSettingsIntroRead', 'true');
       window.localStorage.setItem('StyledRanklistSettings', JSON.stringify({
@@ -163,6 +165,48 @@ test.describe('/ranklist/:id', () => {
         userAvatarPlacement: 'user',
       }));
     });
+    await page.route('**/ranklist/test-key', async (route) => {
+      const response = await route.fetch();
+      const html = await response.text();
+      // An inline script at the end of the SSR document executes before the
+      // deferred client module. Capture real SSR nodes, not post-hydration DOM.
+      const probe = `<script>
+        (() => {
+          const table = document.querySelector('.srk-main table');
+          const tbody = table?.querySelector('tbody');
+          const firstRow = tbody?.querySelector('tr');
+          const snapshot = () => ({
+            hasTable: !!table,
+            sameTable: !!table && table === document.querySelector('.srk-main table') && table.isConnected,
+            sameTbody: !!tbody && tbody === document.querySelector('.srk-main tbody') && tbody.isConnected,
+            sameFirstRow: !!firstRow && firstRow === document.querySelector('.srk-main tbody tr') && firstRow.isConnected,
+            rowStriped: !!table?.classList.contains('srk-table-row-striped'),
+            rowBordered: !!table?.classList.contains('srk-table-row-bordered'),
+            columnBordered: !!table?.classList.contains('srk-table-column-bordered'),
+            hasDirtColumn: Array.from(table?.querySelectorAll('thead th') || []).some(cell => cell.textContent?.trim() === 'Dirt'),
+            hasOrganizationColumn: Array.from(table?.querySelectorAll('thead th') || []).some(cell => cell.textContent?.trim() === 'Organization'),
+            hasSEColumn: Array.from(table?.querySelectorAll('thead th') || []).some(cell => cell.textContent?.trim() === 'SE'),
+            hasProblemStatisticsFooter: !!document.querySelector('.srk-problem-statistics-footer-row'),
+            darkTheme: document.documentElement.classList.contains('dark')
+          });
+          window.__ranklistHydrationProbe = {
+            before: snapshot(),
+            beforeRevealed: document.body.dataset.ranklandHydrated === 'true',
+            snapshot,
+            revealed: null
+          };
+          const observer = new MutationObserver(() => {
+            if (document.body.dataset.ranklandHydrated === 'true') {
+              window.__ranklistHydrationProbe.revealed = snapshot();
+              observer.disconnect();
+            }
+          });
+          observer.observe(document.body, { attributes: true });
+        })();
+      </script>`;
+      expect(html).toContain('</body>');
+      await route.fulfill({ response, body: html.replace('</body>', `${probe}</body>`) });
+    });
 
     await page.goto('/ranklist/test-key');
     await page.waitForFunction(() => document.body.dataset.ranklandHydrated === 'true');
@@ -172,27 +216,36 @@ test.describe('/ranklist/:id', () => {
     });
 
     const renderedState = await page.evaluate(() => {
-      const headers = Array.from(document.querySelectorAll('.srk-main thead th')).map((header) =>
-        header.textContent?.trim() || '',
-      );
-      return {
-        bodyOpacity: getComputedStyle(document.body).opacity,
-        hasDirtColumn: headers.includes('Dirt'),
-        hasOrganizationColumn: headers.includes('Organization'),
-        hasSEColumn: headers.includes('SE'),
-        hasProblemStatisticsFooter: Boolean(document.querySelector('.srk-problem-statistics-footer-row')),
-        hasLegacyRanklistGate: Boolean(document.querySelector('.srk-ranklist-client-render-region')),
-      };
+      const probe = (window as any).__ranklistHydrationProbe;
+      return { before: probe.before, beforeRevealed: probe.beforeRevealed, revealed: probe.revealed, current: probe.snapshot() };
     });
-
-    expect(renderedState).toEqual({
-      bodyOpacity: '1',
+    expect(renderedState.beforeRevealed).toBe(false);
+    expect(renderedState.before).toMatchObject({
+      hasTable: true,
+      rowStriped: true,
+      rowBordered: false,
+      columnBordered: false,
+      hasDirtColumn: false,
+      hasOrganizationColumn: false,
+      hasSEColumn: false,
+      hasProblemStatisticsFooter: false,
+    });
+    const expected = {
+      hasTable: true,
+      sameTable: true,
+      sameTbody: true,
+      sameFirstRow: true,
+      rowStriped: false,
+      rowBordered: true,
+      columnBordered: true,
       hasDirtColumn: true,
       hasOrganizationColumn: true,
       hasSEColumn: true,
       hasProblemStatisticsFooter: true,
-      hasLegacyRanklistGate: false,
-    });
+      darkTheme: true,
+    };
+    expect(renderedState.revealed).toEqual(expected);
+    expect(renderedState.current).toEqual(expected);
     expect(hydrationMessages).toEqual([]);
   });
 

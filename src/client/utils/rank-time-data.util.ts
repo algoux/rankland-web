@@ -166,7 +166,6 @@ export function getAllRankTimeData(
   solutions: CalculatedSolutionTetrad[],
   unit: srk.TimeDuration,
 ): RankTimeDataSet {
-  const unitTimeValue = formatTimeDuration(unit);
   const timePoints: srk.TimeDuration[] = [];
   {
     const durationInTargetUnit = formatTimeDuration(ranklist.contest.duration, unit[1]);
@@ -224,7 +223,35 @@ export function getAllRankTimeData(
     fixedSeriesSegmentRangesList.push(fixedSeriesSegmentRanges);
   }
 
-  const rowsGroupByTimePoints: StaticRanklist['rows'][] = [];
+  const userRankTimePointsList = new Map<string, RankTimePoint[][]>();
+  const userRankTimeSolvedEventPointsList = new Map<string, RankTimeSolvedEventPoint[][]>();
+  // Keep only the current static rows. Historical snapshots retain row shells,
+  // rankValues and superseded submission arrays, but the output only needs points.
+  function appendRankPoints(timePoint: srk.TimeDuration, rows: StaticRanklist['rows']) {
+    for (const row of rows) {
+      const user = row.user;
+      if (!userRankTimePointsList.has(user.id)) {
+        userRankTimePointsList.set(user.id, []);
+      }
+      const rankTimePointsList = userRankTimePointsList.get(user.id)!;
+      while (rankTimePointsList.length < icpcSeriesList.length) {
+        rankTimePointsList.push([]);
+      }
+      for (let j = 0; j < icpcSeriesList.length; j++) {
+        const rankTimePoints = rankTimePointsList[j];
+        const rank = row.rankValues[j].rank;
+        if (typeof rank !== 'number') {
+          continue;
+        }
+        rankTimePoints.push({
+          time: timePoint[0],
+          rank,
+          solved: row.score.value,
+        });
+      }
+    }
+  }
+  let currentStaticRows: StaticRanklist['rows'] | undefined;
   const userRankTimeSolvedEventPointsComm = new Map<string, RankTimeSolvedEventPoint[]>();
   {
     let solutionIndex = 0;
@@ -281,7 +308,7 @@ export function getAllRankTimeData(
         }
         lastRanklist.rows = regenerateRowsByIncrementalSolutions(lastRanklist, incrementalSolutions);
         const staticRows = convertToStaticRanklist(lastRanklist).rows;
-        rowsGroupByTimePoints.push(staticRows);
+        currentStaticRows = staticRows;
 
         for (let i = 0; i < icpcSeriesList.length; i++) {
           const seriesSegmentRanges = seriesSegmentRangesList[i];
@@ -326,10 +353,8 @@ export function getAllRankTimeData(
           }
         }
       } else {
-        if (rowsGroupByTimePoints.length) {
-          rowsGroupByTimePoints.push(rowsGroupByTimePoints[rowsGroupByTimePoints.length - 1]);
-        } else {
-          rowsGroupByTimePoints.push(convertToStaticRanklist(lastRanklist).rows);
+        if (!currentStaticRows) {
+          currentStaticRows = convertToStaticRanklist(lastRanklist).rows;
         }
         seriesSegmentRangesList.forEach((seriesSegmentRanges, index) => {
           if (fixedSeriesSegmentRangesList[index].length === 0) {
@@ -342,37 +367,10 @@ export function getAllRankTimeData(
           }
         });
       }
+      appendRankPoints(timePoint, currentStaticRows!);
     }
   }
 
-  const userRankTimePointsList = new Map<string, RankTimePoint[][]>();
-  const userRankTimeSolvedEventPointsList = new Map<string, RankTimeSolvedEventPoint[][]>();
-  for (let i = 0; i < timePoints.length; i++) {
-    const timePoint = timePoints[i];
-    const rows = rowsGroupByTimePoints[i];
-    for (const row of rows) {
-      const user = row.user;
-      if (!userRankTimePointsList.has(user.id)) {
-        userRankTimePointsList.set(user.id, []);
-      }
-      const rankTimePointsList = userRankTimePointsList.get(user.id)!;
-      while (rankTimePointsList.length < icpcSeriesList.length) {
-        rankTimePointsList.push([]);
-      }
-      for (let j = 0; j < icpcSeriesList.length; j++) {
-        const rankTimePoints = rankTimePointsList[j];
-        const rank = row.rankValues[j].rank;
-        if (typeof rank !== 'number') {
-          continue;
-        }
-        rankTimePoints.push({
-          time: timePoint[0],
-          rank,
-          solved: row.score.value,
-        });
-      }
-    }
-  }
   for (const [userId, solvedEventPointsComm] of userRankTimeSolvedEventPointsComm) {
     const rankTimePointsList = userRankTimePointsList.get(userId)!;
     const rankTimeSolvedEventPointsList: RankTimeSolvedEventPoint[][] = [];

@@ -2,6 +2,7 @@ const { defineConfig } = require('vite');
 const path = require('path');
 const viteSSR = require('vite-ssr/plugin');
 const vue = require('@vitejs/plugin-vue');
+const { productionClientGuard } = require('./scripts/production-client-guard.cjs');
 const { isSameOriginWorkerAsset, toSameOriginWorkerAssetUrl } = require('./scripts/worker-assets.cjs');
 
 function buildClientEnv() {
@@ -42,6 +43,7 @@ module.exports = defineConfig(({ command }) => {
     define: {
       'process.env.BWCX_RUNTIME_SCOPE': JSON.stringify('client'),
       'process.env.NODE_ENV': JSON.stringify(process.env.NODE_ENV || (isBuild ? 'production' : 'development')),
+      __VUE_PROD_DEVTOOLS__: false,
       __RANKLAND_CLIENT_ENV__: JSON.stringify(buildClientEnv()),
     },
     resolve: {
@@ -62,6 +64,7 @@ module.exports = defineConfig(({ command }) => {
         },
       }),
       vue(),
+      productionClientGuard(),
     ],
   };
 });

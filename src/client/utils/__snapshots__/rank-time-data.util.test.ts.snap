@@ -1,0 +1,691 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`getAllRankTimeData output contract > keeps ratio-segment boundaries through minutes without new submissions 1`] = `
+{
+  "seriesSegmentsList": [
+    [
+      {
+        "points": [
+          {
+            "end": 1,
+            "start": 1,
+            "time": 1,
+          },
+          {
+            "end": 1,
+            "start": 1,
+            "time": 2,
+          },
+          {
+            "end": 1,
+            "start": 1,
+            "time": 3,
+          },
+          {
+            "end": 1,
+            "start": 1,
+            "time": 4,
+          },
+          {
+            "end": 1,
+            "start": 1,
+            "time": 5,
+          },
+        ],
+        "resolvedColor": "#f8bf29",
+        "title": "Gold",
+      },
+      {
+        "points": [
+          {
+            "end": 2,
+            "start": 2,
+            "time": 2,
+          },
+          {
+            "end": 2,
+            "start": 2,
+            "time": 3,
+          },
+          {
+            "end": 2,
+            "start": 2,
+            "time": 4,
+          },
+          {
+            "end": 2,
+            "start": 2,
+            "time": 5,
+          },
+        ],
+        "resolvedColor": "#c0c0c0",
+        "title": "Silver",
+      },
+    ],
+  ],
+  "totalUsers": 3,
+  "unit": "min",
+  "userRankTimePointsList": [
+    [
+      "alpha",
+      [
+        [
+          {
+            "rank": 1,
+            "solved": 0,
+            "time": 0,
+          },
+          {
+            "rank": 1,
+            "solved": 1,
+            "time": 1,
+          },
+          {
+            "rank": 2,
+            "solved": 1,
+            "time": 2,
+          },
+          {
+            "rank": 2,
+            "solved": 2,
+            "time": 3,
+          },
+          {
+            "rank": 2,
+            "solved": 2,
+            "time": 4,
+          },
+          {
+            "rank": 2,
+            "solved": 2,
+            "time": 5,
+          },
+        ],
+      ],
+    ],
+    [
+      "beta",
+      [
+        [
+          {
+            "rank": 1,
+            "solved": 0,
+            "time": 0,
+          },
+          {
+            "rank": 1,
+            "solved": 1,
+            "time": 1,
+          },
+          {
+            "rank": 1,
+            "solved": 2,
+            "time": 2,
+          },
+          {
+            "rank": 1,
+            "solved": 2,
+            "time": 3,
+          },
+          {
+            "rank": 1,
+            "solved": 2,
+            "time": 4,
+          },
+          {
+            "rank": 1,
+            "solved": 2,
+            "time": 5,
+          },
+        ],
+      ],
+    ],
+    [
+      "guest",
+      [
+        [],
+      ],
+    ],
+  ],
+  "userRankTimeSolvedEventPointsList": [
+    [
+      "guest",
+      [
+        [
+          {
+            "fb": false,
+            "problemAlias": "A",
+            "rank": -1,
+            "solvedTime": [
+              15,
+              "s",
+            ],
+            "time": 1,
+          },
+        ],
+      ],
+    ],
+    [
+      "alpha",
+      [
+        [
+          {
+            "fb": true,
+            "problemAlias": "A",
+            "rank": 1,
+            "solvedTime": [
+              30,
+              "s",
+            ],
+            "time": 1,
+          },
+          {
+            "fb": false,
+            "problemAlias": "B",
+            "rank": 2,
+            "solvedTime": [
+              125,
+              "s",
+            ],
+            "time": 3,
+          },
+        ],
+      ],
+    ],
+    [
+      "beta",
+      [
+        [
+          {
+            "fb": false,
+            "problemAlias": "A",
+            "rank": 1,
+            "solvedTime": [
+              30,
+              "s",
+            ],
+            "time": 1,
+          },
+          {
+            "fb": false,
+            "problemAlias": "B",
+            "rank": 1,
+            "solvedTime": [
+              90,
+              "s",
+            ],
+            "time": 2,
+          },
+        ],
+      ],
+    ],
+  ],
+}
+`;
+
+exports[`getAllRankTimeData output contract > preserves ties, filtered series, guest exclusion, FB events, segments and a partial final bucket 1`] = `
+{
+  "seriesSegmentsList": [
+    [
+      {
+        "points": [
+          {
+            "end": 1,
+            "start": 1,
+            "time": 1,
+          },
+          {
+            "end": 1,
+            "start": 1,
+            "time": 2,
+          },
+          {
+            "end": 1,
+            "start": 1,
+            "time": 2.5,
+          },
+        ],
+        "resolvedColor": "#f8bf29",
+        "title": "Gold",
+      },
+      {
+        "points": [
+          {
+            "end": 2,
+            "start": 2,
+            "time": 2,
+          },
+          {
+            "end": 2,
+            "start": 2,
+            "time": 2.5,
+          },
+        ],
+        "resolvedColor": "#c0c0c0",
+        "title": "Silver",
+      },
+    ],
+    [
+      {
+        "points": [
+          {
+            "end": 1,
+            "start": 1,
+            "time": 0,
+          },
+          {
+            "end": 1,
+            "start": 1,
+            "time": 1,
+          },
+          {
+            "end": 1,
+            "start": 1,
+            "time": 2,
+          },
+          {
+            "end": 1,
+            "start": 1,
+            "time": 2.5,
+          },
+        ],
+        "resolvedColor": "#f8bf29",
+        "title": "Gold",
+      },
+    ],
+  ],
+  "totalUsers": 3,
+  "unit": "min",
+  "userRankTimePointsList": [
+    [
+      "alpha",
+      [
+        [
+          {
+            "rank": 1,
+            "solved": 0,
+            "time": 0,
+          },
+          {
+            "rank": 1,
+            "solved": 1,
+            "time": 1,
+          },
+          {
+            "rank": 2,
+            "solved": 1,
+            "time": 2,
+          },
+          {
+            "rank": 2,
+            "solved": 2,
+            "time": 2.5,
+          },
+        ],
+        [
+          {
+            "rank": 1,
+            "solved": 0,
+            "time": 0,
+          },
+          {
+            "rank": 1,
+            "solved": 1,
+            "time": 1,
+          },
+          {
+            "rank": 1,
+            "solved": 1,
+            "time": 2,
+          },
+          {
+            "rank": 1,
+            "solved": 2,
+            "time": 2.5,
+          },
+        ],
+      ],
+    ],
+    [
+      "beta",
+      [
+        [
+          {
+            "rank": 1,
+            "solved": 0,
+            "time": 0,
+          },
+          {
+            "rank": 1,
+            "solved": 1,
+            "time": 1,
+          },
+          {
+            "rank": 1,
+            "solved": 2,
+            "time": 2,
+          },
+          {
+            "rank": 1,
+            "solved": 2,
+            "time": 2.5,
+          },
+        ],
+        [],
+      ],
+    ],
+    [
+      "guest",
+      [
+        [],
+        [],
+      ],
+    ],
+  ],
+  "userRankTimeSolvedEventPointsList": [
+    [
+      "guest",
+      [
+        [
+          {
+            "fb": false,
+            "problemAlias": "A",
+            "rank": -1,
+            "solvedTime": [
+              15,
+              "s",
+            ],
+            "time": 1,
+          },
+        ],
+        [
+          {
+            "fb": false,
+            "problemAlias": "A",
+            "rank": -1,
+            "solvedTime": [
+              15,
+              "s",
+            ],
+            "time": 1,
+          },
+        ],
+      ],
+    ],
+    [
+      "alpha",
+      [
+        [
+          {
+            "fb": true,
+            "problemAlias": "A",
+            "rank": 1,
+            "solvedTime": [
+              30,
+              "s",
+            ],
+            "time": 1,
+          },
+          {
+            "fb": false,
+            "problemAlias": "B",
+            "rank": 2,
+            "solvedTime": [
+              125,
+              "s",
+            ],
+            "time": 2.5,
+          },
+        ],
+        [
+          {
+            "fb": true,
+            "problemAlias": "A",
+            "rank": 1,
+            "solvedTime": [
+              30,
+              "s",
+            ],
+            "time": 1,
+          },
+          {
+            "fb": false,
+            "problemAlias": "B",
+            "rank": 1,
+            "solvedTime": [
+              125,
+              "s",
+            ],
+            "time": 2.5,
+          },
+        ],
+      ],
+    ],
+    [
+      "beta",
+      [
+        [
+          {
+            "fb": false,
+            "problemAlias": "A",
+            "rank": 1,
+            "solvedTime": [
+              30,
+              "s",
+            ],
+            "time": 1,
+          },
+          {
+            "fb": false,
+            "problemAlias": "B",
+            "rank": 1,
+            "solvedTime": [
+              90,
+              "s",
+            ],
+            "time": 2,
+          },
+        ],
+        [
+          {
+            "fb": false,
+            "problemAlias": "A",
+            "rank": -1,
+            "solvedTime": [
+              30,
+              "s",
+            ],
+            "time": 1,
+          },
+          {
+            "fb": false,
+            "problemAlias": "B",
+            "rank": -1,
+            "solvedTime": [
+              90,
+              "s",
+            ],
+            "time": 2,
+          },
+        ],
+      ],
+    ],
+  ],
+}
+`;
+
+exports[`getAllRankTimeData output contract > retains each empty sampling interval and independent point objects 1`] = `
+{
+  "seriesSegmentsList": [
+    [
+      {
+        "points": [],
+        "resolvedColor": "#f8bf29",
+        "title": "Gold",
+      },
+      {
+        "points": [],
+        "resolvedColor": "#c0c0c0",
+        "title": "Silver",
+      },
+    ],
+    [
+      {
+        "points": [
+          {
+            "end": 1,
+            "start": 1,
+            "time": 0,
+          },
+          {
+            "end": 1,
+            "start": 1,
+            "time": 1,
+          },
+          {
+            "end": 1,
+            "start": 1,
+            "time": 2,
+          },
+          {
+            "end": 1,
+            "start": 1,
+            "time": 3,
+          },
+          {
+            "end": 1,
+            "start": 1,
+            "time": 4,
+          },
+          {
+            "end": 1,
+            "start": 1,
+            "time": 5,
+          },
+        ],
+        "resolvedColor": "#f8bf29",
+        "title": "Gold",
+      },
+    ],
+  ],
+  "totalUsers": 3,
+  "unit": "min",
+  "userRankTimePointsList": [
+    [
+      "alpha",
+      [
+        [
+          {
+            "rank": 1,
+            "solved": 0,
+            "time": 0,
+          },
+          {
+            "rank": 1,
+            "solved": 0,
+            "time": 1,
+          },
+          {
+            "rank": 1,
+            "solved": 0,
+            "time": 2,
+          },
+          {
+            "rank": 1,
+            "solved": 0,
+            "time": 3,
+          },
+          {
+            "rank": 1,
+            "solved": 0,
+            "time": 4,
+          },
+          {
+            "rank": 1,
+            "solved": 0,
+            "time": 5,
+          },
+        ],
+        [
+          {
+            "rank": 1,
+            "solved": 0,
+            "time": 0,
+          },
+          {
+            "rank": 1,
+            "solved": 0,
+            "time": 1,
+          },
+          {
+            "rank": 1,
+            "solved": 0,
+            "time": 2,
+          },
+          {
+            "rank": 1,
+            "solved": 0,
+            "time": 3,
+          },
+          {
+            "rank": 1,
+            "solved": 0,
+            "time": 4,
+          },
+          {
+            "rank": 1,
+            "solved": 0,
+            "time": 5,
+          },
+        ],
+      ],
+    ],
+    [
+      "beta",
+      [
+        [
+          {
+            "rank": 1,
+            "solved": 0,
+            "time": 0,
+          },
+          {
+            "rank": 1,
+            "solved": 0,
+            "time": 1,
+          },
+          {
+            "rank": 1,
+            "solved": 0,
+            "time": 2,
+          },
+          {
+            "rank": 1,
+            "solved": 0,
+            "time": 3,
+          },
+          {
+            "rank": 1,
+            "solved": 0,
+            "time": 4,
+          },
+          {
+            "rank": 1,
+            "solved": 0,
+            "time": 5,
+          },
+        ],
+        [],
+      ],
+    ],
+    [
+      "guest",
+      [
+        [],
+        [],
+      ],
+    ],
+  ],
+  "userRankTimeSolvedEventPointsList": [],
+}
+`;
