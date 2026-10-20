@@ -181,7 +181,8 @@ const storedRanklistSettings = ref<unknown>(readLocalStorageJson(LocalStorageKey
 const settingsIntroRead = ref<string | undefined>(readLocalStorageString(LocalStorageKey.StyledRanklistSettingsIntroRead));
 const memorizedData = shallowRef<srk.Ranklist>(toRanklistPayloadWithoutVolatileFields(toRaw(props.data)));
 const rankTimeDataVersion = ref(0);
-const enableCCPC26 = useCCPC26Mode(() => memorizedData.value, () => props.isLive, () => timeTravelTime.value);
+const ccpc26TimeEligible = useCCPC26Mode(() => memorizedData.value, () => props.isLive, () => timeTravelTime.value);
+const hasCCPC26 = computed(() => isCCPC26Ranklist(memorizedData.value));
 const requiresClientClockForRanklist = computed(() => props.isLive && isCCPC26Ranklist(memorizedData.value));
 
 const ranklistSettings = computed(() => normalizeStyledRanklistSettings(storedRanklistSettings.value));
@@ -196,6 +197,8 @@ const renderedRanklistSettings = computed<StyledRanklistSettings>(() => {
     statusColorAsText: true,
   };
 });
+// The saved preference stays enabled across the freeze boundary; only the effective mode changes.
+const enableCCPC26 = computed(() => renderedRanklistSettings.value.preferCCPC26 && ccpc26TimeEligible.value);
 const emptyStatusPlaceholder = computed(() =>
   getEmptyStatusPlaceholder(renderedRanklistSettings.value.emptyStatusPlaceholder),
 );
@@ -1270,7 +1273,22 @@ function resolveDisplayText(text: Parameters<typeof resolveText>[0]) {
         enable-time-travel
         :live="isLive"
         @time-travel="handleTimeTravel"
-      />
+      >
+        <template #timeMachine>
+          <div class="srk-progress-time-machine-status srk-ranklist-time-machine-status">
+            <div class="srk-progress-time-machine-text">Time Travel Mode</div>
+            <label v-if="hasCCPC26" class="srk-ranklist-ccpc26-switch">
+              <span>CCPC26</span>
+              <Switch
+                class="srk-ranklist-switch"
+                :checked="ranklistSettings.preferCCPC26"
+                aria-label="CCPC26"
+                @update:checked="updateRanklistSetting('preferCCPC26', $event)"
+              />
+            </label>
+          </div>
+        </template>
+      </ProgressBar>
     </div>
     <div class="mx-4 mt-3 srk-ranklist-toolbar" :class="{ 'srk-ranklist-toolbar-with-filter': showFilter }">
       <div v-if="showFilter" class="srk-ranklist-filter">

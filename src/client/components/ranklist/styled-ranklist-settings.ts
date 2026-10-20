@@ -7,6 +7,7 @@ export type StyledRanklistEmptyStatusPlaceholder = 'none' | 'dot' | 'dash';
 
 export interface StyledRanklistSettings {
   professionalMode: boolean;
+  preferCCPC26: boolean;
   statusCellPreset: RanklistStatusCellPreset;
   statusColorAsText: boolean;
   rowStriped: boolean;
@@ -18,6 +19,7 @@ export interface StyledRanklistSettings {
 
 export const DEFAULT_STYLED_RANKLIST_SETTINGS: StyledRanklistSettings = {
   professionalMode: false,
+  preferCCPC26: true,
   statusCellPreset: 'classic',
   statusColorAsText: false,
   rowStriped: true,
@@ -43,6 +45,7 @@ export function normalizeStyledRanklistSettings(settings: unknown): StyledRankli
 
   return {
     professionalMode: source.professionalMode === true,
+    preferCCPC26: source.preferCCPC26 !== false,
     statusCellPreset:
       typeof statusCellPreset === 'string' && STATUS_CELL_PRESETS.includes(statusCellPreset as RanklistStatusCellPreset)
         ? (statusCellPreset as RanklistStatusCellPreset)

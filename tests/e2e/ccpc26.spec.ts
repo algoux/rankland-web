@@ -20,11 +20,16 @@ function ranklistAt(minutes: number) {
   );
 }
 
-async function preparePage(page: Page) {
-  await page.addInitScript(() => {
+async function preparePage(page: Page, initialPreferCCPC26?: boolean) {
+  await page.addInitScript((preferCCPC26: boolean | null) => {
     localStorage.setItem('StyledRanklistSettingsIntroRead', 'true');
-    localStorage.setItem('StyledRanklistSettings', JSON.stringify({ professionalMode: true }));
-  });
+    if (localStorage.getItem('StyledRanklistSettings') === null) {
+      localStorage.setItem('StyledRanklistSettings', JSON.stringify({
+        professionalMode: true,
+        ...(preferCCPC26 === null ? {} : { preferCCPC26 }),
+      }));
+    }
+  }, initialPreferCCPC26 ?? null);
   await stubWebSocket(page);
 }
 
@@ -35,14 +40,19 @@ async function openStatic(page: Page, ordinary = false) {
   await expect(page.getByRole('slider', { name: 'Time Travel' })).toBeVisible();
 }
 
-async function openLive(page: Page, snapshot: () => srk.Ranklist, ordinary = false) {
+async function openLive(
+  page: Page,
+  snapshot: () => srk.Ranklist,
+  ordinary = false,
+  initialPreferCCPC26?: boolean,
+) {
   const key = ordinary ? 'ccpc26-live-ordinary-test' : 'ccpc26-live-test';
   const runtimeProblems: string[] = [];
   page.on('pageerror', (error) => runtimeProblems.push(error.message));
   page.on('console', (message) => {
     if (/hydration|mismatch|Cannot read properties/i.test(message.text())) runtimeProblems.push(message.text());
   });
-  await preparePage(page);
+  await preparePage(page, initialPreferCCPC26);
   await page.route((url) => url.pathname === `/ranking/config/${key}`, (route) => route.fulfill({
     json: {
       code: 0,
@@ -85,6 +95,35 @@ async function expectProblemAliases(page: Page, aliases: string[]) {
     ))),
     aliases,
   )).toBe(true);
+}
+
+async function expectCCPC26Preference(page: Page, enabled: boolean) {
+  await expect.poll(() => page.evaluate(() => {
+    const settings = JSON.parse(localStorage.getItem('StyledRanklistSettings') || '{}');
+    return settings.preferCCPC26;
+  })).toBe(enabled);
+}
+
+async function expectCenteredReplayLabel(page: Page) {
+  const label = page.locator('.srk-progress-time-machine-text');
+  const switchLabel = page.locator('.srk-ranklist-ccpc26-switch');
+  await expect(label).toBeVisible();
+  await expect(switchLabel).toBeVisible();
+  const [barBox, textBox, switchBox] = await Promise.all([
+    page.locator('.srk-progress-bar').boundingBox(),
+    label.boundingBox(),
+    switchLabel.boundingBox(),
+  ]);
+  expect(barBox).not.toBeNull();
+  expect(textBox).not.toBeNull();
+  expect(switchBox).not.toBeNull();
+  expect(Math.abs(textBox!.x + textBox!.width / 2 - barBox!.x - barBox!.width / 2))
+    .toBeLessThanOrEqual(1);
+  expect(switchBox!.x).toBeGreaterThanOrEqual(textBox!.x + textBox!.width);
+  expect(switchBox!.x + switchBox!.width).toBeLessThanOrEqual(page.viewportSize()!.width);
+  const remainingBox = await page.locator('.srk-progress-secondary-area-right').boundingBox();
+  expect(remainingBox).not.toBeNull();
+  expect(remainingBox!.y >= switchBox!.y + switchBox!.height || remainingBox!.x >= switchBox!.x + switchBox!.width).toBe(true);
 }
 
 function alphaProblemCells(page: Page) {
@@ -421,6 +460,114 @@ test.describe('CCPC26 presentation', () => {
     });
   }
 
+  for (const { width, progressWidth } of [{ width: 1280 }, { width: 390 }, { width: 1280, progressWidth: 420 }]) {
+    test(`CCPC26 preference persists through replay and reload at ${width}px${progressWidth ? ' in a narrow pane' : ''}`, async ({ page }, testInfo) => {
+      await page.setViewportSize({ width, height: 844 });
+      await page.clock.setFixedTime(new Date(contestStart + 11 * minute));
+      await openStatic(page);
+      async function constrainProgress() {
+        if (progressWidth) {
+          await page.locator('[data-id="ranklist-progress"]').evaluate((element, width) => {
+            (element as HTMLElement).style.maxWidth = `${width}px`;
+          }, progressWidth);
+        }
+      }
+      await constrainProgress();
+      const ccpc26 = page.getByRole('switch', { name: 'CCPC26', exact: true });
+      await expect(ccpc26).toHaveCount(0);
+      await replayAt(page, 4);
+      await expect(ccpc26).toBeChecked();
+      await expectProblemAliases(page, ['A', '', '']);
+      await expectCenteredReplayLabel(page);
+      await expect(page.locator('body')).toHaveCSS('opacity', '1');
+      await page.screenshot({
+        path: testInfo.outputPath(`ccpc26-preference-default-${width}.png`),
+        fullPage: true,
+      });
+
+      await ccpc26.click();
+      await expect(ccpc26).not.toBeChecked();
+      await expect(page.getByRole('slider', { name: 'Time Travel' })).toHaveValue('4');
+      await expectProblemAliases(page, ['A', 'B', 'C']);
+      await expectCenteredReplayLabel(page);
+      await expectCCPC26Preference(page, false);
+      for (const replayMinute of [0, 8, 6]) {
+        await replayAt(page, replayMinute);
+        await expect(ccpc26).not.toBeChecked();
+        await expectProblemAliases(page, ['A', 'B', 'C']);
+        await expectCCPC26Preference(page, false);
+      }
+
+      await page.reload();
+      await expect(page.locator('.srk-main tbody tr')).toHaveCount(3);
+      await expect(ccpc26).toHaveCount(0);
+      await constrainProgress();
+      await replayAt(page, 4);
+      await expect(ccpc26).not.toBeChecked();
+      await expectProblemAliases(page, ['A', 'B', 'C']);
+      await expectCCPC26Preference(page, false);
+      await ccpc26.focus();
+      await ccpc26.press('Space');
+      await expect(ccpc26).toBeChecked();
+      await expectProblemAliases(page, ['A', '', '']);
+      await expectCCPC26Preference(page, true);
+
+      await replayAt(page, 8);
+      await expect(ccpc26).toBeChecked();
+      await expectProblemAliases(page, ['A', 'B', 'C']);
+      await expectCCPC26Preference(page, true);
+      await expectCenteredReplayLabel(page);
+      await page.locator('[data-id="ranklist-progress"]').screenshot({
+        path: testInfo.outputPath(`ccpc26-progress-frozen-${width}.png`),
+      });
+      await page.screenshot({
+        path: testInfo.outputPath(`ccpc26-preference-frozen-${width}.png`),
+        fullPage: true,
+      });
+      await replayAt(page, 4);
+      await expect(ccpc26).toBeChecked();
+      await expectProblemAliases(page, ['A', '', '']);
+      await page.getByRole('slider', { name: 'Time Travel' }).press('End');
+      await expect(ccpc26).toHaveCount(0);
+      await expectProblemAliases(page, ['A', 'B', 'C']);
+      await expectCCPC26Preference(page, true);
+    });
+  }
+
+  test('live honors the saved preference through replay, exit and reload without hydration errors', async ({ page }) => {
+    const runtimeProblems: string[] = [];
+    page.on('pageerror', (error) => runtimeProblems.push(error.message));
+    page.on('console', (message) => {
+      if (/hydration|mismatch|Cannot read properties/i.test(message.text())) runtimeProblems.push(message.text());
+    });
+    const snapshot = ranklistAt(4);
+    await page.clock.setFixedTime(new Date(contestStart + 4 * minute));
+    await openLive(page, () => snapshot, false, false);
+    const ccpc26 = page.getByRole('switch', { name: 'CCPC26', exact: true });
+    await expect(ccpc26).toHaveCount(0);
+    await expectProblemAliases(page, ['A', 'B', 'C']);
+    await expectCCPC26Preference(page, false);
+    await replayAt(page, 2);
+    await expect(ccpc26).not.toBeChecked();
+    await expectProblemAliases(page, ['A', 'B', 'C']);
+    await ccpc26.click();
+    await expect(ccpc26).toBeChecked();
+    await expectProblemAliases(page, ['', '', '']);
+    await expectCCPC26Preference(page, true);
+    await page.getByRole('slider', { name: 'Time Travel' }).press('End');
+    await expect(ccpc26).toHaveCount(0);
+    await expect(page.locator('.srk-progress-live-text')).toBeVisible();
+    await expectProblemAliases(page, ['A', '', '']);
+    await expectCCPC26Preference(page, true);
+
+    await page.reload();
+    await expect(page.locator('.srk-main tbody tr')).toHaveCount(3);
+    await expect(ccpc26).toHaveCount(0);
+    await expectProblemAliases(page, ['A', '', '']);
+    await expectCCPC26Preference(page, true);
+    expect(runtimeProblems).toEqual([]);
+  });
+
   for (const live of [false, true]) {
     test(`ordinary ICPC remains identified in ${live ? 'live' : 'static'} and replay modes`, async ({ page }) => {
       await page.clock.setFixedTime(new Date(contestStart + (live ? 4 : 11) * minute));
@@ -431,8 +578,10 @@ test.describe('CCPC26 presentation', () => {
       } else {
         await openStatic(page, true);
       }
+      await expect(page.getByRole('switch', { name: 'CCPC26', exact: true })).toHaveCount(0);
       await expectProblemAliases(page, ['A', 'B', 'C']);
       await replayAt(page, 2);
+      await expect(page.getByRole('switch', { name: 'CCPC26', exact: true })).toHaveCount(0);
       await expectProblemAliases(page, ['A', 'B', 'C']);
       await problemHeaders(page).nth(1).click();
       await expect(page.getByRole('dialog', { name: 'Info of Problem B', exact: true })).toBeVisible();

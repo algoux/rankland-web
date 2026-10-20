@@ -22,8 +22,8 @@ importers:
         specifier: ^0.7.2
         version: 0.7.2(@algoux/standard-ranklist@0.3.14)
       '@algoux/standard-ranklist-renderer-component-vue':
-        specifier: ^0.7.2
-        version: 0.7.2(@algoux/standard-ranklist@0.3.14)(vue@3.5.35(typescript@5.9.3))
+        specifier: ^0.7.3
+        version: 0.7.3(@algoux/standard-ranklist@0.3.14)(vue@3.5.35(typescript@5.9.3))
       '@algoux/standard-ranklist-utils':
         specifier: ^0.3.5
         version: 0.3.5(@algoux/standard-ranklist@0.3.14)
@@ -309,8 +309,8 @@ packages:
   '@algoux/standard-ranklist-renderer-component-styles@0.7.0':
     resolution: {integrity: sha512-gvX8XwTtR3KAHBAMFoWJJjtS7OnWKrJhWuQltjmKkfPaob1q1IAytL3Si8O24Debs4ey/cvS+IZsIbFy0Ndndw==}
 
-  '@algoux/standard-ranklist-renderer-component-vue@0.7.2':
-    resolution: {integrity: sha512-Ts4VKCsg4ZnZ7NC3fQumM1PEStNnvQ9i4XfEjJMfgvVCbqNVTtF5cChySJhQQYiw0apf7J7p3DhxKQ+0Q6Yzpg==}
+  '@algoux/standard-ranklist-renderer-component-vue@0.7.3':
+    resolution: {integrity: sha512-+Tl1Q5jAltz3iZ8AkAZ6MIG/XDLuLzEVc4O1wDRDO2t8QPRuQ7ZaPn4sOBKkl7ICihwyMkGeN4Mq/eqv9ecDug==}
     peerDependencies:
       '@algoux/standard-ranklist': '*'
       vue: '>=3.4.0'
@@ -5121,7 +5121,7 @@ snapshots:
 
   '@algoux/standard-ranklist-renderer-component-styles@0.7.0': {}
 
-  '@algoux/standard-ranklist-renderer-component-vue@0.7.2(@algoux/standard-ranklist@0.3.14)(vue@3.5.35(typescript@5.9.3))':
+  '@algoux/standard-ranklist-renderer-component-vue@0.7.3(@algoux/standard-ranklist@0.3.14)(vue@3.5.35(typescript@5.9.3))':
     dependencies:
       '@algoux/standard-ranklist': 0.3.14
       '@algoux/standard-ranklist-renderer-component-core': 0.7.2(@algoux/standard-ranklist@0.3.14)

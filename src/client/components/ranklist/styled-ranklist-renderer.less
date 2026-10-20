@@ -501,6 +501,31 @@
   transform: translateX(12px) !important;
 }
 
+[data-id='ranklist-progress'] {
+  container: ranklist-progress / inline-size;
+}
+
+.srk-ranklist-time-machine-status {
+  position: relative;
+  width: max-content;
+  white-space: nowrap;
+}
+
+.srk-ranklist-ccpc26-switch {
+  position: absolute;
+  left: calc(100% + 16px);
+  top: 50%;
+  transform: translateY(-50%);
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  min-height: 24px;
+  color: hsl(var(--foreground));
+  font-size: 12px;
+  line-height: 1;
+  cursor: pointer;
+}
+
 .srk-ranklist-table-scroll {
   max-width: 100%;
 }
@@ -791,6 +816,28 @@ html.dark .srk-ranklist-settings-modal {
   display: flex;
   justify-content: flex-end;
   margin-top: 20px;
+}
+
+@container ranklist-progress (max-width: 720px) {
+  // Narrow embeds and desktop preview panes need the same layout as mobile.
+  [data-id='ranklist-progress'] .srk-progress-bar-container .srk-progress-secondary-area {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    row-gap: 12px;
+
+    .srk-progress-secondary-area-center {
+      grid-column: 1 / -1;
+      grid-row: 1;
+      justify-self: center;
+    }
+
+    .srk-progress-secondary-area-left,
+    .srk-progress-secondary-area-right {
+      min-width: 0;
+      grid-row: 2;
+      font-size: 12px;
+    }
+  }
 }
 
 @media screen and (max-width: 768px) {

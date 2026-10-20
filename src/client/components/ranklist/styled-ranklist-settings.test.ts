@@ -15,6 +15,7 @@ describe('styled ranklist settings', () => {
     expect(
       normalizeStyledRanklistSettings({
         professionalMode: true,
+        preferCCPC26: false,
         statusCellPreset: 'minimal',
         statusColorAsText: true,
         rowStriped: false,
@@ -25,6 +26,7 @@ describe('styled ranklist settings', () => {
       }),
     ).toEqual({
       professionalMode: true,
+      preferCCPC26: false,
       statusCellPreset: 'minimal',
       statusColorAsText: true,
       rowStriped: false,
@@ -32,6 +34,23 @@ describe('styled ranklist settings', () => {
       emptyStatusPlaceholder: 'dash',
       splitOrganization: true,
       userAvatarPlacement: 'user',
+    });
+  });
+
+  it.each([undefined, null, true, 0, 1, 'false', {}, []])(
+    'defaults the CCPC26 preference to true for non-false stored value %j',
+    (preferCCPC26) => {
+      expect(normalizeStyledRanklistSettings({ preferCCPC26 }).preferCCPC26).toBe(true);
+    },
+  );
+
+  it('restores a disabled CCPC26 preference and preserves it when another setting changes', () => {
+    const restored = normalizeStyledRanklistSettings(JSON.parse(JSON.stringify({ preferCCPC26: false })));
+    expect(restored.preferCCPC26).toBe(false);
+    expect(normalizeStyledRanklistSettings({ ...restored, professionalMode: true })).toEqual({
+      ...DEFAULT_STYLED_RANKLIST_SETTINGS,
+      preferCCPC26: false,
+      professionalMode: true,
     });
   });
 
