@@ -9,10 +9,6 @@ on:
     branches:
       - master
 
-concurrency:
-  group: ${{ github.workflow }}-${{ github.event.workflow_run.head_branch }}
-  cancel-in-progress: true
-
 env:
   NODE_VERSION: '22.23.4'
   PNPM_VERSION: '9.15.9'
@@ -25,6 +21,10 @@ jobs:
         github.event.workflow_run.event == 'push' &&
         github.event.workflow_run.conclusion == 'success'
       }}
+    # Skipped workflow_run events must not cancel an eligible release.
+    concurrency:
+      group: ${{ github.workflow }}-${{ github.event.workflow_run.head_branch }}
+      cancel-in-progress: true
     runs-on: ubuntu-latest
     env:
       COS_SECRET_ID: ${{ secrets.COS_SECRET_ID }}
