@@ -34,6 +34,7 @@ import IdGeneratorService from './services/id-generator.service';
 import ContestEventNotificationCoordinator from './modules/contest/contest-event-notification';
 import { disposeApplicationResources } from './application-resource-disposal';
 import { listenHttpServer, parseServerListenBacklog } from './application-http-listener';
+import { createApplicationHttpHandler } from './application-http-handler';
 
 export default class OurApp extends App {
   protected baseDir = path.join(__dirname, '..');
@@ -253,7 +254,7 @@ app
   .bootstrap()
   .then(async () => {
     await app.startManually(async () => {
-      const httpServer = http.createServer(app.instance.callback());
+      const httpServer = http.createServer(createApplicationHttpHandler(app.instance.callback()));
       app.server = httpServer;
       await listenHttpServer(
         httpServer,

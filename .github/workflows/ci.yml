@@ -14,7 +14,7 @@ concurrency:
   cancel-in-progress: true
 
 env:
-  NODE_VERSION: '20'
+  NODE_VERSION: '22.23.4'
   PNPM_VERSION: '9.15.9'
 
 jobs:
@@ -95,6 +95,7 @@ jobs:
           context: ./
           file: ./Dockerfile
           push: true
+          pull: true
           tags: ${{ secrets.DOCKERHUB_USERNAME }}/rankland-web:latest
 
       - name: Deploy on VPS

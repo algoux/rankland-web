@@ -1,4 +1,6 @@
-FROM algoux/nodebase:20
+FROM algoux/nodebase:22.23.4
+
+RUN node -e "const assert = require('node:assert/strict'); assert.equal(process.versions.node, '22.23.4'); assert.equal(typeof require('node:zlib').constants.BROTLI_DECODER_ERROR_FORMAT_BLOCK_SWITCH, 'number')"
 
 WORKDIR /app/
 

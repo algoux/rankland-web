@@ -14,7 +14,7 @@ RankLand 的 bwcx + Vue 3 SSR 前端/后端一体项目。当前前端已从
 
 ## 准备
 
-1. 安装并使用 Node.js 20.19.1（推荐使用 fnm 自动切换版本）。
+1. 安装并使用 Node.js 22.23.4（推荐使用 fnm 自动切换版本）。
 2. 安装并使用 pnpm 9.15.9。
 3. 准备本机 MySQL。默认开发连接配置为：
 
@@ -37,7 +37,7 @@ CREATE DATABASE rankland
 5. 安装依赖：
 
 ```bash
-fnm exec --using v20.19.1 corepack pnpm@9.15.9 install --frozen-lockfile
+fnm exec --using v22.23.4 corepack pnpm@9.15.9 install --frozen-lockfile
 ```
 
 6. 初始化或更新数据库结构：
@@ -53,7 +53,7 @@ TypeORM 会在 `typeorm_migrations` 表记录已经执行过的 migration。再�
 1. 运行开发服务：
 
 ```bash
-fnm exec --using v20.19.1 corepack pnpm@9.15.9 run dev
+fnm exec --using v22.23.4 corepack pnpm@9.15.9 run dev
 ```
 
 2. 在浏览器中打开 <http://127.0.0.1:3000/>。
@@ -100,6 +100,7 @@ pnpm run db:migration:generate
 - [Contest 事件实现进度](docs/contest-event-implementation-progress.md)
 - [MySQL DATETIME UTC 约定](docs/mysql-datetime-utc.md)
 - [Redis SSR 页面缓存](docs/ssr-redis-cache.md)
+- [Node 22 安全更新与请求编码边界](docs/node22-security-update.md)
 
 ## RankLand 前端
 
@@ -136,19 +137,19 @@ BEIAN=
 运行单元测试：
 
 ```bash
-fnm exec --using v20.19.1 corepack pnpm@9.15.9 run test
+fnm exec --using v22.23.4 corepack pnpm@9.15.9 run test
 ```
 
 运行依赖本机 MySQL 的集成测试：
 
 ```bash
-RUN_MYSQL_TESTS=true fnm exec --using v20.19.1 corepack pnpm@9.15.9 run test
+RUN_MYSQL_TESTS=true fnm exec --using v22.23.4 corepack pnpm@9.15.9 run test
 ```
 
 运行 RankLand 前端 e2e parity tests：
 
 ```bash
-fnm exec --using v20.19.1 corepack pnpm@9.15.9 run test:e2e
+fnm exec --using v22.23.4 corepack pnpm@9.15.9 run test:e2e
 ```
 
 `test:e2e` 会先用 mock RankLand API 环境构建前端，再启动 mock API
@@ -192,7 +193,7 @@ POST /api/v2/contests/:uk/events/reset             x-token
 ## 构建
 
 ```bash
-fnm exec --using v20.19.1 corepack pnpm@9.15.9 run build
+fnm exec --using v22.23.4 corepack pnpm@9.15.9 run build
 ```
 
 ## 部署
@@ -200,8 +201,8 @@ fnm exec --using v20.19.1 corepack pnpm@9.15.9 run build
 服务以单个前台 Node 进程运行，不再使用 PM2 cluster。生产环境应在启动服务前显式执行 migration：
 
 ```bash
-fnm exec --using v20.19.1 corepack pnpm@9.15.9 run db:migration:run
-fnm exec --using v20.19.1 corepack pnpm@9.15.9 run build
+fnm exec --using v22.23.4 corepack pnpm@9.15.9 run db:migration:run
+fnm exec --using v22.23.4 corepack pnpm@9.15.9 run build
 MYSQL_HOST=... \
 MYSQL_PORT=3306 \
 MYSQL_USER=... \
@@ -222,7 +223,7 @@ COS_DOMAIN= \
 COS_BUCKET=... \
 COS_REGION=... \
 COS_BASE_PATH=rankland/file/ \
-fnm exec --using v20.19.1 corepack pnpm@9.15.9 run start
+fnm exec --using v22.23.4 corepack pnpm@9.15.9 run start
 ```
 
 `compose-template.yml` 只列出启动所需的拓扑、凭据与存储配置。业务服务已经内置经过本机 loadtest
