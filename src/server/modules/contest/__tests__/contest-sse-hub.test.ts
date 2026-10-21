@@ -1,5 +1,16 @@
 import { EventEmitter } from 'events';
+import { configDefaults } from 'vitest/config';
 import ContestSseHub from '../contest-sse-hub';
+
+// Fake node:perf_hooks alongside the global clock used by Vitest's timers.
+// Otherwise real CPU time can shorten a shard's fake-time deadline.
+vi.mock('node:perf_hooks', () => ({
+  performance: { now: () => globalThis.performance.now() },
+}));
+
+function useFakeMonotonicTimers() {
+  vi.useFakeTimers({ toFake: [...configDefaults.fakeTimers.toFake, 'performance'] });
+}
 
 class FakeResponse extends EventEmitter {
   public readonly writes: string[] = [];
@@ -135,7 +146,7 @@ describe('ContestSseHub', () => {
   });
 
   it('coalesces to the latest watermark and fans out in deterministic shards', () => {
-    vi.useFakeTimers();
+    useFakeMonotonicTimers();
     const hub = new ContestSseHub({
       coalesceWindowMs: 25,
       fanoutShards: 2,
@@ -165,7 +176,7 @@ describe('ContestSseHub', () => {
   });
 
   it('sends initial authority immediately but never below an already queued live watermark', () => {
-    vi.useFakeTimers();
+    useFakeMonotonicTimers();
     const hub = new ContestSseHub({
       coalesceWindowMs: 25,
       fanoutShards: 2,
@@ -184,7 +195,7 @@ describe('ContestSseHub', () => {
   });
 
   it('advances unflushed shards immediately and follows up only clients that received the older watermark', () => {
-    vi.useFakeTimers();
+    useFakeMonotonicTimers();
     const hub = new ContestSseHub({
       coalesceWindowMs: 25,
       fanoutShards: 2,
@@ -212,7 +223,7 @@ describe('ContestSseHub', () => {
   });
 
   it('keeps shard scheduling monotonic when the wall clock jumps during delivery', () => {
-    vi.useFakeTimers();
+    useFakeMonotonicTimers();
     vi.setSystemTime(new Date('2026-07-20T00:00:00.000Z'));
     const hub = new ContestSseHub({
       coalesceWindowMs: 25,
@@ -234,7 +245,7 @@ describe('ContestSseHub', () => {
   });
 
   it('rotates the first shard and ignores a duplicate after the previous cycle completes', () => {
-    vi.useFakeTimers();
+    useFakeMonotonicTimers();
     const hub = new ContestSseHub({
       coalesceWindowMs: 25,
       fanoutShards: 2,
@@ -257,7 +268,7 @@ describe('ContestSseHub', () => {
   });
 
   it('emits interval-scoped notification maxima and resets them after each summary', () => {
-    vi.useFakeTimers();
+    useFakeMonotonicTimers();
     const info = vi.spyOn(console, 'info').mockImplementation(() => undefined);
     const hub = new ContestSseHub({
       coalesceWindowMs: 25,
@@ -290,7 +301,7 @@ describe('ContestSseHub', () => {
   });
 
   it('continues later shards when one client write throws', () => {
-    vi.useFakeTimers();
+    useFakeMonotonicTimers();
     const hub = new ContestSseHub({
       coalesceWindowMs: 25,
       fanoutShards: 2,
@@ -311,7 +322,7 @@ describe('ContestSseHub', () => {
   });
 
   it('cancels queued fanout when a contest closes or the Hub begins draining', () => {
-    vi.useFakeTimers();
+    useFakeMonotonicTimers();
     const hub = new ContestSseHub({
       coalesceWindowMs: 25,
       fanoutShards: 2,
@@ -370,7 +381,7 @@ describe('ContestSseHub', () => {
   });
 
   it('sends heartbeats to writable clients and closes blocked clients after ten seconds', () => {
-    vi.useFakeTimers();
+    useFakeMonotonicTimers();
     const hub = new ContestSseHub();
     const healthy = new FakeResponse();
     const blocked = new FakeResponse();
@@ -446,7 +457,7 @@ describe('ContestSseHub', () => {
   });
 
   it.each(['close', 'error', 'finish'])('removes timers and listeners after the response %s event', (event) => {
-    vi.useFakeTimers();
+    useFakeMonotonicTimers();
     const hub = new ContestSseHub();
     const response = new FakeResponse();
     response.writeResults.push(false);
