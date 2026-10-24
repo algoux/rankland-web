@@ -6,7 +6,12 @@
         :key="item.key"
         class="plugin_scroll-solution-toast"
       >
-        <div class="container">
+        <div
+          :class="[
+            'scroll-solution-row',
+            { 'scroll-solution-row-change': item.data.previousResult },
+          ]"
+        >
           <div class="score">{{ item.data.score.value }}</div>
           <div class="user">
             <span class="user-name">{{ resolveDisplayText(item.data.user.name) }}</span>
@@ -25,8 +30,6 @@
             </div>
           </template>
           <template v-else>
-            <div class="result result-placeholder" />
-            <div class="result-change result-placeholder">→</div>
             <div :class="resultClass(item.data.result)">
               <span>{{ item.data.result }}</span>
             </div>
@@ -43,6 +46,7 @@ import { resolveText } from '@algoux/standard-ranklist-utils';
 import type * as srk from '@algoux/standard-ranklist';
 import type { LiveScrollSolutionItem } from '@/services/ranklist-api/live-contest-types';
 import {
+  SCROLL_SOLUTION_LEFT_OFFSET,
   createScrollSolutionState,
   SCROLL_SOLUTION_WIDTH,
 } from './scroll-solution-state';
@@ -56,6 +60,7 @@ const props = withDefaults(defineProps<{ containerMaxHeight?: number }>(), {
 const ITEM_HEIGHT = 45;
 const POP_LIMIT = 20;
 const scrollSolutionWidth = `${SCROLL_SOLUTION_WIDTH}px`;
+const scrollSolutionLeft = `${SCROLL_SOLUTION_LEFT_OFFSET}px`;
 
 const popLimit = computed(() => {
   if (!props.containerMaxHeight) {
@@ -111,10 +116,11 @@ defineExpose({
   --color-ac-bg: #4fb24f;
   --color-rj-bg: #e23a36;
   --color-result-text: #fff;
+  --color-item-border: hsl(var(--background));
 
   position: fixed;
   bottom: 0;
-  left: 0;
+  left: v-bind(scrollSolutionLeft);
   z-index: 50;
   width: v-bind(scrollSolutionWidth);
   padding: 0;
@@ -122,7 +128,7 @@ defineExpose({
   pointer-events: none;
 }
 
-:global(.dark) .plugin_scroll-solution-container {
+:global(html.dark .plugin_scroll-solution-container) {
   --bg: #272727;
   --text: rgb(223, 223, 233);
   --color-user-second-name: #a5a5a5;
@@ -136,23 +142,43 @@ defineExpose({
   min-height: initial;
   padding: 0;
   border-radius: 0;
-  background-color: var(--bg);
   font-family: "Helvetica Neue", Helvetica, "Microsoft Yahei", Arial, sans-serif;
 }
 
-.container {
+.scroll-solution-row {
   display: flex;
+  box-sizing: border-box;
+  position: relative;
+  width: 250px;
   align-items: center;
   height: 45px;
+  background-color: var(--bg);
+}
+
+.scroll-solution-row-change {
+  width: 320px;
+}
+
+.plugin_scroll-solution-toast + .plugin_scroll-solution-toast .scroll-solution-row::before {
+  position: absolute;
+  top: 0;
+  right: 0;
+  left: 0;
+  height: 1px;
+  background-color: var(--color-item-border);
+  content: "";
+  pointer-events: none;
 }
 
 .score {
+  flex: 0 0 40px;
   width: 40px;
   text-align: center;
 }
 
 .user {
-  width: 125px;
+  min-width: 0;
+  flex: 1 1 0;
   height: 45px;
   overflow: hidden;
 }
@@ -174,12 +200,14 @@ defineExpose({
 }
 
 .problem {
+  flex: 0 0 40px;
   width: 40px;
   text-align: center;
 }
 
 .result {
   display: flex;
+  flex: 0 0 45px;
   width: 45px;
   align-self: stretch;
   align-items: center;
@@ -189,15 +217,12 @@ defineExpose({
 
 .result-change {
   display: flex;
+  flex: 0 0 25px;
   width: 25px;
   align-self: stretch;
   align-items: center;
   justify-content: center;
   text-align: center;
-}
-
-.result-placeholder {
-  visibility: hidden;
 }
 
 .result-fb {

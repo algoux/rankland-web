@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed, inject } from 'vue';
-import { Monitor, Moon, Sun } from 'lucide-vue-next';
+import { Moon, Sun, SunMoon } from 'lucide-vue-next';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -14,7 +14,7 @@ import { THEME_TOKEN, type ThemeMode } from '@/lib/theme';
 const themeService = inject(THEME_TOKEN, undefined);
 
 const themeModeOptions = [
-  { value: 'auto', label: '自动', icon: Monitor },
+  { value: 'auto', label: '自动', icon: SunMoon },
   { value: 'light', label: '亮色', icon: Sun },
   { value: 'dark', label: '暗色', icon: Moon },
 ] as const;

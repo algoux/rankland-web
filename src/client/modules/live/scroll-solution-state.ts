@@ -2,6 +2,7 @@ import { ref } from 'vue';
 import type { LiveScrollSolutionItem } from '@/services/ranklist-api/live-contest-types';
 
 export const SCROLL_SOLUTION_WIDTH = 320;
+export const SCROLL_SOLUTION_LEFT_OFFSET = 50;
 
 const POP_INTERVAL = 200;
 const MIN_DELAY = 1000;

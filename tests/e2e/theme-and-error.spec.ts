@@ -185,10 +185,20 @@ test.describe('cross-cutting RankLand behavior', () => {
     await page.goto('/');
 
     await expect(page.locator('html')).toHaveClass(/light/, { timeout: 20_000 });
+    const themeTrigger = page.getByRole('button', { name: '主题模式' });
+    await expect(themeTrigger.locator('svg')).toHaveClass(/lucide-sun-moon/);
 
-    await page.getByRole('button', { name: '主题模式' }).click();
+    await themeTrigger.click();
+    const themeMenu = page.locator('[data-id="theme-mode-menu"]');
+    await expect(themeMenu.getByRole('menuitemradio', { name: /自动/ }).locator('svg.lucide-sun-moon'))
+      .toHaveClass(/lucide-sun-moon/);
+    await expect(themeMenu.getByRole('menuitemradio', { name: /亮色/ }).locator('svg.lucide-sun'))
+      .toHaveClass(/lucide-sun/);
+    await expect(themeMenu.getByRole('menuitemradio', { name: /暗色/ }).locator('svg.lucide-moon'))
+      .toHaveClass(/lucide-moon/);
     await page.locator('[data-id="theme-mode-menu"]').getByRole('menuitemradio', { name: /暗色/ }).click();
     await expect(page.locator('html')).toHaveClass(/dark/);
+    await expect(themeTrigger.locator('svg')).toHaveClass(/lucide-moon/);
     await expect.poll(() => page.evaluate(() => window.localStorage.getItem('RanklandThemeMode'))).toBe('dark');
 
     await page.reload();
@@ -198,6 +208,7 @@ test.describe('cross-cutting RankLand behavior', () => {
     await page.getByRole('button', { name: '主题模式' }).click();
     await page.locator('[data-id="theme-mode-menu"]').getByRole('menuitemradio', { name: /亮色/ }).click();
     await expect(page.locator('html')).toHaveClass(/light/);
+    await expect(themeTrigger.locator('svg')).toHaveClass(/lucide-sun/);
     await expect.poll(() => page.evaluate(() => window.localStorage.getItem('RanklandThemeMode'))).toBe('light');
 
     await page.reload();
@@ -207,6 +218,7 @@ test.describe('cross-cutting RankLand behavior', () => {
     await page.locator('[data-id="theme-mode-menu"]').getByRole('menuitemradio', { name: /自动/ }).click();
     await expect.poll(() => page.evaluate(() => window.localStorage.getItem('RanklandThemeMode'))).toBe('auto');
     await expect(page.locator('html')).toHaveClass(/dark/);
+    await expect(themeTrigger.locator('svg')).toHaveClass(/lucide-sun-moon/);
 
     await page.emulateMedia({ colorScheme: 'light' });
     await expect(page.locator('html')).toHaveClass(/light/);
