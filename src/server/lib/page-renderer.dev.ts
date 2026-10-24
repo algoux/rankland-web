@@ -15,6 +15,7 @@ import path from 'path';
 import { promises as fs } from 'fs';
 import chalk from 'chalk';
 import { createSsrRequestLanguageInitialState } from '@common/request-language';
+import { formatRequestErrorForLog } from '@common/request-error-log';
 import {
   IPageRenderer,
   triggerSuccessfulSsrRender,
@@ -204,7 +205,7 @@ export default class PageRendererDev implements IPageRenderer {
       triggerSuccessfulSsrRender(
         cached,
         options.onSuccessfulSsrRender,
-        (error) => ctx.error?.('[SSR] successful-render callback failed:', error),
+        (error) => ctx.error?.('[SSR] successful-render callback failed:', formatRequestErrorForLog(error)),
       );
       return cached.html;
     }
@@ -285,11 +286,11 @@ export default class PageRendererDev implements IPageRenderer {
       triggerSuccessfulSsrRender(
         rendered,
         options.onSuccessfulSsrRender,
-        (error) => ctx.error?.('[SSR] successful-render callback failed:', error),
+        (error) => ctx.error?.('[SSR] successful-render callback failed:', formatRequestErrorForLog(error)),
       );
       return rendered.html;
     } catch (e) {
-      ctx.error?.(`Render ${ctx.url} failed, retry with csr mode. Error:`, e);
+      ctx.error?.(`Render ${ctx.url} failed, retry with csr mode. Error:`, formatRequestErrorForLog(e));
       this.server.ssrFixStacktrace(e as Error);
 
       // Send back template HTML to inject ViteErrorOverlay

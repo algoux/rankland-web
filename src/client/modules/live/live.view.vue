@@ -73,6 +73,7 @@
 </template>
 
 <script lang="ts">
+import { formatRequestErrorForLog } from '@common/request-error-log';
 import type * as srk from '@algoux/standard-ranklist';
 import { resolveText } from '@algoux/standard-ranklist-utils';
 import { Options, Vue } from 'vue-class-component';
@@ -208,7 +209,7 @@ export default class LiveRanklist extends Vue {
       };
     } catch (error) {
       if (shouldLogRanklistPageError(error)) {
-        console.error(error);
+        console.error(formatRequestErrorForLog(error));
       }
       return {
         livePageData: undefined,
@@ -304,7 +305,7 @@ export default class LiveRanklist extends Vue {
       return;
     }
     if (shouldLogRanklistPageError(error)) {
-      console.error(error);
+      console.error(formatRequestErrorForLog(error));
     }
     this.clearPendingLivePublication();
     this.clientRanklist = null;

@@ -4,6 +4,7 @@ import { Inject, Provide } from 'bwcx-core';
 import type { RequestContext } from 'bwcx-ljsm';
 import type { Renderer, Rendered } from 'vite-ssr/utils/types';
 import { createSsrRequestLanguageInitialState } from '@common/request-language';
+import { formatRequestErrorForLog } from '@common/request-error-log';
 import {
   IPageRenderer,
   triggerSuccessfulSsrRender,
@@ -71,7 +72,7 @@ export default class PageRendererProd implements IPageRenderer {
       requestLanguages: options.requestLanguages,
       onSuccessfulSsrRender: options.onSuccessfulSsrRender,
       onSsrError: (error) => {
-        ctx.error?.(`Render ${ctx.url} failed, retry with csr mode. Error:`, error);
+        ctx.error?.(`Render ${ctx.url} failed, retry with csr mode. Error:`, formatRequestErrorForLog(error));
       },
     });
     ctx.status = res.status;
@@ -94,7 +95,7 @@ export async function renderProdSsrPage(options: RenderProdSsrPageOptions): Prom
     triggerSuccessfulSsrRender(
       cached,
       options.mode === 'ssr' ? options.onSuccessfulSsrRender : undefined,
-      (error) => console.error('[SSR] successful-render callback failed:', error),
+      (error) => console.error('[SSR] successful-render callback failed:', formatRequestErrorForLog(error)),
     );
     return cached;
   }
@@ -116,7 +117,7 @@ export async function renderProdSsrPage(options: RenderProdSsrPageOptions): Prom
   triggerSuccessfulSsrRender(
     rendered,
     options.mode === 'ssr' ? options.onSuccessfulSsrRender : undefined,
-    (error) => console.error('[SSR] successful-render callback failed:', error),
+    (error) => console.error('[SSR] successful-render callback failed:', formatRequestErrorForLog(error)),
   );
   return toSsrPageCachePayload(rendered);
 }

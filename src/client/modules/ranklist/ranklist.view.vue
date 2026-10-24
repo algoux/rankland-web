@@ -53,6 +53,7 @@
 </template>
 
 <script lang="ts">
+import { formatRequestErrorForLog } from '@common/request-error-log';
 import { Options, Vue } from 'vue-class-component';
 import { Prop } from 'vue-property-decorator';
 import { View, RenderMethod, RenderMethodKind } from 'bwcx-client-vue3';
@@ -140,7 +141,7 @@ export default class Ranklist extends Vue {
       };
     } catch (error) {
       if (shouldLogRanklistPageError(error)) {
-        console.error(error);
+        console.error(formatRequestErrorForLog(error));
       }
       return {
         ranklistData: undefined,
@@ -163,7 +164,7 @@ export default class Ranklist extends Vue {
           this.reportedViewCountUK = uk;
         }
       },
-      onError: (error, uk) => console.error(`[ranklist] failed to report view for ${uk}`, error),
+      onError: (error, uk) => console.error(`[ranklist] failed to report view for ${uk}`, formatRequestErrorForLog(error)),
     });
   }
 }

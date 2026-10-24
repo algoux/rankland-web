@@ -140,6 +140,7 @@
 </template>
 
 <script lang="ts">
+import { formatRequestErrorForLog } from '@common/request-error-log';
 import { Options, Vue } from 'vue-class-component';
 import { Prop } from 'vue-property-decorator';
 import { View, RenderMethod, RenderMethodKind } from 'bwcx-client-vue3';
@@ -391,7 +392,7 @@ export default class Collection extends Vue {
       };
     } catch (error) {
       if (shouldLogRanklistPageError(error)) {
-        console.error(error);
+        console.error(formatRequestErrorForLog(error));
       }
       return {
         collectionPageData: undefined,
@@ -586,7 +587,7 @@ export default class Collection extends Vue {
           this.reportedViewCountUK = uk;
         }
       },
-      onError: (error, uk) => console.error(`[collection] failed to report view for ${uk}`, error),
+      onError: (error, uk) => console.error(`[collection] failed to report view for ${uk}`, formatRequestErrorForLog(error)),
     });
   }
 }

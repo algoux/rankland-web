@@ -1,4 +1,6 @@
 import { describe, expect, it, vi } from 'vitest';
+import createError from 'axios/lib/core/createError';
+import { format } from 'node:util';
 import { createHead } from '@vueuse/head';
 import { createSSRApp } from 'vue';
 import { renderToString } from '@vue/server-renderer';
@@ -23,6 +25,43 @@ describe('rankland migrated pages', () => {
     expect(Live).toBeTruthy();
     expect(Playground).toBeTruthy();
     expect(NotFound).toBeTruthy();
+  });
+
+  it.each([
+    ['ranklist', Ranklist],
+    ['collection', Collection],
+    ['live', Live],
+    ['search', Search],
+  ])('keeps repeated %s SSR Axios error logs compact', async (_name, component) => {
+    const error = createError('Request failed with status code 500', {
+      method: 'get',
+      url: '/v2/public/contests/example',
+      headers: { Cookie: 'private-cookie' },
+    }, undefined, undefined, { status: 500, data: 'large-body'.repeat(1000) });
+    const fail = vi.fn().mockRejectedValue(error);
+    const log = vi.spyOn(console, 'error').mockImplementation(() => {});
+
+    try {
+      await getComponentAsyncData(component)({
+        api: {
+          getRanklist: fail,
+          getCollection: fail,
+          listAllRanklists: fail,
+          createLiveContestTransport: () => ({ getContest: fail }),
+        },
+        isClient: false,
+        to: { params: { id: 'example' }, query: {} },
+        writeResponse: vi.fn(),
+      });
+
+      expect(log).toHaveBeenCalledOnce();
+      const output = format(...log.mock.calls[0]);
+      expect(output).toContain('Request failed with status code 500');
+      expect(output).not.toMatch(/private-cookie|large-body|\n/);
+      expect(output.length).toBeLessThan(1024);
+    } finally {
+      log.mockRestore();
+    }
   });
 
   it('marks collection SSR output as not cacheable when the selected ranklist transiently fails', async () => {

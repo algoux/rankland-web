@@ -4,6 +4,7 @@ import type { IBwcxApiRequestAdaptorArgs } from 'bwcx-api-client';
 import { inject } from 'vue';
 import { ApiClient } from '@common/api/api-client';
 import { ResponseParser } from '@common/api/response-parser';
+import { formatRequestErrorForLog } from '@common/request-error-log';
 
 export interface IRequestExtraOpts {
   signal?: AbortSignal;
@@ -28,7 +29,11 @@ export class ApiClientFactory {
             console.log('[ApiClient] request cancelled');
             return;
           }
-          console.error('[ApiClient] request error', err, config);
+          if (Axios.isAxiosError(err)) {
+            console.error('[ApiClient] request error', formatRequestErrorForLog(err));
+          } else {
+            console.error('[ApiClient] request error', err, config);
+          }
           throw err;
         });
     };

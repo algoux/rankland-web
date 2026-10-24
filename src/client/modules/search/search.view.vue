@@ -69,6 +69,7 @@
 </template>
 
 <script lang="ts">
+import { formatRequestErrorForLog } from '@common/request-error-log';
 import { Options, Vue } from 'vue-class-component';
 import { Prop } from 'vue-property-decorator';
 import { View, RenderMethod, RenderMethodKind } from 'bwcx-client-vue3';
@@ -139,7 +140,7 @@ export default class Search extends Vue {
         loadFailed: false,
       };
     } catch (error) {
-      console.error(error);
+      console.error(formatRequestErrorForLog(error));
       return {
         ranklistIndex: { ranks: [] },
         loadFailed: true,

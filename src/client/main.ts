@@ -6,6 +6,7 @@ import type { HookParams } from 'vite-ssr/vue/types';
 import { Vue } from 'vue-class-component';
 import { BwcxClientRouterPlugin } from 'bwcx-client-vue3';
 import { clientRoutesMap } from '@common/router/client-routes';
+import { formatRequestErrorForLog } from '@common/request-error-log';
 import { ApiClientPlugin } from './plugins/api-client.plugin';
 import type { ApiClientType } from './api';
 import type { ApiService } from './services/ranklist-api';
@@ -59,14 +60,14 @@ export function mainEntry({
   }
 
   app.config.errorHandler = (err, vm, info) => {
-    console.error('Vue error:', err, vm, info);
+    console.error('Vue error:', formatRequestErrorForLog(err), vm, info);
     if (isClient) {
       // 可以在此展示全局错误提示
     }
   };
 
   router.onError((err) => {
-    console.error('Vue Router error:', err);
+    console.error('Vue Router error:', formatRequestErrorForLog(err));
     if (isClient) {
       // 可以在此展示全局错误提示
     }
