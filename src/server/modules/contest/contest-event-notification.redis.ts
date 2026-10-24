@@ -1,6 +1,7 @@
 import { Inject, Provide } from 'bwcx-core';
 import { length as hasLength } from 'class-validator';
 import RedisConfig from '@server/configs/redis/redis.config';
+import ContestEventRuntimeConfig from '@server/configs/contest-event-runtime/contest-event-runtime.config';
 import { RedisClientId, RedisSubscriberClientId } from '@server/container-ids';
 import type { ContestCommittedWatermark } from './contest-event-watermark';
 import type { ContestEventCacheControl } from './contest-event-cache-control';
@@ -98,6 +99,7 @@ export type ContestEventCacheControlEnvelopeParseResult =
 export default class ContestEventNotificationRedisAdapter {
   private readonly channel: string;
   private readonly controlChannel: string;
+  private readonly runtimeDiagnosticsEnabled: boolean;
   private state: ContestEventNotificationRedisState = 'idle';
   private callbacks?: ContestEventNotificationRedisCallbacks;
   private started = false;
@@ -124,9 +126,12 @@ export default class ContestEventNotificationRedisAdapter {
     private readonly subscriber: RedisSubscriberPort,
     @Inject(RedisConfig)
     config: RedisConfig,
+    @Inject(ContestEventRuntimeConfig)
+    runtimeConfig: Pick<ContestEventRuntimeConfig, 'diagnosticsEnabled'> = new ContestEventRuntimeConfig(),
   ) {
     this.channel = buildContestEventNotificationChannel(config.namespace);
     this.controlChannel = buildContestEventCacheControlChannel(config.namespace);
+    this.runtimeDiagnosticsEnabled = runtimeConfig.diagnosticsEnabled;
   }
 
   public getState(): ContestEventNotificationRedisState {
@@ -384,11 +389,13 @@ export default class ContestEventNotificationRedisAdapter {
     }
     const previousState = this.state;
     this.state = state;
-    this.safeInfo('contest_event_notification.redis_state', {
-      channel: this.channel,
-      previousState,
-      state,
-    });
+    if (this.runtimeDiagnosticsEnabled) {
+      this.safeInfo('contest_event_notification.redis_state', {
+        channel: this.channel,
+        previousState,
+        state,
+      });
+    }
   }
 
   private logSubscriberFailure(operation: string, error?: unknown): void {

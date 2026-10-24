@@ -6,7 +6,12 @@
         :key="item.key"
         class="plugin_scroll-solution-toast"
       >
-        <div class="container">
+        <div
+          :class="[
+            'scroll-solution-row',
+            { 'scroll-solution-row-change': item.data.previousResult },
+          ]"
+        >
           <div class="score">{{ item.data.score.value }}</div>
           <div class="user">
             <span class="user-name">{{ resolveDisplayText(item.data.user.name) }}</span>
@@ -15,9 +20,20 @@
             </span>
           </div>
           <div class="problem">{{ item.data.problem.alias }}</div>
-          <div :class="resultClass(item.data.result)">
-            <span>{{ item.data.result }}</span>
-          </div>
+          <template v-if="item.data.previousResult">
+            <div :class="resultClass(item.data.previousResult)">
+              <span>{{ item.data.previousResult }}</span>
+            </div>
+            <div class="result-change">→</div>
+            <div :class="resultClass(item.data.result)">
+              <span>{{ item.data.result }}</span>
+            </div>
+          </template>
+          <template v-else>
+            <div :class="resultClass(item.data.result)">
+              <span>{{ item.data.result }}</span>
+            </div>
+          </template>
         </div>
       </div>
     </TransitionGroup>
@@ -25,28 +41,17 @@
 </template>
 
 <script setup lang="ts">
-import { computed, onBeforeUnmount, onMounted, ref } from 'vue';
+import { computed, onBeforeUnmount, onMounted } from 'vue';
 import { resolveText } from '@algoux/standard-ranklist-utils';
 import type * as srk from '@algoux/standard-ranklist';
+import type { LiveScrollSolutionItem } from '@/services/ranklist-api/live-contest-types';
+import {
+  SCROLL_SOLUTION_LEFT_OFFSET,
+  createScrollSolutionState,
+  SCROLL_SOLUTION_WIDTH,
+} from './scroll-solution-state';
 
-export interface ScrollSolutionDataItem {
-  problem: {
-    alias: string;
-  };
-  score: {
-    value: srk.RankScore['value'];
-  };
-  result: Exclude<srk.SolutionResultFull, null>;
-  user: {
-    name: srk.User['name'];
-    organization: srk.User['organization'];
-  };
-}
-
-interface VisibleItem {
-  key: number;
-  data: ScrollSolutionDataItem;
-}
+export type ScrollSolutionDataItem = LiveScrollSolutionItem;
 
 const props = withDefaults(defineProps<{ containerMaxHeight?: number }>(), {
   containerMaxHeight: 0,
@@ -54,30 +59,8 @@ const props = withDefaults(defineProps<{ containerMaxHeight?: number }>(), {
 
 const ITEM_HEIGHT = 45;
 const POP_LIMIT = 20;
-const POP_INTERVAL = 200;
-const MIN_DELAY = 1000;
-const RJ_DELAY = 10_000;
-const DELAY_MAP: Record<string, number> = {
-  FB: 180_000,
-  AC: 20_000,
-  RJ: RJ_DELAY,
-  '?': 10_000,
-  WA: RJ_DELAY,
-  PE: RJ_DELAY,
-  TLE: RJ_DELAY,
-  MLE: RJ_DELAY,
-  OLE: RJ_DELAY,
-  RTE: RJ_DELAY,
-  CE: RJ_DELAY,
-  UKE: RJ_DELAY,
-};
-
-const visibleItems = ref<VisibleItem[]>([]);
-const queue: ScrollSolutionDataItem[] = [];
-const timers: number[] = [];
-let nextKey = 1;
-let popInterval = POP_INTERVAL;
-let queueTimer: number | undefined;
+const scrollSolutionWidth = `${SCROLL_SOLUTION_WIDTH}px`;
+const scrollSolutionLeft = `${SCROLL_SOLUTION_LEFT_OFFSET}px`;
 
 const popLimit = computed(() => {
   if (!props.containerMaxHeight) {
@@ -86,50 +69,18 @@ const popLimit = computed(() => {
   return Math.max(1, Math.floor(props.containerMaxHeight / ITEM_HEIGHT));
 });
 
-function pushSolutions(rows: ScrollSolutionDataItem[]) {
-  if (!rows.length) {
-    return;
-  }
-  for (const row of rows) {
-    if (row.result === 'FB') {
-      pop(row, DELAY_MAP[row.result]);
-    } else {
-      queue.push(row);
-    }
-  }
-}
+const state = createScrollSolutionState({
+  getPopLimit: () => popLimit.value,
+  scheduler: {
+    setTimeout: (callback, delay) => window.setTimeout(callback, delay),
+    clearTimeout: (timer) => window.clearTimeout(timer),
+  },
+});
+const visibleItems = state.visibleItems;
+const pushSolutions = state.pushSolutions;
+const resetSolutions = state.resetSolutions;
 
-function pop(data: ScrollSolutionDataItem, delay = DELAY_MAP[data.result] || RJ_DELAY) {
-  const key = nextKey;
-  nextKey += 1;
-  visibleItems.value = [...visibleItems.value, { key, data }].slice(-popLimit.value);
-  const timer = window.setTimeout(() => {
-    visibleItems.value = visibleItems.value.filter((item) => item.key !== key);
-  }, delay);
-  timers.push(timer);
-}
-
-function popFromQueue() {
-  if (queue.length > 0) {
-    const maxPopInterval = 100;
-    const next = queue[0];
-    let delay = DELAY_MAP[next.result] || RJ_DELAY;
-
-    if (queue.length <= popLimit.value) {
-      popInterval = maxPopInterval;
-    } else {
-      const scale = Math.max(1 / (queue.length / popLimit.value) - 0.5, 0.01);
-      delay = MIN_DELAY + delay * scale;
-      popInterval = maxPopInterval * scale;
-    }
-
-    pop(next, delay);
-    queue.shift();
-  }
-  queueTimer = window.setTimeout(popFromQueue, popInterval);
-}
-
-function resultClass(result: ScrollSolutionDataItem['result']) {
+function resultClass(result: LiveScrollSolutionItem['result']) {
   return [
     'result',
     result === 'FB' ? 'result-fb' : '',
@@ -144,20 +95,16 @@ function resolveDisplayText(text: srk.Text) {
 }
 
 onMounted(() => {
-  popFromQueue();
+  state.start();
 });
 
 onBeforeUnmount(() => {
-  if (queueTimer !== undefined) {
-    window.clearTimeout(queueTimer);
-  }
-  for (const timer of timers) {
-    window.clearTimeout(timer);
-  }
+  state.stop();
 });
 
 defineExpose({
   pushSolutions,
+  resetSolutions,
 });
 </script>
 
@@ -169,18 +116,19 @@ defineExpose({
   --color-ac-bg: #4fb24f;
   --color-rj-bg: #e23a36;
   --color-result-text: #fff;
+  --color-item-border: hsl(var(--background));
 
   position: fixed;
   bottom: 0;
-  left: 0;
+  left: v-bind(scrollSolutionLeft);
   z-index: 50;
-  width: 250px;
+  width: v-bind(scrollSolutionWidth);
   padding: 0;
   color: var(--text);
   pointer-events: none;
 }
 
-:global(.dark) .plugin_scroll-solution-container {
+:global(html.dark .plugin_scroll-solution-container) {
   --bg: #272727;
   --text: rgb(223, 223, 233);
   --color-user-second-name: #a5a5a5;
@@ -194,23 +142,43 @@ defineExpose({
   min-height: initial;
   padding: 0;
   border-radius: 0;
-  background-color: var(--bg);
   font-family: "Helvetica Neue", Helvetica, "Microsoft Yahei", Arial, sans-serif;
 }
 
-.container {
+.scroll-solution-row {
   display: flex;
+  box-sizing: border-box;
+  position: relative;
+  width: 250px;
   align-items: center;
   height: 45px;
+  background-color: var(--bg);
+}
+
+.scroll-solution-row-change {
+  width: 320px;
+}
+
+.plugin_scroll-solution-toast + .plugin_scroll-solution-toast .scroll-solution-row::before {
+  position: absolute;
+  top: 0;
+  right: 0;
+  left: 0;
+  height: 1px;
+  background-color: var(--color-item-border);
+  content: "";
+  pointer-events: none;
 }
 
 .score {
+  flex: 0 0 40px;
   width: 40px;
   text-align: center;
 }
 
 .user {
-  width: 125px;
+  min-width: 0;
+  flex: 1 1 0;
   height: 45px;
   overflow: hidden;
 }
@@ -232,13 +200,25 @@ defineExpose({
 }
 
 .problem {
+  flex: 0 0 40px;
   width: 40px;
   text-align: center;
 }
 
 .result {
   display: flex;
+  flex: 0 0 45px;
   width: 45px;
+  align-self: stretch;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+}
+
+.result-change {
+  display: flex;
+  flex: 0 0 25px;
+  width: 25px;
   align-self: stretch;
   align-items: center;
   justify-content: center;

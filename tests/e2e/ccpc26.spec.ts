@@ -1,23 +1,53 @@
 import type { Page } from '@playwright/test';
-import type * as srk from '@algoux/standard-ranklist';
-import {
-  filterSolutionsUntil,
-  getSortedCalculatedRawSolutions,
-  regenerateRanklistBySolutions,
-} from '@algoux/standard-ranklist-utils';
 import fixture from '../fixtures/ccpc26.srk.json';
 import { expect, test } from './test';
-import { stubWebSocket } from './helpers/browser';
 
 const minute = 60_000;
 const contestStart = Date.parse(fixture.contest.startAt);
+const LIVE_AUTH_HEADERS = {
+  'x-token': 'rankland-e2e-auth',
+  'x-producer-id': 'rankland-web-e2e-ccpc26',
+};
 
-function ranklistAt(minutes: number) {
-  const data = structuredClone(fixture) as srk.Ranklist;
-  return regenerateRanklistBySolutions(
-    data,
-    filterSolutionsUntil(getSortedCalculatedRawSolutions(data.rows), [minutes, 'min']),
-  );
+interface LiveEventSession {
+  key: string;
+  streamRevision: number;
+  nextEventId: number;
+}
+
+function anonymousFooterCellsAreHidden(rows: Element[], displayedAliases: string[]) {
+  for (const row of rows) {
+    const cells = row.querySelectorAll(
+      '.srk-problem-statistics-footer-cell:not(.srk-extra-statistics-footer-cell)',
+    );
+    for (const [index, cell] of Array.from(cells).entries()) {
+      if (
+        displayedAliases[index] === ''
+        && (cell.textContent?.trim() !== '' || cell.querySelector('a, [title], [data-tooltip]'))
+      ) {
+        return false;
+      }
+    }
+  }
+  return true;
+}
+
+async function waitForAnimationTimerCycle() {
+  await new Promise<void>((resolve) => {
+    requestAnimationFrame(() => resolve());
+  });
+  await new Promise<void>((resolve) => {
+    setTimeout(resolve, 0);
+  });
+  await new Promise<void>((resolve) => {
+    requestAnimationFrame(() => resolve());
+  });
+}
+
+function waitForMacrotask() {
+  return new Promise<void>((resolve) => {
+    setTimeout(resolve, 0);
+  });
 }
 
 async function preparePage(page: Page, initialPreferCCPC26?: boolean) {
@@ -30,7 +60,6 @@ async function preparePage(page: Page, initialPreferCCPC26?: boolean) {
       }));
     }
   }, initialPreferCCPC26 ?? null);
-  await stubWebSocket(page);
 }
 
 async function openStatic(page: Page, ordinary = false) {
@@ -42,7 +71,6 @@ async function openStatic(page: Page, ordinary = false) {
 
 async function openLive(
   page: Page,
-  snapshot: () => srk.Ranklist,
   ordinary = false,
   initialPreferCCPC26?: boolean,
 ) {
@@ -53,27 +81,81 @@ async function openLive(
     if (/hydration|mismatch|Cannot read properties/i.test(message.text())) runtimeProblems.push(message.text());
   });
   await preparePage(page, initialPreferCCPC26);
-  await page.route((url) => url.pathname === `/ranking/config/${key}`, (route) => route.fulfill({
-    json: {
-      code: 0,
-      message: 'success',
-      data: {
-        id: key,
-        uniqueKey: key,
-        ...fixture.contest,
-      },
-    },
-  }));
-  let requests = 0;
-  await page.route((url) => url.pathname === `/ranking/${key}`, (route) => {
-    requests += 1;
-    return route.fulfill({ json: { code: 0, message: 'success', data: snapshot() } });
-  });
+  const session = await resetLiveContest(page, key);
   await page.goto(`/live/${key}`);
   await expect(page.locator('.srk-main tbody tr')).toHaveCount(3);
   await expect(page.getByRole('slider', { name: 'Time Travel' })).toBeVisible();
   expect(runtimeProblems).toEqual([]);
-  return () => requests;
+  return session;
+}
+
+async function resetLiveContest(page: Page, key: string): Promise<LiveEventSession> {
+  const resetResponse = await page.request.post(`/api/v2/contests/${key}/events/reset`, {
+    headers: { 'x-token': LIVE_AUTH_HEADERS['x-token'] },
+  });
+  expect(resetResponse.ok(), await resetResponse.text()).toBe(true);
+
+  const stateResponse = await page.request.get(`/api/v2/public/contests/${key}/event-stream`);
+  expect(stateResponse.ok(), await stateResponse.text()).toBe(true);
+  const stateBody = await stateResponse.json() as {
+    data?: { streamRevision?: number };
+  };
+  const streamRevision = stateBody.data?.streamRevision;
+  expect(streamRevision).toEqual(expect.any(Number));
+  const session: LiveEventSession = {
+    key,
+    streamRevision: streamRevision!,
+    nextEventId: 1,
+  };
+  await appendLiveEvents(page, session, createCcpc26InitialEvents());
+  return session;
+}
+
+async function appendLiveEvents(
+  page: Page,
+  session: LiveEventSession,
+  events: Array<Record<string, unknown>>,
+) {
+  const eventsWithIds = events.map((event, index) => ({
+    eventId: session.nextEventId + index,
+    ...event,
+  }));
+  const response = await page.request.post(`/api/v2/contests/${session.key}/events`, {
+    headers: LIVE_AUTH_HEADERS,
+    data: {
+      streamRevision: session.streamRevision,
+      events: eventsWithIds,
+    },
+  });
+  expect(response.ok(), await response.text()).toBe(true);
+  session.nextEventId += eventsWithIds.length;
+}
+
+function createCcpc26InitialEvents(): Array<Record<string, unknown>> {
+  const solutions = [
+    { solutionId: 201, userId: 'ccpc26-alpha', problemAlias: 'B', submittedAtSeconds: 60 },
+    { solutionId: 202, userId: 'ccpc26-alpha', problemAlias: 'A', submittedAtSeconds: 120 },
+    { solutionId: 203, userId: 'ccpc26-beta', problemAlias: 'A', submittedAtSeconds: 180 },
+  ];
+  return solutions.flatMap((solution) => [
+    {
+      type: 0,
+      newSolutionData: {
+        solutionId: solution.solutionId,
+        userId: solution.userId,
+        problemAlias: solution.problemAlias,
+        time: { value: String(solution.submittedAtSeconds), unit: 0 },
+      },
+    },
+    {
+      type: 2,
+      solutionOnResultSettleData: {
+        solutionId: solution.solutionId,
+        result: 5,
+        time: { value: String(solution.submittedAtSeconds + 1), unit: 0 },
+      },
+    },
+  ]);
 }
 
 function problemHeaders(page: Page) {
@@ -88,11 +170,7 @@ async function expectProblemAliases(page: Page, aliases: string[]) {
     (cells) => cells.map((cell) => cell.querySelector('span')?.textContent || ''),
   )).toEqual(aliases);
   await expect.poll(() => page.locator('.srk-problem-statistics-footer-row').evaluateAll(
-    (rows, displayedAliases) => rows.every((row) => Array.from(row.querySelectorAll(
-      '.srk-problem-statistics-footer-cell:not(.srk-extra-statistics-footer-cell)',
-    )).every((cell, index) => displayedAliases[index] !== '' || (
-      cell.textContent?.trim() === '' && !cell.querySelector('a, [title], [data-tooltip]')
-    ))),
+    anonymousFooterCellsAreHidden,
     aliases,
   )).toBe(true);
 }
@@ -304,9 +382,8 @@ test.describe('CCPC26 presentation', () => {
   });
 
   test('live crosses the exact freeze boundary without new submissions and replay takes priority', async ({ page }) => {
-    const snapshot = ranklistAt(4);
     await page.clock.install({ time: new Date(contestStart + 4 * minute) });
-    await openLive(page, () => snapshot);
+    await openLive(page);
     await expectProblemAliases(page, ['A', '', '']);
     await page.clock.pauseAt(new Date(contestStart + 8 * minute - 1000));
     await expectProblemAliases(page, ['A', '', '']);
@@ -323,45 +400,79 @@ test.describe('CCPC26 presentation', () => {
     await expect(page.getByText('Time Travel Mode', { exact: true })).toHaveCount(0);
   });
 
-  test('live polling updates open submission privacy and preserves an i18n-title replay slider', async ({ page }) => {
-    let latest = ranklistAt(4);
+  test('live SSE updates open submission privacy and preserves an i18n-title replay slider', async ({ page }) => {
     await page.clock.install({ time: new Date(contestStart + 4 * minute) });
-    const pollRequests = await openLive(page, () => latest);
+    const session = await openLive(page);
     await expectProblemAliases(page, ['A', '', '']);
     await alphaProblemCells(page).nth(1).click();
     await expectAnonymousSolutions(page);
     await page.clock.pauseAt(new Date(contestStart + 6 * minute));
-    const pollsBeforeUpdate = pollRequests();
-    latest = ranklistAt(6);
-    await page.clock.runFor(10_000);
-    await expect.poll(pollRequests).toBeGreaterThan(pollsBeforeUpdate);
+    await page.clock.resume();
+    await appendLiveEvents(page, session, [
+      {
+        type: 0,
+        newSolutionData: {
+          solutionId: 204,
+          userId: 'ccpc26-gamma',
+          problemAlias: 'B',
+          time: { value: '360', unit: 0 },
+        },
+      },
+      {
+        type: 2,
+        solutionOnResultSettleData: {
+          solutionId: 204,
+          result: 5,
+          time: { value: '361', unit: 0 },
+        },
+      },
+    ]);
     await expectProblemAliases(page, ['A', 'B', '']);
     await expect(alphaProblemCells(page).nth(1)).toHaveClass(/srk-prest-status-block-fb/);
     await expectRevealedBSolutions(page);
 
     // The same open submission details follow revelation and later data correction.
-    const pollsBeforeAnonymous = pollRequests();
-    latest = ranklistAt(4);
-    await page.clock.runFor(10_000);
-    await expect.poll(pollRequests).toBeGreaterThan(pollsBeforeAnonymous);
+    await appendLiveEvents(page, session, [
+      {
+        type: 3,
+        solutionOnResultChangeData: {
+          solutionId: 204,
+          previousResult: 5,
+          result: 2,
+          time: { value: '362', unit: 0 },
+        },
+      },
+    ]);
     await expectProblemAliases(page, ['A', '', '']);
     await expectAnonymousSolutions(page);
-    await page.clock.resume();
     await closeAnonymousSolutions(page);
-    const pollsBeforeReveal = pollRequests();
-    latest = ranklistAt(6);
-    await page.clock.runFor(10_000);
-    await expect.poll(pollRequests).toBeGreaterThan(pollsBeforeReveal);
+    await appendLiveEvents(page, session, [
+      {
+        type: 3,
+        solutionOnResultChangeData: {
+          solutionId: 204,
+          previousResult: 2,
+          result: 5,
+          time: { value: '363', unit: 0 },
+        },
+      },
+    ]);
     await expectProblemAliases(page, ['A', 'B', '']);
 
     await replayAt(page, 4);
     await expectProblemAliases(page, ['A', '', '']);
-    const pollsBeforeReplay = pollRequests();
-    await page.clock.runFor(10_000);
-    await expect.poll(pollRequests).toBeGreaterThan(pollsBeforeReplay);
+    await appendLiveEvents(page, session, [
+      {
+        type: 2,
+        solutionOnResultSettleData: {
+          solutionId: 204,
+          result: 5,
+          time: { value: '364', unit: 0 },
+        },
+      },
+    ]);
     await expect(page.getByRole('slider', { name: 'Time Travel' })).toHaveValue('4');
     await expectProblemAliases(page, ['A', '', '']);
-    await page.clock.resume();
     await page.getByRole('slider', { name: 'Time Travel' }).press('End');
     await expectProblemAliases(page, ['A', 'B', '']);
     await alphaProblemCells(page).nth(1).click();
@@ -370,10 +481,17 @@ test.describe('CCPC26 presentation', () => {
     await expect(page.getByRole('dialog')).toHaveCount(0);
     await problemHeaders(page).nth(1).click();
     await expect(page.getByRole('dialog', { name: 'Info of Problem B', exact: true })).toBeVisible();
-    const pollsBeforeCorrection = pollRequests();
-    latest = ranklistAt(4);
-    await page.clock.runFor(10_000);
-    await expect.poll(pollRequests).toBeGreaterThan(pollsBeforeCorrection);
+    await appendLiveEvents(page, session, [
+      {
+        type: 3,
+        solutionOnResultChangeData: {
+          solutionId: 204,
+          previousResult: 5,
+          result: 2,
+          time: { value: '365', unit: 0 },
+        },
+      },
+    ]);
     await expectProblemAliases(page, ['A', '', '']);
     await expect(page.getByRole('dialog')).toHaveCount(0);
     await expect(page.locator('.problem-modal')).toHaveCount(0);
@@ -436,9 +554,7 @@ test.describe('CCPC26 presentation', () => {
         .getByText('Team Alpha', { exact: true }).click();
       await expect(page.getByRole('dialog', { name: 'Team Alpha', exact: true })).toBeVisible();
       // The user selection is scheduled after a frame and now waits on prepare.
-      await page.evaluate(() => new Promise<void>((resolve) => requestAnimationFrame(
-        () => setTimeout(() => requestAnimationFrame(() => resolve()), 0),
-      )));
+      await page.evaluate(waitForAnimationTimerCycle);
       const before = await workerEvents();
       expect(before).not.toContain('select');
       if (leavePage) {
@@ -455,7 +571,7 @@ test.describe('CCPC26 presentation', () => {
         await expect(page.getByRole('dialog', { name: 'Team Alpha', exact: true })).toBeVisible();
         await expect(page.locator('.user-modal canvas')).toHaveCount(0);
       }
-      await page.evaluate(() => new Promise<void>((resolve) => setTimeout(resolve, 0)));
+      await page.evaluate(waitForMacrotask);
       expect((await workerEvents()).slice(before.length)).toEqual(['terminate']);
     });
   }
@@ -540,9 +656,8 @@ test.describe('CCPC26 presentation', () => {
     page.on('console', (message) => {
       if (/hydration|mismatch|Cannot read properties/i.test(message.text())) runtimeProblems.push(message.text());
     });
-    const snapshot = ranklistAt(4);
     await page.clock.setFixedTime(new Date(contestStart + 4 * minute));
-    await openLive(page, () => snapshot, false, false);
+    await openLive(page, false, false);
     const ccpc26 = page.getByRole('switch', { name: 'CCPC26', exact: true });
     await expect(ccpc26).toHaveCount(0);
     await expectProblemAliases(page, ['A', 'B', 'C']);
@@ -572,9 +687,7 @@ test.describe('CCPC26 presentation', () => {
     test(`ordinary ICPC remains identified in ${live ? 'live' : 'static'} and replay modes`, async ({ page }) => {
       await page.clock.setFixedTime(new Date(contestStart + (live ? 4 : 11) * minute));
       if (live) {
-        const data = ranklistAt(4);
-        data.sorter = { algorithm: 'ICPC', config: {} };
-        await openLive(page, () => data, true);
+        await openLive(page, true);
       } else {
         await openStatic(page, true);
       }

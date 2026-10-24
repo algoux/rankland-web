@@ -1,5 +1,5 @@
 <template>
-  <section v-if="errorKind === PageErrorKind.NotFound" class="mt-16 text-center" data-id="live-not-found">
+  <section v-if="pageErrorKind === PageErrorKind.NotFound" class="mt-16 text-center" data-id="live-not-found">
     <Head>
       <title>{{ notFoundTitle }}</title>
     </Head>
@@ -9,7 +9,7 @@
     </router-link>
   </section>
 
-  <section v-else-if="errorKind === PageErrorKind.LoadFailed" class="mt-16 text-center">
+  <section v-else-if="pageErrorKind === PageErrorKind.LoadFailed" class="mt-16 text-center">
     <Head>
       <title>{{ fallbackTitle }}</title>
     </Head>
@@ -39,9 +39,9 @@
       <meta property="og:title" :content="pageTitle" />
     </Head>
     <StyledRanklist
+      :id="liveKey"
       :data="ranklist"
       :name="liveKey"
-      :id="liveKey"
       show-filter
       show-progress
       show-footer
@@ -83,17 +83,23 @@ import { Button } from '@/components/ui/button';
 import { Switch } from '@/components/ui/switch';
 import Loading from '@/components/common/Loading.vue';
 import ScrollSolution from './ScrollSolution.vue';
-import type { ScrollSolutionDataItem } from './ScrollSolution.vue';
 import StyledRanklist from '@/components/ranklist/StyledRanklist.vue';
-import { getRanklandRuntimeConfig } from '@/app/config';
-import { loadLivePageData, type LivePageData } from './page-data';
+import {
+  createLiveContestTransport,
+  loadLivePageData,
+  type LivePageData,
+} from './page-data';
 import {
   RanklistPageErrorKind,
   shouldLogRanklistPageError,
+  toRanklistPageErrorKind,
   writeRanklistPageErrorResponse,
 } from '@/domain/ranklist/page-error';
 import { formatTitle } from '@/app/title-format';
-import { parseRealtimeSolutionBuffer } from '@/utils/realtime-solutions.util';
+import { ContestEventConsumer } from './contest-event-consumer';
+import { LiveRanklistProjector } from './live-ranklist-projector';
+import type { LiveScrollSolutionItem } from '@/services/ranklist-api/live-contest-types';
+import { SCROLL_SOLUTION_WIDTH } from './scroll-solution-state';
 
 @View('/live/:id')
 @RenderMethod(RenderMethodKind.CSR)
@@ -114,23 +120,20 @@ export default class LiveRanklist extends Vue {
   fallbackTitle = formatTitle('Live');
   notFoundTitle = formatTitle('Not Found');
   clientRanklist: srk.Ranklist | null = null;
+  clientErrorKind?: RanklistPageErrorKind;
   clientWidth = 1024;
   clientHeight = 0;
-  private pollTimer: number | undefined;
-  private websocket: WebSocket | undefined;
-  private currentLiveKey = '';
+  private consumer?: ContestEventConsumer;
+  private projector?: LiveRanklistProjector;
+  private currentLiveSignature = '';
+  private sessionGeneration = 0;
+  private pendingLiveRanklist: srk.Ranklist | null = null;
+  private pendingScrollItems: LiveScrollSolutionItem[] = [];
+  private livePublishFrame?: number;
 
   get liveKey() {
     const id = this.$route.params.id;
     return Array.isArray(id) ? id[0] : String(id || '');
-  }
-
-  get liveId() {
-    return this.livePageData?.liveInfo.id || '';
-  }
-
-  get token() {
-    return firstQueryValue(this.$route.query.token);
   }
 
   get enabledScrollSolution() {
@@ -138,11 +141,16 @@ export default class LiveRanklist extends Vue {
   }
 
   get ranklist() {
-    return this.clientRanklist || this.livePageData?.ranklist;
+    return this.clientRanklist;
+  }
+
+  get pageErrorKind() {
+    return this.clientErrorKind || this.errorKind;
   }
 
   get pageTitle() {
-    return formatTitle(`Live: ${resolveText(this.ranklist?.contest.title || '')}`);
+    const title = this.ranklist?.contest.title || this.livePageData?.config.contest.title || '';
+    return formatTitle(`Live: ${resolveText(title)}`);
   }
 
   get shouldRenderScrollSolutionSwitch() {
@@ -151,7 +159,7 @@ export default class LiveRanklist extends Vue {
 
   get ranklistSectionStyle() {
     return {
-      marginLeft: this.enabledScrollSolution ? '250px' : undefined,
+      marginLeft: this.enabledScrollSolution ? `${SCROLL_SOLUTION_WIDTH}px` : undefined,
     };
   }
 
@@ -167,8 +175,7 @@ export default class LiveRanklist extends Vue {
 
   beforeUnmount() {
     window.removeEventListener('resize', this.updateViewport);
-    this.stopPolling();
-    this.closeWebsocket();
+    this.stopLiveSession();
   }
 
   reloadPage() {
@@ -194,10 +201,9 @@ export default class LiveRanklist extends Vue {
 
   async asyncData({ api, isClient, to, writeResponse }: AsyncDataOptions) {
     const id = Array.isArray(to.params.id) ? to.params.id[0] : String(to.params.id || '');
-    const token = firstQueryValue(to.query.token);
     try {
       return {
-        livePageData: await loadLivePageData({ api, id, token }),
+        livePageData: await loadLivePageData({ api, id }),
         errorKind: undefined,
       };
     } catch (error) {
@@ -217,105 +223,148 @@ export default class LiveRanklist extends Vue {
   };
 
   private syncLiveState() {
-    const signature = `${this.liveKey}:${this.liveId}:${this.token || ''}:${this.enabledScrollSolution ? 'scroll' : 'plain'}`;
-    if (!this.livePageData || signature === this.currentLiveKey) {
+    const pageData = this.livePageData;
+    const signature = `${this.liveKey}:${pageData?.requestedUk || ''}:${pageData?.config.uk || ''}:${this.enabledScrollSolution ? 'scroll' : 'plain'}`;
+    if (signature === this.currentLiveSignature) {
       return;
     }
-    this.currentLiveKey = signature;
+    this.currentLiveSignature = signature;
+    if (!pageData || pageData.requestedUk !== this.liveKey) {
+      this.stopLiveSession();
+      this.clientRanklist = null;
+      this.clientErrorKind = undefined;
+      return;
+    }
+    this.startLiveSession(pageData.config);
+  }
+
+  private startLiveSession(config: LivePageData['config']) {
+    this.stopLiveSession();
+    const sessionGeneration = this.sessionGeneration;
     this.clientRanklist = null;
-    this.startPolling();
-    this.syncWebsocket();
-  }
+    this.clientErrorKind = undefined;
 
-  private startPolling() {
-    this.stopPolling();
-    if (!this.liveId) {
-      return;
-    }
-    this.fetchRanklistSnapshot();
-    this.pollTimer = window.setInterval(
-      () => this.fetchRanklistSnapshot(),
-      getRanklandRuntimeConfig().livePollingInterval,
-    );
-  }
-
-  private stopPolling() {
-    if (this.pollTimer !== undefined) {
-      window.clearInterval(this.pollTimer);
-      this.pollTimer = undefined;
-    }
-  }
-
-  private async fetchRanklistSnapshot() {
-    if (!this.liveId) {
-      return;
-    }
+    let projector: LiveRanklistProjector;
     try {
-      this.clientRanklist = await this.$ranklandApi.getLiveRanklist({
-        id: this.liveId,
-        token: this.token,
-      });
+      projector = new LiveRanklistProjector(config);
     } catch (error) {
+      this.handleFatalError(error, sessionGeneration);
+      return;
+    }
+    this.projector = projector;
+    const consumer = new ContestEventConsumer({
+      transport: createLiveContestTransport(this.$ranklandApi),
+      onInitialEvents: (events, complete) => {
+        if (!this.isSessionCurrent(sessionGeneration)) {
+          return;
+        }
+        projector.ingestInitial(events);
+        if (complete) {
+          this.clientRanklist = projector.finishInitial();
+        }
+      },
+      onEvents: (events) => {
+        if (!this.isSessionCurrent(sessionGeneration)) {
+          return;
+        }
+        const { ranklist, scrollItems } = projector.applyLive(events);
+        this.queueLivePublication(ranklist, scrollItems, sessionGeneration);
+      },
+      onReset: () => {
+        if (!this.isSessionCurrent(sessionGeneration)) {
+          return;
+        }
+        this.clearPendingLivePublication();
+        this.clientRanklist = projector.reset();
+        this.$nextTick(() => {
+          if (this.isSessionCurrent(sessionGeneration)) {
+            this.scrollSolutionRef()?.resetSolutions?.();
+          }
+        }).catch((error) => this.handleFatalError(error, sessionGeneration));
+      },
+      onFatal: (error) => this.handleFatalError(error, sessionGeneration),
+    });
+    this.consumer = consumer;
+    consumer.start(config.uk).catch((error) => {
+      this.handleFatalError(error, sessionGeneration);
+    });
+  }
+
+  private stopLiveSession() {
+    this.sessionGeneration += 1;
+    this.clearPendingLivePublication();
+    this.consumer?.stop();
+    this.consumer = undefined;
+    this.projector = undefined;
+    this.scrollSolutionRef()?.resetSolutions?.();
+  }
+
+  private handleFatalError(error: unknown, sessionGeneration: number) {
+    if (!this.isSessionCurrent(sessionGeneration)) {
+      return;
+    }
+    if (shouldLogRanklistPageError(error)) {
       console.error(error);
     }
+    this.clearPendingLivePublication();
+    this.clientRanklist = null;
+    this.clientErrorKind = toRanklistPageErrorKind(error);
+    this.scrollSolutionRef()?.resetSolutions?.();
   }
 
-  private syncWebsocket() {
-    this.closeWebsocket();
-    if (!this.enabledScrollSolution || !this.liveId || typeof WebSocket === 'undefined') {
-      return;
-    }
-    const wsBase = getRanklandRuntimeConfig().wsBase;
-    if (!wsBase) {
-      return;
-    }
-    try {
-      const search = this.token ? `?token=${encodeURIComponent(this.token)}` : '';
-      const websocket = new WebSocket(`${wsBase}/ranking/record/${this.liveId}${search}`);
-      websocket.binaryType = 'arraybuffer';
-      websocket.addEventListener('message', this.handleWebsocketMessage);
-      websocket.addEventListener('error', (event) => {
-        console.error('[ScrollSolution] ws error:', event);
-      });
-      this.websocket = websocket;
-    } catch (error) {
-      console.error('[ScrollSolution] ws exception:', error);
-    }
+  private isSessionCurrent(sessionGeneration: number) {
+    return sessionGeneration === this.sessionGeneration;
   }
 
-  private closeWebsocket() {
-    this.websocket?.removeEventListener('message', this.handleWebsocketMessage);
-    this.websocket?.close();
-    this.websocket = undefined;
+  private queueLivePublication(
+    ranklist: srk.Ranklist,
+    scrollItems: LiveScrollSolutionItem[],
+    sessionGeneration: number,
+  ) {
+    this.pendingLiveRanklist = ranklist;
+    if (this.enabledScrollSolution && scrollItems.length > 0) {
+      this.pendingScrollItems.push(...scrollItems);
+    }
+    if (this.livePublishFrame !== undefined) {
+      return;
+    }
+    this.livePublishFrame = window.requestAnimationFrame(() => {
+      this.livePublishFrame = undefined;
+      if (!this.isSessionCurrent(sessionGeneration)) {
+        return;
+      }
+      const pendingRanklist = this.pendingLiveRanklist;
+      const pendingScrollItems = this.pendingScrollItems;
+      this.pendingLiveRanklist = null;
+      this.pendingScrollItems = [];
+      if (pendingRanklist) {
+        this.clientRanklist = pendingRanklist;
+      }
+      if (pendingScrollItems.length > 0) {
+        this.$nextTick(() => {
+          if (this.isSessionCurrent(sessionGeneration)) {
+            this.scrollSolutionRef()?.pushSolutions?.(pendingScrollItems);
+          }
+        }).catch((error) => this.handleFatalError(error, sessionGeneration));
+      }
+    });
   }
 
-  private handleWebsocketMessage = (event: MessageEvent) => {
-    if (!(event.data instanceof ArrayBuffer)) {
-      return;
+  private clearPendingLivePublication() {
+    if (this.livePublishFrame !== undefined && typeof window !== 'undefined') {
+      window.cancelAnimationFrame(this.livePublishFrame);
     }
-    const solution = parseRealtimeSolutionBuffer(event.data);
-    const user = (this.livePageData?.liveInfo.members || []).find((item) => item.id === solution.userId);
-    if (!user) {
-      console.warn('[ScrollSolution] skipped scroll solution cuz user not found', solution);
-      return;
-    }
-    const ref = this.$refs.scrollSolution as { pushSolutions?: (rows: ScrollSolutionDataItem[]) => void } | undefined;
-    ref?.pushSolutions?.([
-      {
-        problem: {
-          alias: solution.problemAlias,
-        },
-        score: {
-          value: solution.solved,
-        },
-        result: solution.result,
-        user: {
-          name: user.name,
-          organization: user.organization,
-        },
-      },
-    ]);
-  };
+    this.livePublishFrame = undefined;
+    this.pendingLiveRanklist = null;
+    this.pendingScrollItems = [];
+  }
+
+  private scrollSolutionRef() {
+    return this.$refs.scrollSolution as {
+      pushSolutions?: (rows: LiveScrollSolutionItem[]) => void;
+      resetSolutions?: () => void;
+    } | undefined;
+  }
 }
 
 function firstQueryValue(value: unknown) {

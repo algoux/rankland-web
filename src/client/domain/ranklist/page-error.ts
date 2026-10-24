@@ -1,4 +1,5 @@
 import { LogicException, LogicExceptionKind } from '@/services/ranklist-api';
+import { ErrCode } from '@common/enums/err-code.enum';
 import { SSR_SKIP_CACHE_HEADER } from '@common/ssr-cache';
 
 export enum RanklistPageErrorKind {
@@ -10,7 +11,7 @@ export function toRanklistPageErrorKind(error: unknown) {
   if (error instanceof LogicException && error.kind === LogicExceptionKind.NotFound) {
     return RanklistPageErrorKind.NotFound;
   }
-  if (isSerializedNotFound(error)) {
+  if (isSerializedNotFound(error) || isApiNotFound(error)) {
     return RanklistPageErrorKind.NotFound;
   }
   return RanklistPageErrorKind.LoadFailed;
@@ -57,4 +58,20 @@ function isSerializedNotFound(error: unknown) {
     && 'kind' in error
     && (error as { kind?: unknown }).kind === LogicExceptionKind.NotFound,
   );
+}
+
+function isApiNotFound(error: unknown) {
+  if (!error || typeof error !== 'object') {
+    return false;
+  }
+  const candidate = error as {
+    code?: unknown;
+    status?: unknown;
+    response?: { status?: unknown };
+  };
+  return candidate.status === 404
+    || candidate.response?.status === 404
+    || candidate.code === ErrCode.ContestNotFound
+    || candidate.code === String(ErrCode.ContestNotFound)
+    || candidate.code === 'ContestNotFound';
 }

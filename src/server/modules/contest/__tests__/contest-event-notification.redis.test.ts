@@ -554,6 +554,31 @@ describe('ContestEventNotificationRedisAdapter logging', () => {
     vi.restoreAllMocks();
   });
 
+  it('emits routine Redis state transitions only when runtime diagnostics are enabled', async () => {
+    const info = vi.spyOn(console, 'info').mockImplementation(() => undefined);
+    const defaultSubscriber = new FakeSubscriber();
+    const defaultAdapter = createAdapter(new FakePublisher(), defaultSubscriber);
+
+    await defaultAdapter.start(createCallbacks());
+    defaultSubscriber.status = 'ready';
+    defaultSubscriber.emit('ready');
+    await flushPromises();
+    expect(info.mock.calls.filter(([event]) => event === 'contest_event_notification.redis_state')).toEqual([]);
+    await defaultAdapter.stop();
+
+    const diagnosticSubscriber = new FakeSubscriber();
+    const diagnosticAdapter = createAdapter(new FakePublisher(), diagnosticSubscriber, true);
+    await diagnosticAdapter.start(createCallbacks());
+    diagnosticSubscriber.status = 'ready';
+    diagnosticSubscriber.emit('ready');
+    await flushPromises();
+
+    expect(
+      info.mock.calls.filter(([event]) => event === 'contest_event_notification.redis_state').length,
+    ).toBeGreaterThan(0);
+    await diagnosticAdapter.stop();
+  });
+
   it('rate-limits subscriber failures for 30 seconds and reports suppressed errors on recovery', async () => {
     vi.useFakeTimers();
     vi.setSystemTime(new Date('2026-07-16T00:00:00.000Z'));
@@ -733,7 +758,7 @@ class FakeSubscriber extends EventEmitter implements RedisSubscriberPort {
   }
 }
 
-function createAdapter(publisher = new FakePublisher(), subscriber = new FakeSubscriber()) {
+function createAdapter(publisher = new FakePublisher(), subscriber = new FakeSubscriber(), diagnosticsEnabled = false) {
   const config: RedisConfig = {
     host: '127.0.0.1',
     port: 6379,
@@ -741,7 +766,7 @@ function createAdapter(publisher = new FakePublisher(), subscriber = new FakeSub
     password: '',
     namespace: 'rankland:test',
   };
-  return new ContestEventNotificationRedisAdapter(publisher, subscriber, config);
+  return new ContestEventNotificationRedisAdapter(publisher, subscriber, config, { diagnosticsEnabled });
 }
 
 function createCallbacks(): ContestEventNotificationRedisCallbacks & {

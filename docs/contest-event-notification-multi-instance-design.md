@@ -318,15 +318,18 @@ nginx 到应用、应用到 Redis/MySQL 的网络都必须允许多机互通。�
 
 首期不引入新的 metrics 依赖，使用稳定的结构化日志事件：
 
-- `contest_event_notification.redis_state`
 - `contest_event_notification.publish_failed`
 - `contest_event_notification.invalid_message`
 - `contest_event_notification.reconcile_failed`
 - `contest_event_notification.backpressure_timeout`
 
-状态变化立即记录；同类重复错误每 30 秒最多输出一次，并在下一条中带 `suppressedCount`。恢复时输出一条 recovery/state 日志。日志至少包含 channel、Redis state、active contest 数量和 error class，不输出密码或完整连接串。
+故障类日志默认输出；同类重复错误每 30 秒最多输出一次，并在下一条中带 `suppressedCount`。恢复时输出一条
+recovery 日志。设置 `CONTEST_EVENT_RUNTIME_DIAGNOSTICS_ENABLED=true` 后，额外输出
+`contest_event_notification.redis_state` 状态变化。日志至少包含 channel、Redis state、active contest
+数量和 error class，不输出密码或完整连接串。
 
-Redis 故障不改变 readiness。生产告警应基于 Redis state/publish failure/reconcile failure 日志，而不是摘除所有实例。
+Redis 故障不改变 readiness。生产告警应默认基于 publish failure/reconcile failure 等故障日志；仅在显式
+启用运行时诊断时才依赖 Redis state 日志。告警不应直接摘除所有实例。
 
 ## 13. 故障矩阵
 

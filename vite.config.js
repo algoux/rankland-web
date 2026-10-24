@@ -14,8 +14,6 @@ function buildClientEnv() {
     HOST_CN: process.env.HOST_CN || 'rl.algoux.cn',
     SITE_ALIAS: process.env.SITE_ALIAS || 'global',
     BEIAN: process.env.BEIAN || '',
-    LIVE_POLLING_INTERVAL: process.env.LIVE_POLLING_INTERVAL || '10000',
-    WS_BASE: process.env.WS_BASE || '',
     GTAG: process.env.GTAG || '',
     BUILD_COMMIT: process.env.BUILD_COMMIT || '',
   };

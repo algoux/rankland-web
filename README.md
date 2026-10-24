@@ -110,7 +110,7 @@ pnpm run db:migration:generate
 - `/search?kw=`：榜单搜索
 - `/ranklist/:id`：单榜渲染，支持 `focus=yes` 或 `聚焦=是` 进入无站点 chrome 的聚焦模式
 - `/collection/:id?rankId=`：合集页和侧边导航
-- `/live/:id`：实时榜单，支持轮询和滚榜 WebSocket 配置
+- `/live/:id`：实时榜单，通过 API v2 protobuf 事件补拉和 SSE 水位通知更新
 - `/playground`：CSR-only SRK playground，包含 Monaco 编辑器和实时预览
 
 RankLand 外部 API 配置：
@@ -123,14 +123,12 @@ VIN_URL=https://cdn.algoux.cn/rankland/vin.txt
 HOST_GLOBAL=rl.algoux.org
 HOST_CN=rl.algoux.cn
 SITE_ALIAS=global
-LIVE_POLLING_INTERVAL=10000
-WS_BASE=wss://rl-api.algoux.cn
 GTAG=
 BEIAN=
 ```
 
 `LEGACY_API_BASE_SERVER` 在 SSR 服务运行时读取；`LEGACY_API_BASE_CLIENT` 和 `VIN_URL` 会在 Vite 构建时写入浏览器包。
-这两个地址只用于 `/rank/search`、`/ranking/*` 等尚未迁移的旧接口；contest、collection、statistics 与文件元数据统一使用同源 `/api/v2`。如果切换 legacy mock 或环境地址，需要重新运行 client build。
+这两个地址只用于尚未迁移的 `/rank/search`；contest、collection、statistics、文件元数据与 live 事件统一使用同源 `/api/v2`。如果切换 legacy mock 或环境地址，需要重新运行 client build。
 
 ## 测试
 

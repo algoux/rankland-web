@@ -66,8 +66,6 @@ jobs:
           HOST_CN: ${{ vars.HOST_CN }}
           SITE_ALIAS: ${{ vars.SITE_ALIAS }}
           BEIAN: ${{ vars.BEIAN }}
-          LIVE_POLLING_INTERVAL: ${{ vars.LIVE_POLLING_INTERVAL }}
-          WS_BASE: ${{ vars.WS_BASE }}
           GTAG: ${{ vars.GTAG }}
           BUILD_COMMIT: ${{ github.event.workflow_run.head_sha }}
         run: pnpm run build

@@ -1,6 +1,7 @@
 import { Inject, Provide } from 'bwcx-core';
 import { performance } from 'node:perf_hooks';
 import ContestEventNotificationConfig from '@server/configs/contest-event-notification/contest-event-notification.config';
+import ContestEventRuntimeConfig from '@server/configs/contest-event-runtime/contest-event-runtime.config';
 import {
   compareContestEventWatermarks,
   ContestCommittedWatermark,
@@ -95,6 +96,7 @@ export default class ContestSseHub {
   private readonly clients = new Map<string, Set<ClientState>>();
   private readonly fanoutStates = new Map<string, ContestFanoutState>();
   private readonly config: ContestSseHubConfig;
+  private readonly runtimeDiagnosticsEnabled: boolean;
   private heartbeatTimer?: NodeJS.Timeout;
   private summaryTimer?: NodeJS.Timeout;
   private runtimeSummaryStarted = false;
@@ -105,6 +107,8 @@ export default class ContestSseHub {
   public constructor(
     @Inject(ContestEventNotificationConfig)
     config: Partial<ContestSseHubConfig> = new ContestEventNotificationConfig(),
+    @Inject(ContestEventRuntimeConfig)
+    runtimeConfig: Pick<ContestEventRuntimeConfig, 'diagnosticsEnabled'> = new ContestEventRuntimeConfig(),
   ) {
     this.config = {
       coalesceWindowMs: config.coalesceWindowMs ?? 0,
@@ -112,6 +116,7 @@ export default class ContestSseHub {
       fanoutWindowMs: config.fanoutWindowMs ?? 0,
       summaryIntervalMs: config.summaryIntervalMs ?? 60_000,
     };
+    this.runtimeDiagnosticsEnabled = runtimeConfig.diagnosticsEnabled;
   }
 
   public start(): void {
@@ -120,6 +125,9 @@ export default class ContestSseHub {
     }
     this.heartbeatTimer = setInterval(() => this.sendHeartbeats(), HEARTBEAT_INTERVAL_MS);
     this.heartbeatTimer.unref?.();
+    if (!this.runtimeDiagnosticsEnabled) {
+      return;
+    }
     this.lastRuntimeCounters = contestEventNotificationRuntimeMetrics.snapshot().counters;
     contestEventNotificationRuntimeMetrics.takeIntervalMaxima();
     this.lastSummaryEpochMs = Date.now();
@@ -607,6 +615,9 @@ export default class ContestSseHub {
   }
 
   private logRuntimeSummary(final: boolean): void {
+    if (!this.runtimeDiagnosticsEnabled) {
+      return;
+    }
     const runtime = contestEventNotificationRuntimeMetrics.snapshot();
     const intervalMaxima = contestEventNotificationRuntimeMetrics.takeIntervalMaxima();
     const endEpochMs = Date.now();
