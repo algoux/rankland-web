@@ -46,9 +46,7 @@ export default class TencentCloudFileStorageProvider implements FileStorageProvi
 
   public async upload(input: FileStorageUploadInput): Promise<void> {
     const { tencentCloud } = this.config;
-    if (!tencentCloud.secretId || !tencentCloud.secretKey || !tencentCloud.bucket || !tencentCloud.region) {
-      throw new FileStorageProviderError('unavailable', new Error('TencentCloud file storage is not configured'));
-    }
+    this.assertConfigured();
 
     try {
       await this.client.putObject({
@@ -61,6 +59,29 @@ export default class TencentCloudFileStorageProvider implements FileStorageProvi
       });
     } catch (error) {
       throw new FileStorageProviderError(classifyTencentCloudError(error), error);
+    }
+  }
+
+  public async remove(path: string): Promise<void> {
+    const { tencentCloud } = this.config;
+    this.assertConfigured();
+    try {
+      await this.client.deleteObject({
+        Bucket: tencentCloud.bucket,
+        Region: tencentCloud.region,
+        Key: joinObjectPath(tencentCloud.basePath, path),
+      });
+    } catch (error) {
+      // COS usually returns success for a missing object; some compatible endpoints return NoSuchKey.
+      if ((error as { code?: string })?.code === 'NoSuchKey') return;
+      throw new FileStorageProviderError(classifyTencentCloudError(error), error);
+    }
+  }
+
+  private assertConfigured(): void {
+    const { tencentCloud } = this.config;
+    if (!tencentCloud.secretId || !tencentCloud.secretKey || !tencentCloud.bucket || !tencentCloud.region) {
+      throw new FileStorageProviderError('unavailable', new Error('TencentCloud file storage is not configured'));
     }
   }
 }

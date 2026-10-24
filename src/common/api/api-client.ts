@@ -6,9 +6,9 @@
 
 import { AllowedRequestMethod, IBwcxApiRequestAdaptorArgs, AbstractResponseParser } from 'bwcx-api-client';
 import { configure as configureUrlcat } from 'urlcat-fork';
-import { CreateCollectionReqDTO, CreateCollectionRespDTO, UpdateCollectionReqDTO, GetCollectionsRespDTO, GetPublicCollectionsRespDTO, GetCollectionReqDTO, GetCollectionRespDTO, GetPublicCollectionReqDTO, GetPublicCollectionRespDTO, DeleteCollectionReqDTO } from '../modules/collection/collection.dto';
-import { CreateContestReqDTO, CreateContestRespDTO, UpdateContestReqDTO, GetContestsRespDTO, GetPublicContestsRespDTO, GetPublicStatisticsRespDTO, ReportPublicContestViewReqDTO, DeleteContestReqDTO, ResetContestEventsReqDTO, AppendContestEventsReqDTO, AppendContestEventsRespDTO, GetPublicContestEventsReqDTO, GetPublicContestEventsRespDTO, StreamPublicContestEventStreamNotificationsReqDTO, GetContestEventStreamReqDTO, GetContestEventStreamRespDTO, GetPublicContestEventStreamReqDTO, GetPublicContestEventStreamRespDTO, DeleteContestEventStreamProducerLockReqDTO, GetContestReqDTO, GetContestRespDTO, GetPublicContestReqDTO, GetPublicContestRespDTO, GetPublicContestUsersReqDTO, GetPublicContestUsersRespDTO, GetPublicContestUserReqDTO, GetPublicContestUserRespDTO, GetContestUsersReqDTO, GetContestUsersRespDTO, GetContestUserReqDTO, GetContestUserRespDTO, UpdateContestUserReqDTO } from '../modules/contest/contest.dto';
 import { UploadFileReqDTO, UploadFileRespDTO, GetFileReqDTO, GetFileRespDTO, GetPublicFileReqDTO, GetPublicFileRespDTO, DeleteFileReqDTO } from '../modules/file/file.dto';
+import { CreateContestReqDTO, CreateContestRespDTO, FinalizeContestReqDTO, FinalizeContestRespDTO, UpdateContestReqDTO, GetContestsRespDTO, GetPublicContestsRespDTO, GetPublicStatisticsRespDTO, ReportPublicContestViewReqDTO, DeleteContestReqDTO, ResetContestEventsReqDTO, AppendContestEventsReqDTO, AppendContestEventsRespDTO, GetPublicContestEventsReqDTO, GetPublicContestEventsRespDTO, StreamPublicContestEventStreamNotificationsReqDTO, GetContestEventStreamReqDTO, GetContestEventStreamRespDTO, GetPublicContestEventStreamReqDTO, GetPublicContestEventStreamRespDTO, DeleteContestEventStreamProducerLockReqDTO, GetContestReqDTO, GetContestRespDTO, GetPublicContestReqDTO, GetPublicContestRespDTO, GetPublicContestUsersReqDTO, GetPublicContestUsersRespDTO, GetPublicContestUserReqDTO, GetPublicContestUserRespDTO, GetContestUsersReqDTO, GetContestUsersRespDTO, GetContestUserReqDTO, GetContestUserRespDTO, UpdateContestUserReqDTO } from '../modules/contest/contest.dto';
+import { CreateCollectionReqDTO, CreateCollectionRespDTO, UpdateCollectionReqDTO, GetCollectionsRespDTO, GetPublicCollectionsRespDTO, GetCollectionReqDTO, GetCollectionRespDTO, GetPublicCollectionReqDTO, GetPublicCollectionRespDTO, DeleteCollectionReqDTO } from '../modules/collection/collection.dto';
 
 const urlcat = configureUrlcat({ arrayFormat: 'repeat' });
 
@@ -25,314 +25,6 @@ export class ApiClient<T = undefined> {
   }
 
   /**
-   * 创建合集
-   *
-   * @param {CreateCollectionReqDTO} req The request data (compatible with ReqDTO).
-   * @param {T} opts Extra request options.
-   * @returns {CreateCollectionRespDTO} The response data (RespDTO).
-   */
-  public async createCollection(req: CreateCollectionReqDTO, opts?: T): Promise<CreateCollectionRespDTO> {
-    return this._r(this._rArgs.a(req, opts)).then((resp) => this._rp.pat(CreateCollectionRespDTO, resp));
-  }
-
-  /**
-   * 更新合集
-   *
-   * @param {UpdateCollectionReqDTO} req The request data (compatible with ReqDTO).
-   * @param {T} opts Extra request options.
-   * @returns {null} The response data (RespDTO).
-   */
-  public async updateCollection(req: UpdateCollectionReqDTO, opts?: T): Promise<null> {
-    return this._r(this._rArgs.b(req, opts)).then((resp) => this._rp.pat(null, resp));
-  }
-
-  /**
-   * 查询全部合集
-   *
-   * @param {null} req The request data (compatible with ReqDTO).
-   * @param {T} opts Extra request options.
-   * @returns {GetCollectionsRespDTO} The response data (RespDTO).
-   */
-  public async getCollections(req?: null, opts?: T): Promise<GetCollectionsRespDTO> {
-    return this._r(this._rArgs.c(req, opts)).then((resp) => this._rp.pat(GetCollectionsRespDTO, resp));
-  }
-
-  /**
-   * 公开查询全部合集
-   *
-   * @param {null} req The request data (compatible with ReqDTO).
-   * @param {T} opts Extra request options.
-   * @returns {GetPublicCollectionsRespDTO} The response data (RespDTO).
-   */
-  public async getPublicCollections(req?: null, opts?: T): Promise<GetPublicCollectionsRespDTO> {
-    return this._r(this._rArgs.d(req, opts)).then((resp) => this._rp.pat(GetPublicCollectionsRespDTO, resp));
-  }
-
-  /**
-   * 查询合集
-   *
-   * @param {GetCollectionReqDTO} req The request data (compatible with ReqDTO).
-   * @param {T} opts Extra request options.
-   * @returns {GetCollectionRespDTO} The response data (RespDTO).
-   */
-  public async getCollection(req: GetCollectionReqDTO, opts?: T): Promise<GetCollectionRespDTO> {
-    return this._r(this._rArgs.e(req, opts)).then((resp) => this._rp.pat(GetCollectionRespDTO, resp));
-  }
-
-  /**
-   * 公开查询合集
-   *
-   * @param {GetPublicCollectionReqDTO} req The request data (compatible with ReqDTO).
-   * @param {T} opts Extra request options.
-   * @returns {GetPublicCollectionRespDTO} The response data (RespDTO).
-   */
-  public async getPublicCollection(req: GetPublicCollectionReqDTO, opts?: T): Promise<GetPublicCollectionRespDTO> {
-    return this._r(this._rArgs.f(req, opts)).then((resp) => this._rp.pat(GetPublicCollectionRespDTO, resp));
-  }
-
-  /**
-   * 删除合集
-   *
-   * @param {DeleteCollectionReqDTO} req The request data (compatible with ReqDTO).
-   * @param {T} opts Extra request options.
-   * @returns {null} The response data (RespDTO).
-   */
-  public async deleteCollection(req: DeleteCollectionReqDTO, opts?: T): Promise<null> {
-    return this._r(this._rArgs.g(req, opts)).then((resp) => this._rp.pat(null, resp));
-  }
-
-  /**
-   * 创建实时比赛
-   *
-   * @param {CreateContestReqDTO} req The request data (compatible with ReqDTO).
-   * @param {T} opts Extra request options.
-   * @returns {CreateContestRespDTO} The response data (RespDTO).
-   */
-  public async createContest(req: CreateContestReqDTO, opts?: T): Promise<CreateContestRespDTO> {
-    return this._r(this._rArgs.h(req, opts)).then((resp) => this._rp.pat(CreateContestRespDTO, resp));
-  }
-
-  /**
-   * 更新实时比赛
-   *
-   * @param {UpdateContestReqDTO} req The request data (compatible with ReqDTO).
-   * @param {T} opts Extra request options.
-   * @returns {null} The response data (RespDTO).
-   */
-  public async updateContest(req: UpdateContestReqDTO, opts?: T): Promise<null> {
-    return this._r(this._rArgs.i(req, opts)).then((resp) => this._rp.pat(null, resp));
-  }
-
-  /**
-   * 查询全部实时比赛
-   *
-   * @param {null} req The request data (compatible with ReqDTO).
-   * @param {T} opts Extra request options.
-   * @returns {GetContestsRespDTO} The response data (RespDTO).
-   */
-  public async getContests(req?: null, opts?: T): Promise<GetContestsRespDTO> {
-    return this._r(this._rArgs.j(req, opts)).then((resp) => this._rp.pat(GetContestsRespDTO, resp));
-  }
-
-  /**
-   * 公开查询全部实时比赛
-   *
-   * @param {null} req The request data (compatible with ReqDTO).
-   * @param {T} opts Extra request options.
-   * @returns {GetPublicContestsRespDTO} The response data (RespDTO).
-   */
-  public async getPublicContests(req?: null, opts?: T): Promise<GetPublicContestsRespDTO> {
-    return this._r(this._rArgs.k(req, opts)).then((resp) => this._rp.pat(GetPublicContestsRespDTO, resp));
-  }
-
-  /**
-   * 公开查询榜单统计
-   *
-   * @param {null} req The request data (compatible with ReqDTO).
-   * @param {T} opts Extra request options.
-   * @returns {GetPublicStatisticsRespDTO} The response data (RespDTO).
-   */
-  public async getPublicStatistics(req?: null, opts?: T): Promise<GetPublicStatisticsRespDTO> {
-    return this._r(this._rArgs.l(req, opts)).then((resp) => this._rp.pat(GetPublicStatisticsRespDTO, resp));
-  }
-
-  /**
-   * 上报一次实时比赛浏览
-   *
-   * @param {ReportPublicContestViewReqDTO} req The request data (compatible with ReqDTO).
-   * @param {T} opts Extra request options.
-   * @returns {null} The response data (RespDTO).
-   */
-  public async reportPublicContestView(req: ReportPublicContestViewReqDTO, opts?: T): Promise<null> {
-    return this._r(this._rArgs.m(req, opts)).then((resp) => this._rp.pat(null, resp));
-  }
-
-  /**
-   * 删除实时比赛
-   *
-   * @param {DeleteContestReqDTO} req The request data (compatible with ReqDTO).
-   * @param {T} opts Extra request options.
-   * @returns {null} The response data (RespDTO).
-   */
-  public async deleteContest(req: DeleteContestReqDTO, opts?: T): Promise<null> {
-    return this._r(this._rArgs.n(req, opts)).then((resp) => this._rp.pat(null, resp));
-  }
-
-  /**
-   * 重置实时比赛事件流
-   *
-   * @param {ResetContestEventsReqDTO} req The request data (compatible with ReqDTO).
-   * @param {T} opts Extra request options.
-   * @returns {null} The response data (RespDTO).
-   */
-  public async resetContestEvents(req: ResetContestEventsReqDTO, opts?: T): Promise<null> {
-    return this._r(this._rArgs.o(req, opts)).then((resp) => this._rp.pat(null, resp));
-  }
-
-  /**
-   * 追加实时比赛事件
-   *
-   * @param {AppendContestEventsReqDTO} req The request data (compatible with ReqDTO).
-   * @param {T} opts Extra request options.
-   * @returns {AppendContestEventsRespDTO} The response data (RespDTO).
-   */
-  public async appendContestEvents(req: AppendContestEventsReqDTO, opts?: T): Promise<AppendContestEventsRespDTO> {
-    return this._r(this._rArgs.p(req, opts)).then((resp) => this._rp.pat(AppendContestEventsRespDTO, resp));
-  }
-
-  /**
-   * 公开查询实时比赛事件
-   *
-   * @param {GetPublicContestEventsReqDTO} req The request data (compatible with ReqDTO).
-   * @param {T} opts Extra request options.
-   * @returns {GetPublicContestEventsRespDTO} The response data (RespDTO).
-   */
-  public async getPublicContestEvents(req: GetPublicContestEventsReqDTO, opts?: T): Promise<GetPublicContestEventsRespDTO> {
-    return this._r(this._rArgs.q(req, opts)).then((resp) => this._rp.pat(GetPublicContestEventsRespDTO, resp));
-  }
-
-  /**
-   * 公开实时比赛事件流通知
-   *
-   * @param {StreamPublicContestEventStreamNotificationsReqDTO} req The request data (compatible with ReqDTO).
-   * @param {T} opts Extra request options.
-   * @returns {null} The response data (RespDTO).
-   */
-  public async streamPublicContestEventStreamNotifications(req: StreamPublicContestEventStreamNotificationsReqDTO, opts?: T): Promise<null> {
-    return this._r(this._rArgs.r(req, opts)).then((resp) => this._rp.pat(null, resp));
-  }
-
-  /**
-   * 查询实时比赛事件流
-   *
-   * @param {GetContestEventStreamReqDTO} req The request data (compatible with ReqDTO).
-   * @param {T} opts Extra request options.
-   * @returns {GetContestEventStreamRespDTO} The response data (RespDTO).
-   */
-  public async getContestEventStream(req: GetContestEventStreamReqDTO, opts?: T): Promise<GetContestEventStreamRespDTO> {
-    return this._r(this._rArgs.s(req, opts)).then((resp) => this._rp.pat(GetContestEventStreamRespDTO, resp));
-  }
-
-  /**
-   * 公开查询实时比赛事件流
-   *
-   * @param {GetPublicContestEventStreamReqDTO} req The request data (compatible with ReqDTO).
-   * @param {T} opts Extra request options.
-   * @returns {GetPublicContestEventStreamRespDTO} The response data (RespDTO).
-   */
-  public async getPublicContestEventStream(req: GetPublicContestEventStreamReqDTO, opts?: T): Promise<GetPublicContestEventStreamRespDTO> {
-    return this._r(this._rArgs.t(req, opts)).then((resp) => this._rp.pat(GetPublicContestEventStreamRespDTO, resp));
-  }
-
-  /**
-   * 释放实时比赛事件流生产者锁
-   *
-   * @param {DeleteContestEventStreamProducerLockReqDTO} req The request data (compatible with ReqDTO).
-   * @param {T} opts Extra request options.
-   * @returns {GetContestEventStreamRespDTO} The response data (RespDTO).
-   */
-  public async deleteContestEventStreamProducerLock(req: DeleteContestEventStreamProducerLockReqDTO, opts?: T): Promise<GetContestEventStreamRespDTO> {
-    return this._r(this._rArgs.u(req, opts)).then((resp) => this._rp.pat(GetContestEventStreamRespDTO, resp));
-  }
-
-  /**
-   * 查询实时比赛
-   *
-   * @param {GetContestReqDTO} req The request data (compatible with ReqDTO).
-   * @param {T} opts Extra request options.
-   * @returns {GetContestRespDTO} The response data (RespDTO).
-   */
-  public async getContest(req: GetContestReqDTO, opts?: T): Promise<GetContestRespDTO> {
-    return this._r(this._rArgs.v(req, opts)).then((resp) => this._rp.pat(GetContestRespDTO, resp));
-  }
-
-  /**
-   * 公开查询实时比赛
-   *
-   * @param {GetPublicContestReqDTO} req The request data (compatible with ReqDTO).
-   * @param {T} opts Extra request options.
-   * @returns {GetPublicContestRespDTO} The response data (RespDTO).
-   */
-  public async getPublicContest(req: GetPublicContestReqDTO, opts?: T): Promise<GetPublicContestRespDTO> {
-    return this._r(this._rArgs.w(req, opts)).then((resp) => this._rp.pat(GetPublicContestRespDTO, resp));
-  }
-
-  /**
-   * 公开查询实时比赛用户
-   *
-   * @param {GetPublicContestUsersReqDTO} req The request data (compatible with ReqDTO).
-   * @param {T} opts Extra request options.
-   * @returns {GetPublicContestUsersRespDTO} The response data (RespDTO).
-   */
-  public async getPublicContestUsers(req: GetPublicContestUsersReqDTO, opts?: T): Promise<GetPublicContestUsersRespDTO> {
-    return this._r(this._rArgs.x(req, opts)).then((resp) => this._rp.pat(GetPublicContestUsersRespDTO, resp));
-  }
-
-  /**
-   * 公开查询实时比赛用户详情
-   *
-   * @param {GetPublicContestUserReqDTO} req The request data (compatible with ReqDTO).
-   * @param {T} opts Extra request options.
-   * @returns {GetPublicContestUserRespDTO} The response data (RespDTO).
-   */
-  public async getPublicContestUser(req: GetPublicContestUserReqDTO, opts?: T): Promise<GetPublicContestUserRespDTO> {
-    return this._r(this._rArgs.y(req, opts)).then((resp) => this._rp.pat(GetPublicContestUserRespDTO, resp));
-  }
-
-  /**
-   * 查询实时比赛用户
-   *
-   * @param {GetContestUsersReqDTO} req The request data (compatible with ReqDTO).
-   * @param {T} opts Extra request options.
-   * @returns {GetContestUsersRespDTO} The response data (RespDTO).
-   */
-  public async getContestUsers(req: GetContestUsersReqDTO, opts?: T): Promise<GetContestUsersRespDTO> {
-    return this._r(this._rArgs.z(req, opts)).then((resp) => this._rp.pat(GetContestUsersRespDTO, resp));
-  }
-
-  /**
-   * 查询实时比赛用户详情
-   *
-   * @param {GetContestUserReqDTO} req The request data (compatible with ReqDTO).
-   * @param {T} opts Extra request options.
-   * @returns {GetContestUserRespDTO} The response data (RespDTO).
-   */
-  public async getContestUser(req: GetContestUserReqDTO, opts?: T): Promise<GetContestUserRespDTO> {
-    return this._r(this._rArgs.aa(req, opts)).then((resp) => this._rp.pat(GetContestUserRespDTO, resp));
-  }
-
-  /**
-   * 更新实时比赛用户
-   *
-   * @param {UpdateContestUserReqDTO} req The request data (compatible with ReqDTO).
-   * @param {T} opts Extra request options.
-   * @returns {null} The response data (RespDTO).
-   */
-  public async updateContestUser(req: UpdateContestUserReqDTO, opts?: T): Promise<null> {
-    return this._r(this._rArgs.ab(req, opts)).then((resp) => this._rp.pat(null, resp));
-  }
-
-  /**
    * 上传比赛文件
    *
    * @param {UploadFileReqDTO} req The request data (compatible with ReqDTO).
@@ -340,7 +32,7 @@ export class ApiClient<T = undefined> {
    * @returns {UploadFileRespDTO} The response data (RespDTO).
    */
   public async uploadFile(req: UploadFileReqDTO, opts?: T): Promise<UploadFileRespDTO> {
-    return this._r(this._rArgs.ac(req, opts)).then((resp) => this._rp.pat(UploadFileRespDTO, resp));
+    return this._r(this._rArgs.a(req, opts)).then((resp) => this._rp.pat(UploadFileRespDTO, resp));
   }
 
   /**
@@ -351,7 +43,7 @@ export class ApiClient<T = undefined> {
    * @returns {GetFileRespDTO} The response data (RespDTO).
    */
   public async getFile(req: GetFileReqDTO, opts?: T): Promise<GetFileRespDTO> {
-    return this._r(this._rArgs.ad(req, opts)).then((resp) => this._rp.pat(GetFileRespDTO, resp));
+    return this._r(this._rArgs.b(req, opts)).then((resp) => this._rp.pat(GetFileRespDTO, resp));
   }
 
   /**
@@ -362,7 +54,7 @@ export class ApiClient<T = undefined> {
    * @returns {GetPublicFileRespDTO} The response data (RespDTO).
    */
   public async getPublicFile(req: GetPublicFileReqDTO, opts?: T): Promise<GetPublicFileRespDTO> {
-    return this._r(this._rArgs.ae(req, opts)).then((resp) => this._rp.pat(GetPublicFileRespDTO, resp));
+    return this._r(this._rArgs.c(req, opts)).then((resp) => this._rp.pat(GetPublicFileRespDTO, resp));
   }
 
   /**
@@ -373,150 +65,415 @@ export class ApiClient<T = undefined> {
    * @returns {null} The response data (RespDTO).
    */
   public async deleteFile(req: DeleteFileReqDTO, opts?: T): Promise<null> {
-    return this._r(this._rArgs.af(req, opts)).then((resp) => this._rp.pat(null, resp));
+    return this._r(this._rArgs.d(req, opts)).then((resp) => this._rp.pat(null, resp));
+  }
+
+  /**
+   * 创建实时比赛
+   *
+   * @param {CreateContestReqDTO} req The request data (compatible with ReqDTO).
+   * @param {T} opts Extra request options.
+   * @returns {CreateContestRespDTO} The response data (RespDTO).
+   */
+  public async createContest(req: CreateContestReqDTO, opts?: T): Promise<CreateContestRespDTO> {
+    return this._r(this._rArgs.e(req, opts)).then((resp) => this._rp.pat(CreateContestRespDTO, resp));
+  }
+
+  /**
+   * 确认比赛完结并生成最终榜单
+   *
+   * @param {FinalizeContestReqDTO} req The request data (compatible with ReqDTO).
+   * @param {T} opts Extra request options.
+   * @returns {FinalizeContestRespDTO} The response data (RespDTO).
+   */
+  public async finalizeContest(req: FinalizeContestReqDTO, opts?: T): Promise<FinalizeContestRespDTO> {
+    return this._r(this._rArgs.f(req, opts)).then((resp) => this._rp.pat(FinalizeContestRespDTO, resp));
+  }
+
+  /**
+   * 更新实时比赛
+   *
+   * @param {UpdateContestReqDTO} req The request data (compatible with ReqDTO).
+   * @param {T} opts Extra request options.
+   * @returns {null} The response data (RespDTO).
+   */
+  public async updateContest(req: UpdateContestReqDTO, opts?: T): Promise<null> {
+    return this._r(this._rArgs.g(req, opts)).then((resp) => this._rp.pat(null, resp));
+  }
+
+  /**
+   * 查询全部实时比赛
+   *
+   * @param {null} req The request data (compatible with ReqDTO).
+   * @param {T} opts Extra request options.
+   * @returns {GetContestsRespDTO} The response data (RespDTO).
+   */
+  public async getContests(req?: null, opts?: T): Promise<GetContestsRespDTO> {
+    return this._r(this._rArgs.h(req, opts)).then((resp) => this._rp.pat(GetContestsRespDTO, resp));
+  }
+
+  /**
+   * 公开查询全部实时比赛
+   *
+   * @param {null} req The request data (compatible with ReqDTO).
+   * @param {T} opts Extra request options.
+   * @returns {GetPublicContestsRespDTO} The response data (RespDTO).
+   */
+  public async getPublicContests(req?: null, opts?: T): Promise<GetPublicContestsRespDTO> {
+    return this._r(this._rArgs.i(req, opts)).then((resp) => this._rp.pat(GetPublicContestsRespDTO, resp));
+  }
+
+  /**
+   * 公开查询榜单统计
+   *
+   * @param {null} req The request data (compatible with ReqDTO).
+   * @param {T} opts Extra request options.
+   * @returns {GetPublicStatisticsRespDTO} The response data (RespDTO).
+   */
+  public async getPublicStatistics(req?: null, opts?: T): Promise<GetPublicStatisticsRespDTO> {
+    return this._r(this._rArgs.j(req, opts)).then((resp) => this._rp.pat(GetPublicStatisticsRespDTO, resp));
+  }
+
+  /**
+   * 上报一次实时比赛浏览
+   *
+   * @param {ReportPublicContestViewReqDTO} req The request data (compatible with ReqDTO).
+   * @param {T} opts Extra request options.
+   * @returns {null} The response data (RespDTO).
+   */
+  public async reportPublicContestView(req: ReportPublicContestViewReqDTO, opts?: T): Promise<null> {
+    return this._r(this._rArgs.k(req, opts)).then((resp) => this._rp.pat(null, resp));
+  }
+
+  /**
+   * 删除实时比赛
+   *
+   * @param {DeleteContestReqDTO} req The request data (compatible with ReqDTO).
+   * @param {T} opts Extra request options.
+   * @returns {null} The response data (RespDTO).
+   */
+  public async deleteContest(req: DeleteContestReqDTO, opts?: T): Promise<null> {
+    return this._r(this._rArgs.l(req, opts)).then((resp) => this._rp.pat(null, resp));
+  }
+
+  /**
+   * 重置实时比赛事件流
+   *
+   * @param {ResetContestEventsReqDTO} req The request data (compatible with ReqDTO).
+   * @param {T} opts Extra request options.
+   * @returns {null} The response data (RespDTO).
+   */
+  public async resetContestEvents(req: ResetContestEventsReqDTO, opts?: T): Promise<null> {
+    return this._r(this._rArgs.m(req, opts)).then((resp) => this._rp.pat(null, resp));
+  }
+
+  /**
+   * 追加实时比赛事件
+   *
+   * @param {AppendContestEventsReqDTO} req The request data (compatible with ReqDTO).
+   * @param {T} opts Extra request options.
+   * @returns {AppendContestEventsRespDTO} The response data (RespDTO).
+   */
+  public async appendContestEvents(req: AppendContestEventsReqDTO, opts?: T): Promise<AppendContestEventsRespDTO> {
+    return this._r(this._rArgs.n(req, opts)).then((resp) => this._rp.pat(AppendContestEventsRespDTO, resp));
+  }
+
+  /**
+   * 公开查询实时比赛事件
+   *
+   * @param {GetPublicContestEventsReqDTO} req The request data (compatible with ReqDTO).
+   * @param {T} opts Extra request options.
+   * @returns {GetPublicContestEventsRespDTO} The response data (RespDTO).
+   */
+  public async getPublicContestEvents(req: GetPublicContestEventsReqDTO, opts?: T): Promise<GetPublicContestEventsRespDTO> {
+    return this._r(this._rArgs.o(req, opts)).then((resp) => this._rp.pat(GetPublicContestEventsRespDTO, resp));
+  }
+
+  /**
+   * 公开实时比赛事件流通知
+   *
+   * @param {StreamPublicContestEventStreamNotificationsReqDTO} req The request data (compatible with ReqDTO).
+   * @param {T} opts Extra request options.
+   * @returns {null} The response data (RespDTO).
+   */
+  public async streamPublicContestEventStreamNotifications(req: StreamPublicContestEventStreamNotificationsReqDTO, opts?: T): Promise<null> {
+    return this._r(this._rArgs.p(req, opts)).then((resp) => this._rp.pat(null, resp));
+  }
+
+  /**
+   * 查询实时比赛事件流
+   *
+   * @param {GetContestEventStreamReqDTO} req The request data (compatible with ReqDTO).
+   * @param {T} opts Extra request options.
+   * @returns {GetContestEventStreamRespDTO} The response data (RespDTO).
+   */
+  public async getContestEventStream(req: GetContestEventStreamReqDTO, opts?: T): Promise<GetContestEventStreamRespDTO> {
+    return this._r(this._rArgs.q(req, opts)).then((resp) => this._rp.pat(GetContestEventStreamRespDTO, resp));
+  }
+
+  /**
+   * 公开查询实时比赛事件流
+   *
+   * @param {GetPublicContestEventStreamReqDTO} req The request data (compatible with ReqDTO).
+   * @param {T} opts Extra request options.
+   * @returns {GetPublicContestEventStreamRespDTO} The response data (RespDTO).
+   */
+  public async getPublicContestEventStream(req: GetPublicContestEventStreamReqDTO, opts?: T): Promise<GetPublicContestEventStreamRespDTO> {
+    return this._r(this._rArgs.r(req, opts)).then((resp) => this._rp.pat(GetPublicContestEventStreamRespDTO, resp));
+  }
+
+  /**
+   * 释放实时比赛事件流生产者锁
+   *
+   * @param {DeleteContestEventStreamProducerLockReqDTO} req The request data (compatible with ReqDTO).
+   * @param {T} opts Extra request options.
+   * @returns {GetContestEventStreamRespDTO} The response data (RespDTO).
+   */
+  public async deleteContestEventStreamProducerLock(req: DeleteContestEventStreamProducerLockReqDTO, opts?: T): Promise<GetContestEventStreamRespDTO> {
+    return this._r(this._rArgs.s(req, opts)).then((resp) => this._rp.pat(GetContestEventStreamRespDTO, resp));
+  }
+
+  /**
+   * 查询实时比赛
+   *
+   * @param {GetContestReqDTO} req The request data (compatible with ReqDTO).
+   * @param {T} opts Extra request options.
+   * @returns {GetContestRespDTO} The response data (RespDTO).
+   */
+  public async getContest(req: GetContestReqDTO, opts?: T): Promise<GetContestRespDTO> {
+    return this._r(this._rArgs.t(req, opts)).then((resp) => this._rp.pat(GetContestRespDTO, resp));
+  }
+
+  /**
+   * 公开查询实时比赛
+   *
+   * @param {GetPublicContestReqDTO} req The request data (compatible with ReqDTO).
+   * @param {T} opts Extra request options.
+   * @returns {GetPublicContestRespDTO} The response data (RespDTO).
+   */
+  public async getPublicContest(req: GetPublicContestReqDTO, opts?: T): Promise<GetPublicContestRespDTO> {
+    return this._r(this._rArgs.u(req, opts)).then((resp) => this._rp.pat(GetPublicContestRespDTO, resp));
+  }
+
+  /**
+   * 公开查询实时比赛用户
+   *
+   * @param {GetPublicContestUsersReqDTO} req The request data (compatible with ReqDTO).
+   * @param {T} opts Extra request options.
+   * @returns {GetPublicContestUsersRespDTO} The response data (RespDTO).
+   */
+  public async getPublicContestUsers(req: GetPublicContestUsersReqDTO, opts?: T): Promise<GetPublicContestUsersRespDTO> {
+    return this._r(this._rArgs.v(req, opts)).then((resp) => this._rp.pat(GetPublicContestUsersRespDTO, resp));
+  }
+
+  /**
+   * 公开查询实时比赛用户详情
+   *
+   * @param {GetPublicContestUserReqDTO} req The request data (compatible with ReqDTO).
+   * @param {T} opts Extra request options.
+   * @returns {GetPublicContestUserRespDTO} The response data (RespDTO).
+   */
+  public async getPublicContestUser(req: GetPublicContestUserReqDTO, opts?: T): Promise<GetPublicContestUserRespDTO> {
+    return this._r(this._rArgs.w(req, opts)).then((resp) => this._rp.pat(GetPublicContestUserRespDTO, resp));
+  }
+
+  /**
+   * 查询实时比赛用户
+   *
+   * @param {GetContestUsersReqDTO} req The request data (compatible with ReqDTO).
+   * @param {T} opts Extra request options.
+   * @returns {GetContestUsersRespDTO} The response data (RespDTO).
+   */
+  public async getContestUsers(req: GetContestUsersReqDTO, opts?: T): Promise<GetContestUsersRespDTO> {
+    return this._r(this._rArgs.x(req, opts)).then((resp) => this._rp.pat(GetContestUsersRespDTO, resp));
+  }
+
+  /**
+   * 查询实时比赛用户详情
+   *
+   * @param {GetContestUserReqDTO} req The request data (compatible with ReqDTO).
+   * @param {T} opts Extra request options.
+   * @returns {GetContestUserRespDTO} The response data (RespDTO).
+   */
+  public async getContestUser(req: GetContestUserReqDTO, opts?: T): Promise<GetContestUserRespDTO> {
+    return this._r(this._rArgs.y(req, opts)).then((resp) => this._rp.pat(GetContestUserRespDTO, resp));
+  }
+
+  /**
+   * 更新实时比赛用户
+   *
+   * @param {UpdateContestUserReqDTO} req The request data (compatible with ReqDTO).
+   * @param {T} opts Extra request options.
+   * @returns {null} The response data (RespDTO).
+   */
+  public async updateContestUser(req: UpdateContestUserReqDTO, opts?: T): Promise<null> {
+    return this._r(this._rArgs.z(req, opts)).then((resp) => this._rp.pat(null, resp));
+  }
+
+  /**
+   * 创建合集
+   *
+   * @param {CreateCollectionReqDTO} req The request data (compatible with ReqDTO).
+   * @param {T} opts Extra request options.
+   * @returns {CreateCollectionRespDTO} The response data (RespDTO).
+   */
+  public async createCollection(req: CreateCollectionReqDTO, opts?: T): Promise<CreateCollectionRespDTO> {
+    return this._r(this._rArgs.aa(req, opts)).then((resp) => this._rp.pat(CreateCollectionRespDTO, resp));
+  }
+
+  /**
+   * 更新合集
+   *
+   * @param {UpdateCollectionReqDTO} req The request data (compatible with ReqDTO).
+   * @param {T} opts Extra request options.
+   * @returns {null} The response data (RespDTO).
+   */
+  public async updateCollection(req: UpdateCollectionReqDTO, opts?: T): Promise<null> {
+    return this._r(this._rArgs.ab(req, opts)).then((resp) => this._rp.pat(null, resp));
+  }
+
+  /**
+   * 查询全部合集
+   *
+   * @param {null} req The request data (compatible with ReqDTO).
+   * @param {T} opts Extra request options.
+   * @returns {GetCollectionsRespDTO} The response data (RespDTO).
+   */
+  public async getCollections(req?: null, opts?: T): Promise<GetCollectionsRespDTO> {
+    return this._r(this._rArgs.ac(req, opts)).then((resp) => this._rp.pat(GetCollectionsRespDTO, resp));
+  }
+
+  /**
+   * 公开查询全部合集
+   *
+   * @param {null} req The request data (compatible with ReqDTO).
+   * @param {T} opts Extra request options.
+   * @returns {GetPublicCollectionsRespDTO} The response data (RespDTO).
+   */
+  public async getPublicCollections(req?: null, opts?: T): Promise<GetPublicCollectionsRespDTO> {
+    return this._r(this._rArgs.ad(req, opts)).then((resp) => this._rp.pat(GetPublicCollectionsRespDTO, resp));
+  }
+
+  /**
+   * 查询合集
+   *
+   * @param {GetCollectionReqDTO} req The request data (compatible with ReqDTO).
+   * @param {T} opts Extra request options.
+   * @returns {GetCollectionRespDTO} The response data (RespDTO).
+   */
+  public async getCollection(req: GetCollectionReqDTO, opts?: T): Promise<GetCollectionRespDTO> {
+    return this._r(this._rArgs.ae(req, opts)).then((resp) => this._rp.pat(GetCollectionRespDTO, resp));
+  }
+
+  /**
+   * 公开查询合集
+   *
+   * @param {GetPublicCollectionReqDTO} req The request data (compatible with ReqDTO).
+   * @param {T} opts Extra request options.
+   * @returns {GetPublicCollectionRespDTO} The response data (RespDTO).
+   */
+  public async getPublicCollection(req: GetPublicCollectionReqDTO, opts?: T): Promise<GetPublicCollectionRespDTO> {
+    return this._r(this._rArgs.af(req, opts)).then((resp) => this._rp.pat(GetPublicCollectionRespDTO, resp));
+  }
+
+  /**
+   * 删除合集
+   *
+   * @param {DeleteCollectionReqDTO} req The request data (compatible with ReqDTO).
+   * @param {T} opts Extra request options.
+   * @returns {null} The response data (RespDTO).
+   */
+  public async deleteCollection(req: DeleteCollectionReqDTO, opts?: T): Promise<null> {
+    return this._r(this._rArgs.ag(req, opts)).then((resp) => this._rp.pat(null, resp));
   }
 
   private _rArgs = {
-    a: (req: CreateCollectionReqDTO, opts?: any) => {
+    a: (req: UploadFileReqDTO, opts?: any) => {
+      const formData = new FormData();
+      formData.append('contestId', req.contestId);
+      formData.append('category', req.category);
+      formData.append('file', req.file);
       return {
         method: 'POST' as AllowedRequestMethod,
-        url: this._uf('/api/v2/collections', {
+        url: this._uf('/api/v2/files', {
           param: {},
           query: {},
         }),
-        data: {
-          uk: req.uk,
-          content: req.content,
+        data: formData,
+        headers: {
+          'Content-Type': 'multipart/form-data',
         },
         extraOpts: opts,
         metadata: {
-          name: 'createCollection',
+          name: 'uploadFile',
           method: 'POST',
-          path: '/api/v2/collections',
-          req: CreateCollectionReqDTO,
-          resp: CreateCollectionRespDTO,
+          path: '/api/v2/files',
+          req: UploadFileReqDTO,
+          resp: UploadFileRespDTO,
         },
       };
     },
-    b: (req: UpdateCollectionReqDTO, opts?: any) => {
+    b: (req: GetFileReqDTO, opts?: any) => {
       return {
-        method: 'PATCH' as AllowedRequestMethod,
-        url: this._uf('/api/v2/collections/:uk', {
+        method: 'GET' as AllowedRequestMethod,
+        url: this._uf('/api/v2/files/:id', {
           param: {
-            uk: req.uk,
-          },
-          query: {},
-        }),
-        data: {
-          content: req.content,
-        },
-        extraOpts: opts,
-        metadata: {
-          name: 'updateCollection',
-          method: 'PATCH',
-          path: '/api/v2/collections/:uk',
-          req: UpdateCollectionReqDTO,
-          resp: null as null,
-        },
-      };
-    },
-    c: (req: null, opts?: any) => {
-      return {
-        method: 'GET' as AllowedRequestMethod,
-        url: this._uf('/api/v2/collections', {
-          param: {},
-          query: {},
-        }),
-        data: {},
-        extraOpts: opts,
-        metadata: {
-          name: 'getCollections',
-          method: 'GET',
-          path: '/api/v2/collections',
-          req: null as null,
-          resp: GetCollectionsRespDTO,
-        },
-      };
-    },
-    d: (req: null, opts?: any) => {
-      return {
-        method: 'GET' as AllowedRequestMethod,
-        url: this._uf('/api/v2/public/collections', {
-          param: {},
-          query: {},
-        }),
-        data: {},
-        extraOpts: opts,
-        metadata: {
-          name: 'getPublicCollections',
-          method: 'GET',
-          path: '/api/v2/public/collections',
-          req: null as null,
-          resp: GetPublicCollectionsRespDTO,
-        },
-      };
-    },
-    e: (req: GetCollectionReqDTO, opts?: any) => {
-      return {
-        method: 'GET' as AllowedRequestMethod,
-        url: this._uf('/api/v2/collections/:uk', {
-          param: {
-            uk: req.uk,
+            id: req.id,
           },
           query: {},
         }),
         data: {},
         extraOpts: opts,
         metadata: {
-          name: 'getCollection',
+          name: 'getFile',
           method: 'GET',
-          path: '/api/v2/collections/:uk',
-          req: GetCollectionReqDTO,
-          resp: GetCollectionRespDTO,
+          path: '/api/v2/files/:id',
+          req: GetFileReqDTO,
+          resp: GetFileRespDTO,
         },
       };
     },
-    f: (req: GetPublicCollectionReqDTO, opts?: any) => {
+    c: (req: GetPublicFileReqDTO, opts?: any) => {
       return {
         method: 'GET' as AllowedRequestMethod,
-        url: this._uf('/api/v2/public/collections/:uk', {
+        url: this._uf('/api/v2/public/files/:id', {
           param: {
-            uk: req.uk,
+            id: req.id,
           },
           query: {},
         }),
         data: {},
         extraOpts: opts,
         metadata: {
-          name: 'getPublicCollection',
+          name: 'getPublicFile',
           method: 'GET',
-          path: '/api/v2/public/collections/:uk',
-          req: GetPublicCollectionReqDTO,
-          resp: GetPublicCollectionRespDTO,
+          path: '/api/v2/public/files/:id',
+          req: GetPublicFileReqDTO,
+          resp: GetPublicFileRespDTO,
         },
       };
     },
-    g: (req: DeleteCollectionReqDTO, opts?: any) => {
+    d: (req: DeleteFileReqDTO, opts?: any) => {
       return {
         method: 'DELETE' as AllowedRequestMethod,
-        url: this._uf('/api/v2/collections/:uk', {
+        url: this._uf('/api/v2/files/:id', {
           param: {
-            uk: req.uk,
+            id: req.id,
           },
           query: {},
         }),
         data: {},
         extraOpts: opts,
         metadata: {
-          name: 'deleteCollection',
+          name: 'deleteFile',
           method: 'DELETE',
-          path: '/api/v2/collections/:uk',
-          req: DeleteCollectionReqDTO,
+          path: '/api/v2/files/:id',
+          req: DeleteFileReqDTO,
           resp: null as null,
         },
       };
     },
-    h: (req: CreateContestReqDTO, opts?: any) => {
+    e: (req: CreateContestReqDTO, opts?: any) => {
       return {
         method: 'POST' as AllowedRequestMethod,
         url: this._uf('/api/v2/contests', {
@@ -550,7 +507,27 @@ export class ApiClient<T = undefined> {
         },
       };
     },
-    i: (req: UpdateContestReqDTO, opts?: any) => {
+    f: (req: FinalizeContestReqDTO, opts?: any) => {
+      return {
+        method: 'POST' as AllowedRequestMethod,
+        url: this._uf('/api/v2/contests/:uk/finalize', {
+          param: {
+            uk: req.uk,
+          },
+          query: {},
+        }),
+        data: {},
+        extraOpts: opts,
+        metadata: {
+          name: 'finalizeContest',
+          method: 'POST',
+          path: '/api/v2/contests/:uk/finalize',
+          req: FinalizeContestReqDTO,
+          resp: FinalizeContestRespDTO,
+        },
+      };
+    },
+    g: (req: UpdateContestReqDTO, opts?: any) => {
       return {
         method: 'PATCH' as AllowedRequestMethod,
         url: this._uf('/api/v2/contests/:uk', {
@@ -586,7 +563,7 @@ export class ApiClient<T = undefined> {
         },
       };
     },
-    j: (req: null, opts?: any) => {
+    h: (req: null, opts?: any) => {
       return {
         method: 'GET' as AllowedRequestMethod,
         url: this._uf('/api/v2/contests', {
@@ -604,7 +581,7 @@ export class ApiClient<T = undefined> {
         },
       };
     },
-    k: (req: null, opts?: any) => {
+    i: (req: null, opts?: any) => {
       return {
         method: 'GET' as AllowedRequestMethod,
         url: this._uf('/api/v2/public/contests', {
@@ -622,7 +599,7 @@ export class ApiClient<T = undefined> {
         },
       };
     },
-    l: (req: null, opts?: any) => {
+    j: (req: null, opts?: any) => {
       return {
         method: 'GET' as AllowedRequestMethod,
         url: this._uf('/api/v2/public/statistics', {
@@ -640,7 +617,7 @@ export class ApiClient<T = undefined> {
         },
       };
     },
-    m: (req: ReportPublicContestViewReqDTO, opts?: any) => {
+    k: (req: ReportPublicContestViewReqDTO, opts?: any) => {
       return {
         method: 'POST' as AllowedRequestMethod,
         url: this._uf('/api/v2/public/contests/:uk/views', {
@@ -660,7 +637,7 @@ export class ApiClient<T = undefined> {
         },
       };
     },
-    n: (req: DeleteContestReqDTO, opts?: any) => {
+    l: (req: DeleteContestReqDTO, opts?: any) => {
       return {
         method: 'DELETE' as AllowedRequestMethod,
         url: this._uf('/api/v2/contests/:uk', {
@@ -680,7 +657,7 @@ export class ApiClient<T = undefined> {
         },
       };
     },
-    o: (req: ResetContestEventsReqDTO, opts?: any) => {
+    m: (req: ResetContestEventsReqDTO, opts?: any) => {
       return {
         method: 'POST' as AllowedRequestMethod,
         url: this._uf('/api/v2/contests/:uk/events/reset', {
@@ -700,7 +677,7 @@ export class ApiClient<T = undefined> {
         },
       };
     },
-    p: (req: AppendContestEventsReqDTO, opts?: any) => {
+    n: (req: AppendContestEventsReqDTO, opts?: any) => {
       return {
         method: 'POST' as AllowedRequestMethod,
         url: this._uf('/api/v2/contests/:uk/events', {
@@ -723,7 +700,7 @@ export class ApiClient<T = undefined> {
         },
       };
     },
-    q: (req: GetPublicContestEventsReqDTO, opts?: any) => {
+    o: (req: GetPublicContestEventsReqDTO, opts?: any) => {
       return {
         method: 'GET' as AllowedRequestMethod,
         url: this._uf('/api/v2/public/contests/:uk/events', {
@@ -735,6 +712,7 @@ export class ApiClient<T = undefined> {
             limit: req.limit,
             streamRevision: req.streamRevision,
             compactProgress: req.compactProgress,
+            ignoreFrozen: req.ignoreFrozen,
           },
         }),
         data: {},
@@ -748,7 +726,7 @@ export class ApiClient<T = undefined> {
         },
       };
     },
-    r: (req: StreamPublicContestEventStreamNotificationsReqDTO, opts?: any) => {
+    p: (req: StreamPublicContestEventStreamNotificationsReqDTO, opts?: any) => {
       return {
         method: 'GET' as AllowedRequestMethod,
         url: this._uf('/api/v2/public/contests/:uk/event-stream/notifications', {
@@ -768,7 +746,7 @@ export class ApiClient<T = undefined> {
         },
       };
     },
-    s: (req: GetContestEventStreamReqDTO, opts?: any) => {
+    q: (req: GetContestEventStreamReqDTO, opts?: any) => {
       return {
         method: 'GET' as AllowedRequestMethod,
         url: this._uf('/api/v2/contests/:uk/event-stream', {
@@ -788,7 +766,7 @@ export class ApiClient<T = undefined> {
         },
       };
     },
-    t: (req: GetPublicContestEventStreamReqDTO, opts?: any) => {
+    r: (req: GetPublicContestEventStreamReqDTO, opts?: any) => {
       return {
         method: 'GET' as AllowedRequestMethod,
         url: this._uf('/api/v2/public/contests/:uk/event-stream', {
@@ -808,7 +786,7 @@ export class ApiClient<T = undefined> {
         },
       };
     },
-    u: (req: DeleteContestEventStreamProducerLockReqDTO, opts?: any) => {
+    s: (req: DeleteContestEventStreamProducerLockReqDTO, opts?: any) => {
       return {
         method: 'DELETE' as AllowedRequestMethod,
         url: this._uf('/api/v2/contests/:uk/event-stream/producer-lock', {
@@ -828,7 +806,7 @@ export class ApiClient<T = undefined> {
         },
       };
     },
-    v: (req: GetContestReqDTO, opts?: any) => {
+    t: (req: GetContestReqDTO, opts?: any) => {
       return {
         method: 'GET' as AllowedRequestMethod,
         url: this._uf('/api/v2/contests/:uk', {
@@ -848,7 +826,7 @@ export class ApiClient<T = undefined> {
         },
       };
     },
-    w: (req: GetPublicContestReqDTO, opts?: any) => {
+    u: (req: GetPublicContestReqDTO, opts?: any) => {
       return {
         method: 'GET' as AllowedRequestMethod,
         url: this._uf('/api/v2/public/contests/:uk', {
@@ -868,7 +846,7 @@ export class ApiClient<T = undefined> {
         },
       };
     },
-    x: (req: GetPublicContestUsersReqDTO, opts?: any) => {
+    v: (req: GetPublicContestUsersReqDTO, opts?: any) => {
       return {
         method: 'GET' as AllowedRequestMethod,
         url: this._uf('/api/v2/public/contests/:uk/users', {
@@ -897,7 +875,7 @@ export class ApiClient<T = undefined> {
         },
       };
     },
-    y: (req: GetPublicContestUserReqDTO, opts?: any) => {
+    w: (req: GetPublicContestUserReqDTO, opts?: any) => {
       return {
         method: 'GET' as AllowedRequestMethod,
         url: this._uf('/api/v2/public/contests/:uk/users/:userId', {
@@ -918,7 +896,7 @@ export class ApiClient<T = undefined> {
         },
       };
     },
-    z: (req: GetContestUsersReqDTO, opts?: any) => {
+    x: (req: GetContestUsersReqDTO, opts?: any) => {
       return {
         method: 'GET' as AllowedRequestMethod,
         url: this._uf('/api/v2/contests/:uk/users', {
@@ -938,7 +916,7 @@ export class ApiClient<T = undefined> {
         },
       };
     },
-    aa: (req: GetContestUserReqDTO, opts?: any) => {
+    y: (req: GetContestUserReqDTO, opts?: any) => {
       return {
         method: 'GET' as AllowedRequestMethod,
         url: this._uf('/api/v2/contests/:uk/users/:userId', {
@@ -959,7 +937,7 @@ export class ApiClient<T = undefined> {
         },
       };
     },
-    ab: (req: UpdateContestUserReqDTO, opts?: any) => {
+    z: (req: UpdateContestUserReqDTO, opts?: any) => {
       return {
         method: 'PATCH' as AllowedRequestMethod,
         url: this._uf('/api/v2/contests/:uk/users/:userId', {
@@ -991,87 +969,141 @@ export class ApiClient<T = undefined> {
         },
       };
     },
-    ac: (req: UploadFileReqDTO, opts?: any) => {
-      const formData = new FormData();
-      formData.append('contestId', req.contestId);
-      formData.append('category', req.category);
-      formData.append('file', req.file);
+    aa: (req: CreateCollectionReqDTO, opts?: any) => {
       return {
         method: 'POST' as AllowedRequestMethod,
-        url: this._uf('/api/v2/files', {
+        url: this._uf('/api/v2/collections', {
           param: {},
           query: {},
         }),
-        data: formData,
-        headers: {
-          'Content-Type': 'multipart/form-data',
+        data: {
+          uk: req.uk,
+          content: req.content,
         },
         extraOpts: opts,
         metadata: {
-          name: 'uploadFile',
+          name: 'createCollection',
           method: 'POST',
-          path: '/api/v2/files',
-          req: UploadFileReqDTO,
-          resp: UploadFileRespDTO,
+          path: '/api/v2/collections',
+          req: CreateCollectionReqDTO,
+          resp: CreateCollectionRespDTO,
         },
       };
     },
-    ad: (req: GetFileReqDTO, opts?: any) => {
+    ab: (req: UpdateCollectionReqDTO, opts?: any) => {
+      return {
+        method: 'PATCH' as AllowedRequestMethod,
+        url: this._uf('/api/v2/collections/:uk', {
+          param: {
+            uk: req.uk,
+          },
+          query: {},
+        }),
+        data: {
+          content: req.content,
+        },
+        extraOpts: opts,
+        metadata: {
+          name: 'updateCollection',
+          method: 'PATCH',
+          path: '/api/v2/collections/:uk',
+          req: UpdateCollectionReqDTO,
+          resp: null as null,
+        },
+      };
+    },
+    ac: (req: null, opts?: any) => {
       return {
         method: 'GET' as AllowedRequestMethod,
-        url: this._uf('/api/v2/files/:id', {
+        url: this._uf('/api/v2/collections', {
+          param: {},
+          query: {},
+        }),
+        data: {},
+        extraOpts: opts,
+        metadata: {
+          name: 'getCollections',
+          method: 'GET',
+          path: '/api/v2/collections',
+          req: null as null,
+          resp: GetCollectionsRespDTO,
+        },
+      };
+    },
+    ad: (req: null, opts?: any) => {
+      return {
+        method: 'GET' as AllowedRequestMethod,
+        url: this._uf('/api/v2/public/collections', {
+          param: {},
+          query: {},
+        }),
+        data: {},
+        extraOpts: opts,
+        metadata: {
+          name: 'getPublicCollections',
+          method: 'GET',
+          path: '/api/v2/public/collections',
+          req: null as null,
+          resp: GetPublicCollectionsRespDTO,
+        },
+      };
+    },
+    ae: (req: GetCollectionReqDTO, opts?: any) => {
+      return {
+        method: 'GET' as AllowedRequestMethod,
+        url: this._uf('/api/v2/collections/:uk', {
           param: {
-            id: req.id,
+            uk: req.uk,
           },
           query: {},
         }),
         data: {},
         extraOpts: opts,
         metadata: {
-          name: 'getFile',
+          name: 'getCollection',
           method: 'GET',
-          path: '/api/v2/files/:id',
-          req: GetFileReqDTO,
-          resp: GetFileRespDTO,
+          path: '/api/v2/collections/:uk',
+          req: GetCollectionReqDTO,
+          resp: GetCollectionRespDTO,
         },
       };
     },
-    ae: (req: GetPublicFileReqDTO, opts?: any) => {
+    af: (req: GetPublicCollectionReqDTO, opts?: any) => {
       return {
         method: 'GET' as AllowedRequestMethod,
-        url: this._uf('/api/v2/public/files/:id', {
+        url: this._uf('/api/v2/public/collections/:uk', {
           param: {
-            id: req.id,
+            uk: req.uk,
           },
           query: {},
         }),
         data: {},
         extraOpts: opts,
         metadata: {
-          name: 'getPublicFile',
+          name: 'getPublicCollection',
           method: 'GET',
-          path: '/api/v2/public/files/:id',
-          req: GetPublicFileReqDTO,
-          resp: GetPublicFileRespDTO,
+          path: '/api/v2/public/collections/:uk',
+          req: GetPublicCollectionReqDTO,
+          resp: GetPublicCollectionRespDTO,
         },
       };
     },
-    af: (req: DeleteFileReqDTO, opts?: any) => {
+    ag: (req: DeleteCollectionReqDTO, opts?: any) => {
       return {
         method: 'DELETE' as AllowedRequestMethod,
-        url: this._uf('/api/v2/files/:id', {
+        url: this._uf('/api/v2/collections/:uk', {
           param: {
-            id: req.id,
+            uk: req.uk,
           },
           query: {},
         }),
         data: {},
         extraOpts: opts,
         metadata: {
-          name: 'deleteFile',
+          name: 'deleteCollection',
           method: 'DELETE',
-          path: '/api/v2/files/:id',
-          req: DeleteFileReqDTO,
+          path: '/api/v2/collections/:uk',
+          req: DeleteCollectionReqDTO,
           resp: null as null,
         },
       };

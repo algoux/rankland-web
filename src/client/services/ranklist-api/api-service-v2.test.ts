@@ -1,6 +1,7 @@
 import { describe, expect, it, vi } from 'vitest';
 import { ApiRequestException } from '@client/api';
 import { ErrCode } from '@common/enums/err-code.enum';
+import { ContestStatus } from '@common/modules/contest/contest-status';
 import { ApiService } from './api-service';
 import { LogicExceptionKind } from './logic-exception';
 import type { CacheManager, RanklandRequestAdapter } from './types';
@@ -30,6 +31,7 @@ function makeContest(overrides: Record<string, unknown> = {}) {
     _id: '100',
     uk: 'contest-a',
     name: 'Contest A',
+    status: ContestStatus.Finalized,
     title: { fallback: 'Contest A' },
     startAt: '2026-01-01T00:00:00Z',
     duration: [5, 'h'],

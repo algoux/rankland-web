@@ -17,6 +17,9 @@ registerErrCodeConfigs({
   [ErrCode.ContestEventIdGap]: '事件 ID 不连续',
   [ErrCode.ContestEventIdConflict]: '事件 ID 已存在但内容不一致',
   [ErrCode.ContestEventStreamRevisionMismatch]: '事件流版本不匹配',
+  [ErrCode.ContestFinalized]: '比赛已完结，不能修改榜单数据',
+  [ErrCode.ContestFinalizationIncomplete]: '仍有未完成判题的提交，不能确认完结',
+  [ErrCode.ContestFinalizationInvalidData]: '比赛数据不完整或不一致，不能生成最终榜单',
 
   // File
   [ErrCode.FileNotFound]: '该文件未找到',
@@ -24,6 +27,7 @@ registerErrCodeConfigs({
   [ErrCode.FileUploadTooLarge]: '上传文件过大',
   [ErrCode.FileUploadAccessDenied]: '文件上传被存储服务拒绝',
   [ErrCode.FileUploadUnavailable]: '文件存储服务暂不可用',
+  [ErrCode.FileReferencedByFinalizedContest]: '文件被已完结比赛引用，不能删除',
   [ErrCode.FileUploadUnknown]: '文件上传失败',
 
   // Collection

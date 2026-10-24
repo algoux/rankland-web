@@ -7,6 +7,7 @@ export interface FileStorageUploadInput {
 
 export interface FileStorageProvider {
   upload: (input: FileStorageUploadInput) => Promise<void>;
+  remove: (path: string) => Promise<void>;
 }
 
 export type FileStorageProviderErrorKind = 'access_denied' | 'unavailable' | 'unknown';

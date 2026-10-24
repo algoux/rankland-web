@@ -94,6 +94,7 @@ export class HttpLiveContestTransport implements LiveContestTransport {
     return {
       uk: response.uk,
       name: response.name,
+      status: response.status,
       contest,
       problems: (response.problems ?? []) as srk.Problem[],
       users: response.users as srk.User[],

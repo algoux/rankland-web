@@ -1,6 +1,6 @@
 # Contest Producer / Consumer Guide
 
-Updated: 2026-07-16
+Updated: 2026-10-24
 
 本文档面向事件生产脚本和事件消费者应用。核心原则：
 
@@ -19,6 +19,22 @@ Updated: 2026-07-16
 - `producerId`：生产者身份，来自 `x-producer-id`。同一事件流同时只允许一个 producer。
 
 ## 消费者实现
+
+### 完结和上帝视角
+
+生产者补齐全部判题结果后，由管理调用方使用 `x-token` 调用
+`POST /api/v2/contests/:uk/finalize`。接口生成并关联最终 SRK，重复调用幂等；有待判、判题中或
+`?` 提交时返回 100009 和未完成提交摘要。完结后的事件追加（包括重传）和 reset 返回 100008，
+因此应先确认最后一批 append 成功，再确认完结。纯静态导入仍走创建、上传、PATCH 文件关联，
+空事件流的关联操作会直接完结。
+
+管理消费者可为 events 请求设置 `ignoreFrozen=true` 并携带 `x-token`，读取未封榜视图。
+令牌只放请求头，不放 URL。比赛状态采用数字枚举：`Created=0`（默认 `created`）、`Finalized=99`。
+普通消费者无需令牌，比赛 `status=99` 后也会读到真实结果。
+该视图变化不改变 `streamRevision` 或水位，不会自动触发已有客户端重放；完结后或切换视角时，
+主动清空投影和 checkpoint，从 0 重新拉取。不得把公开和特权视图的本地投影缓存混用。
+
+分页、进度压缩、JSON/protobuf 协议不变。若要查看全部进度事件，另设 `compactProgress=false`。
 
 ### 数据通道
 

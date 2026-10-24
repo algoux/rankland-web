@@ -1,3 +1,4 @@
+import { ContestStatus } from '@common/modules/contest/contest-status';
 import { DataSource } from 'typeorm';
 import MysqlConfig from '@server/configs/mysql/mysql.config';
 import { getMysqlDataSourceOptions } from '@server/database/typeorm-data-source';
@@ -236,6 +237,7 @@ describe.runIf(runMysqlTests)('contest TypeORM event store', () => {
         'sorter',
         'contributors',
         'srk_file_id',
+        'status',
         'view_count',
         'redirect_uk',
         'created_at',
@@ -541,8 +543,6 @@ describe.runIf(runMysqlTests)('contest TypeORM event store', () => {
     const deletedFile = await saveFile(owner.id, 'deleted.srk.json');
     await fileRepository.softDelete({ id: deletedFile.id });
 
-    await service.updateContest({ uk: ownerUk, srkFileID: ownFile.id });
-    expect((await service.getContest(ownerUk)).srkFileId).toBe(ownFile.id);
     await expect(service.updateContest({ uk: ownerUk, srkFileID: otherFile.id })).rejects.toMatchObject({
       code: ErrCode.FileNotFound,
     });
@@ -553,8 +553,12 @@ describe.runIf(runMysqlTests)('contest TypeORM event store', () => {
       code: ErrCode.IllegalParameters,
     });
 
-    await service.updateContest({ uk: ownerUk, srkFileID: null });
-    expect((await service.getContest(ownerUk)).srkFileId).toBeNull();
+    await service.updateContest({ uk: ownerUk, srkFileID: ownFile.id });
+    expect(await service.getContest(ownerUk)).toMatchObject({ srkFileId: ownFile.id, status: ContestStatus.Finalized });
+    await expect(service.updateContest({ uk: ownerUk, srkFileID: ownFile.id })).resolves.toBeUndefined();
+    await expect(service.updateContest({ uk: ownerUk, srkFileID: null })).rejects.toMatchObject({
+      code: ErrCode.ContestFinalized,
+    });
   });
 
   it('denormalizes submit time and filters frozen non-new events during catch-up', async () => {
@@ -728,7 +732,7 @@ describe.runIf(runMysqlTests)('contest TypeORM event store', () => {
           },
         );
 
-      await new Promise((resolve) => setTimeout(resolve, 25));
+      await new Promise((resolve) => { setTimeout(resolve, 25); });
       expect(appendSettled).toBe(false);
       await lockRunner.manager.getRepository(ContestEntity).softDelete({ id: contest.id });
       await lockRunner.commitTransaction();

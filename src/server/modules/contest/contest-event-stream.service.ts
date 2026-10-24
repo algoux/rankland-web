@@ -12,6 +12,7 @@ import Long from 'long';
 import { ContestClientEventBO, ContestEventsResponseBO, ContestProducerBatchBO } from './contest-event-bo';
 import LogicException from '@server/exceptions/logic.exception';
 import { ErrCode } from '@common/enums/err-code.enum';
+import { ContestStatus } from '@common/modules/contest/contest-status';
 import ContestEventReadCache, {
   ContestEventReadCacheUnavailableError,
   ContestEventReadFormat,
@@ -50,6 +51,8 @@ export interface GetClientEventsInput {
   limit: number;
   streamRevision: number;
   compactProgress?: boolean;
+  /** The caller must authorize privileged reads before enabling this option. */
+  ignoreFrozen?: boolean;
 }
 
 export interface GetClientEventsResult extends ContestEventsResponseBO {}
@@ -93,6 +96,9 @@ export default class ContestEventStreamService {
 
     return this.store.runInStreamTransaction(input.uk, async (transaction) => {
       const { stream } = transaction;
+      if (stream.status === ContestStatus.Finalized) {
+        throw new LogicException(ErrCode.ContestFinalized, `contest ${input.uk} is finalized`);
+      }
       if (input.batch.streamRevision !== stream.streamRevision) {
         throw new LogicException(
           ErrCode.ContestEventStreamRevisionMismatch,
@@ -217,7 +223,7 @@ export default class ContestEventStreamService {
     }
     const storedEvents = snapshot.events;
     const page = storedEvents.slice(0, limit);
-    const freezeVisiblePage = filterFrozenNonNewEvents(page, snapshot.frozenStartNs);
+    const freezeVisiblePage = input.ignoreFrozen ? page : filterFrozenNonNewEvents(page, snapshot.frozenStartNs);
     const clientEvents: ContestClientEventBO[] = freezeVisiblePage.map(storedEventToClientEvent);
     const visibleEvents =
       input.compactProgress === false
@@ -242,6 +248,10 @@ export default class ContestEventStreamService {
     input: GetClientEventsInput,
     format: ContestEventReadFormat,
   ): Promise<Record<string, any> | TrustedResponse> {
+    // Privileged results must never enter or depend on the public visibility cache.
+    if (input.ignoreFrozen) {
+      return this.runLegacyRead(input);
+    }
     const mode = this.readCacheConfig?.mode ?? 'off';
     if (mode === 'off' || !this.readCache) {
       return this.runLegacyRead(input);

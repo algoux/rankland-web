@@ -1,4 +1,5 @@
 import { describe, expect, it, vi } from 'vitest';
+import { ContestStatus } from '@common/modules/contest/contest-status';
 import type { LiveContestConfig, LiveContestEvent } from '@/services/ranklist-api/live-contest-types';
 import { LiveRanklistProjector } from './live-ranklist-projector';
 
@@ -403,6 +404,53 @@ describe('LiveRanklistProjector', () => {
     ]);
 
     expect(rowByUser(projector, 'alice').statuses[0].result).toBe('?');
+  });
+
+  it.each([
+    [undefined, '?'],
+    [ContestStatus.Created, '?'],
+    [ContestStatus.Finalized, null],
+  ] as const)('projects a cancelled frozen submission with contest status %s as %s', (status, expected) => {
+    const projector = new LiveRanklistProjector(config({ status }));
+    projector.applyInitial([
+      newSolution(1, 301, 'alice', 'A', 250),
+      { eventId: 2, type: 'SETTLE', solutionId: 301, result: 'CNL', time: [251, 's'] },
+    ]);
+    expect(rowByUser(projector, 'alice').statuses[0].result).toBe(expected);
+    if (status === ContestStatus.Finalized) expect(rowByUser(projector, 'alice').statuses[0].solutions).toEqual([]);
+  });
+
+  it('recomputes inferred freeze visibility when resetting to finalized or created metadata', () => {
+    const events: LiveContestEvent[] = [
+      newSolution(1, 301, 'alice', 'A', 250),
+      { eventId: 2, type: 'SETTLE', solutionId: 301, result: 'CNL', time: [251, 's'] },
+    ];
+    const projector = new LiveRanklistProjector(config({ status: ContestStatus.Created }));
+    projector.applyInitial(events);
+    expect(rowByUser(projector, 'alice').statuses[0].result).toBe('?');
+
+    projector.reset(config({ status: ContestStatus.Finalized }));
+    projector.applyInitial(events);
+    expect(rowByUser(projector, 'alice').statuses[0].result).toBeNull();
+    projector.reset();
+    projector.applyInitial(events);
+    expect(rowByUser(projector, 'alice').statuses[0].result).toBeNull();
+
+    projector.reset(config({ status: ContestStatus.Created }));
+    projector.applyInitial(events);
+    expect(rowByUser(projector, 'alice').statuses[0].result).toBe('?');
+  });
+
+  it('preserves an explicit disabled freeze inference for final archive construction and resets', () => {
+    const projector = new LiveRanklistProjector(config({ status: ContestStatus.Created }), { inferFrozenSolutions: false });
+    for (const status of [ContestStatus.Created, ContestStatus.Finalized] as const) {
+      projector.reset(config({ status }));
+      projector.applyInitial([
+        newSolution(1, 301, 'alice', 'A', 250),
+        { eventId: 2, type: 'SETTLE', solutionId: 301, result: 'CNL', time: [251, 's'] },
+      ]);
+      expect(rowByUser(projector, 'alice').statuses[0].result).toBeNull();
+    }
   });
 
   it('creates event-derived rows while preserving score or missing sorter metadata', () => {

@@ -1,4 +1,5 @@
 import { describe, expect, it, vi } from 'vitest';
+import { ContestStatus } from '@common/modules/contest/contest-status';
 import {
   HttpLiveContestTransport,
   type HttpLiveContestTransportOptions,
@@ -9,6 +10,7 @@ const contest = {
   _id: '42',
   uk: 'summer-2026',
   name: 'Summer Contest',
+  status: ContestStatus.Created,
   title: { fallback: 'Summer Contest' },
   startAt: '2026-07-24T00:00:00.000Z',
   duration: [5, 'h'],
@@ -78,6 +80,7 @@ describe('HttpLiveContestTransport', () => {
     await expect(transport.getContest(contest.uk)).resolves.toEqual({
       uk: contest.uk,
       name: contest.name,
+      status: 0,
       contest: {
         title: contest.title,
         startAt: contest.startAt,
@@ -89,6 +92,18 @@ describe('HttpLiveContestTransport', () => {
       series: [],
       sorter: contest.sorter,
       contributors: contest.contributors,
+    });
+  });
+
+  it('passes finalized status through without changing the stored freeze configuration', async () => {
+    const apiClient = {
+      getPublicContest: vi.fn(async () => ({ ...contest, status: ContestStatus.Finalized, frozenDuration: [1, 'h'] })),
+      getPublicContestEventStream: vi.fn(),
+    };
+    const { transport } = createTransport({ apiClient: apiClient as never });
+    await expect(transport.getContest(contest.uk)).resolves.toMatchObject({
+      status: 99,
+      contest: { duration: [5, 'h'], frozenDuration: [1, 'h'] },
     });
   });
 

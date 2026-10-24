@@ -1,3 +1,4 @@
+import { ContestStatus } from '@common/modules/contest/contest-status';
 import { Inject, Provide } from 'bwcx-core';
 import { DataSource, EntityManager, FindOptionsWhere, In } from 'typeorm';
 import type { User } from '@algoux/standard-ranklist';
@@ -14,6 +15,7 @@ import { contestDurationToSeconds, contestSecondsToDuration } from '@common/modu
 import { formatDatabaseDateTimeForApi, normalizeDateTimeInput } from '@server/utils/datetime.util';
 import { ContestCommittedWatermark } from './contest-event-watermark';
 import type { ContestEventCacheControl } from './contest-event-cache-control';
+import { getContestVisibility } from './contest-event-visibility';
 
 export type ContestUserInput = srk.User & {
   banned?: boolean;
@@ -101,6 +103,7 @@ export default class ContestService {
         sorter: data.sorter ?? null,
         contributors: data.contributors ?? null,
         srkFileId: null,
+        status: ContestStatus.Created,
         viewCount: 0,
         redirectUk: data.redirectUK ?? null,
       });
@@ -126,7 +129,18 @@ export default class ContestService {
 
   public async updateContest(data: ContestUpdateInput): Promise<ContestEventCacheControl | undefined> {
     return this.dataSource.transaction(async (manager) => {
-      const { contest } = await this.findLockedContestAndStream(manager, data.uk);
+      const { contest, stream } = await this.findLockedContestAndStream(manager, data.uk);
+      if (contest.status === ContestStatus.Finalized) {
+        const changesResults = Object.entries(data).some(
+          ([key, value]) =>
+            value !== undefined &&
+            !['uk', 'name', 'redirectUK'].includes(key) &&
+            !(key === 'srkFileID' && value === contest.srkFileId),
+        );
+        if (changesResults) {
+          throw new LogicException(ErrCode.ContestFinalized);
+        }
+      }
       if (data.redirectUK !== undefined) {
         await this.validateRedirectUk(manager, data.uk, data.redirectUK, contest.id);
       }
@@ -161,6 +175,9 @@ export default class ContestService {
       }
       if (data.srkFileID !== undefined) {
         updateData.srkFileId = data.srkFileID;
+        if (data.srkFileID !== null && stream.lastEventId === 0) {
+          updateData.status = ContestStatus.Finalized;
+        }
       }
       if (data.redirectUK !== undefined) {
         updateData.redirectUk = data.redirectUK;
@@ -177,7 +194,11 @@ export default class ContestService {
           await manager.getRepository(ContestUserEntity).delete({ contestId: contest.id });
         }
       }
-      if (data.duration !== undefined || data.frozenDuration !== undefined) {
+      if (
+        data.duration !== undefined ||
+        data.frozenDuration !== undefined ||
+        (updateData.status !== undefined && updateData.status !== contest.status)
+      ) {
         const committedDurationS = updateData.durationS ?? contest.durationS;
         const committedFrozenDurationS =
           data.frozenDuration !== undefined ? updateData.frozenDurationS ?? null : contest.frozenDurationS;
@@ -185,7 +206,11 @@ export default class ContestService {
           type: 'metadata',
           contestId: contest.id,
           canonicalUk: contest.uk,
-          visibilityFingerprint: `duration=${committedDurationS};frozen=${committedFrozenDurationS ?? 'null'}`,
+          visibilityFingerprint: getContestVisibility(
+            committedDurationS,
+            committedFrozenDurationS,
+            updateData.status ?? contest.status,
+          ).visibilityFingerprint,
         };
       }
       return undefined;
@@ -195,6 +220,7 @@ export default class ContestService {
   public async dropEvents(uk: string): Promise<ContestCommittedWatermark> {
     return this.dataSource.transaction(async (manager) => {
       const { contest, stream } = await this.findLockedContestAndStream(manager, uk);
+      assertContestNotFinalized(contest);
       stream.lastEventId = 0;
       stream.streamRevision += 1;
       stream.producerId = null;
@@ -292,7 +318,7 @@ export default class ContestService {
     });
   }
 
-  private async findLockedContestAndStream(
+  public async findLockedContestAndStream(
     manager: EntityManager,
     uk: string,
   ): Promise<{ contest: ContestEntity; stream: ContestEventStreamEntity }> {
@@ -364,11 +390,35 @@ export default class ContestService {
   }
 
   public async upsertContestUsers(contestId: string, users: ContestUserInput[]): Promise<void> {
-    await this.dataSource.transaction((manager) => this.upsertContestUsersWithManager(manager, contestId, users));
+    await this.dataSource.transaction(async (manager) => {
+      await this.lockContestForResultUpdate(manager, contestId);
+      await this.upsertContestUsersWithManager(manager, contestId, users);
+    });
   }
 
   public async replaceContestUsers(contestId: string, users: ContestUserInput[]): Promise<void> {
-    await this.dataSource.transaction((manager) => this.replaceContestUsersWithManager(manager, contestId, users));
+    await this.dataSource.transaction(async (manager) => {
+      await this.lockContestForResultUpdate(manager, contestId);
+      await this.replaceContestUsersWithManager(manager, contestId, users);
+    });
+  }
+
+  private async lockContestForResultUpdate(manager: EntityManager, contestId: string): Promise<void> {
+    const contest = await manager.getRepository(ContestEntity).findOne({
+      where: { id: contestId },
+      lock: { mode: 'pessimistic_write' },
+    });
+    if (!contest) {
+      throw new LogicException(ErrCode.ContestNotFound);
+    }
+    const stream = await manager.getRepository(ContestEventStreamEntity).findOne({
+      where: { contestId },
+      lock: { mode: 'pessimistic_write' },
+    });
+    if (!stream) {
+      throw new LogicException(ErrCode.ContestNotFound);
+    }
+    assertContestNotFinalized(contest);
   }
 
   public async updateContestUser(
@@ -388,35 +438,48 @@ export default class ContestService {
       index?: number | null;
     },
   ): Promise<void> {
-    const user = await this.findContestUserById(uk, userId);
-    if (!user) {
-      throw new LogicException(ErrCode.ContestUserNotFound);
-    }
-
-    const updateData: Partial<ContestUserEntity> = {};
-    const assignNullable = <K extends keyof ContestUserEntity>(key: K, value: any) => {
-      if (value !== undefined) {
-        (updateData as any)[key] = value === null ? null : value;
+    return this.dataSource.transaction(async (manager) => {
+      const { contest } = await this.findLockedContestAndStream(manager, uk);
+      if (
+        contest.status === ContestStatus.Finalized &&
+        Object.entries(data).some(
+          ([key, value]) => value !== undefined && key !== 'banned' && key !== 'broadcasterToken',
+        )
+      ) {
+        throw new LogicException(ErrCode.ContestFinalized);
       }
-    };
+      const user = await manager.getRepository(ContestUserEntity).findOne({
+        where: { contestId: contest.id, userId },
+      });
+      if (!user) {
+        throw new LogicException(ErrCode.ContestUserNotFound);
+      }
 
-    assignNullable('name', data.name);
-    assignNullable('official', data.official);
-    assignNullable('avatar', data.avatar);
-    assignNullable('photo', data.photo);
-    assignNullable('organization', data.organization);
-    assignNullable('location', data.location);
-    assignNullable('teamMembers', data.teamMembers);
-    assignNullable('markers', data.markers);
-    assignNullable('banned', data.banned);
-    assignNullable('broadcasterToken', data.broadcasterToken);
-    if (data.index !== undefined && data.index !== null) {
-      updateData.sortIndex = data.index;
-    }
+      const updateData: Partial<ContestUserEntity> = {};
+      const assignNullable = <K extends keyof ContestUserEntity>(key: K, value: any) => {
+        if (value !== undefined) {
+          (updateData as any)[key] = value === null ? null : value;
+        }
+      };
 
-    if (Object.keys(updateData).length > 0) {
-      await this.dataSource.getRepository(ContestUserEntity).update({ id: user.id }, updateData);
-    }
+      assignNullable('name', data.name);
+      assignNullable('official', data.official);
+      assignNullable('avatar', data.avatar);
+      assignNullable('photo', data.photo);
+      assignNullable('organization', data.organization);
+      assignNullable('location', data.location);
+      assignNullable('teamMembers', data.teamMembers);
+      assignNullable('markers', data.markers);
+      assignNullable('banned', data.banned);
+      assignNullable('broadcasterToken', data.broadcasterToken);
+      if (data.index !== undefined && data.index !== null) {
+        updateData.sortIndex = data.index;
+      }
+
+      if (Object.keys(updateData).length > 0) {
+        await manager.getRepository(ContestUserEntity).update({ id: user.id }, updateData);
+      }
+    });
   }
 
   private async validateRedirectUk(
@@ -549,6 +612,12 @@ function jsonTextIncludes(value: unknown, query: string): boolean {
   return JSON.stringify(value).toLowerCase().includes(query.toLowerCase());
 }
 
+function assertContestNotFinalized(contest: ContestEntity): void {
+  if (contest.status === ContestStatus.Finalized) {
+    throw new LogicException(ErrCode.ContestFinalized);
+  }
+}
+
 function parseStatisticsInteger(value: string | number, field: string): number {
   const parsed = Number(value);
   if (!Number.isSafeInteger(parsed) || parsed < 0) {
@@ -568,6 +637,7 @@ function contestEntityToCoreFields(contest: ContestEntity) {
     _id: contest.id,
     uk: contest.uk,
     name: contest.name,
+    status: contest.status,
     title: contest.title,
     startAt: formatDatabaseDateTimeForApi(contest.startAt)!,
     duration: contestSecondsToDuration(contest.durationS),

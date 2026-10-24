@@ -5,7 +5,8 @@ import { ContestEntity } from '@server/entities/contest.entity';
 import { ContestEventEntity } from '@server/entities/contest-event.entity';
 import { ContestEventStreamEntity } from '@server/entities/contest-event-stream.entity';
 import { rankland_live_contest_common } from '@common/proto/rankland_live_contest';
-import { getFrozenStartNsFromSeconds } from './contest-time';
+import { getContestVisibility } from './contest-event-visibility';
+import { ContestStatus } from '@common/modules/contest/contest-status';
 import {
   ContestEventInsertInput,
   ContestEventAuthorityState,
@@ -59,7 +60,9 @@ export default class TypeOrmContestEventStore implements ContestEventStore {
   ): Promise<T> {
     return this.typeOrmClient.getDataSource().transaction(async (manager) => {
       const { contest, stream } = await this.findLockedStream(manager, uk);
-      const transaction = new TypeOrmContestEventTransaction(manager, stream, contest.uk, this.idGenerator);
+      const transaction = new TypeOrmContestEventTransaction(
+        manager, stream, contest.uk, this.idGenerator, Number(contest.status ?? ContestStatus.Created),
+      );
       return runner(transaction);
     });
   }
@@ -99,11 +102,11 @@ export default class TypeOrmContestEventStore implements ContestEventStore {
 
   public async readAuthorityByUk(uk: string): Promise<ContestEventAuthorityState> {
     contestEventReadMetrics.add('authorityByUkCalls');
-    const { stream, durationS, frozenDurationS } = await this.runBoundedRead((manager) =>
+    const { stream, durationS, frozenDurationS, status } = await this.runBoundedRead((manager) =>
       this.findSnapshotStateByUk(manager, uk),
     );
     contestEventReadMetrics.add('authorityByUkRows');
-    return authorityState(stream, durationS, frozenDurationS);
+    return authorityState(stream, durationS, frozenDurationS, status);
   }
 
   public async readAuthorityByContestIds(contestIds: readonly string[]): Promise<ContestEventAuthorityState[]> {
@@ -120,6 +123,7 @@ export default class TypeOrmContestEventStore implements ContestEventStore {
         .addSelect('contest.uk', 'canonicalUk')
         .addSelect('contest.durationS', 'durationS')
         .addSelect('contest.frozenDurationS', 'frozenDurationS')
+        .addSelect('contest.status', 'status')
         .addSelect('stream.lastEventId', 'lastEventId')
         .addSelect('stream.streamRevision', 'streamRevision')
         .where('stream.contestId IN (:...contestIds)', { contestIds: [...contestIds] })
@@ -130,6 +134,7 @@ export default class TypeOrmContestEventStore implements ContestEventStore {
           canonicalUk: string;
           durationS: string | number;
           frozenDurationS?: string | number | null;
+          status: string | number;
           lastEventId: string | number;
           streamRevision: string | number;
         }>(),
@@ -145,6 +150,7 @@ export default class TypeOrmContestEventStore implements ContestEventStore {
         },
         Number(row.durationS),
         row.frozenDurationS === undefined || row.frozenDurationS === null ? null : Number(row.frozenDurationS),
+        Number(row.status ?? ContestStatus.Created),
       ),
     );
   }
@@ -225,7 +231,7 @@ export default class TypeOrmContestEventStore implements ContestEventStore {
     contestEventReadMetrics.add('legacySnapshotCalls');
     try {
       const snapshot = await this.runBoundedRead(async (manager) => {
-        const { stream, durationS, frozenDurationS } = await this.findSnapshotStateByUk(manager, request.uk);
+        const { stream, durationS, frozenDurationS, status } = await this.findSnapshotStateByUk(manager, request.uk);
         const snapshotLastEventId =
           request.throughEventId === undefined
             ? stream.lastEventId
@@ -282,7 +288,7 @@ export default class TypeOrmContestEventStore implements ContestEventStore {
           settledEventIdsBySolutionId: new Map(
             settledRows.map((row) => [Number(row.solutionId), Number(row.eventId)] as [number, number]),
           ),
-          frozenStartNs: getFrozenStartNsFromSeconds(durationS, frozenDurationS),
+          frozenStartNs: getContestVisibility(durationS, frozenDurationS, status).frozenStartNs,
         };
       }, 'REPEATABLE READ');
       contestEventReadMetrics.add('eventsReadTransactionCommitted');
@@ -301,6 +307,7 @@ export default class TypeOrmContestEventStore implements ContestEventStore {
     stream: ContestStreamState;
     durationS: number;
     frozenDurationS?: number | null;
+    status: ContestStatus;
   }> {
     const row = await manager
       .getRepository(ContestEntity)
@@ -310,6 +317,7 @@ export default class TypeOrmContestEventStore implements ContestEventStore {
       .addSelect('contest.uk', 'uk')
       .addSelect('contest.durationS', 'durationS')
       .addSelect('contest.frozenDurationS', 'frozenDurationS')
+      .addSelect('contest.status', 'status')
       .addSelect('stream.lastEventId', 'lastEventId')
       .addSelect('stream.streamRevision', 'streamRevision')
       .addSelect('stream.producerId', 'producerId')
@@ -320,6 +328,7 @@ export default class TypeOrmContestEventStore implements ContestEventStore {
         uk: string;
         durationS: string | number;
         frozenDurationS?: string | number | null;
+        status: string | number;
         lastEventId: string | number;
         streamRevision: string | number;
         producerId?: string | null;
@@ -338,6 +347,7 @@ export default class TypeOrmContestEventStore implements ContestEventStore {
       durationS: Number(row.durationS),
       frozenDurationS:
         row.frozenDurationS === undefined || row.frozenDurationS === null ? null : Number(row.frozenDurationS),
+      status: Number(row.status ?? ContestStatus.Created),
     };
   }
 
@@ -430,15 +440,16 @@ function deadlinePhaseCounter(
 }
 
 class TypeOrmContestEventTransaction implements ContestEventTransaction {
-  public readonly stream: ContestStreamState;
+  public readonly stream: ContestEventTransaction['stream'];
 
   public constructor(
     private readonly manager: EntityManager,
     private readonly streamEntity: ContestEventStreamEntity,
     uk: string,
     private readonly idGenerator: IdGenerator,
+    status: ContestStatus,
   ) {
-    this.stream = streamEntityToState(streamEntity, uk);
+    this.stream = { ...streamEntityToState(streamEntity, uk), status };
   }
 
   public async findEvents(eventIds: number[]): Promise<ContestStoredEvent[]> {
@@ -564,13 +575,13 @@ function authorityState(
   stream: ContestStreamState,
   durationS: number,
   frozenDurationS?: number | null,
+  status: ContestStatus = ContestStatus.Created,
 ): ContestEventAuthorityState {
   return {
     contestId: stream.contestId,
     canonicalUk: stream.uk,
     streamRevision: stream.streamRevision,
     lastEventId: stream.lastEventId,
-    frozenStartNs: getFrozenStartNsFromSeconds(durationS, frozenDurationS),
-    visibilityFingerprint: `duration=${durationS};frozen=${frozenDurationS ?? 'null'}`,
+    ...getContestVisibility(durationS, frozenDurationS, status),
   };
 }

@@ -1,3 +1,4 @@
+import { ContestStatus } from '@common/modules/contest/contest-status';
 import 'reflect-metadata';
 import { plainToInstance } from 'class-transformer';
 import { validate } from 'class-validator';
@@ -9,6 +10,8 @@ import {
 import {
   AppendContestEventsReqDTO,
   CreateContestReqDTO,
+  FinalizeContestReqDTO,
+  FinalizeContestRespDTO,
   GetPublicContestEventsReqDTO,
   MAX_APPEND_CONTEST_EVENTS_BATCH_SIZE,
   UpdateContestReqDTO,
@@ -31,6 +34,102 @@ async function validationProperties(instance: object): Promise<string[]> {
 }
 
 describe('contest API contract', () => {
+  it.each([
+    ['true', true],
+    ['false', false],
+    [true, true],
+    [false, false],
+    [undefined, undefined],
+  ])('accepts an explicit ignoreFrozen boolean %j without truthiness coercion', async (input, expected) => {
+    const request = plainToInstance(GetPublicContestEventsReqDTO, {
+      uk: 'contest-a', streamRevision: 1, ignoreFrozen: input,
+    });
+    await expect(validationProperties(request)).resolves.toEqual([]);
+    expect(request.ignoreFrozen).toBe(expected);
+  });
+
+  it.each([null, '', 'TRUE', '1', 1, 0, 'false,true', ['true'], ['false'], ['true', 'false'], {}])(
+    'rejects malformed or repeated ignoreFrozen input %j', async (ignoreFrozen) => {
+      const request = plainToInstance(GetPublicContestEventsReqDTO, {
+        uk: 'contest-a', streamRevision: 1, ignoreFrozen,
+      });
+      await expect(validationProperties(request)).resolves.toContain('ignoreFrozen');
+    },
+  );
+
+  it.each([
+    ['true', true, true],
+    ['false', false, true],
+    [true, true, true],
+    [false, false, true],
+    [undefined, undefined, true],
+    ['invalid', 'invalid', false],
+    ['', '', false],
+    [null, null, false],
+    [['true'], ['true'], false],
+    [['false'], ['false'], false],
+    [['true', 'false'], ['true', 'false'], false],
+    ['1', '1', false],
+    [1, 1, false],
+    [0, 0, false],
+  ])('validates raw ignoreFrozen=%j with production Boolean metadata and implicit conversion', async (input, expected, valid) => {
+    // Vitest/esbuild does not emit the design:type metadata that production tsc emits.
+    // bwcx's ValidationRegister enables implicit conversion before running @Transform.
+    const prototype = GetPublicContestEventsReqDTO.prototype;
+    const previousType = Reflect.getOwnMetadata('design:type', prototype, 'ignoreFrozen');
+    Reflect.defineMetadata('design:type', Boolean, prototype, 'ignoreFrozen');
+    try {
+      const request = plainToInstance(GetPublicContestEventsReqDTO, {
+        uk: 'contest-a', streamRevision: 1, ignoreFrozen: input,
+      }, { enableImplicitConversion: true });
+      expect(request.ignoreFrozen).toEqual(expected);
+      const errors = await validationProperties(request);
+      if (valid) expect(errors).toEqual([]);
+      else expect(errors).toContain('ignoreFrozen');
+    } finally {
+      if (previousType === undefined) Reflect.deleteMetadata('design:type', prototype, 'ignoreFrozen');
+      else Reflect.defineMetadata('design:type', previousType, prototype, 'ignoreFrozen');
+    }
+  });
+
+  it('requires a nonempty contest UK for finalization', async () => {
+    await expect(validationProperties(plainToInstance(FinalizeContestReqDTO, { uk: 'contest-a' }))).resolves.toEqual([]);
+    for (const uk of [undefined, '', null, ['contest-a'], 123]) {
+      await expect(validationProperties(plainToInstance(FinalizeContestReqDTO, { uk }))).resolves.toContain('uk');
+    }
+  });
+
+  it('builds an authenticated finalization request and retains the committed status and file ID', async () => {
+    const response: FinalizeContestRespDTO = {
+      uk: 'contest-a', status: ContestStatus.Finalized, srkFileID: '70346717215600641',
+    };
+    const request = vi.fn(async () => ({ success: true, code: 0, data: response }));
+    const client = new ApiClient({ request }, { pat: vi.fn((_dto, resp) => resp.data) } as any);
+    const opts = { headers: { 'x-token': 'management-test-token' } };
+    const finalized = await client.finalizeContest({ uk: 'contest-a' }, opts);
+    expect(finalized).toEqual(response);
+    expect(JSON.parse(JSON.stringify(finalized))).toEqual({
+      uk: 'contest-a', status: 99, srkFileID: '70346717215600641',
+    });
+    expect(typeof finalized.status).toBe('number');
+    expect(request).toHaveBeenCalledWith(expect.objectContaining({
+      method: 'POST', url: '/api/v2/contests/contest-a/finalize', data: {}, extraOpts: opts,
+      metadata: expect.objectContaining({ name: 'finalizeContest', req: FinalizeContestReqDTO, resp: FinalizeContestRespDTO }),
+    }));
+  });
+
+  it.each([true, false])('preserves ignoreFrozen=%s and explicit token options on event requests', async (ignoreFrozen) => {
+    const request = vi.fn(async () => ({ success: true, code: 0, data: {} }));
+    const client = new ApiClient({ request }, { pat: vi.fn((_dto, resp) => resp.data) } as any);
+    const opts = { headers: { 'x-token': 'management-test-token' } };
+    await client.getPublicContestEvents({ uk: 'contest-a', streamRevision: 1, ignoreFrozen }, opts);
+    expect(request).toHaveBeenCalledWith(expect.objectContaining({
+      method: 'GET',
+      url: `/api/v2/public/contests/contest-a/events?streamRevision=1&ignoreFrozen=${ignoreFrozen}`,
+      data: {}, extraOpts: opts,
+    }));
+  });
+
   it('keeps the created contest Snowflake id as a decimal string', async () => {
     const request = vi.fn(async () => ({
       success: true,

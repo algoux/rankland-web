@@ -24,6 +24,7 @@ import {
 } from 'class-validator';
 import type * as srk from '@algoux/standard-ranklist';
 import { contestDurationToSeconds, isI18NStringSet } from './contest-metadata';
+import type { ContestStatus } from './contest-status';
 
 export const MAX_APPEND_CONTEST_EVENTS_BATCH_SIZE = 1000;
 
@@ -288,6 +289,19 @@ export class CreateContestRespDTO {
   public _id: string;
 }
 
+export class FinalizeContestReqDTO {
+  @FromParam()
+  @IsString()
+  @IsNotEmpty()
+  public uk: string;
+}
+
+export class FinalizeContestRespDTO {
+  public uk: string;
+  public status: ContestStatus;
+  public srkFileID: string;
+}
+
 export class UpdateContestReqDTO {
   @FromParam()
   @IsString()
@@ -457,6 +471,16 @@ export class GetPublicContestEventsReqDTO {
   @Type(() => String)
   @Transform(({ value }) => (value === 'false' ? false : value === 'true' ? true : undefined))
   public compactProgress?: boolean;
+
+  @FromQuery()
+  @ValidateIf((_object, value) => value !== undefined)
+  @Transform(({ obj, key }) => {
+    // bwcx enables implicit conversion: Boolean('false') is true, so parse the raw input.
+    const value = obj[key];
+    return value === 'true' ? true : value === 'false' ? false : value;
+  })
+  @IsBoolean()
+  public ignoreFrozen?: boolean;
 }
 
 export class GetPublicContestEventsRespDTO {
@@ -522,6 +546,7 @@ export class GetContestReqDTO {
 }
 
 export class GetContestRespDTO {
+  public status: ContestStatus;
   public _id: string;
   public uk: string;
   public name: string;
@@ -551,6 +576,7 @@ export class GetPublicContestReqDTO {
 }
 
 export class GetPublicContestRespDTO {
+  public status: ContestStatus;
   public _id: string;
   public uk: string;
   public name: string;
@@ -572,6 +598,7 @@ export class GetPublicContestRespDTO {
 }
 
 export class ContestSummaryDTO {
+  public status: ContestStatus;
   public _id: string;
   public uk: string;
   public name: string;

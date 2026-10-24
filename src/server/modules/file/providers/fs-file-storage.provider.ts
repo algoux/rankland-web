@@ -1,4 +1,4 @@
-import { mkdir, writeFile } from 'fs/promises';
+import { lstat, mkdir, unlink, writeFile } from 'fs/promises';
 import path from 'path';
 import { Inject, Provide } from 'bwcx-core';
 
@@ -18,8 +18,32 @@ export default class FsFileStorageProvider implements FileStorageProvider {
   public constructor(@Inject(FileConfig) private readonly config: FileConfig) {}
 
   public async upload(input: FileStorageUploadInput): Promise<void> {
+    const targetPath = this.resolveTargetPath(input.path);
+    try {
+      await this.assertNoSymlinks(targetPath);
+      await mkdir(path.dirname(targetPath), { recursive: true });
+      await writeFile(targetPath, input.body);
+    } catch (error) {
+      if (error instanceof FileStorageProviderError) throw error;
+      throw new FileStorageProviderError(classifyFsError(error), error);
+    }
+  }
+
+  public async remove(filePath: string): Promise<void> {
+    const targetPath = this.resolveTargetPath(filePath);
+    try {
+      await this.assertNoSymlinks(targetPath);
+      await unlink(targetPath);
+    } catch (error) {
+      if ((error as NodeJS.ErrnoException)?.code === 'ENOENT') return;
+      if (error instanceof FileStorageProviderError) throw error;
+      throw new FileStorageProviderError(classifyFsError(error), error);
+    }
+  }
+
+  private resolveTargetPath(filePath: string): string {
     const basePath = path.resolve(this.config.fs.basePath);
-    const targetPath = path.resolve(basePath, input.path);
+    const targetPath = path.resolve(basePath, filePath);
     const relativePath = path.relative(basePath, targetPath);
     if (
       relativePath === '' ||
@@ -29,12 +53,22 @@ export default class FsFileStorageProvider implements FileStorageProvider {
     ) {
       throw new FileStorageProviderError('access_denied', new Error('File path escapes the configured FS base path'));
     }
+    return targetPath;
+  }
 
-    try {
-      await mkdir(path.dirname(targetPath), { recursive: true });
-      await writeFile(targetPath, input.body);
-    } catch (error) {
-      throw new FileStorageProviderError(classifyFsError(error), error);
+  private async assertNoSymlinks(targetPath: string): Promise<void> {
+    const basePath = path.resolve(this.config.fs.basePath);
+    let currentPath = basePath;
+    for (const segment of path.relative(basePath, targetPath).split(path.sep)) {
+      currentPath = path.join(currentPath, segment);
+      try {
+        if ((await lstat(currentPath)).isSymbolicLink()) {
+          throw new FileStorageProviderError('access_denied', new Error('File path traverses a symbolic link'));
+        }
+      } catch (error) {
+        if ((error as NodeJS.ErrnoException)?.code === 'ENOENT') return;
+        throw error;
+      }
     }
   }
 }

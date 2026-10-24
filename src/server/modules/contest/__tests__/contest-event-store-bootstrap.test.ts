@@ -5,8 +5,75 @@ import { ContestEventStreamEntity } from '@server/entities/contest-event-stream.
 import type { IdGenerator } from '@server/services/id-generator.service';
 import TypeOrmContestEventStore from '../contest-event-store.typeorm';
 import { ContestEventReadDatabaseUnavailableError } from '../contest-event-read-db-deadline';
+import { ContestStatus } from '@common/modules/contest/contest-status';
 
 describe('TypeOrmContestEventStore bootstrap authority read', () => {
+  it.each([ContestStatus.Finalized, '99'] as const)(
+    'passes locked contest status %j into the internal transaction as a numeric enum', async (status) => {
+    const contestFind = vi.fn(async () => ({ id: '101', uk: 'Contest-A', status }));
+    const streamFind = vi.fn(async () => ({
+      contestId: '101', lastEventId: 7, streamRevision: 2, producerId: null,
+    }));
+    const manager = {
+      getRepository: vi.fn((entity) => {
+        if (entity === ContestEntity) return { findOne: contestFind };
+        if (entity === ContestEventStreamEntity) return { findOne: streamFind };
+        throw new Error('unexpected repository');
+      }),
+    } as unknown as EntityManager;
+    const store = new TypeOrmContestEventStore(typeOrmClient({
+      transaction: async (callback: (transactionManager: EntityManager) => unknown) => callback(manager),
+    } as unknown as DataSource), idGenerator);
+
+    await expect(store.runInStreamTransaction('Contest-A', async (transaction) => transaction.stream.status))
+      .resolves.toBe(ContestStatus.Finalized);
+    expect(contestFind).toHaveBeenCalledWith({ where: { uk: 'Contest-A' }, lock: { mode: 'pessimistic_write' } });
+    expect(streamFind).toHaveBeenCalledWith({ where: { contestId: '101' }, lock: { mode: 'pessimistic_write' } });
+    expect(contestFind.mock.invocationCallOrder[0]).toBeLessThan(streamFind.mock.invocationCallOrder[0]);
+  });
+
+  it.each([ContestStatus.Created, ContestStatus.Finalized, '0', '99'] as const)(
+    'normalizes raw status %j through single and batch authority and snapshots', async (status) => {
+    const row = {
+      contestId: '101', uk: 'Contest-A', canonicalUk: 'Contest-A',
+      durationS: 18_000, frozenDurationS: 3_600, status,
+      lastEventId: 0, streamRevision: 2, producerId: null,
+    };
+    const builder = fluentBuilder(row) as any;
+    for (const method of ['andWhere', 'orderBy', 'limit']) builder[method] = vi.fn(() => builder);
+    builder.getRawMany = vi.fn(async () => [row]);
+    builder.getMany = vi.fn(async () => []);
+    const manager = {
+      getRepository: vi.fn(() => ({ createQueryBuilder: vi.fn(() => builder) })),
+    } as unknown as EntityManager;
+    const runner = {
+      connect: vi.fn(async () => ({ release: vi.fn() })),
+      release: vi.fn(async () => undefined),
+      startTransaction: vi.fn(async () => undefined),
+      commitTransaction: vi.fn(async () => undefined),
+      rollbackTransaction: vi.fn(async () => undefined),
+      manager,
+      isTransactionActive: false,
+    } as unknown as QueryRunner;
+    const store = new TypeOrmContestEventStore(typeOrmClient({
+      createQueryRunner: vi.fn(() => runner),
+    } as unknown as DataSource), idGenerator);
+    const visibility = {
+      frozenStartNs: Number(status) === ContestStatus.Created ? '14400000000000' : null,
+      visibilityFingerprint: `duration=18000;frozen=3600;status=${Number(status)}`,
+    };
+
+    await expect(store.readAuthorityByUk('Contest-A')).resolves.toMatchObject(visibility);
+    await expect(store.readAuthorityByContestIds(['101'])).resolves.toEqual([
+      { contestId: '101', canonicalUk: 'Contest-A', lastEventId: 0, streamRevision: 2, ...visibility },
+    ]);
+    await expect(store.readEventsSnapshot({
+      uk: 'Contest-A', afterEventId: 0, limit: 10, requestStreamRevision: 2, compactProgress: false,
+    })).resolves.toMatchObject({ frozenStartNs: visibility.frozenStartNs });
+    expect(builder.addSelect).toHaveBeenCalledWith('contest.status', 'status');
+    expect(await store.getStreamState('Contest-A')).not.toHaveProperty('status');
+  });
+
   it('keeps the legacy two-query manager path behind the A/B switch', async () => {
     const contestFind = vi.fn(async () => ({ id: '101', uk: 'Contest-A' }));
     const streamFind = vi.fn(async () => ({
@@ -61,7 +128,7 @@ describe('TypeOrmContestEventStore bootstrap authority read', () => {
     } as unknown as QueryRunner;
     const createQueryRunner = vi.fn(() => runner);
     const store = new TypeOrmContestEventStore(
-      typeOrmClient({ manager: {} as EntityManager, createQueryRunner } as unknown as DataSource),
+      typeOrmClient({ manager: {} as unknown as EntityManager, createQueryRunner } as unknown as DataSource),
       idGenerator,
       { queryTimeoutMs: 1_000, bootstrapAuthorityCoalescingEnabled: true },
     );
@@ -114,7 +181,7 @@ describe('TypeOrmContestEventStore bootstrap authority read', () => {
       isTransactionActive: false,
     } as unknown as QueryRunner;
     const store = new TypeOrmContestEventStore(
-      typeOrmClient({ manager: {} as EntityManager, createQueryRunner: vi.fn(() => runner) } as unknown as DataSource),
+      typeOrmClient({ manager: {} as unknown as EntityManager, createQueryRunner: vi.fn(() => runner) } as unknown as DataSource),
       idGenerator,
       { queryTimeoutMs: 1_000 },
     );
@@ -137,7 +204,8 @@ describe('TypeOrmContestEventStore bootstrap authority read', () => {
 const idGenerator = { nextId: vi.fn(() => '1') } as unknown as IdGenerator;
 
 function typeOrmClient(dataSource: DataSource): TypeOrmClient {
-  return { getDataSource: () => dataSource } as TypeOrmClient;
+  const client: Pick<TypeOrmClient, 'getDataSource'> = { getDataSource: () => dataSource };
+  return client as TypeOrmClient;
 }
 
 function fluentBuilder(row: Record<string, unknown>) {

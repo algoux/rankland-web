@@ -37,6 +37,7 @@ export default class LogicExceptionHandler implements IBwcxExceptionHandler {
       status,
       code: e.code,
       msg: msgText,
+      meta: e.meta ? { meta: e.meta } : undefined,
     });
   }
 }

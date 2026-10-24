@@ -1,6 +1,6 @@
 # Contest Event Read Cache Operations
 
-Updated: 2026-07-23
+Updated: 2026-10-24
 
 This runbook covers startup configuration, staged rollout, failure handling, and rollback for the process-local
 contest event read cache. Its correctness contract is defined in
@@ -47,6 +47,19 @@ All instances in one deployment must share the exact Redis endpoint and namespac
 strict delete or visibility-fingerprint envelopes; it never carries event payloads and has no retained state.
 
 ## Modes
+
+Contest finalization adds numeric `status` to the visibility fingerprint: `Created=0` (the default created state)
+and `Finalized=99`; API responses use `status: 0 | 99`. All writers and readers must use the same new
+build before enabling finalization; old binaries ignore the status and cannot enforce immutable final results.
+The state migration and deployment procedure are documented in [Contest finalization](contest-finalization.md).
+Finalized authority (`status=99`) uses no freeze boundary. Both explicit finalize and empty-stream static file association
+publish metadata invalidation after committing, without changing the stream revision or notifying clients to replay.
+An in-flight response pinned before invalidation may finish. Lost control messages converge through the existing
+authority lease/reconciliation; this is not a cross-instance linearizability guarantee.
+
+Authenticated `ignoreFrozen=true` reads bypass the public cache in all modes (including shadow comparisons),
+use the existing bounded database fallback, and return `Cache-Control: private, no-store`.
+Never cache those responses in a CDN or reuse them as a public materialized snapshot.
 
 `off` is the rollback and B1 baseline. GET uses the optimized legacy snapshot path through its bounded bulkhead.
 Cache-aware writers still publish delete/metadata control so an `off` instance can safely coexist with `on` from

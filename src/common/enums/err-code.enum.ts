@@ -19,6 +19,9 @@ export enum ErrCode {
   ContestEventIdGap = 100005,
   ContestEventIdConflict = 100006,
   ContestEventStreamRevisionMismatch = 100007,
+  ContestFinalized = 100008,
+  ContestFinalizationIncomplete = 100009,
+  ContestFinalizationInvalidData = 100010,
 
   // File
   FileNotFound = 101000,
@@ -26,6 +29,7 @@ export enum ErrCode {
   FileUploadTooLarge = 101002,
   FileUploadAccessDenied = 101003,
   FileUploadUnavailable = 101004,
+  FileReferencedByFinalizedContest = 101005,
   FileUploadUnknown = 101099,
 
   // Collection

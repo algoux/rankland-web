@@ -1,3 +1,4 @@
+import { ContestStatus } from '@common/modules/contest/contest-status';
 import { describe, expect, it, vi } from 'vitest';
 
 import type TypeOrmClient from '@server/database/typeorm-client';
@@ -31,7 +32,7 @@ describe('contest Snowflake ID assignment', () => {
     });
 
     expect(result).toEqual({ _id: generatedIds[0] });
-    expect(harness.savedContests[0].id).toBe(generatedIds[0]);
+    expect(harness.savedContests[0]).toMatchObject({ id: generatedIds[0], status: ContestStatus.Created, srkFileId: null });
     expect(harness.savedStreams[0].contestId).toBe(generatedIds[0]);
     expect(harness.savedUsers[0]).toMatchObject({
       id: generatedIds[1],
@@ -131,7 +132,11 @@ function contestServiceHarness(options: { existingUser?: Partial<ContestUserEnti
   const savedStreams: any[] = [];
   const savedUsers: any[] = [];
   const contestRepository = {
-    findOne: vi.fn(async () => null),
+    findOne: vi.fn(async (query) => query.lock && options.existingUser ? {
+      id: options.existingUser.contestId,
+      uk: 'contest-a',
+      status: ContestStatus.Created,
+    } : null),
     create: vi.fn((value) => ({ ...value })),
     save: vi.fn(async (value) => {
       savedContests.push(value);
@@ -139,6 +144,11 @@ function contestServiceHarness(options: { existingUser?: Partial<ContestUserEnti
     }),
   };
   const streamRepository = {
+    findOne: vi.fn(async () => options.existingUser ? {
+      contestId: options.existingUser.contestId,
+      lastEventId: 0,
+      streamRevision: 1,
+    } : null),
     create: vi.fn((value) => ({ ...value })),
     save: vi.fn(async (value) => {
       savedStreams.push(value);

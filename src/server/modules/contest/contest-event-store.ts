@@ -1,4 +1,5 @@
 import { rankland_live_contest_common } from '@common/proto/rankland_live_contest';
+import type { ContestStatus } from '@common/modules/contest/contest-status';
 
 export interface ContestStreamState {
   contestId: string;
@@ -75,7 +76,8 @@ export interface ContestEventRangeMemoryEstimate {
 }
 
 export interface ContestEventTransaction {
-  stream: ContestStreamState;
+  /** Contest status is read under the same locks as the stream and is never public stream metadata. */
+  stream: ContestStreamState & { status?: ContestStatus };
   findEvents: (eventIds: number[]) => Promise<ContestStoredEvent[]>;
   findNewSolutionSubmitTimes: (solutionIds: number[]) => Promise<Map<number, string>>;
   insertEvents: (inputs: ContestEventInsertInput[]) => Promise<void>;

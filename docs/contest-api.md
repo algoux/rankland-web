@@ -1,6 +1,6 @@
 # Contest v2 API
 
-Updated: 2026-07-18
+Updated: 2026-10-24
 
 本文档描述 contest 相关 HTTP/SSE API。接口、DTO、JSON 字段使用 camelCase；MySQL 表和列使用 snake_case，并由 TypeORM entity 显式映射。
 
@@ -92,9 +92,11 @@ x-token: <AUTH_TOKEN>
 x-producer-id: <producer-id>
 ```
 
-公开读取接口、事件 catch-up 接口、SSE 接口当前不要求 `x-token`。
+公开读取接口、普通事件 catch-up 和 SSE 不要求 `x-token`。事件 catch-up 使用
+`ignoreFrozen=true` 时必须提供有效 `x-token`；仅携带令牌而未开启该参数不会改变公开视角。
 
-所有需要鉴权的端点（含 protobuf 追加）都通过控制器上的 `AuthGuard` 鉴权，鉴权失败统一返回未授权信封（按内容协商包装；protobuf 请求则为空 body + `X-RL-*` 错误头）：
+管理端点（含 protobuf 追加）通过控制器上的 `AuthGuard` 鉴权；公开事件读取的 `ignoreFrozen=true`
+分支复用相同的管理令牌校验。鉴权失败统一返回未授权信封（按内容协商包装；protobuf 请求则为空 body + `X-RL-*` 错误头）：
 
 ```json
 { "success": false, "code": -4, "msg": "未授权的操作" }
@@ -150,6 +152,7 @@ series JSON NULL
 sorter JSON NULL
 contributors JSON NULL
 srk_file_id BIGINT UNSIGNED NULL
+status TINYINT UNSIGNED NOT NULL DEFAULT 0
 view_count INT UNSIGNED NOT NULL DEFAULT 0
 redirect_uk VARCHAR(64) NULL
 created_at DATETIME(6)
@@ -243,9 +246,65 @@ Body 中字段均为可选：`name`、`title`、`startAt`、`duration`、`frozen
 
 如果传入 `users` 数组，会替换当前 contest 的用户集合；未出现在新数组中的用户会被删除。传 `users: []` 表示清空用户集合。
 
-`srkFileID` 只允许在更新接口设置；非空值必须指向当前比赛名下的未删除文件，传 `null` 表示清除。`redirectUK` 的非空值必须指向另一个未删除比赛，传 `null` 表示清除。本轮只保存重定向元数据，不执行 HTTP 302 或透明代理。
+`srkFileID` 只允许在更新接口设置；非空值必须指向当前比赛名下的未删除文件，传 `null` 表示清除。
+对 `created`（`status=0`）且当前事件流为空的比赛，关联非空文件会在同一事务中将状态设为
+`finalized`（`status=99`），兼容静态导入。有事件时关联文件保持 `created`，必须调用 finalize 生成权威终榜并完结。
+`finalized` 比赛不能替换或清除文件，但重复关联相同 ID 可作为无操作重试。
+`redirectUK` 的非空值必须指向另一个未删除比赛，传 `null` 表示清除。这里只保存重定向元数据，不执行 HTTP 302 或透明代理。
 
 Data: `null`
+
+### 确认比赛完结
+
+```text
+POST /api/v2/contests/:uk/finalize
+Auth: x-token
+```
+
+无请求体，成功响应的 `data` 为：
+
+```ts
+{ uk: string; status: 99; srkFileID: string }
+```
+
+管理和公开的比赛详情、列表均增加 `status: 0 | 99`，对应共享枚举
+`ContestStatus.Created = 0`、`ContestStatus.Finalized = 99`。创建接口保持不变，新比赛默认
+`created`（`0`）；状态不根据比赛时间自动变化。finalize 可由管理员主动调用，无预定结束时间限制。
+重复／并发确认只生成一份最终文件；已完结比赛直接返回既有文件。
+
+确认时读取锁定的当前比赛配置、公开选手信息和当前 revision 的全部原始事件，生成并上传
+`RankMain` 类别的 `${uk}.srk.json`，再原子提交文件记录、`srkFileID` 和完结状态。
+未结算、PD、JG、FZ/`?`（包括终判后的新 PROGRESS）阻止完结；CNL 视为已取消，不计分。
+数据完整性校验也会拒绝事件缺口、重复 NEW、缺失 NEW 和未知选手／题目引用。
+
+新增业务错误码：
+
+| code | 含义 |
+| --- | --- |
+| 100008 | 比赛已完结，不能修改榜单数据 |
+| 100009 | 有未完成提交；错误 `meta` 包含 `pendingCount` 和最多 20 个 `pendingSolutionIds` |
+| 100010 | 比赛配置或事件不完整／不一致 |
+| 101005 | 文件仍被未删除的已完结比赛引用，不能直接删除 |
+
+上述错误沿用业务错误信封。完结后禁止事件追加（包括重传）、事件重置、SRK 元数据及选手公开信息修改。
+仍允许修改比赛 `name`、`redirectUK`，单用户的 `banned`／`broadcasterToken`，浏览上报及比赛软删除。
+不提供重新开放操作。存储上传不参与 MySQL ACID；失败补偿及迁移说明见
+[比赛完结设计](contest-finalization.md)。
+
+### 不封榜读取及重新消费
+
+```text
+GET /api/v2/public/contests/:uk/events?streamRevision=1&afterEventId=0&ignoreFrozen=true
+x-token: <AUTH_TOKEN>
+```
+
+`ignoreFrozen` 只接受 `true`／`false`，默认 false；true 必须鉴权，即使比赛已经完结也不例外。
+特权响应为 `Cache-Control: private, no-store`，支持 JSON 和 protobuf，分页及 `compactProgress` 语义不变。
+普通公开读取在 `created`（`status=0`）时继续封榜；在 `finalized`（`status=99`）时跳过封榜过滤，无需令牌。
+
+完结不修改事件 ID、水位或 `streamRevision`，也不发送揭榜专用 SSE。
+已有消费者必须清空已计算状态，从 `afterEventId=0` 重新消费；切换到或离开上帝视角也需要这样做。
+仅从旧 checkpoint 继续读取不会补回之前隐藏的判题事件。
 
 ### 查询比赛
 
@@ -274,6 +333,7 @@ Data:
   sorter: Sorter | null;
   contributors?: string[];
   srkFileID: string | null;
+  status: 0 | 99;
   viewCount: number;
   redirectUK: string | null;
   deletedAt: string | null;
@@ -302,6 +362,7 @@ Auth: x-token
     duration: TimeDuration;
     frozenDuration: TimeDuration | null;
     srkFileID: string | null;
+    status: 0 | 99;
     viewCount: number;
     redirectUK: string | null;
     createdAt: string;
@@ -393,7 +454,7 @@ Data 与管理查询比赛类似，但 `users` 中不包含 `banned`、`broadcas
 GET /api/v2/public/contests
 ```
 
-按主键倒序返回未删除比赛。响应为 `{ contests: [...] }`，每项严格包含 `_id`、`uk`、`name`、`title`、`startAt`、`duration`、`frozenDuration`、`srkFileID`、`viewCount`、`redirectUK`、`createdAt`、`updatedAt`。
+按主键倒序返回未删除比赛。响应为 `{ contests: [...] }`，每项严格包含 `_id`、`uk`、`name`、`title`、`startAt`、`duration`、`frozenDuration`、`srkFileID`、`status`、`viewCount`、`redirectUK`、`createdAt`、`updatedAt`。
 
 ### 上报一次比赛浏览
 

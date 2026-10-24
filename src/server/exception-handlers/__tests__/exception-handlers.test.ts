@@ -59,6 +59,25 @@ describe('exception handlers (content-negotiated)', () => {
     });
   });
 
+  it.each([ResponseContentType.Json, ResponseContentType.Protobuf])(
+    'preserves bounded pending-submission metadata in %s finalization errors', (format) => {
+      const ctx = createCtx({ respContentType: format, url: '/api/v2/contests/x/finalize' });
+      const meta = { pendingCount: 3, solutionIds: [17, 24, 31] };
+      new LogicExceptionHandler().catch(new LogicException(ErrCode.ContestFinalizationIncomplete, 'pending', meta), ctx);
+      expect(ctx.status).toBe(200);
+      if (format === ResponseContentType.Protobuf) {
+        expect(ctx.body).toEqual(Buffer.alloc(0));
+        expect(ctx.headers['X-RL-Resp-Code']).toBe(String(ErrCode.ContestFinalizationIncomplete));
+        expect(JSON.parse(decodeURIComponent(ctx.headers['X-RL-Resp-Meta']))).toEqual({ meta });
+      } else {
+        expect(ctx.body).toEqual({
+          success: false, code: ErrCode.ContestFinalizationIncomplete,
+          msg: '仍有未完成判题的提交，不能确认完结', meta,
+        });
+      }
+    },
+  );
+
   it('HttpExceptionHandler writes a json error for api routes', () => {
     const ctx = createCtx({ url: '/api/v2/contests/x/events' });
     new HttpExceptionHandler().catch(new HttpException(406), ctx);

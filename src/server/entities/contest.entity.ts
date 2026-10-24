@@ -1,5 +1,6 @@
 import { Column, CreateDateColumn, DeleteDateColumn, Entity, Index, PrimaryColumn } from 'typeorm';
 import type * as srk from '@algoux/standard-ranklist';
+import { ContestStatus } from '@common/modules/contest/contest-status';
 
 import { nullableOutputTransformer } from './nullable-output.transformer';
 
@@ -50,6 +51,9 @@ export class ContestEntity {
 
   @Column({ name: 'srk_file_id', type: 'bigint', unsigned: true, nullable: true })
   public srkFileId: string | null;
+
+  @Column({ type: 'tinyint', unsigned: true, default: ContestStatus.Created })
+  public status: ContestStatus;
 
   @Column({ name: 'view_count', type: 'int', unsigned: true, default: 0 })
   public viewCount: number;

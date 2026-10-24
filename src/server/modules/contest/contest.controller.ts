@@ -1,8 +1,19 @@
-import { Contract, Data, Delete, Get, InjectCtx, Patch, Post, RequestContext, UseGuards } from 'bwcx-ljsm';
+import {
+  Contract,
+  Data,
+  Delete,
+  Get,
+  GuardNotPassException,
+  InjectCtx,
+  Patch,
+  Post,
+  RequestContext,
+  UseGuards,
+} from 'bwcx-ljsm';
 import { Inject } from 'bwcx-core';
 import { Api } from 'bwcx-api';
 import { ApiController } from '@server/decorators';
-import AuthGuard from '@server/guards/auth.guard';
+import AuthGuard, { hasManagementToken } from '@server/guards/auth.guard';
 import {
   AppendContestEventsReqDTO,
   AppendContestEventsRespDTO,
@@ -36,6 +47,8 @@ import {
   GetContestsRespDTO,
   ReportPublicContestViewReqDTO,
   DeleteContestReqDTO,
+  FinalizeContestReqDTO,
+  FinalizeContestRespDTO,
 } from '@common/modules/contest/contest.dto';
 import LogicException from '@server/exceptions/logic.exception';
 import { ErrCode } from '@common/enums/err-code.enum';
@@ -48,6 +61,7 @@ import { Sse } from '@server/decorators/sse.decorator';
 import { rankland_live_contest_client, rankland_live_contest_producer } from '@common/proto/rankland_live_contest';
 import { ResponseContentType } from '@server/http/content-type';
 import { openSseResponse } from '@server/middlewares/sse.middleware';
+import ContestFinalizationService from './contest-finalization.service';
 
 @ApiController('/v2')
 export default class ContestController {
@@ -63,6 +77,9 @@ export default class ContestController {
 
     @Inject()
     private readonly notificationCoordinator: ContestEventNotificationCoordinator,
+
+    @Inject()
+    private readonly finalizationService: ContestFinalizationService,
   ) {}
 
   @Api.Summary('创建实时比赛')
@@ -71,6 +88,22 @@ export default class ContestController {
   @Contract(CreateContestReqDTO, CreateContestRespDTO)
   public async createContest(@Data() data: CreateContestReqDTO): Promise<CreateContestRespDTO> {
     return this.service.createContest(data as any);
+  }
+
+  @Api.Summary('确认比赛完结并生成最终榜单')
+  @Post('/contests/:uk/finalize')
+  @UseGuards(AuthGuard)
+  @Contract(FinalizeContestReqDTO, FinalizeContestRespDTO)
+  public async finalizeContest(@Data() data: FinalizeContestReqDTO): Promise<FinalizeContestRespDTO> {
+    const { response, control } = await this.finalizationService.finalize(data.uk);
+    if (control) {
+      try {
+        await this.notificationCoordinator.announceControl(control);
+      } catch (error) {
+        console.warn('[ContestFinalization] post-commit cache notification failed', { uk: data.uk, error });
+      }
+    }
+    return response;
   }
 
   @Api.Summary('更新实时比赛')
@@ -167,6 +200,12 @@ export default class ContestController {
   @Contract(GetPublicContestEventsReqDTO, GetPublicContestEventsRespDTO)
   @ProtobufContract(null, rankland_live_contest_client.GetContestEventsResponse)
   public async getPublicContestEvents(@Data() data: GetPublicContestEventsReqDTO): Promise<any> {
+    if (data.ignoreFrozen === true) {
+      this.ctx.set('Cache-Control', 'private, no-store');
+      if (!hasManagementToken(this.ctx)) {
+        throw new GuardNotPassException();
+      }
+    }
     return this.eventStreamService.getClientEventsForTransport(
       {
         uk: data.uk,
@@ -174,6 +213,7 @@ export default class ContestController {
         limit: data.limit ?? 1000,
         streamRevision: data.streamRevision,
         compactProgress: data.compactProgress,
+        ...(data.ignoreFrozen === true ? { ignoreFrozen: true } : {}),
       },
       this.ctx.state?.respContentType === ResponseContentType.Protobuf ? 'protobuf' : 'json',
     );
