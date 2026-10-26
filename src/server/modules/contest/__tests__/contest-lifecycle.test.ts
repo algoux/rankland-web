@@ -10,6 +10,7 @@ import ContestService from '../contest.service';
 
 const CONTEST_ID = '100';
 const FILE_ID = '200';
+const REPLACEMENT_FILE_ID = '201';
 const USER_ID = '300';
 
 function harness(options: { status?: ContestStatus; lastEventId?: number; missingContest?: boolean; missingStream?: boolean } = {}) {
@@ -63,7 +64,8 @@ function harness(options: { status?: ContestStatus; lastEventId?: number; missin
     delete: vi.fn(async () => { calls.push('user:delete'); return { affected: 1 }; }),
   };
   const fileRepository = {
-    findOne: vi.fn(async (query: any) => query.where.id === FILE_ID ? { id: FILE_ID, contestId: CONTEST_ID } : null),
+    findOne: vi.fn(async (query: any) => [FILE_ID, REPLACEMENT_FILE_ID].includes(query.where.id)
+      ? { id: query.where.id, contestId: CONTEST_ID } : null),
   };
   const manager = {
     getRepository: (target: unknown) => {
@@ -146,6 +148,26 @@ describe('ContestService lifecycle', () => {
     expect(fileRepository.findOne).toHaveBeenCalledWith({ where: { id: FILE_ID } });
   });
 
+  it.each([FILE_ID, REPLACEMENT_FILE_ID])('accepts archived SRK corrections from sync with file %s', async (srkFileID) => {
+    const { service, contestRepository, userRepository, streamRepository } = harness({
+      status: ContestStatus.Finalized, lastEventId: 2,
+    });
+    // srk-collection/scripts/sync.js sends the whole SRK metadata, even when reusing its file.
+    await expect(service.updateContest({
+      uk: 'contest-a', name: 'Corrected Contest', title: { fallback: 'Corrected Contest' },
+      startAt: '2026-10-26T00:00:00Z', duration: [4, 'h'], frozenDuration: null,
+      banner: null, refLinks: null, problems: [{ alias: 'A' }], markers: [], series: [],
+      sorter: { algorithm: 'ICPC', config: {} }, contributors: [], srkFileID,
+    })).resolves.toMatchObject({ visibilityFingerprint: 'duration=14400;frozen=null;status=99' });
+    expect(contestRepository.update).toHaveBeenCalledWith({ id: CONTEST_ID }, expect.objectContaining({
+      srkFileId: srkFileID, title: { fallback: 'Corrected Contest' }, durationS: 14400,
+    }));
+    expect(contestRepository.update.mock.calls[0][1]).not.toHaveProperty('status', ContestStatus.Created);
+    expect(userRepository.save).not.toHaveBeenCalled();
+    expect(userRepository.delete).not.toHaveBeenCalled();
+    expect(streamRepository.save).not.toHaveBeenCalled();
+  });
+
   it('allows finalized contest administrative name and redirect changes', async () => {
     const { service, contestRepository } = harness({ status: ContestStatus.Finalized });
     await service.updateContest({ uk: 'contest-a', name: 'Renamed', redirectUK: 'target' });
@@ -168,11 +190,40 @@ describe('ContestService lifecycle', () => {
     { contributors: [] },
     { users: [] },
     { users: null },
-    { srkFileID: 'other-file' },
     { srkFileID: null },
   ])('rejects finalized ranklist metadata changes: %j', async (change) => {
     const { service, contestRepository, userRepository } = harness({ status: ContestStatus.Finalized });
     await expect(service.updateContest({ uk: 'contest-a', name: 'Renamed', ...change } as any))
+      .rejects.toMatchObject({ code: ErrCode.ContestFinalized });
+    expect(contestRepository.update).not.toHaveBeenCalled();
+    expect(userRepository.save).not.toHaveBeenCalled();
+    expect(userRepository.delete).not.toHaveBeenCalled();
+  });
+
+  it.each([0, 2])('allows replacing only the finalized file with %i current events', async (lastEventId) => {
+    const { service, contestRepository, streamRepository } = harness({ status: ContestStatus.Finalized, lastEventId });
+    await expect(service.updateContest({ uk: 'contest-a', srkFileID: REPLACEMENT_FILE_ID })).resolves.toBeUndefined();
+    expect(contestRepository.update).toHaveBeenCalledWith({ id: CONTEST_ID }, {
+      srkFileId: REPLACEMENT_FILE_ID,
+      ...(lastEventId === 0 ? { status: ContestStatus.Finalized } : {}),
+    });
+    expect(streamRepository.save).not.toHaveBeenCalled();
+  });
+
+  it.each([null, { id: REPLACEMENT_FILE_ID, contestId: 'another-contest' }])(
+    'rejects invalid or foreign archive replacements before applying metadata: %j', async (file) => {
+      const { service, fileRepository, contestRepository } = harness({ status: ContestStatus.Finalized });
+      fileRepository.findOne.mockResolvedValueOnce(file);
+      await expect(service.updateContest({
+        uk: 'contest-a', srkFileID: REPLACEMENT_FILE_ID, title: { fallback: 'Corrected' },
+      })).rejects.toMatchObject({ code: ErrCode.FileNotFound });
+      expect(contestRepository.update).not.toHaveBeenCalled();
+    },
+  );
+
+  it.each([[], null])('does not allow archive replacement to overwrite contest users: %j', async (users) => {
+    const { service, contestRepository, userRepository } = harness({ status: ContestStatus.Finalized });
+    await expect(service.updateContest({ uk: 'contest-a', srkFileID: REPLACEMENT_FILE_ID, users }))
       .rejects.toMatchObject({ code: ErrCode.ContestFinalized });
     expect(contestRepository.update).not.toHaveBeenCalled();
     expect(userRepository.save).not.toHaveBeenCalled();

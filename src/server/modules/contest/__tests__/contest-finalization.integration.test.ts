@@ -114,10 +114,10 @@ describe.runIf(runMysqlTests)('contest finalization with isolated MySQL and real
     return { contest, file, buffer, ranklist: JSON.parse(buffer.toString()) };
   }
 
-  async function uploadStaticFile() {
+  async function uploadStaticFile(ownerContestId = contestId) {
     const buffer = Buffer.from('{"static":true}');
     return files.uploadFile({
-      contestId,
+      contestId: ownerContestId,
       category: 'RankMain',
       file: { originalname: 'static.srk.json', buffer, size: buffer.length, mimetype: 'application/json' },
     });
@@ -549,6 +549,160 @@ describe.runIf(runMysqlTests)('contest finalization with isolated MySQL and real
     ).rejects.toBeDefined();
     expect(await contests.getContest(uk)).toMatchObject({ status: ContestStatus.Created, srkFileId: null });
     expect(await contests.findContestUserById(uk, 'alice')).toMatchObject({ name: 'Alice' });
+  });
+
+  it('corrects a finalized static archive with a replacement file and complete SRK metadata', async () => {
+    const original = await uploadStaticFile();
+    await contests.updateContest({ uk, srkFileID: original.id });
+    const replacement = await uploadStaticFile();
+    const streamBefore = await dataSource.getRepository(ContestEventStreamEntity).findOneByOrFail({ contestId });
+
+    await expect(
+      contests.updateContest({
+        uk,
+        srkFileID: replacement.id,
+        name: 'Corrected Contest',
+        title: { fallback: 'Corrected title' },
+        startAt: '2026-10-26T04:00:00Z',
+        duration: [4, 'h'],
+        frozenDuration: [30, 'min'],
+        banner: 'https://example.invalid/corrected-banner.png',
+        refLinks: [{ link: 'https://example.invalid/corrected', title: 'Corrected source' }],
+        problems: [{ alias: 'A', title: 'Corrected problem' }],
+        markers: [{ id: 'corrected', label: 'Corrected marker', style: 'blue' }],
+        series: [{ title: 'Corrected series' }],
+        sorter: { algorithm: 'ICPC', config: { penalty: [10, 'min'] } },
+        contributors: ['Corrected contributor'],
+      }),
+    ).resolves.toMatchObject({ type: 'metadata', contestId });
+
+    expect(await contests.getContest(uk)).toMatchObject({
+      status: ContestStatus.Finalized,
+      srkFileId: replacement.id,
+      name: 'Corrected Contest',
+      title: { fallback: 'Corrected title' },
+      startAt: new Date('2026-10-26T04:00:00Z'),
+      durationS: 14400,
+      frozenDurationS: 1800,
+      banner: 'https://example.invalid/corrected-banner.png',
+      refLinks: [{ link: 'https://example.invalid/corrected', title: 'Corrected source' }],
+      problems: [{ alias: 'A', title: 'Corrected problem' }],
+      markers: [{ id: 'corrected', label: 'Corrected marker', style: 'blue' }],
+      series: [{ title: 'Corrected series' }],
+      sorter: { algorithm: 'ICPC', config: { penalty: [10, 'min'] } },
+      contributors: ['Corrected contributor'],
+    });
+    expect(await dataSource.getRepository(ContestEventStreamEntity).findOneByOrFail({ contestId })).toEqual(
+      streamBefore,
+    );
+    expect(await contests.findContestUserById(uk, 'alice')).toMatchObject({ name: 'Alice' });
+    await expect(files.deleteFile(original.id)).resolves.toBeUndefined();
+    await expect(files.deleteFile(replacement.id)).rejects.toMatchObject({
+      code: ErrCode.FileReferencedByFinalizedContest,
+    });
+    const uploadSpy = vi.spyOn(provider, 'upload');
+    expect((await finalization.finalize(uk)).response).toEqual({
+      uk,
+      status: ContestStatus.Finalized,
+      srkFileID: replacement.id,
+    });
+    expect(uploadSpy).not.toHaveBeenCalled();
+  });
+
+  it.each(['missing', 'deleted', 'foreign'] as const)(
+    'keeps the finalized archive and metadata unchanged when a correction references a %s file',
+    async (invalidKind) => {
+      const original = await uploadStaticFile();
+      await contests.updateContest({ uk, srkFileID: original.id });
+      const before = await contests.getContest(uk);
+      const streamBefore = await dataSource.getRepository(ContestEventStreamEntity).findOneByOrFail({ contestId });
+      let invalidFileId = ids.nextId();
+      if (invalidKind === 'deleted') {
+        const deleted = await uploadStaticFile();
+        await files.deleteFile(deleted.id);
+        invalidFileId = deleted.id;
+      } else if (invalidKind === 'foreign') {
+        const owner = await contests.createContest({
+          uk: `foreign-${ids.nextId()}`,
+          name: 'Other Contest',
+          title: { fallback: 'Other Contest' },
+          startAt: '2026-10-26T00:00:00Z',
+          duration: [300, 's'],
+          problems: [],
+          markers: [],
+          series: [],
+        });
+        invalidFileId = (await uploadStaticFile(owner._id)).id;
+      }
+
+      await expect(
+        contests.updateContest({
+          uk,
+          srkFileID: invalidFileId,
+          name: 'Must not persist',
+          title: { fallback: 'Must not persist' },
+          duration: [4, 'h'],
+          frozenDuration: null,
+          problems: [],
+          contributors: ['Must not persist'],
+        }),
+      ).rejects.toMatchObject({ code: ErrCode.FileNotFound });
+      expect(await contests.getContest(uk)).toEqual(before);
+      expect(await dataSource.getRepository(ContestEventStreamEntity).findOneByOrFail({ contestId })).toEqual(
+        streamBefore,
+      );
+      expect((await finalization.finalize(uk)).response.srkFileID).toBe(original.id);
+    },
+  );
+
+  it('serializes archive correction against deleting both the replacement and old files', async () => {
+    const original = await uploadStaticFile();
+    await contests.updateContest({ uk, srkFileID: original.id });
+    const replacement = await uploadStaticFile();
+    const entered = deferred();
+    const release = deferred();
+    interceptNextRunner((runner) => {
+      const repository = runner.manager.getRepository(FileEntity);
+      const find = repository.findOne.bind(repository);
+      vi.spyOn(repository, 'findOne').mockImplementationOnce(async (options) => {
+        const file = await find(options);
+        entered.resolve();
+        await release.promise;
+        return file;
+      });
+    });
+    const correcting = contests.updateContest({
+      uk,
+      srkFileID: replacement.id,
+      title: { fallback: 'Corrected under lock' },
+    });
+    await entered.promise;
+    let deletionsSettled = false;
+    const deleting = Promise.allSettled([files.deleteFile(replacement.id), files.deleteFile(original.id)]).then(
+      (outcomes) => {
+        deletionsSettled = true;
+        return outcomes;
+      },
+    );
+    await new Promise((resolve) => {
+      setTimeout(resolve, 50);
+    });
+    expect(deletionsSettled).toBe(false);
+    release.resolve();
+    await correcting;
+    const outcomes = await deleting;
+    expect(outcomes[0]).toMatchObject({
+      status: 'rejected',
+      reason: { code: ErrCode.FileReferencedByFinalizedContest },
+    });
+    expect(outcomes[1]).toMatchObject({ status: 'fulfilled' });
+    expect(await contests.getContest(uk)).toMatchObject({
+      status: ContestStatus.Finalized,
+      srkFileId: replacement.id,
+      title: { fallback: 'Corrected under lock' },
+    });
+    expect(await files.getFile(replacement.id)).toMatchObject({ id: replacement.id });
+    await expect(files.getFile(original.id)).rejects.toMatchObject({ code: ErrCode.FileNotFound });
   });
 
   it('serializes deleting a file with a static-import PATCH that finalizes its contest', async () => {

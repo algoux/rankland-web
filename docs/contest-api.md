@@ -1,6 +1,6 @@
 # Contest v2 API
 
-Updated: 2026-10-24
+Updated: 2026-10-26
 
 本文档描述 contest 相关 HTTP/SSE API。接口、DTO、JSON 字段使用 camelCase；MySQL 表和列使用 snake_case，并由 TypeORM entity 显式映射。
 
@@ -249,7 +249,9 @@ Body 中字段均为可选：`name`、`title`、`startAt`、`duration`、`frozen
 `srkFileID` 只允许在更新接口设置；非空值必须指向当前比赛名下的未删除文件，传 `null` 表示清除。
 对 `created`（`status=0`）且当前事件流为空的比赛，关联非空文件会在同一事务中将状态设为
 `finalized`（`status=99`），兼容静态导入。有事件时关联文件保持 `created`，必须调用 finalize 生成权威终榜并完结。
-`finalized` 比赛不能替换或清除文件，但重复关联相同 ID 可作为无操作重试。
+`finalized` 比赛允许通过带有效、非空 `srkFileID` 的 PATCH 替换归档文件，并在同一事务内订正
+标题、时间、题目等 SRK 元数据，兼容 `srk-collection` sync 的完整请求。也可携带当前文件 ID
+修正元数据。文件仍须属于当前比赛且未删除，状态保持 `99`；不能清空文件引用或修改 `users`。
 `redirectUK` 的非空值必须指向另一个未删除比赛，传 `null` 表示清除。这里只保存重定向元数据，不执行 HTTP 302 或透明代理。
 
 Data: `null`
@@ -286,7 +288,9 @@ Auth: x-token
 | 100010 | 比赛配置或事件不完整／不一致 |
 | 101005 | 文件仍被未删除的已完结比赛引用，不能直接删除 |
 
-上述错误沿用业务错误信封。完结后禁止事件追加（包括重传）、事件重置、SRK 元数据及选手公开信息修改。
+上述错误沿用业务错误信封。完结后禁止事件追加（包括重传）、事件重置及选手公开信息修改。
+归档文件及 SRK 元数据订正需在 PATCH 中携带有效、非空 `srkFileID`；订正不回写或重置原始事件流，
+也不重新开放比赛。后续 finalize 返回当前关联的订正文件，不从旧事件覆盖该文件。
 仍允许修改比赛 `name`、`redirectUK`，单用户的 `banned`／`broadcasterToken`，浏览上报及比赛软删除。
 不提供重新开放操作。存储上传不参与 MySQL ACID；失败补偿及迁移说明见
 [比赛完结设计](contest-finalization.md)。

@@ -1,6 +1,6 @@
 # Contest Producer / Consumer Guide
 
-Updated: 2026-10-24
+Updated: 2026-10-26
 
 本文档面向事件生产脚本和事件消费者应用。核心原则：
 
@@ -27,6 +27,10 @@ Updated: 2026-10-24
 `?` 提交时返回 100009 和未完成提交摘要。完结后的事件追加（包括重传）和 reset 返回 100008，
 因此应先确认最后一批 append 成功，再确认完结。纯静态导入仍走创建、上传、PATCH 文件关联，
 空事件流的关联操作会直接完结。
+
+已完结归档需要订正时，先上传属于该比赛的新文件，再带非空 `srkFileID` PATCH 文件引用和完整
+SRK 元数据；也可复用既有文件 ID 修正元数据。该流程与 `srk-collection` sync 兼容，保持
+`status=99`，不修改原始事件或选手数据。重复 finalize 返回当前订正文件，不重新生成旧事件的结果。
 
 管理消费者可为 events 请求设置 `ignoreFrozen=true` 并携带 `x-token`，读取未封榜视图。
 令牌只放请求头，不放 URL。比赛状态采用数字枚举：`Created=0`（默认 `created`）、`Finalized=99`。

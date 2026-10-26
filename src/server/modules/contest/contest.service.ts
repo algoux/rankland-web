@@ -131,13 +131,16 @@ export default class ContestService {
     return this.dataSource.transaction(async (manager) => {
       const { contest, stream } = await this.findLockedContestAndStream(manager, data.uk);
       if (contest.status === ContestStatus.Finalized) {
-        const changesResults = Object.entries(data).some(
-          ([key, value]) =>
-            value !== undefined &&
-            !['uk', 'name', 'redirectUK'].includes(key) &&
-            !(key === 'srkFileID' && value === contest.srkFileId),
-        );
-        if (changesResults) {
+        // Static archive sync sends the file reference and its complete SRK metadata together.
+        // Validate that reference below, then update both atomically without reopening the stream.
+        const correctsArchive = data.srkFileID !== undefined && data.srkFileID !== null;
+        const changesLockedData =
+          data.users !== undefined ||
+          (!correctsArchive &&
+            Object.entries(data).some(
+              ([key, value]) => value !== undefined && !['uk', 'name', 'redirectUK'].includes(key),
+            ));
+        if (changesLockedData) {
           throw new LogicException(ErrCode.ContestFinalized);
         }
       }
