@@ -74,7 +74,8 @@ describe('renderer controlled display window', () => {
     expect(large.match(/data-rich-row="true"/g)).toHaveLength(40);
     expect(large.match(/data-search-text="name"/g)).toHaveLength(1000);
     expect(large).toContain('data-windowed="true"');
-    expect(large).toContain('显示完整榜单');
+    expect(large).not.toContain('ranklist-window-controls');
+    expect(large).not.toContain('<button');
   });
 });
 

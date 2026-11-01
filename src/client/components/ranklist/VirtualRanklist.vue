@@ -15,14 +15,21 @@ defineOptions({ inheritAttrs: false });
 const props = defineProps<RanklistProps>();
 const forwardedProps = computed(() => ({ ...props, languages: props.languages ? [...props.languages] : undefined }));
 const root = ref<HTMLElement | null>(null);
-const fullList = ref(false);
 const slots = useSlots();
 let printContainer: HTMLDivElement | null = null;
-const large = computed(() => props.data.rows.length > LARGE_RANKLIST_THRESHOLD);
-const windowed = computed(() => large.value && !fullList.value);
+const windowed = computed(() => props.data.rows.length > LARGE_RANKLIST_THRESHOLD);
 const range = shallowRef<RanklistRowWindow>(initialRanklistRowWindow(props.data.rows.length));
 const displayWindow = computed(() => windowed.value ? range.value : undefined);
 const columnWidths = computed(() => windowed.value ? getRanklistColumnWidths(props) : undefined);
+const windowedTableStyle = computed(() => {
+  const widths = columnWidths.value;
+  if (!widths) return undefined;
+  const nameColumn = props.data.series.length + (props.splitOrganization ? 1 : 0);
+  return {
+    '--ranklist-window-fixed-width': `${widths.reduce((sum, width) => sum + width, 0)}px`,
+    '--ranklist-window-name-width': `${widths[nameColumn]}px`,
+  };
+});
 let frame = 0;
 let mounted = false;
 let rootObserver: ResizeObserver | null = null;
@@ -86,7 +93,7 @@ function beforePrint() {
   printContainer = document.createElement('div');
   printContainer.className = 'ranklist-print-copy';
   root.value.append(printContainer);
-  render(h(Ranklist, { ...forwardedProps.value, rowWindow: undefined, retainUserText: large.value, columnWidths: undefined, rowHeight: RANKLIST_ROW_HEIGHT }, slots), printContainer);
+  render(h(Ranklist, { ...forwardedProps.value, rowWindow: undefined, retainUserText: windowed.value, columnWidths: undefined, rowHeight: RANKLIST_ROW_HEIGHT }, slots), printContainer);
   root.value.classList.add('ranklist-printing');
 }
 function afterPrint() {
@@ -124,14 +131,8 @@ onBeforeUnmount(() => {
 </script>
 
 <template>
-  <div ref="root" class="ranklist-window" :data-windowed="windowed ? 'true' : undefined">
-    <div v-if="large" class="ranklist-window-controls">
-      <span>共 {{ data.rows.length }} 行</span>
-      <button type="button" :aria-pressed="fullList" title="队名、学校可直接使用浏览器查找；查找排名、分数或提交状态时请显示完整榜单" @click="fullList = !fullList">
-        {{ fullList ? '恢复流畅浏览' : '显示完整榜单（复制或打印）' }}
-      </button>
-    </div>
-    <Ranklist v-bind="{ ...forwardedProps, ...$attrs }" :row-window="displayWindow" :retain-user-text="large" :column-widths="columnWidths" :row-height="RANKLIST_ROW_HEIGHT">
+  <div ref="root" class="ranklist-window" :style="windowedTableStyle" :data-windowed="windowed ? 'true' : undefined">
+    <Ranklist v-bind="{ ...forwardedProps, ...$attrs }" :row-window="displayWindow" :retain-user-text="windowed" :column-widths="columnWidths" :row-height="RANKLIST_ROW_HEIGHT">
       <template v-for="(_, name) in $slots" #[name]="slotProps">
         <slot :name="name" v-bind="slotProps" />
       </template>
@@ -141,19 +142,12 @@ onBeforeUnmount(() => {
 
 <style>
 .ranklist-window { overflow-anchor: none; }
-.ranklist-window-controls {
-  display: flex;
-  justify-content: flex-end;
-  align-items: center;
-  gap: 12px;
-  padding: 0 8px 8px;
-  font-size: 12px;
-  color: hsl(var(--muted-foreground));
+/* Name is the only flexible column. Bound the renderer container so filling
+   it cannot exceed the original 300px content limit plus 8px padding per side.
+   Keep the fixed-column minimum for narrow viewports and custom headings. */
+.ranklist-window[data-windowed="true"] > .srk-main {
+  max-width: max(var(--ranklist-window-fixed-width), calc(var(--ranklist-window-fixed-width) - var(--ranklist-window-name-width) + var(--srk-table-body-user-max-width, 300px) + 16px));
 }
-.ranklist-window-controls button { text-decoration: underline; text-underline-offset: 3px; }
 /* Hide only the live table, not the nested synchronous print copy. */
 .ranklist-window.ranklist-printing > .srk-main { display: none; }
-@media print {
-  .ranklist-window-controls { display: none; }
-}
 </style>
