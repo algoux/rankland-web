@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import type * as srk from '@algoux/standard-ranklist';
 import { getSortedCalculatedRawSolutions } from '@algoux/standard-ranklist-utils';
-import { getAllRankTimeData, getProperRankTimeChunkUnit } from './rank-time-data.util';
+import { getAllRankTimeData, getProperRankTimeChunkUnit, getUserRankTimeDataAsync } from './rank-time-data.util';
 
 function contest(duration: srk.TimeDuration): srk.Contest {
   return {
@@ -77,6 +77,38 @@ function serializedCurve(ranklist: srk.Ranklist, unit: srk.TimeDuration) {
 }
 
 describe('getAllRankTimeData output contract', () => {
+  it('retains only the requested user without changing ranks, sampling, events or award boundaries', () => {
+    const ranklist = curveFixture();
+    const solutions = getSortedCalculatedRawSolutions(ranklist.rows);
+    const full = getAllRankTimeData(ranklist, solutions, [1, 'min']);
+    for (const user of ranklist.rows.map((row) => row.user.id)) {
+      const selected = getAllRankTimeData(ranklist, solutions, [1, 'min'], user);
+      expect([...selected.userRankTimePointsList.keys()]).toEqual([user]);
+      expect(selected.userRankTimePointsList.get(user)).toEqual(full.userRankTimePointsList.get(user));
+      expect(selected.userRankTimeSolvedEventPointsList.get(user)).toEqual(full.userRankTimeSolvedEventPointsList.get(user));
+      expect(selected.seriesSegmentsList).toEqual(full.seriesSegmentsList);
+      expect(selected.totalUsers).toBe(full.totalUsers);
+    }
+  });
+
+  it('yields between sampling steps in the main-thread fallback and cancels stale work', async () => {
+    const ranklist = curveFixture();
+    const solutions = getSortedCalculatedRawSolutions(ranklist.rows);
+    let yields = 0;
+    const result = await getUserRankTimeDataAsync(ranklist, solutions, [1, 'min'], 'alpha', {
+      yieldControl: async () => { yields++; },
+      budgetMs: 0,
+    });
+    expect(yields).toBeGreaterThan(1);
+    expect(result).toEqual(getAllRankTimeData(ranklist, solutions, [1, 'min'], 'alpha'));
+    let current = true;
+    expect(await getUserRankTimeDataAsync(ranklist, solutions, [1, 'min'], 'alpha', {
+      isCurrent: () => current,
+      yieldControl: async () => { current = false; },
+      budgetMs: 0,
+    })).toBeNull();
+  });
+
   it('preserves ties, filtered series, guest exclusion, FB events, segments and a partial final bucket', () => {
     const ranklist = curveFixture();
     const before = JSON.stringify(ranklist);

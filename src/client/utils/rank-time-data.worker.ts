@@ -7,23 +7,34 @@ import {
 } from './rank-time-data.util';
 import type { RankTimeDataSet } from './rank-time-data.util';
 import type { RankTimeWorkerRequest, RankTimeWorkerResponse } from './rank-time-worker.types';
+import { getSortedCalculatedRawSolutions } from '@algoux/standard-ranklist-utils';
+import type * as srk from '@algoux/standard-ranklist';
 
 let cachedKey = '';
 let cachedDataSet: RankTimeDataSet = createEmptyRankTimeDataSet();
-let cachedDataSetReady = false;
+let cachedRanklist: srk.Ranklist | undefined;
+let cachedUnit: srk.TimeDuration | undefined;
+let cachedSolutions: ReturnType<typeof getSortedCalculatedRawSolutions> = [];
+let cachedUserId: string | undefined;
 
 function ensureDataSet(message: RankTimeWorkerRequest) {
-  if (cachedKey === message.cacheKey && cachedDataSetReady) {
-    return cachedDataSet;
+  if (cachedKey !== message.cacheKey || !cachedRanklist) {
+    if (!message.ranklist || !message.unit) {
+      throw new Error('Rank time worker cache is not prepared');
+    }
+    cachedRanklist = message.ranklist;
+    cachedUnit = message.unit;
+    cachedSolutions = getSortedCalculatedRawSolutions(cachedRanklist.rows);
+    cachedUserId = undefined;
+    cachedDataSet = createEmptyRankTimeDataSet();
+    cachedKey = message.cacheKey;
   }
-
-  if (!message.ranklist || !message.solutions || !message.unit) {
-    throw new Error('Rank time worker cache is not prepared');
+  // Ranking still includes everyone. Only the requested user's historical
+  // points are retained, with a one-user cache rather than N x time buckets.
+  if (message.kind === 'select' && cachedUserId !== message.userId) {
+    cachedDataSet = getAllRankTimeData(cachedRanklist, cachedSolutions, cachedUnit!, message.userId);
+    cachedUserId = message.userId;
   }
-
-  cachedDataSet = getAllRankTimeData(message.ranklist, message.solutions, message.unit);
-  cachedKey = message.cacheKey;
-  cachedDataSetReady = true;
   return cachedDataSet;
 }
 
@@ -38,7 +49,7 @@ export function handleRankTimeWorkerMessage(message: RankTimeWorkerRequest): Ran
     if (message.kind === 'select') {
       response.data = selectUserMainRankTimeData({
         rankTimeDataSet: dataSet,
-        staticRows: message.staticRows,
+        user: message.user,
         staticSeries: message.staticSeries,
         staticMarkers: message.staticMarkers,
         userId: message.userId,

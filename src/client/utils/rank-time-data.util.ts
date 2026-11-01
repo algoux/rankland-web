@@ -97,14 +97,15 @@ export function getProperRankTimeChunkUnit(contest: srk.Contest): srk.TimeDurati
 
 export function selectUserMainRankTimeData(params: {
   rankTimeDataSet: RankTimeDataSet;
-  staticRows: StaticRanklist['rows'];
+  staticRows?: StaticRanklist['rows'];
+  user?: srk.User;
   staticSeries: StaticRanklist['series'];
   staticMarkers?: srk.Marker[];
   userId: string;
   fixedMarker?: string;
 }): SelectedUserMainRankTimeData | null {
   const { rankTimeDataSet, staticRows, staticSeries, staticMarkers, userId, fixedMarker } = params;
-  const user = staticRows.find((row) => row.user?.id === userId)?.user;
+  const user = params.user || staticRows?.find((row) => row.user?.id === userId)?.user;
   if (!user) {
     return null;
   }
@@ -165,7 +166,52 @@ export function getAllRankTimeData(
   ranklist: srk.Ranklist,
   solutions: CalculatedSolutionTetrad[],
   unit: srk.TimeDuration,
+  userId?: string,
 ): RankTimeDataSet {
+  const calculation = calculateRankTimeData(ranklist, solutions, unit, userId);
+  let step = calculation.next();
+  while (!step.done) {
+    step = calculation.next();
+  }
+  return step.value;
+}
+
+// Worker-less browsers still yield to input/paint instead of doing the entire
+// contest in one task. Cancellation also releases the suspended calculation.
+export async function getUserRankTimeDataAsync(
+  ranklist: srk.Ranklist,
+  solutions: CalculatedSolutionTetrad[],
+  unit: srk.TimeDuration,
+  userId: string,
+  options: {
+    isCurrent?: () => boolean;
+    yieldControl?: () => Promise<void>;
+    budgetMs?: number;
+  } = {},
+): Promise<RankTimeDataSet | null> {
+  const isCurrent = options.isCurrent || (() => true);
+  const yieldControl = options.yieldControl || (() => new Promise<void>((resolve) => setTimeout(resolve, 0)));
+  const calculation = calculateRankTimeData(ranklist, solutions, unit, userId);
+  let started = performance.now();
+  while (isCurrent()) {
+    const step = calculation.next();
+    if (step.done) {
+      return step.value;
+    }
+    if (performance.now() - started >= (options.budgetMs ?? 8)) {
+      await yieldControl();
+      started = performance.now();
+    }
+  }
+  return null;
+}
+
+function* calculateRankTimeData(
+  ranklist: srk.Ranklist,
+  solutions: CalculatedSolutionTetrad[],
+  unit: srk.TimeDuration,
+  selectedUserId?: string,
+): Generator<void, RankTimeDataSet> {
   const timePoints: srk.TimeDuration[] = [];
   {
     const durationInTargetUnit = formatTimeDuration(ranklist.contest.duration, unit[1]);
@@ -230,6 +276,9 @@ export function getAllRankTimeData(
   function appendRankPoints(timePoint: srk.TimeDuration, rows: StaticRanklist['rows']) {
     for (const row of rows) {
       const user = row.user;
+      if (selectedUserId !== undefined && user.id !== selectedUserId) {
+        continue;
+      }
       if (!userRankTimePointsList.has(user.id)) {
         userRankTimePointsList.set(user.id, []);
       }
@@ -290,6 +339,9 @@ export function getAllRankTimeData(
       if (incrementalSolutions.length) {
         for (const solution of incrementalSolutions) {
           const [userId, problemIndex, result, time] = solution;
+          if (selectedUserId !== undefined && userId !== selectedUserId) {
+            continue;
+          }
           if (!userRankTimeSolvedEventPointsComm.has(userId)) {
             userRankTimeSolvedEventPointsComm.set(userId, []);
           }
@@ -368,6 +420,7 @@ export function getAllRankTimeData(
         });
       }
       appendRankPoints(timePoint, currentStaticRows!);
+      yield;
     }
   }
 

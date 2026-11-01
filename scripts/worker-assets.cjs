@@ -1,4 +1,4 @@
-const SAME_ORIGIN_WORKER_ASSET_RE = /^assets\/(?:rank-time-data\.worker|editor\.worker|json\.worker)-[^/]+\.js$/;
+const SAME_ORIGIN_WORKER_ASSET_RE = /^assets\/(?:rank-time-data\.worker|ranklist-diagnostics\.worker|editor\.worker|json\.worker)-[^/]+\.js$/;
 
 function normalizeAssetPath(fileName) {
   return fileName.replace(/^\/+/, '').replace(/\\/g, '/');

@@ -1,11 +1,9 @@
 <script setup lang="ts">
-import { computed, onMounted, ref } from 'vue';
+import { computed, ref } from 'vue';
 import type * as srk from '@algoux/standard-ranklist';
-import { diagnoseRanklist } from '@algoux/standard-ranklist-utils';
 import type {
   RanklistCompletenessItems,
   RanklistCorrectnessChecks,
-  RanklistDiagnostics,
 } from '@algoux/standard-ranklist-utils';
 import { Modal } from '@algoux/standard-ranklist-renderer-component-vue';
 import { Button } from '@/components/ui/button';
@@ -18,7 +16,6 @@ import {
   QUALITY_BADGE_TONE_CLASSES,
   QUALITY_TONE_BUTTON_CLASSES,
   QUALITY_TONE_TEXT_CLASSES,
-  calculateRanklistQualityScore,
   formatCompletenessCount,
   formatCorrectnessCount,
   formatPrecisionText,
@@ -28,48 +25,15 @@ import {
   getScoreTone,
 } from './ranklist-diagnostics-score';
 import './ranklist-quality-action.less';
+import { useRanklistDiagnostics } from './use-ranklist-diagnostics';
 
 const props = defineProps<{
   data: srk.Ranklist;
   clientWidth: number;
 }>();
 
-const mounted = ref(false);
 const modalOpen = ref(false);
-
-onMounted(() => {
-  // A rAF scheduled inside onMounted still fires before the first paint; only the nested
-  // one is guaranteed to run after it, so the placeholder button paints before the
-  // expensive synchronous diagnose call. Hidden documents suspend rAF entirely (and have
-  // no paint to protect), so compute immediately there.
-  if (document.visibilityState === 'hidden') {
-    mounted.value = true;
-    return;
-  }
-  requestAnimationFrame(() => {
-    requestAnimationFrame(() => {
-      mounted.value = true;
-    });
-  });
-});
-
-type QualityState =
-  | { status: 'pending' }
-  | { status: 'error' }
-  | { status: 'ready'; diagnostics: RanklistDiagnostics; score: number };
-
-const state = computed<QualityState>(() => {
-  if (!mounted.value) {
-    return { status: 'pending' };
-  }
-  try {
-    const diagnostics = diagnoseRanklist(props.data);
-    return { status: 'ready', diagnostics, score: calculateRanklistQualityScore(diagnostics) };
-  } catch (error) {
-    console.error('[RanklistQualityAction] failed to diagnose ranklist:', error);
-    return { status: 'error' };
-  }
-});
+const state = useRanklistDiagnostics(() => props.data);
 
 const score = computed(() => (state.value.status === 'ready' ? state.value.score : null));
 

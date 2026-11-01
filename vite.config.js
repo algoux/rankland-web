@@ -3,6 +3,7 @@ const path = require('path');
 const viteSSR = require('vite-ssr/plugin');
 const vue = require('@vitejs/plugin-vue');
 const { productionClientGuard } = require('./scripts/production-client-guard.cjs');
+const { ssrManifestAliases } = require('./scripts/ssr-manifest-aliases.cjs');
 const { isSameOriginWorkerAsset, toSameOriginWorkerAssetUrl } = require('./scripts/worker-assets.cjs');
 
 function buildClientEnv() {
@@ -63,6 +64,7 @@ module.exports = defineConfig(({ command }) => {
       }),
       vue(),
       productionClientGuard(),
+      ssrManifestAliases(),
     ],
   };
 });

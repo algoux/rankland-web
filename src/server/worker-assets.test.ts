@@ -12,6 +12,9 @@ describe('worker assets', () => {
       '/dist/assets/rank-time-data.worker-58b7b4e9.js',
     );
     expect(renderBuiltUrl('assets/editor.worker-7a35bb28.js', {})).toBe('/dist/assets/editor.worker-7a35bb28.js');
+    expect(renderBuiltUrl('assets/ranklist-diagnostics.worker-abcd1234.js', {})).toBe(
+      '/dist/assets/ranklist-diagnostics.worker-abcd1234.js',
+    );
     expect(renderBuiltUrl('assets/json.worker-432a81d8.js', {})).toBe('/dist/assets/json.worker-432a81d8.js');
     expect(renderBuiltUrl('assets/index-288dc2dc.js', {})).toBeUndefined();
     expect(renderBuiltUrl('assets/StyledRanklist-4e8e13a8.css', {})).toBeUndefined();
@@ -20,6 +23,7 @@ describe('worker assets', () => {
   it('skips same-origin worker assets when uploading dist files to COS', () => {
     expect(shouldUploadDistFile('assets/rank-time-data.worker-58b7b4e9.js')).toBe(false);
     expect(shouldUploadDistFile('assets/editor.worker-7a35bb28.js')).toBe(false);
+    expect(shouldUploadDistFile('assets/ranklist-diagnostics.worker-abcd1234.js')).toBe(false);
     expect(shouldUploadDistFile('assets/json.worker-432a81d8.js')).toBe(false);
     expect(shouldUploadDistFile('assets/index-288dc2dc.js')).toBe(true);
     expect(shouldUploadDistFile('assets/style-288dc2dc.css')).toBe(true);

@@ -16,6 +16,8 @@ const props = defineProps<{
 const theme = inject(THEME_TOKEN, undefined);
 const container = ref<HTMLDivElement | null>(null);
 let chart: import('@antv/g2').Chart | null = null;
+let disposed = false;
+const loadError = ref(false);
 
 const primaryColor = '#5b8ff9';
 const solvedColor = '#64de7c';
@@ -41,6 +43,9 @@ async function renderChart() {
     return;
   }
   const { Chart } = await preloadRankCurveRenderer();
+  if (disposed || !container.value) {
+    return;
+  }
   const maxTime = props.points[props.points.length - 1].time;
   const maxRank = Math.min(Math.max(50, Math.max(...props.points.map((item) => item.rank)) + 10), props.totalUsers);
   const yTicks = [1];
@@ -145,14 +150,20 @@ async function renderChart() {
     crosshairsLineWidth: 1,
   });
 
-  chart.render();
+  await chart.render();
 }
 
 onMounted(() => {
-  renderChart();
+  void renderChart().catch((error) => {
+    if (!disposed) {
+      loadError.value = true;
+      console.warn('[RankCurve] renderer failed:', error);
+    }
+  });
 });
 
 onBeforeUnmount(() => {
+  disposed = true;
   chart?.destroy();
   chart = null;
 });
@@ -176,6 +187,7 @@ function getTooltipInteractionOptions() {
 
 <template>
   <div class="rank-curve">
+    <p v-if="loadError" role="status">排名曲线暂时不可用，请重新打开详情重试。</p>
     <div ref="container" class="rank-curve-chart" />
   </div>
 </template>

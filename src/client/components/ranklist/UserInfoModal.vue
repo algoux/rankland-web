@@ -21,6 +21,8 @@ const props = defineProps<{
   languages?: readonly string[];
   rankTimeData: RankTimeData;
   showRankCurve?: boolean;
+  rankCurveLoading?: boolean;
+  rankCurveError?: string;
 }>();
 
 const theme = inject(THEME_TOKEN, undefined);
@@ -107,7 +109,13 @@ function resolveDisplayText(text: Parameters<typeof resolveText>[0]) {
       />
       <p v-if="slogan" class="slogan mt-4 mb-2">{{ slogan }}</p>
     </div>
-    <div v-if="showRankCurve !== false && user.official && rankTimeData.initialized" class="mt-4">
+    <p v-if="showRankCurve !== false && rankCurveLoading" class="mt-4 text-muted-foreground" role="status">
+      正在生成排名曲线…
+    </p>
+    <p v-else-if="showRankCurve !== false && rankCurveError" class="mt-4 text-muted-foreground" role="status">
+      {{ rankCurveError }}
+    </p>
+    <div v-if="showRankCurve !== false && user.official !== false && rankTimeData.initialized" class="mt-4">
       <RankCurve
         :key="rankTimeData.key"
         :unit="rankTimeData.unit"
