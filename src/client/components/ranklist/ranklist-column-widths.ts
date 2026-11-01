@@ -2,6 +2,10 @@ import type { RanklistProps } from '@algoux/standard-ranklist-renderer-component
 import { formatTimeDuration, getCCPC26ProblemLayout, numberToAlphabet } from '@algoux/standard-ranklist-utils';
 import { getRankProblemStatusCellPresentation, shouldShowTimeColumn } from '@algoux/standard-ranklist-renderer-component-core';
 
+// Keep numeric/status padding in sync with the wrapper's CSS custom property.
+export const RANKLIST_NUMERIC_PADDING_X = 4;
+const NUMERIC_COLUMN_EXTRA = RANKLIST_NUMERIC_PADDING_X * 2 + 2;
+
 // The renderer uses 14px text. Pixel upper bounds keep col widths and light-row
 // offsets in the same metric context (ch would differ on bold header cells).
 export function estimateRanklistTextWidth(value: unknown) {
@@ -39,7 +43,8 @@ export function getRanklistColumnWidths(props: RanklistProps): number[] {
   });
   let scoreWidth = headerTextWidth(title('score', 'Score'));
   let timeWidth = headerTextWidth(title('time', 'Time'));
-  const statusWidths: number[] = data.problems.map(() => props.statusCellPreset === 'detailed' ? 40 : 22);
+  // Reserve a useful submission/time shape even for unattempted/unsolved problems.
+  const statusWidths: number[] = data.problems.map(() => estimateRanklistTextWidth('22/222'));
   const footerTimeWidths = new Array(data.problems.length).fill(0);
   const footerSubmitted = new Array(data.problems.length).fill(0);
   for (const row of data.rows) {
@@ -76,13 +81,13 @@ export function getRanklistColumnWidths(props: RanklistProps): number[] {
     }
   }
   if (layout) statusWidths.fill(Math.max(0, ...statusWidths));
-  const widths = rankWidths.map((width, index) => Math.max(40, Math.ceil(width + (data.series[index].segments?.some(segment => typeof segment.style === 'string') ? 28 : 18))));
+  const widths = rankWidths.map((width, index) => Math.max(40, Math.ceil(width + (data.series[index].segments?.some(segment => typeof segment.style === 'string') ? RANKLIST_NUMERIC_PADDING_X + 20 : NUMERIC_COLUMN_EXTRA))));
   if (props.splitOrganization) widths.push(Math.max(220, Math.ceil(headerTextWidth(title('organization', 'Organization')) + 18)));
   widths.push(Math.max(240, Math.ceil(headerTextWidth(title('user', 'Name')) + 18)));
-  widths.push(Math.ceil(scoreWidth + 18));
-  if (shouldShowTimeColumn(data.rows)) widths.push(Math.ceil(timeWidth + 18));
-  widths.push(...statusWidths.map(width => Math.max(40, Math.ceil(width + 18))));
-  if (props.showDirtColumn) widths.push(Math.max(65, Math.ceil(estimateRanklistTextWidth(title('dirt', 'Dirt')) + 18)));
-  if (props.showSEColumn) widths.push(Math.max(54, Math.ceil(estimateRanklistTextWidth(title('se', 'SE')) + 18)));
+  widths.push(Math.ceil(scoreWidth + NUMERIC_COLUMN_EXTRA));
+  if (shouldShowTimeColumn(data.rows)) widths.push(Math.ceil(timeWidth + NUMERIC_COLUMN_EXTRA));
+  widths.push(...statusWidths.map(width => Math.max(40, Math.ceil(width + NUMERIC_COLUMN_EXTRA))));
+  if (props.showDirtColumn) widths.push(Math.max(65, Math.ceil(estimateRanklistTextWidth(title('dirt', 'Dirt')) + NUMERIC_COLUMN_EXTRA)));
+  if (props.showSEColumn) widths.push(Math.max(54, Math.ceil(estimateRanklistTextWidth(title('se', 'SE')) + NUMERIC_COLUMN_EXTRA)));
   return widths;
 }

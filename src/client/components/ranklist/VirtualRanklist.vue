@@ -2,7 +2,7 @@
 import { computed, h, onBeforeUnmount, onMounted, ref, render, shallowRef, useSlots, watch } from 'vue';
 import { Ranklist } from '@algoux/standard-ranklist-renderer-component-vue';
 import type { RanklistProps } from '@algoux/standard-ranklist-renderer-component-vue';
-import { getRanklistColumnWidths } from './ranklist-column-widths';
+import { getRanklistColumnWidths, RANKLIST_NUMERIC_PADDING_X } from './ranklist-column-widths';
 import {
   LARGE_RANKLIST_THRESHOLD,
   RANKLIST_ROW_HEIGHT,
@@ -23,9 +23,11 @@ const displayWindow = computed(() => windowed.value ? range.value : undefined);
 const columnWidths = computed(() => windowed.value ? getRanklistColumnWidths(props) : undefined);
 const windowedTableStyle = computed(() => {
   const widths = columnWidths.value;
-  if (!widths) return undefined;
+  const densityStyle = { '--ranklist-numeric-padding-x': `${RANKLIST_NUMERIC_PADDING_X}px` };
+  if (!widths) return densityStyle;
   const nameColumn = props.data.series.length + (props.splitOrganization ? 1 : 0);
   return {
+    ...densityStyle,
     '--ranklist-window-fixed-width': `${widths.reduce((sum, width) => sum + width, 0)}px`,
     '--ranklist-window-name-width': `${widths[nameColumn]}px`,
   };
@@ -147,6 +149,17 @@ onBeforeUnmount(() => {
    Keep the fixed-column minimum for narrow viewports and custom headings. */
 .ranklist-window[data-windowed="true"] > .srk-main {
   max-width: max(var(--ranklist-window-fixed-width), calc(var(--ranklist-window-fixed-width) - var(--ranklist-window-name-width) + var(--srk-table-body-user-max-width, 300px) + 16px));
+}
+/* Keep numeric columns compact without moving identity text or rank markers. */
+.ranklist-window .srk-main > table > :is(thead, tbody, tfoot) > tr > .srk--text-right {
+  padding-left: var(--ranklist-numeric-padding-x);
+}
+.ranklist-window .srk-main > table > :is(thead, tbody, tfoot) > tr > .srk--text-right:not(.srk-series-segmented-column) {
+  padding-right: var(--ranklist-numeric-padding-x);
+}
+.ranklist-window .srk-main > table > :is(thead, tbody, tfoot) > tr > :is(.srk-problem-header, .srk-prest-status-block, .srk-status-placeholder-cell, .srk-problem-statistics-footer-cell) {
+  padding-left: var(--ranklist-numeric-padding-x);
+  padding-right: var(--ranklist-numeric-padding-x);
 }
 /* Hide only the live table, not the nested synchronous print copy. */
 .ranklist-window.ranklist-printing > .srk-main { display: none; }

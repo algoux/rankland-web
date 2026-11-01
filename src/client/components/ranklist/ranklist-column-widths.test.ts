@@ -19,10 +19,25 @@ describe('ranklist first-render column sizing', () => {
     const widths = getRanklistColumnWidths({ data: { ...source, rows } });
     const scoreIndex = source.series.length + 1;
     expect(widths[scoreIndex]).toBeGreaterThan(ordinary[scoreIndex]);
-    expect(widths[scoreIndex]).toBeGreaterThanOrEqual(estimateRanklistTextWidth(-123456789.1234) + 18);
-    expect(widths[scoreIndex + 1]).toBeGreaterThanOrEqual(estimateRanklistTextWidth(99999999) + 18);
-    expect(widths[scoreIndex + 2]).toBeGreaterThanOrEqual(estimateRanklistTextWidth(0.12345678901234567) + 18);
+    expect(widths[scoreIndex]).toBeGreaterThanOrEqual(estimateRanklistTextWidth(-123456789.1234) + 10);
+    expect(widths[scoreIndex + 1]).toBeGreaterThanOrEqual(estimateRanklistTextWidth(99999999) + 10);
+    expect(widths[scoreIndex + 2]).toBeGreaterThanOrEqual(estimateRanklistTextWidth(0.12345678901234567) + 10);
     expect(widths[scoreIndex + 3]).toBe(ordinary[scoreIndex + 3]);
+  });
+
+  it('reserves 22/222 for unsolved and empty problem columns in every preset', () => {
+    const source = convertToStaticRanklist(fixture as any);
+    const data = { ...source,
+      problems: source.problems.map(problem => ({ ...problem, statistics: { accepted: 0, submitted: 1 } })),
+      rows: source.rows.map(row => ({ ...row, statuses: source.problems.map((_, index) =>
+        index % 2 ? { result: null } : { result: 'RJ' as const, tries: 1 }) })),
+    };
+    for (const statusCellPreset of ['classic', 'compact', 'detailed', 'minimal'] as const) {
+      const widths = getRanklistColumnWidths({ data, statusCellPreset });
+      const problems = widths.slice(-data.problems.length);
+      expect(problems.every(width => width >= estimateRanklistTextWidth('22/222') + 10)).toBe(true);
+      expect(problems.every(width => width === 61)).toBe(true);
+    }
   });
 
   it('emits fixed widths and light offsets in SSR itself, while full mode retains native auto layout', async () => {
