@@ -125,3 +125,16 @@ jobs:
             -o StrictHostKeyChecking=yes \
             "$VPS_USER@$VPS_HOST" \
             'cd /opt/rankland-web && bash ./up.sh'
+
+      - name: Notify deployment success
+        if: ${{ success() }}
+        continue-on-error: true
+        uses: azurdream/meowpush-gh-actions@v1
+        with:
+          key: ${{ secrets.MEOWPUSH_KEY }}
+          title: '${{ github.repository }} Deployment Success'
+          body: |
+            Deployment completed.
+            Commit: ${{ github.event.workflow_run.head_sha }}
+          url: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+          group: github-actions
