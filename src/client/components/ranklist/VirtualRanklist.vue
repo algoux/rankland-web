@@ -3,7 +3,13 @@ import { computed, h, onBeforeUnmount, onMounted, ref, render, shallowRef, useSl
 import { Ranklist } from '@algoux/standard-ranklist-renderer-component-vue';
 import type { RanklistProps } from '@algoux/standard-ranklist-renderer-component-vue';
 import { shouldShowTimeColumn } from '@algoux/standard-ranklist-renderer-component-core';
-import { getRanklistColumnWidths, RANKLIST_NUMERIC_PADDING_X, RANKLIST_TIME_PADDING_RIGHT } from './ranklist-column-widths';
+import {
+  getRanklistColumnWidths,
+  RANKLIST_NUMERIC_PADDING_X,
+  RANKLIST_SERIES_SEGMENT_GAP,
+  RANKLIST_SERIES_SEGMENT_WIDTH,
+  RANKLIST_TIME_PADDING_RIGHT,
+} from './ranklist-column-widths';
 import {
   LARGE_RANKLIST_THRESHOLD,
   RANKLIST_ROW_HEIGHT,
@@ -28,6 +34,8 @@ const windowedTableStyle = computed(() => {
   const densityStyle = {
     '--ranklist-numeric-padding-x': `${RANKLIST_NUMERIC_PADDING_X}px`,
     '--ranklist-time-padding-right': `${RANKLIST_TIME_PADDING_RIGHT}px`,
+    '--ranklist-series-segment-width': `${RANKLIST_SERIES_SEGMENT_WIDTH}px`,
+    '--ranklist-series-segment-gap': `${RANKLIST_SERIES_SEGMENT_GAP}px`,
   };
   if (!widths) return densityStyle;
   const nameColumn = props.data.series.length + (props.splitOrganization ? 1 : 0);
@@ -155,6 +163,13 @@ onBeforeUnmount(() => {
 
 <style>
 .ranklist-window { overflow-anchor: none; }
+.ranklist-window .srk-main {
+  --srk-series-segment-border-width: var(--ranklist-series-segment-width);
+  --srk-series-segment-content-gap: var(--ranklist-series-segment-gap);
+}
+.ranklist-window .srk-main > table > thead > tr > .srk-series-segmented-column {
+  --srk-series-segment-content-gap: 0px;
+}
 /* Name is the only flexible column. Bound the renderer container so filling
    it cannot exceed the original 300px content limit plus 8px padding per side.
    Keep the fixed-column minimum for narrow viewports and custom headings. */

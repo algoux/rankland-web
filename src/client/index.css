@@ -106,6 +106,7 @@
       :is([data-classic-scrollbars], [data-classic-scrollbars] *)::-webkit-scrollbar {
         width: 4px;
         height: 4px;
+        background: transparent;
       }
 
       :is([data-classic-scrollbars], [data-classic-scrollbars] *)::-webkit-scrollbar-thumb {
@@ -119,6 +120,7 @@
       }
 
       :is([data-classic-scrollbars], [data-classic-scrollbars] *)::-webkit-scrollbar-track,
+      :is([data-classic-scrollbars], [data-classic-scrollbars] *)::-webkit-scrollbar-track-piece,
       :is([data-classic-scrollbars], [data-classic-scrollbars] *)::-webkit-scrollbar-corner {
         background: transparent;
       }

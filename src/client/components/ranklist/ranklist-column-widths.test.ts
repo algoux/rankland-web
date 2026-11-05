@@ -10,6 +10,15 @@ import { estimateRanklistTextWidth, getRanklistColumnWidths } from './ranklist-c
 const render = (props: any) => renderToString(createSSRApp({ render: () => h(Ranklist, props) }));
 
 describe('ranklist first-render column sizing', () => {
+  it('shrinks a segmented header without taking space from longer body ranks', () => {
+    const data = convertToStaticRanklist(fixture as any);
+    expect(getRanklistColumnWidths({ data })[0]).toBe(63);
+
+    const rows = [...data.rows];
+    rows[1] = { ...rows[1], rankValues: [{ ...rows[1].rankValues[0], rank: 123456789 }] };
+    expect(getRanklistColumnWidths({ data: { ...data, rows } })[0]).toBe(101);
+  });
+
   it('covers numeric/status values outside the first window without widening unrelated ordinary problems', () => {
     const source = convertToStaticRanklist(fixture as any);
     const rows = Array.from({ length: 301 }, (_, index) => ({ ...source.rows[0], user: { ...source.rows[0].user, id: `user-${index}` } }));

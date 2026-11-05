@@ -2,10 +2,13 @@ import type { RanklistProps } from '@algoux/standard-ranklist-renderer-component
 import { formatTimeDuration, getCCPC26ProblemLayout, numberToAlphabet } from '@algoux/standard-ranklist-utils';
 import { getRankProblemStatusCellPresentation, shouldShowTimeColumn } from '@algoux/standard-ranklist-renderer-component-core';
 
-// Keep numeric/status padding in sync with the wrapper's CSS custom property.
+// Shared by the column estimates and the wrapper's CSS custom properties.
 export const RANKLIST_NUMERIC_PADDING_X = 4;
 export const RANKLIST_TIME_PADDING_RIGHT = 8;
+export const RANKLIST_SERIES_SEGMENT_WIDTH = 6;
+export const RANKLIST_SERIES_SEGMENT_GAP = 6;
 const NUMERIC_COLUMN_EXTRA = RANKLIST_NUMERIC_PADDING_X * 2 + 2;
+const SEGMENTED_HEADER_EXTRA = RANKLIST_NUMERIC_PADDING_X + RANKLIST_SERIES_SEGMENT_WIDTH + 4;
 
 // The renderer uses 14px text. Pixel upper bounds keep col widths and light-row
 // offsets in the same metric context (ch would differ on bold header cells).
@@ -37,10 +40,15 @@ function headerTextWidth(value: unknown) {
 export function getRanklistColumnWidths(props: RanklistProps): number[] {
   const { data } = props;
   const title = (key: 'organization' | 'user' | 'score' | 'time' | 'dirt' | 'se', fallback: string) => props.columnTitles?.[key] ?? fallback;
-  const rankWidths = data.series.map((series, index) => {
+  const rankColumns = data.series.map((series, index) => {
     const titles = props.columnTitles?.series;
     const text = typeof titles === 'function' ? titles(series, index) ?? series.title : titles?.[index] ?? series.title;
-    return headerTextWidth(text);
+    const hasSegmentBar = series.segments?.some(segment => typeof segment.style === 'string');
+    const headerExtra = hasSegmentBar ? SEGMENTED_HEADER_EXTRA : NUMERIC_COLUMN_EXTRA;
+    return {
+      width: headerTextWidth(text) + headerExtra,
+      bodyExtra: headerExtra + (hasSegmentBar ? RANKLIST_SERIES_SEGMENT_GAP : 0),
+    };
   });
   let scoreWidth = headerTextWidth(title('score', 'Score'));
   let timeWidth = headerTextWidth(title('time', 'Time'));
@@ -49,8 +57,10 @@ export function getRanklistColumnWidths(props: RanklistProps): number[] {
   const footerTimeWidths = new Array(data.problems.length).fill(0);
   const footerSubmitted = new Array(data.problems.length).fill(0);
   for (const row of data.rows) {
-    for (let index = 0; index < rankWidths.length; index++) {
-      rankWidths[index] = Math.max(rankWidths[index], estimateRanklistTextWidth(row.rankValues?.[index]?.rank || (row.user.official === false ? '＊' : '')));
+    for (let index = 0; index < rankColumns.length; index++) {
+      const column = rankColumns[index];
+      const rank = row.rankValues?.[index]?.rank || (row.user.official === false ? '＊' : '');
+      column.width = Math.max(column.width, estimateRanklistTextWidth(rank) + column.bodyExtra);
     }
     scoreWidth = Math.max(scoreWidth, estimateRanklistTextWidth(row.score.value));
     timeWidth = Math.max(timeWidth, estimateRanklistTextWidth(row.score.time ? formatTimeDuration(row.score.time, 'min', Math.floor) : '-'));
@@ -82,7 +92,7 @@ export function getRanklistColumnWidths(props: RanklistProps): number[] {
     }
   }
   if (layout) statusWidths.fill(Math.max(0, ...statusWidths));
-  const widths = rankWidths.map((width, index) => Math.max(40, Math.ceil(width + (data.series[index].segments?.some(segment => typeof segment.style === 'string') ? RANKLIST_NUMERIC_PADDING_X + 20 : NUMERIC_COLUMN_EXTRA))));
+  const widths = rankColumns.map(({ width }) => Math.max(40, Math.ceil(width)));
   if (props.splitOrganization) widths.push(Math.max(220, Math.ceil(headerTextWidth(title('organization', 'Organization')) + 18)));
   widths.push(Math.max(240, Math.ceil(headerTextWidth(title('user', 'Name')) + 18)));
   widths.push(Math.ceil(scoreWidth + NUMERIC_COLUMN_EXTRA));
