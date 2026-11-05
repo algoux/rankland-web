@@ -4,6 +4,7 @@ import { getRankProblemStatusCellPresentation, shouldShowTimeColumn } from '@alg
 
 // Keep numeric/status padding in sync with the wrapper's CSS custom property.
 export const RANKLIST_NUMERIC_PADDING_X = 4;
+export const RANKLIST_TIME_PADDING_RIGHT = 8;
 const NUMERIC_COLUMN_EXTRA = RANKLIST_NUMERIC_PADDING_X * 2 + 2;
 
 // The renderer uses 14px text. Pixel upper bounds keep col widths and light-row
@@ -85,7 +86,9 @@ export function getRanklistColumnWidths(props: RanklistProps): number[] {
   if (props.splitOrganization) widths.push(Math.max(220, Math.ceil(headerTextWidth(title('organization', 'Organization')) + 18)));
   widths.push(Math.max(240, Math.ceil(headerTextWidth(title('user', 'Name')) + 18)));
   widths.push(Math.ceil(scoreWidth + NUMERIC_COLUMN_EXTRA));
-  if (shouldShowTimeColumn(data.rows)) widths.push(Math.ceil(timeWidth + NUMERIC_COLUMN_EXTRA));
+  if (shouldShowTimeColumn(data.rows)) {
+    widths.push(Math.ceil(timeWidth + NUMERIC_COLUMN_EXTRA + RANKLIST_TIME_PADDING_RIGHT - RANKLIST_NUMERIC_PADDING_X));
+  }
   widths.push(...statusWidths.map(width => Math.max(40, Math.ceil(width + NUMERIC_COLUMN_EXTRA))));
   if (props.showDirtColumn) widths.push(Math.max(65, Math.ceil(estimateRanklistTextWidth(title('dirt', 'Dirt')) + NUMERIC_COLUMN_EXTRA)));
   if (props.showSEColumn) widths.push(Math.max(54, Math.ceil(estimateRanklistTextWidth(title('se', 'SE')) + NUMERIC_COLUMN_EXTRA)));

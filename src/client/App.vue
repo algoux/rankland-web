@@ -21,7 +21,7 @@
       </div>
     </header>
 
-    <main class="w-full px-[50px] py-8 max-md:px-5">
+    <main class="rankland-main w-full py-8">
       <router-view v-slot="{ Component }">
         <Suspense>
           <component :is="Component" />

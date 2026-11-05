@@ -20,7 +20,7 @@ describe('ranklist first-render column sizing', () => {
     const scoreIndex = source.series.length + 1;
     expect(widths[scoreIndex]).toBeGreaterThan(ordinary[scoreIndex]);
     expect(widths[scoreIndex]).toBeGreaterThanOrEqual(estimateRanklistTextWidth(-123456789.1234) + 10);
-    expect(widths[scoreIndex + 1]).toBeGreaterThanOrEqual(estimateRanklistTextWidth(99999999) + 10);
+    expect(widths[scoreIndex + 1]).toBeGreaterThanOrEqual(estimateRanklistTextWidth(99999999) + 14);
     expect(widths[scoreIndex + 2]).toBeGreaterThanOrEqual(estimateRanklistTextWidth(0.12345678901234567) + 10);
     expect(widths[scoreIndex + 3]).toBe(ordinary[scoreIndex + 3]);
   });

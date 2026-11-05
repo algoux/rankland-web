@@ -74,6 +74,57 @@
     @apply border-border;
   }
 
+  :root[data-classic-scrollbars] {
+    /* Keep the viewport width stable when a modal locks body scrolling. */
+    scrollbar-gutter: stable;
+  }
+
+  @media not all and (forced-colors: active) {
+    :root {
+      /* Match the neutral macOS overlay palette with a softer fill. */
+      --rankland-scrollbar-ink: 0 0 0;
+      --rankland-scrollbar-thumb: rgb(var(--rankland-scrollbar-ink) / 35%);
+      --rankland-scrollbar-edge: rgb(255 255 255 / 24%);
+      scrollbar-color: var(--rankland-scrollbar-thumb) transparent;
+    }
+
+    :root.dark {
+      --rankland-scrollbar-ink: 255 255 255;
+      --rankland-scrollbar-edge: rgb(0 0 0 / 24%);
+    }
+
+    * {
+      scrollbar-width: thin;
+    }
+
+    @supports selector(::-webkit-scrollbar) {
+      :is([data-classic-scrollbars], [data-classic-scrollbars] *) {
+        scrollbar-width: auto;
+        scrollbar-color: auto;
+      }
+
+      :is([data-classic-scrollbars], [data-classic-scrollbars] *)::-webkit-scrollbar {
+        width: 4px;
+        height: 4px;
+      }
+
+      :is([data-classic-scrollbars], [data-classic-scrollbars] *)::-webkit-scrollbar-thumb {
+        border-radius: 999px;
+        background: var(--rankland-scrollbar-thumb);
+        box-shadow: inset 0 0 0 1px var(--rankland-scrollbar-edge);
+      }
+
+      :is([data-classic-scrollbars], [data-classic-scrollbars] *)::-webkit-scrollbar-thumb:hover {
+        background: rgb(var(--rankland-scrollbar-ink) / 50%);
+      }
+
+      :is([data-classic-scrollbars], [data-classic-scrollbars] *)::-webkit-scrollbar-track,
+      :is([data-classic-scrollbars], [data-classic-scrollbars] *)::-webkit-scrollbar-corner {
+        background: transparent;
+      }
+    }
+  }
+
   body {
     @apply bg-background text-foreground;
     margin: 0;
@@ -432,9 +483,19 @@
     }
   }
 
+  .rankland-main {
+    --rankland-main-inline-padding: 50px;
+    padding-inline: var(--rankland-main-inline-padding);
+  }
+
+  @media (max-width: 767px) {
+    .rankland-main {
+      --rankland-main-inline-padding: 20px;
+    }
+  }
+
   .rankland-playground-page {
-    width: 100vw;
-    margin: -2rem calc(50% - 50vw);
+    margin: -2rem calc(0px - var(--rankland-main-inline-padding, 0px));
   }
 
   .rankland-ranklist-table-frame {
@@ -443,9 +504,7 @@
 
   @media (max-width: 1023px) {
     .rankland-ranklist-page {
-      width: 100vw;
-      margin-left: calc(50% - 50vw);
-      margin-right: calc(50% - 50vw);
+      margin-inline: calc(0px - var(--rankland-main-inline-padding, 0px));
     }
 
     .rankland-ranklist-table-frame {
@@ -616,30 +675,29 @@
   }
 
   .rankland-collection-page {
-    --rankland-main-inline-padding: 50px;
-    width: calc(100% + var(--rankland-main-inline-padding) + var(--rankland-main-inline-padding));
     min-height: calc(100svh - 4rem);
-    margin: -2rem calc(0px - var(--rankland-main-inline-padding)) 0;
-  }
-
-  @media (max-width: 767px) {
-    .rankland-collection-page {
-      --rankland-main-inline-padding: 20px;
-    }
+    margin: -2rem calc(0px - var(--rankland-main-inline-padding, 0px));
   }
 
   .rankland-collection-shell {
-    position: relative;
+    --rankland-collection-header-height: 4rem;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
     min-height: calc(100svh - 4rem);
+  }
+
+  /* Start both sticky elements below the site header, in the same grid row. */
+  .rankland-collection-shell > * {
+    grid-area: 1 / 1;
+    align-self: start;
   }
 
   .rankland-collection-sidebar,
   .srk-collection-nav {
-    position: fixed;
-    top: 4rem;
-    left: 0;
+    position: sticky;
+    top: var(--rankland-collection-header-height);
     z-index: 20;
-    height: calc(100svh - 4rem);
+    height: calc(100svh - var(--rankland-collection-header-height));
     width: var(--rankland-collection-sidebar-width);
     max-width: 100vw;
     box-sizing: border-box;
@@ -946,7 +1004,7 @@
     top: 0;
     width: var(--rankland-collection-sidebar-width);
     max-width: 100vw;
-    height: 64px;
+    height: var(--rankland-collection-header-height);
     align-items: center;
     justify-content: center;
     border-right: 0 solid currentColor;
@@ -982,19 +1040,22 @@
   }
 
   .rankland-collection-hidden-header.is-collapsed img {
-    width: 24px;
-    height: 24px;
+    width: auto;
+    height: min(24px, calc(var(--rankland-collection-header-height) - 16px));
   }
 
   .rankland-collection-hidden-header.is-collapsed h3 {
     margin-left: 0;
     font-size: 14px;
+    line-height: 16px;
   }
 
   .rankland-collection-content {
     min-height: calc(100svh - 4rem);
+    margin-top: 4rem;
     margin-left: var(--rankland-collection-sidebar-width);
-    padding: 0 0 2.5rem;
+    /* Keep the main element's bottom padding inside the sticky sidebar's boundary. */
+    padding: 0 0 4.5rem;
     transition: margin-left 0.2s ease;
   }
 

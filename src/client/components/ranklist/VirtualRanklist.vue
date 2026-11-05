@@ -2,7 +2,8 @@
 import { computed, h, onBeforeUnmount, onMounted, ref, render, shallowRef, useSlots, watch } from 'vue';
 import { Ranklist } from '@algoux/standard-ranklist-renderer-component-vue';
 import type { RanklistProps } from '@algoux/standard-ranklist-renderer-component-vue';
-import { getRanklistColumnWidths, RANKLIST_NUMERIC_PADDING_X } from './ranklist-column-widths';
+import { shouldShowTimeColumn } from '@algoux/standard-ranklist-renderer-component-core';
+import { getRanklistColumnWidths, RANKLIST_NUMERIC_PADDING_X, RANKLIST_TIME_PADDING_RIGHT } from './ranklist-column-widths';
 import {
   LARGE_RANKLIST_THRESHOLD,
   RANKLIST_ROW_HEIGHT,
@@ -18,12 +19,16 @@ const root = ref<HTMLElement | null>(null);
 const slots = useSlots();
 let printContainer: HTMLDivElement | null = null;
 const windowed = computed(() => props.data.rows.length > LARGE_RANKLIST_THRESHOLD);
+const hasTimeColumn = computed(() => shouldShowTimeColumn(props.data.rows));
 const range = shallowRef<RanklistRowWindow>(initialRanklistRowWindow(props.data.rows.length));
 const displayWindow = computed(() => windowed.value ? range.value : undefined);
 const columnWidths = computed(() => windowed.value ? getRanklistColumnWidths(props) : undefined);
 const windowedTableStyle = computed(() => {
   const widths = columnWidths.value;
-  const densityStyle = { '--ranklist-numeric-padding-x': `${RANKLIST_NUMERIC_PADDING_X}px` };
+  const densityStyle = {
+    '--ranklist-numeric-padding-x': `${RANKLIST_NUMERIC_PADDING_X}px`,
+    '--ranklist-time-padding-right': `${RANKLIST_TIME_PADDING_RIGHT}px`,
+  };
   if (!widths) return densityStyle;
   const nameColumn = props.data.series.length + (props.splitOrganization ? 1 : 0);
   return {
@@ -133,7 +138,13 @@ onBeforeUnmount(() => {
 </script>
 
 <template>
-  <div ref="root" class="ranklist-window" :style="windowedTableStyle" :data-windowed="windowed ? 'true' : undefined">
+  <div
+    ref="root"
+    class="ranklist-window"
+    :style="windowedTableStyle"
+    :data-windowed="windowed ? 'true' : undefined"
+    :data-has-time-column="hasTimeColumn ? 'true' : undefined"
+  >
     <Ranklist v-bind="{ ...forwardedProps, ...$attrs }" :row-window="displayWindow" :retain-user-text="windowed" :column-widths="columnWidths" :row-height="RANKLIST_ROW_HEIGHT">
       <template v-for="(_, name) in $slots" #[name]="slotProps">
         <slot :name="name" v-bind="slotProps" />
@@ -160,6 +171,10 @@ onBeforeUnmount(() => {
 .ranklist-window .srk-main > table > :is(thead, tbody, tfoot) > tr > :is(.srk-problem-header, .srk-prest-status-block, .srk-status-placeholder-cell, .srk-problem-statistics-footer-cell) {
   padding-left: var(--ranklist-numeric-padding-x);
   padding-right: var(--ranklist-numeric-padding-x);
+}
+/* The renderer uses the same classes for Score and Time after the Name cell. */
+.ranklist-window[data-has-time-column] .srk-main > table > :is(thead, tbody) > tr > .srk--text-left + .srk--text-right + .srk--text-right {
+  padding-right: var(--ranklist-time-padding-right);
 }
 /* Hide only the live table, not the nested synchronous print copy. */
 .ranklist-window.ranklist-printing > .srk-main { display: none; }

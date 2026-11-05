@@ -39,11 +39,10 @@
       <link rel="canonical" :href="collectionFullUrl" />
     </Head>
 
-    <div class="rankland-collection-shell srk-collection-container">
+    <div class="rankland-collection-shell srk-collection-container" :style="collectionShellStyle">
       <aside
         class="rankland-collection-sidebar srk-collection-nav"
         :class="{ 'is-client-ready': clientReady, 'is-collapsed': collapsed }"
-        :style="collectionSidebarStyle"
         data-id="collection-sidebar"
       >
         <div class="srk-collection-nav-toggle">
@@ -89,7 +88,6 @@
       <div
         class="rankland-collection-hidden-header srk-collection-hidden-header"
         :class="{ 'is-client-ready': clientReady, 'is-collapsed': collapsed }"
-        :style="collectionHiddenHeaderStyle"
         data-id="collection-hidden-header"
       >
         <img :src="collectionLogo" alt="RankLand" />
@@ -99,7 +97,6 @@
       <div
         class="rankland-collection-content srk-collection-ranklist"
         :class="{ 'is-mobile-nav-open': usingMobileLayout && !collapsed }"
-        :style="collectionContentStyle"
       >
         <div v-if="collectionPageData.ranklistHasError" class="rankland-collection-state">
           <div>
@@ -114,6 +111,7 @@
         </div>
         <div
           v-else-if="collectionPageData.ranklist"
+          ref="ranklistContent"
           class="pb-8"
           data-id="collection-ranklist-content"
           :data-ranklist-id="renderedRanklistId"
@@ -194,11 +192,14 @@ export default class Collection extends Vue {
   collapsed = false;
   clientReady = false;
   clientWidth = 0;
+  ranklistHeaderHeight: number | null = null;
   domThemeName: ThemeName = 'light';
   collectionLogo = ranklandLogo;
   activeCollapsedPopupKey = '';
   private invalidRedirectPath = '';
   private themeClassObserver: MutationObserver | undefined;
+  private ranklistHeaderObserver: ResizeObserver | undefined;
+  private observedRanklistHeader: HTMLTableCellElement | undefined;
   private activeMenuScrollKey = '';
   private activeMenuScrollTimer: number | undefined;
   private activeMenuScrollFrame: number | undefined;
@@ -272,21 +273,12 @@ export default class Collection extends Vue {
     return `${Math.min(300, viewportWidth)}px`;
   }
 
-  get collectionSidebarStyle() {
+  get collectionShellStyle() {
     return {
       '--rankland-collection-sidebar-width': this.sidebarWidth,
-    };
-  }
-
-  get collectionContentStyle() {
-    return {
-      '--rankland-collection-sidebar-width': this.sidebarWidth,
-    };
-  }
-
-  get collectionHiddenHeaderStyle() {
-    return {
-      '--rankland-collection-sidebar-width': this.sidebarWidth,
+      '--rankland-collection-header-height': this.ranklistHeaderHeight === null
+        ? undefined
+        : `${this.ranklistHeaderHeight}px`,
     };
   }
 
@@ -301,6 +293,10 @@ export default class Collection extends Vue {
     this.themeClassObserver.observe(document.documentElement, { attributes: true, attributeFilter: ['class'] });
     this.applyInitialCollapsedState();
     this.clientReady = true;
+    if (typeof ResizeObserver !== 'undefined') {
+      this.ranklistHeaderObserver = new ResizeObserver(() => this.measureRanklistHeader());
+    }
+    this.syncRanklistHeader();
     window.addEventListener('resize', this.updateClientWidth);
     this.syncedRanklistScrollTopKey = this.ranklistDataId;
     this.syncActiveAncestorOpenKeys();
@@ -310,6 +306,7 @@ export default class Collection extends Vue {
   }
 
   updated() {
+    this.syncRanklistHeader();
     this.syncActiveAncestorOpenKeys();
     this.syncInvalidRankId();
     this.queueActiveMenuScroll();
@@ -322,8 +319,35 @@ export default class Collection extends Vue {
       window.removeEventListener('resize', this.updateClientWidth);
     }
     this.themeClassObserver?.disconnect();
+    this.ranklistHeaderObserver?.disconnect();
     this.clearActiveMenuScrollRequest();
     this.clearRanklistScrollTopRequest();
+  }
+
+  private syncRanklistHeader() {
+    const content = this.$refs.ranklistContent as HTMLElement | undefined;
+    const header = content?.querySelector<HTMLTableCellElement>(
+      '.ranklist-window > .srk-main > table > thead > tr > th',
+    ) ?? undefined;
+    if (header === this.observedRanklistHeader) {
+      return;
+    }
+    this.ranklistHeaderObserver?.disconnect();
+    this.observedRanklistHeader = header;
+    if (header) {
+      this.ranklistHeaderObserver?.observe(header, { box: 'border-box' });
+      this.measureRanklistHeader();
+    } else {
+      this.ranklistHeaderHeight = null;
+    }
+  }
+
+  private measureRanklistHeader() {
+    const height = this.observedRanklistHeader?.getBoundingClientRect().height;
+    // The mobile menu can temporarily hide the table.
+    if (height) {
+      this.ranklistHeaderHeight = height;
+    }
   }
 
   reloadPage() {

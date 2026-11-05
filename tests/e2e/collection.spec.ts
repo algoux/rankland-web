@@ -61,24 +61,21 @@ test.describe('/collection/:id', () => {
     });
     expect(gap).toBe(0);
 
-    const layout = await page.evaluate(() => {
+    await expect.poll(() => page.evaluate(() => {
       const hiddenHeader = document.querySelector('.srk-collection-hidden-header')?.getBoundingClientRect();
-      const ranklistShell = document.querySelector('.srk-collection-ranklist')?.getBoundingClientRect();
-      if (!hiddenHeader || !ranklistShell) {
-        return null;
-      }
-      return {
-        hiddenHeaderHeight: Math.round(hiddenHeader.height),
-        ranklistTop: Math.round(ranklistShell.top),
-      };
-    });
-    expect(layout).not.toBeNull();
-    expect(layout!.hiddenHeaderHeight).toBe(64);
-    expect(layout!.ranklistTop).toBeGreaterThanOrEqual(64);
+      const tableHeader = document.querySelector('.srk-main thead th')?.getBoundingClientRect();
+      return hiddenHeader && tableHeader ? Math.abs(hiddenHeader.height - tableHeader.height) : Infinity;
+    })).toBeLessThan(1);
+    const sidebarTop = await page.locator('.srk-collection-nav').evaluate(el => el.getBoundingClientRect().top);
+    const siteHeaderBottom = await page.locator('.rankland-site-header').evaluate(el => el.getBoundingClientRect().bottom);
+    expect(sidebarTop).toBeCloseTo(siteHeaderBottom);
   });
 
   test('reports one browser view for each completed collection selection, including A to B to A', async ({ page }) => {
     const reportedUKs: string[] = [];
+    await page.addInitScript(() => {
+      window.localStorage.setItem('StyledRanklistSettingsIntroRead', 'true');
+    });
     await page.unroute(PUBLIC_CONTEST_VIEW_ROUTE);
     await page.route(PUBLIC_CONTEST_VIEW_ROUTE, async (route) => {
       const match = new URL(route.request().url()).pathname.match(/\/contests\/([^/]+)\/views$/);
@@ -513,6 +510,7 @@ test.describe('/collection/:id', () => {
     });
     await page.locator('[data-id="collection-sidebar-toggle"]').click();
     await expect(page.locator('[data-id="collection-sidebar"]')).toHaveCSS('width', '260px');
+    await expect(page.locator('[data-id="collection-sidebar-toggle"]')).toHaveCSS('width', '260px');
     const expandedMobileWidth = await page.evaluate(() => {
       const sidebar = document.querySelector('[data-id="collection-sidebar"]')?.getBoundingClientRect();
       const toggle = document.querySelector('[data-id="collection-sidebar-toggle"]')?.getBoundingClientRect();
@@ -598,6 +596,7 @@ test.describe('/collection/:id', () => {
     });
     await page.locator('[data-id="collection-sidebar-toggle"]').click();
     await expect(page.locator('[data-id="collection-sidebar"]')).toHaveCSS('width', '600px');
+    await expect(page.locator('[data-id="collection-sidebar-toggle"]')).toHaveCSS('width', '600px');
     const expandedMobileWidth = await page.evaluate(() => {
       const sidebar = document.querySelector('[data-id="collection-sidebar"]')?.getBoundingClientRect();
       const toggle = document.querySelector('[data-id="collection-sidebar-toggle"]')?.getBoundingClientRect();
@@ -698,7 +697,7 @@ test.describe('/collection/:id', () => {
     await expect.poll(() => readProgressSliderState(page)).toEqual({ max: 300, value: 300 });
   });
 
-  test('keeps the hidden collection header and ranklist table header sticky while scrolling', async ({ page }) => {
+  test('aligns the sticky collection header and sidebar with the ranklist header while scrolling', async ({ page }) => {
     await page.addInitScript(() => {
       window.localStorage.setItem('StyledRanklistSettingsIntroRead', 'true');
     });
@@ -708,27 +707,26 @@ test.describe('/collection/:id', () => {
       timeout: 20_000,
     });
     await page.evaluate(() => window.scrollTo(0, 900));
-    await page.waitForTimeout(100);
 
-    const stickyPositions = await page.evaluate(() => {
+    await expect.poll(() => page.evaluate(() => {
       const hiddenHeader = document.querySelector('.srk-collection-hidden-header')?.getBoundingClientRect();
       const tableHeader = document.querySelector('.srk-main thead th')?.getBoundingClientRect();
-      if (!hiddenHeader || !tableHeader) {
+      const sidebar = document.querySelector('.srk-collection-nav')?.getBoundingClientRect();
+      if (!hiddenHeader || !tableHeader || !sidebar || window.scrollY <= 0) {
         return null;
       }
       return {
         hiddenHeaderTop: Math.round(hiddenHeader.top),
         tableHeaderTop: Math.round(tableHeader.top),
-        scrollY: Math.round(window.scrollY),
+        headerBottomDifference: Math.round(hiddenHeader.bottom - tableHeader.bottom),
+        sidebarTopDifference: Math.round(sidebar.top - tableHeader.bottom),
       };
+    })).toEqual({
+      hiddenHeaderTop: 0,
+      tableHeaderTop: 0,
+      headerBottomDifference: 0,
+      sidebarTopDifference: 0,
     });
-
-    expect(stickyPositions).not.toBeNull();
-    expect(stickyPositions!.scrollY).toBeGreaterThan(0);
-    expect(stickyPositions!.hiddenHeaderTop).toBeGreaterThanOrEqual(0);
-    expect(stickyPositions!.hiddenHeaderTop).toBeLessThanOrEqual(65);
-    expect(stickyPositions!.tableHeaderTop).toBeGreaterThanOrEqual(0);
-    expect(stickyPositions!.tableHeaderTop).toBeLessThanOrEqual(65);
   });
 
   test('prompts to select a ranklist when no rankId in URL', async ({ page }) => {
