@@ -1069,6 +1069,16 @@
     .rankland-collection-content.is-mobile-nav-open {
       display: none;
     }
+
+    /* Mobile: the rail owns the top-left corner, so the logo strip is dropped. */
+    .rankland-collection-hidden-header {
+      display: none;
+    }
+
+    .rankland-collection-sidebar {
+      top: 0;
+      height: 100svh;
+    }
   }
 }
 
