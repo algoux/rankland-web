@@ -504,7 +504,7 @@ test.describe('/collection/:id', () => {
     });
     await page.goto('/collection/official?rankId=test-key');
 
-    await expect(page.locator('[data-id="collection-sidebar"]')).toHaveCSS('width', '80px');
+    await expect(page.locator('[data-id="collection-sidebar"]')).toHaveCSS('width', '48px');
     await expect(page.locator('[data-id="collection-ranklist-content"][data-ranklist-id="test-key"]')).toBeVisible({
       timeout: 20_000,
     });
@@ -533,7 +533,7 @@ test.describe('/collection/:id', () => {
       menuWidth: 259,
     });
     await page.locator('[data-id="collection-sidebar-toggle"]').click();
-    await expect(page.locator('[data-id="collection-sidebar"]')).toHaveCSS('width', '80px');
+    await expect(page.locator('[data-id="collection-sidebar"]')).toHaveCSS('width', '48px');
     await page.locator('[data-id="collection-menu-item-dir-icpc"]').click();
     const popup = page.locator('[data-id="collection-collapsed-popup-dir-icpc"]');
     await expect(popup).toBeVisible();
@@ -554,7 +554,7 @@ test.describe('/collection/:id', () => {
     });
     await page.goto('/collection/official?rankId=test-key');
 
-    await expect(page.locator('[data-id="collection-sidebar"]')).toHaveCSS('width', '80px');
+    await expect(page.locator('[data-id="collection-sidebar"]')).toHaveCSS('width', '48px');
     await expect(page.locator('[data-id="collection-ranklist-content"][data-ranklist-id="test-key"]')).toBeVisible({
       timeout: 20_000,
     });
@@ -590,7 +590,7 @@ test.describe('/collection/:id', () => {
     });
     await page.goto('/collection/official?rankId=test-key');
 
-    await expect(page.locator('[data-id="collection-sidebar"]')).toHaveCSS('width', '80px');
+    await expect(page.locator('[data-id="collection-sidebar"]')).toHaveCSS('width', '48px');
     await expect(page.locator('[data-id="collection-ranklist-content"][data-ranklist-id="test-key"]')).toBeVisible({
       timeout: 20_000,
     });

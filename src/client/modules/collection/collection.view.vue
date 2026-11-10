@@ -265,7 +265,7 @@ export default class Collection extends Vue {
   get sidebarWidth() {
     const viewportWidth = this.clientReady && this.clientWidth > 0 ? this.clientWidth : 300;
     if (this.collapsed) {
-      return `${Math.min(80, viewportWidth)}px`;
+      return `${Math.min(this.usingMobileLayout ? 48 : 80, viewportWidth)}px`;
     }
     if (this.usingMobileLayout) {
       return `${viewportWidth}px`;

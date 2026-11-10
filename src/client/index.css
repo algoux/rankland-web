@@ -892,7 +892,7 @@
     .srk-collection-menu-root
     > .srk-collection-menu-node
     > .srk-collection-menu-title {
-    width: 80px;
+    width: var(--rankland-collection-sidebar-width);
     justify-content: center;
     padding: 0;
   }
@@ -923,15 +923,15 @@
     > .srk-collection-menu-node
     > .srk-collection-menu-title
     > .srk-collection-menu-icon {
-    width: 80px;
+    width: var(--rankland-collection-sidebar-width);
     margin-right: 0;
-    flex-basis: 80px;
+    flex-basis: var(--rankland-collection-sidebar-width);
   }
 
   .srk-collection-menu-popup {
     position: absolute;
     top: 0;
-    left: 80px;
+    left: var(--rankland-collection-sidebar-width);
     z-index: 60;
     width: max-content;
     min-width: 220px;
