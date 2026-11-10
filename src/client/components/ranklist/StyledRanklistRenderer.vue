@@ -22,6 +22,7 @@ import {
   ProgressBar,
 } from '@algoux/standard-ranklist-renderer-component-vue';
 import Ranklist from './VirtualRanklist.vue';
+import RanklistCardList from './RanklistCardList.vue';
 import type {
   ProblemClickPayload,
   SolutionClickPayload,
@@ -398,7 +399,8 @@ const activeProblemModalTitle = computed(() => {
   const alias = problem.alias || numberToAlphabet(problemIndex);
   return `Info of Problem ${alias}`;
 });
-const shouldRenderInlineSettingsAction = computed(() => props.showFilter && clientWidth.value <= 768);
+const useCardLayout = computed(() => clientWidth.value > 0 && clientWidth.value <= 640);
+const shouldRenderInlineSettingsAction = computed(() => props.showFilter && clientWidth.value <= 768 && !useCardLayout.value);
 const hasExtraActionSlot = computed(() => !!slots['extra-action']);
 const shouldRenderActions = computed(() => !shouldRenderInlineSettingsAction.value || hasExtraActionSlot.value);
 const config = computed(() => getRanklandRuntimeConfig());
@@ -1463,7 +1465,16 @@ function resolveDisplayText(text: Parameters<typeof resolveText>[0]) {
       <div v-if="staticData.remarks" class="mb-4 text-center">
         <span class="srk-remarks">备注：{{ resolveDisplayText(staticData.remarks) }}</span>
       </div>
-      <div class="srk-ranklist-table-scroll">
+      <RanklistCardList
+        v-if="useCardLayout && (!requiresClientClockForRanklist || clientClockReady)"
+        :data="usingData"
+        :theme-name="themeName"
+        :languages="rendererLanguages"
+        @user-click="handleUserClick"
+        @solution-click="handleSolutionClick"
+        @problem-click="handleProblemClick"
+      />
+      <div v-else class="srk-ranklist-table-scroll">
         <Ranklist
           v-if="!requiresClientClockForRanklist || clientClockReady"
           :data="usingData"

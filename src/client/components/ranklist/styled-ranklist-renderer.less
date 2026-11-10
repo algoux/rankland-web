@@ -841,6 +841,11 @@ html.dark .srk-ranklist-settings-modal {
 }
 
 @media screen and (max-width: 768px) {
+  /* The full-bleed mobile layout drops the page gutters, so the title keeps its own. */
+  .srk-ranklist-title {
+    margin-inline: var(--rankland-main-inline-padding, 20px);
+  }
+
   .srk-ranklist-toolbar-with-filter {
     position: relative;
     display: block;

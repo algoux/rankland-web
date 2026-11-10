@@ -328,7 +328,7 @@ export default class Collection extends Vue {
     const content = this.$refs.ranklistContent as HTMLElement | undefined;
     const header = content?.querySelector<HTMLTableCellElement>(
       '.ranklist-window > .srk-main > table > thead > tr > th',
-    ) ?? undefined;
+    ) ?? content?.querySelector<HTMLElement>('.ranklist-card-legend') ?? undefined;
     if (header === this.observedRanklistHeader) {
       return;
     }
