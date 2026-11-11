@@ -1,0 +1,212 @@
+.ranklist-card-list {
+  --ranklist-card-bg: transparent;
+  --ranklist-card-border: rgba(0, 0, 0, 0.15);
+  --ranklist-card-text: rgba(0, 0, 0, 0.85);
+  --ranklist-card-muted: rgba(0, 0, 0, 0.45);
+  --ranklist-card-striped-bg: rgba(30, 30, 30, 0.06);
+  --ranklist-card-accepted-bg: #99ff99;
+  --ranklist-card-accepted-text: #009905;
+  --ranklist-card-partial-bg: #ffeb99;
+  --ranklist-card-partial-text: #e2a010;
+  --ranklist-card-failed-bg: #ff9999;
+  --ranklist-card-failed-text: #c83939;
+  --ranklist-card-frozen-bg: #c8d6fa;
+  --ranklist-card-frozen-text: #304fa5;
+  --ranklist-card-fb-bg: #009900;
+  --ranklist-card-fb-text: #fff;
+  --ranklist-card-gold: #f8bf29;
+  --ranklist-card-silver: #adadad;
+  --ranklist-card-bronze: #d69872;
+  --ranklist-card-iron: #a94442;
+
+  color: var(--ranklist-card-text);
+  font-family: -apple-system, 'Segoe UI', Roboto, 'PingFang SC', 'Microsoft YaHei', sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+html.dark .ranklist-card-list {
+  --ranklist-card-bg: transparent;
+  --ranklist-card-border: rgba(255, 255, 255, 0.15);
+  --ranklist-card-text: rgba(255, 255, 255, 0.85);
+  --ranklist-card-muted: rgba(255, 255, 255, 0.45);
+  --ranklist-card-striped-bg: rgba(215, 215, 215, 0.08);
+  --ranklist-card-accepted-bg: #084b00;
+  --ranklist-card-accepted-text: #0faa0f;
+  --ranklist-card-partial-bg: #695203;
+  --ranklist-card-partial-text: #d7d666;
+  --ranklist-card-failed-bg: #c83939;
+  --ranklist-card-failed-text: #ef7373;
+  --ranklist-card-frozen-bg: #304fa5;
+  --ranklist-card-frozen-text: #73d7f9;
+  --ranklist-card-fb-bg: #248e18;
+  --ranklist-card-fb-text: #fff;
+}
+
+.ranklist-card-legend {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  display: grid;
+  gap: 1px;
+  padding: 4px 0;
+  background: hsl(var(--background));
+  border-bottom: 1px solid var(--ranklist-card-border);
+}
+
+.ranklist-card-legend-cell {
+  position: relative;
+  padding: 4px 0 0;
+  font-size: 10px;
+  text-align: center;
+  color: var(--ranklist-card-muted);
+  font-variant-numeric: tabular-nums;
+  cursor: pointer;
+}
+
+.ranklist-card-legend-cell::before {
+  content: '';
+  position: absolute;
+  inset: 0 0 auto;
+  height: 4px;
+  background: var(--problem-color, transparent);
+}
+
+.ranklist-card {
+  border: 1px solid var(--ranklist-card-border);
+  background: var(--ranklist-card-bg);
+  /* Long boards stay scrollable like the desktop table without pagination. */
+  content-visibility: auto;
+  contain-intrinsic-size: auto 110px;
+}
+
+.ranklist-card:nth-of-type(even) {
+  background: var(--ranklist-card-striped-bg);
+}
+
+.ranklist-card-head {
+  padding: 8px 8px 0;
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  cursor: pointer;
+}
+
+.ranklist-card-ranks {
+  flex: 0 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  padding-right: 8px;
+  border-right: 4px solid var(--segment-color, transparent);
+  font-size: 11px;
+  line-height: 15px;
+  text-align: right;
+  color: var(--ranklist-card-muted);
+  font-variant-numeric: tabular-nums;
+}
+
+.ranklist-card-ranks b {
+  color: var(--ranklist-card-text);
+  font-weight: 600;
+}
+
+.ranklist-card-identity {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.ranklist-card-name {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 19px;
+}
+
+.ranklist-card-name span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.ranklist-card-unofficial {
+  color: var(--ranklist-card-muted);
+  font-size: 11px;
+  flex-shrink: 0;
+}
+
+.ranklist-card-org {
+  font-size: 11px;
+  line-height: 15px;
+  color: var(--ranklist-card-muted);
+}
+
+.ranklist-card-score {
+  margin-top: 2px;
+  font-size: 11px;
+  line-height: 15px;
+  color: var(--ranklist-card-muted);
+  font-variant-numeric: tabular-nums;
+}
+
+.ranklist-card-score b {
+  color: var(--ranklist-card-text);
+  font-weight: 600;
+}
+
+.ranklist-card-cells {
+  display: grid;
+  gap: 1px;
+  margin-top: 4px;
+}
+
+.ranklist-card-cell {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  aspect-ratio: 1;
+  min-height: 22px;
+  font-size: 10px;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+  overflow: hidden;
+  background: rgba(127, 127, 127, 0.1);
+  color: var(--ranklist-card-muted);
+  cursor: pointer;
+}
+
+.ranklist-card-cell::before {
+  content: '';
+  position: absolute;
+  inset: 0 0 auto;
+  height: 4px;
+  background: var(--problem-color, transparent);
+}
+
+.ranklist-card-cell.srk-prest-status-block-accepted {
+  background: var(--ranklist-card-accepted-bg);
+  color: var(--ranklist-card-accepted-text);
+}
+
+.ranklist-card-cell.srk-prest-status-block-partial {
+  background: var(--ranklist-card-partial-bg);
+  color: var(--ranklist-card-partial-text);
+}
+
+.ranklist-card-cell.srk-prest-status-block-failed {
+  background: var(--ranklist-card-failed-bg);
+  color: var(--ranklist-card-failed-text);
+}
+
+.ranklist-card-cell.srk-prest-status-block-frozen {
+  background: var(--ranklist-card-frozen-bg);
+  color: var(--ranklist-card-frozen-text);
+}
+
+.ranklist-card-cell.srk-prest-status-block-fb {
+  background: var(--ranklist-card-fb-bg);
+  color: var(--ranklist-card-fb-text);
+}
+
