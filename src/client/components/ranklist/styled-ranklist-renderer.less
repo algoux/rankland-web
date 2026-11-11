@@ -897,6 +897,13 @@ html.dark .srk-ranklist-settings-modal {
     overflow-x: visible;
   }
 
+  /* overflow-y: clip keeps the sticky table header pinned to the viewport. */
+  /* shortcut: Safari < 16 ignores overflow: clip and drops the sticky header, revisit when the browser baseline moves up. */
+  .rankland-collection-page .srk-ranklist-table-scroll {
+    overflow-x: auto;
+    overflow-y: clip;
+  }
+
   .srk-ranklist-toolbar-with-filter .srk-ranklist-marker-filter {
     display: flex;
     width: 100%;
