@@ -101,6 +101,7 @@ import { ContestEventConsumer } from './contest-event-consumer';
 import { LiveRanklistProjector } from './live-ranklist-projector';
 import type { LiveScrollSolutionItem } from '@/services/ranklist-api/live-contest-types';
 import { SCROLL_SOLUTION_WIDTH } from './scroll-solution-state';
+import { getRanklistResponsiveWidth } from '@/app/ranklist-viewport';
 
 @View('/live/:id')
 @RenderMethod(RenderMethodKind.CSR)
@@ -219,7 +220,7 @@ export default class LiveRanklist extends Vue {
   }
 
   private updateViewport = () => {
-    this.clientWidth = window.innerWidth;
+    this.clientWidth = getRanklistResponsiveWidth();
     this.clientHeight = window.innerHeight;
   };
 

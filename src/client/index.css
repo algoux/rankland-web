@@ -485,13 +485,15 @@
     }
   }
 
-  .rankland-main {
+  .rankland-main,
+  .rankland-site-header {
     --rankland-main-inline-padding: 50px;
     padding-inline: var(--rankland-main-inline-padding);
   }
 
-  @media (max-width: 767px) {
-    .rankland-main {
+  @media (max-width: 767px), (max-device-width: 767px) and (pointer: coarse) and (hover: none) {
+    .rankland-main,
+    .rankland-site-header {
       --rankland-main-inline-padding: 20px;
     }
   }
@@ -1065,7 +1067,7 @@
     @apply flex min-h-[16rem] items-center justify-center text-center;
   }
 
-  @media (max-width: 639px) {
+  @media (max-width: 639px), (max-device-width: 639px) and (pointer: coarse) and (hover: none) {
     .rankland-collection-content.is-mobile-nav-open {
       display: none;
     }

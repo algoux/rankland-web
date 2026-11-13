@@ -11,7 +11,7 @@
   </router-view>
 
   <div v-else class="min-h-screen bg-background text-foreground">
-    <header class="rankland-site-header px-[50px] max-md:px-5">
+    <header class="rankland-site-header">
       <div data-id="site-header-inner" class="flex h-16 w-full items-center gap-3">
         <router-link class="flex h-11 w-11 shrink-0 items-center justify-center" to="/" aria-label="RankLand">
           <img class="h-10 w-10" src="./assets/rankland-logo.png" alt="RankLand" />

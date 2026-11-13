@@ -166,6 +166,7 @@ import { formatTitle } from '@/app/title-format';
 import type { ThemeName } from '@/lib/theme';
 import CollectionTreeItem from './CollectionTreeItem.vue';
 import { RanklistViewReporter } from '@/domain/ranklist/view-reporter';
+import { getRanklistResponsiveWidth } from '@/app/ranklist-viewport';
 
 const COLLECTION_SUBMENU_ANIMATION_MS = 220;
 
@@ -428,7 +429,7 @@ export default class Collection extends Vue {
 
   private updateClientWidth = () => {
     if (typeof window !== 'undefined') {
-      const widths = [window.innerWidth, document.documentElement.clientWidth]
+      const widths = [getRanklistResponsiveWidth(), document.documentElement.clientWidth]
         .filter((width) => Number.isFinite(width) && width > 0);
       this.clientWidth = widths.length > 0 ? Math.min(...widths) : 0;
     }

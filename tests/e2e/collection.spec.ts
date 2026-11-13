@@ -545,53 +545,51 @@ test.describe('/collection/:id', () => {
     await expect(popup).toBeHidden();
   });
 
-  test('keeps wide ranklist tables inside the collection content area on mobile', async ({ page }) => {
-    await page.setViewportSize({ width: 260, height: 844 });
-    await page.emulateMedia({ colorScheme: 'dark' });
-    await page.addInitScript(() => {
-      window.localStorage.setItem('StyledRanklistSettingsIntroRead', 'true');
-      window.localStorage.removeItem('CollectionNavCollapsed');
-    });
-    await page.goto('/collection/official?rankId=large-key');
-
-    await expect(page.locator('[data-id="collection-sidebar"]')).toHaveCSS('width', '48px');
-    await expect(page.locator('[data-id="collection-ranklist-content"][data-ranklist-id="large-key"]')).toBeVisible({
-      timeout: 20_000,
+  test.describe('mobile browser', () => {
+    test.use({
+      viewport: { width: 390, height: 844 },
+      screen: { width: 390, height: 844 },
+      isMobile: true,
+      hasTouch: true,
     });
 
-    const overflowMetrics = await page.evaluate(() => {
-      const table = document.querySelector('.srk-main table')?.getBoundingClientRect();
-      const tableScroll = document.querySelector('.srk-ranklist-table-scroll');
-      const tableScrollStyle = tableScroll ? getComputedStyle(tableScroll) : null;
-      return {
-        viewportWidth: document.documentElement.clientWidth,
-        documentScrollWidth: document.documentElement.scrollWidth,
-        bodyScrollWidth: document.body.scrollWidth,
-        tableWidth: table ? Math.round(table.width) : 0,
-        tableScrollOverflowX: tableScrollStyle?.overflowX ?? '',
-        tableScrollClientWidth: tableScroll ? tableScroll.clientWidth : 0,
-        tableScrollScrollWidth: tableScroll ? tableScroll.scrollWidth : 0,
-      };
+    test('sticks the table header and supports pinching to zoom out on wide ranklists', async ({ page }) => {
+      await page.addInitScript(() => {
+        window.localStorage.setItem('StyledRanklistSettingsIntroRead', 'true');
+      });
+      await page.goto('/collection/official?rankId=large-key');
+      await page.waitForFunction(() => document.body.dataset.ranklandHydrated === 'true');
+
+      const sidebar = page.locator('[data-id="collection-sidebar"]');
+      const header = page.locator('.srk-main table thead th').first();
+      await expect(sidebar).toHaveCSS('width', '48px');
+      await expect(header).toBeVisible();
+      await expect(page.locator('.srk-collection-hidden-header')).toBeHidden();
+      expect(await header.evaluate(element => element.getBoundingClientRect().top)).toBeGreaterThan(0);
+
+      await page.evaluate(() => window.scrollTo(0, 900));
+      await page.waitForFunction(() => window.scrollY === 900);
+      await expect.poll(async () => Math.round((await header.boundingBox())?.y ?? NaN)).toBe(0);
+      await expect.poll(async () => Math.round((await sidebar.boundingBox())?.y ?? NaN)).toBe(0);
+
+      const scale = () => page.evaluate(() => window.visualViewport?.scale ?? 1);
+      expect(await scale()).toBeCloseTo(0.5);
+      const session = await page.context().newCDPSession(page);
+      try {
+        const gesture = {
+          x: 195,
+          y: 420,
+          relativeSpeed: 600,
+          gestureSourceType: 'touch' as const,
+        };
+        await session.send('Input.synthesizePinchGesture', { ...gesture, scaleFactor: 2 });
+        await expect.poll(scale).toBeCloseTo(1);
+        await session.send('Input.synthesizePinchGesture', { ...gesture, scaleFactor: 0.5 });
+        await expect.poll(scale).toBeCloseTo(0.5);
+      } finally {
+        await session.detach();
+      }
     });
-
-    expect(overflowMetrics.viewportWidth).toBe(260);
-    expect(overflowMetrics.tableWidth).toBeGreaterThan(overflowMetrics.viewportWidth);
-    expect(overflowMetrics.documentScrollWidth).toBeLessThanOrEqual(overflowMetrics.viewportWidth);
-    expect(overflowMetrics.bodyScrollWidth).toBeLessThanOrEqual(overflowMetrics.viewportWidth);
-    expect(overflowMetrics.tableScrollOverflowX).toBe('auto');
-    expect(overflowMetrics.tableScrollScrollWidth).toBeGreaterThan(overflowMetrics.tableScrollClientWidth);
-
-    await page.evaluate(() => window.scrollTo(0, 900));
-    await expect.poll(() => page.evaluate(() => {
-      const header = document.querySelector('.srk-main table thead tr th');
-      return header ? Math.round(header.getBoundingClientRect().top) : Number.NaN;
-    })).toBe(0);
-
-    await expect(page.locator('.srk-collection-hidden-header')).toBeHidden();
-    await expect.poll(() => page.evaluate(() => {
-      const sidebar = document.querySelector('[data-id="collection-sidebar"]');
-      return sidebar ? Math.round(sidebar.getBoundingClientRect().top) : Number.NaN;
-    })).toBe(0);
   });
 
   test('uses full-width expanded sidebar on narrow mobile layouts', async ({ page }) => {

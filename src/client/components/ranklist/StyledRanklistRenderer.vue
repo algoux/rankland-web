@@ -69,6 +69,7 @@ import {
   shouldDeferInitialHydrationRender,
   waitForInitialHydrationFrame,
 } from '@/app/hydration-flicker-guard';
+import { getRanklistResponsiveWidth } from '@/app/ranklist-viewport';
 import { LocalStorageKey } from '@/app/local-storage-key.config';
 import { formatSrkAssetUrl } from '@/utils/srk-asset.util';
 import { formatSrkContestTimeRange } from '@/utils/time-format.util';
@@ -536,7 +537,7 @@ function writeLocalStorageJson(key: string, value: unknown) {
 }
 
 function syncClientWidth() {
-  clientWidth.value = window.innerWidth;
+  clientWidth.value = getRanklistResponsiveWidth();
 }
 
 async function finishInitialRanklistHydrationRender() {

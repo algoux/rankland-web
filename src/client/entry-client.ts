@@ -6,9 +6,11 @@ import { ApiClientFactory, API_REQUEST_TOKEN, API_CLIENT_TOKEN } from './api';
 import { createClientRanklandApi } from './services/ranklist-api/factory.client';
 import { RANKLAND_API_TOKEN } from './services/ranklist-api';
 import { mainEntry } from './main';
+import { installRanklistViewport } from './app/ranklist-viewport';
 
 export default viteSSR(App, { routes }, (hookParams) => {
-  const { app } = hookParams;
+  const { app, router } = hookParams;
+  installRanklistViewport(router);
 
   // init api
   const apiRequest = ApiFactory.createInstance();

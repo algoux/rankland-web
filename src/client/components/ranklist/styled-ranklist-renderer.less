@@ -840,7 +840,7 @@ html.dark .srk-ranklist-settings-modal {
   }
 }
 
-@media screen and (max-width: 768px) {
+@media screen and (max-width: 768px), screen and (max-device-width: 768px) and (pointer: coarse) and (hover: none) {
   .srk-ranklist-toolbar-with-filter {
     position: relative;
     display: block;
@@ -893,15 +893,9 @@ html.dark .srk-ranklist-settings-modal {
     max-width: calc(100vw - 72px);
   }
 
+  /* Let wide tables extend the document for pinch zoom and viewport-sticky headers. */
   .srk-ranklist-table-scroll {
-    overflow-x: visible;
-  }
-
-  /* overflow-y: clip keeps the sticky table header pinned to the viewport. */
-  /* shortcut: Safari < 16 ignores overflow: clip and drops the sticky header, revisit when the browser baseline moves up. */
-  .rankland-collection-page .srk-ranklist-table-scroll {
-    overflow-x: auto;
-    overflow-y: clip;
+    overflow: visible;
   }
 
   .srk-ranklist-toolbar-with-filter .srk-ranklist-marker-filter {
